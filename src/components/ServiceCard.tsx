@@ -1,6 +1,7 @@
 
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
 
 interface ServiceCardProps {
   title: string;
@@ -9,12 +10,20 @@ interface ServiceCardProps {
 }
 
 const ServiceCard = ({ title, description, icon }: ServiceCardProps) => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`/service-providers?service=${encodeURIComponent(title)}`);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       viewport={{ once: true }}
+      onClick={handleClick}
+      className="cursor-pointer"
     >
       <Card className="group relative overflow-hidden p-8 hover:shadow-xl transition-all duration-300 border-none bg-gradient-to-br from-white to-gray-50">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
