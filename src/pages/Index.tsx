@@ -1,5 +1,5 @@
 
-import { Paint, Wrench, Zap } from "lucide-react";
+import { Paintbrush, Wrench, Zap } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import ServiceCard from "@/components/ServiceCard";
 
@@ -8,7 +8,7 @@ const Index = () => {
     {
       title: "Professional Painting",
       description: "Expert interior and exterior painting services for your home or business.",
-      icon: <Paint className="h-8 w-8" />,
+      icon: <Paintbrush className="h-8 w-8" />,
     },
     {
       title: "Electrical Services",
