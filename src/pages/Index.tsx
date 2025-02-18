@@ -28,13 +28,23 @@ const Index = () => {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="pt-32 pb-24 px-4 bg-gradient-to-br from-indigo-50 via-white to-gray-50">
-        <div className="container mx-auto text-center">
+      <section className="relative min-h-[90vh] flex items-center justify-center px-4 overflow-hidden">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: "url('https://images.unsplash.com/photo-1581094288338-2314dddb7ece?q=80&w=2070&auto=format&fit=crop')",
+          }}
+        />
+        {/* Overlay */}
+        <div className="absolute inset-0 z-1 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
+        
+        <div className="container mx-auto text-center relative z-10">
           <motion.h1 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-5xl md:text-6xl font-bold mb-8 bg-gradient-to-r from-gray-900 via-indigo-800 to-gray-900 bg-clip-text text-transparent"
+            className="text-5xl md:text-6xl font-bold mb-8 text-white"
           >
             Your Trusted Partner in Professional Services
           </motion.h1>
@@ -42,7 +52,7 @@ const Index = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-xl md:text-2xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed"
+            className="text-xl md:text-2xl text-gray-200 mb-10 max-w-3xl mx-auto leading-relaxed"
           >
             We deliver excellence in painting, electrical work, and mechanical services.
             Quality craftsmanship backed by years of experience.
@@ -53,7 +63,7 @@ const Index = () => {
             transition={{ duration: 0.5, delay: 0.4 }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="bg-indigo-600 text-white px-10 py-4 rounded-full text-lg font-medium hover:bg-indigo-700 transition-colors shadow-lg hover:shadow-xl"
+            className="bg-white text-gray-900 px-10 py-4 rounded-full text-lg font-medium hover:bg-gray-100 transition-colors shadow-lg hover:shadow-xl"
           >
             Get Started
           </motion.button>
@@ -61,7 +71,7 @@ const Index = () => {
       </section>
 
       {/* Services Section */}
-      <section className="py-24 px-4">
+      <section className="py-24 px-4 bg-white">
         <div className="container mx-auto">
           <motion.h2 
             initial={{ opacity: 0 }}
