@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Star } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import Navbar from "@/components/Navbar";
 
@@ -130,34 +130,37 @@ const ServiceProviders = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
-              <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                <div className="aspect-w-16 aspect-h-9">
-                  <img
-                    src={provider.image}
-                    alt={provider.name}
-                    className="object-cover w-full h-48"
-                  />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold mb-2">{provider.name}</h3>
-                  <RatingStars rating={provider.rating} />
-                  <p className="text-sm text-gray-500 mt-1">
-                    {provider.reviews} reviews
-                  </p>
-                  <p className="text-gray-600 mt-4">{provider.description}</p>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="mt-4 w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors"
-                  >
-                    Contact Provider
-                  </motion.button>
-                </div>
-              </Card>
+              <Link to={`/service-provider/${provider.id}`}>
+                <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                  <div className="aspect-w-16 aspect-h-9">
+                    <img
+                      src={provider.image}
+                      alt={provider.name}
+                      className="object-cover w-full h-48"
+                    />
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-semibold mb-2">{provider.name}</h3>
+                    <RatingStars rating={provider.rating} />
+                    <p className="text-sm text-gray-500 mt-1">
+                      {provider.reviews} reviews
+                    </p>
+                    <p className="text-gray-600 mt-4">{provider.description}</p>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="mt-4 w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors"
+                    >
+                      View Profile
+                    </motion.button>
+                  </div>
+                </Card>
+              </Link>
             </motion.div>
           ))}
         </div>
       </div>
+      
       <footer className="bg-gray-800 text-white py-8 mt-16">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
