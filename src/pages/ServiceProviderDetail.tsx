@@ -1,6 +1,6 @@
 
 import { useParams } from "react-router-dom";
-import { Star, Calendar, Clock, Tools, Award, Phone, Mail } from "lucide-react";
+import { Star, Calendar, Clock, Wrench, Award, Phone, Mail } from "lucide-react";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
@@ -114,7 +114,7 @@ const ServiceProviderDetail = () => {
               <p className="text-gray-600 mb-4">{provider.description}</p>
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div className="flex items-center gap-2">
-                  <Tools className="text-indigo-600" />
+                  <Wrench className="text-indigo-600" />
                   <span>{provider.yearsOfExperience} Years Experience</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -140,7 +140,7 @@ const ServiceProviderDetail = () => {
         <div className="grid md:grid-cols-2 gap-8 mb-8">
           <Card className="p-6">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Tools className="text-indigo-600" />
+              <Wrench className="text-indigo-600" />
               Areas of Expertise
             </h2>
             <div className="flex flex-wrap gap-2">
