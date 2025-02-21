@@ -1,5 +1,4 @@
-
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { Star, Calendar, Clock, Wrench, Award, Phone, Mail } from "lucide-react";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
@@ -70,7 +69,7 @@ const mockServiceProvider: ServiceProvider = {
 
 const ServiceProviderDetail = () => {
   const { id } = useParams();
-  const provider = mockServiceProvider; // In a real app, fetch based on ID
+  const provider = mockServiceProvider;
 
   const RatingStars = ({ rating }: { rating: number }) => {
     return (
@@ -94,7 +93,6 @@ const ServiceProviderDetail = () => {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       <div className="container mx-auto px-4 py-20">
-        {/* Header Section */}
         <div className="bg-white rounded-lg shadow-md p-8 mb-8">
           <div className="grid md:grid-cols-3 gap-8">
             <div className="md:col-span-1">
@@ -136,7 +134,6 @@ const ServiceProviderDetail = () => {
           </div>
         </div>
 
-        {/* Expertise Section */}
         <div className="grid md:grid-cols-2 gap-8 mb-8">
           <Card className="p-6">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
@@ -163,7 +160,6 @@ const ServiceProviderDetail = () => {
           </Card>
         </div>
 
-        {/* Portfolio Section */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
             <Award className="text-indigo-600" />
@@ -171,22 +167,23 @@ const ServiceProviderDetail = () => {
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
             {provider.portfolio.map((project) => (
-              <motion.div
-                key={project.id}
-                whileHover={{ y: -5 }}
-                className="bg-white rounded-lg shadow-md overflow-hidden"
-              >
-                <img
-                  src={project.image}
-                  alt={project.title}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="font-semibold mb-2">{project.title}</h3>
-                  <p className="text-gray-600 text-sm mb-2">{project.description}</p>
-                  <p className="text-sm text-indigo-600">{project.date}</p>
-                </div>
-              </motion.div>
+              <Link key={project.id} to={`/project/${project.id}`}>
+                <motion.div
+                  whileHover={{ y: -5 }}
+                  className="bg-white rounded-lg shadow-md overflow-hidden"
+                >
+                  <img
+                    src={project.image}
+                    alt={project.title}
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="p-4">
+                    <h3 className="font-semibold mb-2">{project.title}</h3>
+                    <p className="text-gray-600 text-sm mb-2">{project.description}</p>
+                    <p className="text-sm text-indigo-600">{project.date}</p>
+                  </div>
+                </motion.div>
+              </Link>
             ))}
           </div>
         </div>
