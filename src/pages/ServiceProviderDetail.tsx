@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface Project {
   id: number;
@@ -72,10 +73,53 @@ const ServiceProviderDetail = () => {
   const provider = mockServiceProvider;
 
   const handleBookMeeting = () => {
+    const now = new Date();
+    const tomorrow = new Date(now.setDate(now.getDate() + 1));
+    const formattedDate = tomorrow.toISOString().split('T')[0];
+    
+    const eventDuration = '1';
+    const eventDetails = {
+      text: `Meeting with ${provider.name}`,
+      dates: `${formattedDate}/${formattedDate}`,
+      details: `Meeting to discuss potential work with ${provider.name}\n\nService: ${provider.service}\n\nContact Details:\nPhone: ${provider.phone}\nEmail: ${provider.email}`,
+    };
+
     const subject = `Meeting Request with ${provider.name}`;
-    const body = `Hi ${provider.name},\n\nI would like to schedule a meeting with you to discuss potential work.\n\nBest regards`;
+    const body = `Hi ${provider.name},
+
+I would like to schedule a meeting with you to discuss potential work.
+
+Proposed Date: ${formattedDate}
+Duration: ${eventDuration} hour
+
+Service Interest: ${provider.service}
+
+Best regards`;
+
     const mailtoLink = `mailto:${provider.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.location.href = mailtoLink;
+  };
+
+  const handleCallClick = () => {
+    toast.success("Contact Number", {
+      description: provider.phone,
+      duration: 5000,
+      action: {
+        label: "Call",
+        onClick: () => window.location.href = `tel:${provider.phone}`
+      },
+    });
+  };
+
+  const handleMessageClick = () => {
+    toast.success("Email Address", {
+      description: provider.email,
+      duration: 5000,
+      action: {
+        label: "Send Email",
+        onClick: () => window.location.href = `mailto:${provider.email}`
+      },
+    });
   };
 
   const RatingStars = ({ rating }: { rating: number }) => {
@@ -132,11 +176,18 @@ const ServiceProviderDetail = () => {
                   <Video className="w-4 h-4" />
                   Book Meeting
                 </Button>
-                <Button className="flex items-center gap-2">
+                <Button 
+                  className="flex items-center gap-2"
+                  onClick={handleCallClick}
+                >
                   <Phone className="w-4 h-4" />
                   Contact Now
                 </Button>
-                <Button variant="outline" className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  className="flex items-center gap-2"
+                  onClick={handleMessageClick}
+                >
                   <Mail className="w-4 h-4" />
                   Send Message
                 </Button>
