@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { Star, Calendar, Clock, Wrench, Award, Phone, Mail } from "lucide-react";
+import { Star, Calendar, Clock, Wrench, Award, Phone, Mail, Video } from "lucide-react";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
@@ -71,6 +71,13 @@ const ServiceProviderDetail = () => {
   const { id } = useParams();
   const provider = mockServiceProvider;
 
+  const handleBookMeeting = () => {
+    const subject = `Meeting Request with ${provider.name}`;
+    const body = `Hi ${provider.name},\n\nI would like to schedule a meeting with you to discuss potential work.\n\nBest regards`;
+    const mailtoLink = `mailto:${provider.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoLink;
+  };
+
   const RatingStars = ({ rating }: { rating: number }) => {
     return (
       <div className="flex items-center gap-1">
@@ -121,6 +128,10 @@ const ServiceProviderDetail = () => {
                 </div>
               </div>
               <div className="flex gap-4">
+                <Button className="flex items-center gap-2" onClick={handleBookMeeting}>
+                  <Video className="w-4 h-4" />
+                  Book Meeting
+                </Button>
                 <Button className="flex items-center gap-2">
                   <Phone className="w-4 h-4" />
                   Contact Now
