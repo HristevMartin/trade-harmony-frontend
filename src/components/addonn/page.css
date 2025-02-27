@@ -1,108 +1,20 @@
 
-/* General Reset for Box Sizing */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-/* Container Styles */
-.addon-spinner {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 60vh;
-}
-
-.addon-title-div {
-  padding: 2rem;
+/* Base Styles */
+.container {
   max-width: 1280px;
   margin: 0 auto;
-  background: linear-gradient(to right, #f8f9fa, #ffffff);
+  padding: 2rem;
 }
 
-.addon-title {
-  text-align: center;
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: #2d3748;
-  margin: 2rem 0;
-  background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: fadeIn 0.8s ease-out;
+/* Animation Classes */
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
 }
 
-.addon-vertical-lign {
-  margin: 2rem 0;
-  border: none;
-  height: 1px;
-  background: linear-gradient(to right, transparent, #e2e8f0, transparent);
-}
-
-.addon-group-title {
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin: 1.5rem 0;
-  color: #2d3748;
-  padding-left: 0.5rem;
-  border-left: 4px solid #4a5568;
-}
-
-/* Card Styles */
-.card-div-img {
-  height: 240px;
-  width: 100%;
-  object-fit: cover;
-  border-radius: 8px;
-  transition: transform 0.3s ease;
-}
-
-.card-div-img:hover {
-  transform: scale(1.02);
-}
-
-.card-div-text {
-  font-family: system-ui, -apple-system, sans-serif;
-  font-size: 0.95rem;
-  color: #4a5568;
-  margin: 0.5rem 0;
-  line-height: 1.5;
-}
-
-.truncatewords {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin: 1rem 0;
-  color: #2d3748;
-  line-height: 1.6;
-}
-
-.card-div-add-to-cart-button {
-  position: absolute;
-  bottom: 1.5rem;
-  right: 1.5rem;
-  transition: transform 0.2s ease;
-}
-
-.card-div-add-to-cart-button:hover {
-  transform: translateY(-2px);
-}
-
-/* Date Selector Styles */
-.date-selector {
-  margin-top: 1rem;
-  width: 100%;
-}
-
-/* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -110,72 +22,89 @@
   }
 }
 
-/* Grid Layout */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  margin: 2rem 0;
-}
-
-/* Card Container */
-.relative {
-  position: relative;
+/* Card Styles */
+.card {
   background: white;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  padding: 1.5rem;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+  transition: all 0.3s ease;
 }
 
-.relative:hover {
+.card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .addon-title-div {
-    padding: 1rem;
-  }
-
-  .addon-title {
-    font-size: 1.8rem;
-    margin: 1.5rem 0;
-  }
-
-  .addon-group-title {
-    font-size: 1.4rem;
-  }
-
-  .grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-
-  .card-div-img {
-    height: 200px;
-  }
-
-  .relative {
-    padding: 1rem;
-  }
+/* Image Styles */
+.card-image {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
 }
 
-@media (min-width: 769px) and (max-width: 1024px) {
+.card-image:hover {
+  transform: scale(1.05);
+}
+
+/* Typography */
+.title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 2rem;
+  background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Responsive Grid */
+.grid {
+  display: grid;
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
   .grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-/* Loading State Animation */
-.addon-spinner {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 60vh;
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
-.addon-spinner .MuiCircularProgress-root {
-  color: #4a5568;
+/* Loading State */
+.loading-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Button Styles */
+.button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+}
+
+/* Date Selector Styles */
+.date-selector {
+  width: 100%;
+  margin-top: 1rem;
 }
