@@ -1,0 +1,104 @@
+/* General Reset for Box Sizing */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+
+
+/* General Styles */
+.truncatewords {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.addon-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.addon-title-div {
+  padding: 20px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.addon-title {
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #4a5568;
+  margin: 20px 0;
+}
+
+.addon-vertical-lign {
+  margin: 20px 0;
+}
+
+.addon-group-title {
+  font-size: 1.5rem;
+  margin-top: 20px;
+  color: #333;
+}
+
+.card-div-img {
+  height: 220px;
+  width: 100%;
+  object-fit: cover;
+}
+
+.card-div-text {
+  font-family: sans-serif;
+  font-size: 14px;
+}
+
+.card-div-add-to-cart-button {
+  position: absolute;
+  bottom: 10px;
+  right: 12px;
+  color: black !important;
+}
+
+/* Media Queries for Responsive Design */
+
+/* For Extra Small Screens (below 768px) */
+@media (max-width: 767px) {
+  .addon-title-div {
+    padding: 10px;
+  }
+
+  .addon-title {
+    font-size: 1.4rem;
+  }
+
+  .addon-group-title {
+    font-size: 1.2rem;
+  }
+
+  .card-div-img {
+    height: 150px;
+  }
+
+  .card-div-add-to-cart-button {
+    bottom: 8px;
+    right: 10px;
+  }
+
+  /* Change the grid to one column for smaller screens */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr; /* Single column layout */
+    gap: 15px; /* Adjust spacing between rows */
+  }
+
+  .relative {
+    margin: 0 auto; /* Center align the card */
+    width: 90%; /* Ensure cards don't take the entire width */
+  }
+}

@@ -1,4 +1,3 @@
-
 import { Paintbrush, Wrench, Zap } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import ServiceCard from "@/components/ServiceCard";
@@ -15,7 +14,6 @@ const Index = () => {
 
   const backgroundImages = [
     "https://images.unsplash.com/photo-1581094288338-2314dddb7ece?q=80&w=2070&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1574359411659-15573a68378c?q=80&w=2070&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2074&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=2069&auto=format&fit=crop",
   ];
@@ -23,7 +21,7 @@ const Index = () => {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % backgroundImages.length);
-    }, 5000); // Change slide every 5 seconds
+    }, 3000); 
 
     return () => clearInterval(timer);
   }, []);
