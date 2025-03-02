@@ -82,9 +82,6 @@ const serviceProviders: Record<string, ServiceProvider[]> = {
 const ServiceProviders = () => {
   const [searchParams] = useSearchParams();
   const serviceType = searchParams.get("service") || "Professional Painting";
-  // type console log serviceType
-  console.log('serviceType', serviceType);
-  
   const providers = serviceProviders[serviceType] || [];
 
   const RatingStars = ({ rating }: { rating: number }) => {
