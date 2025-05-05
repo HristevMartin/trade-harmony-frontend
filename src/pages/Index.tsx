@@ -1,18 +1,19 @@
 
-import { Paintbrush, Wrench, Zap, ArrowRight } from "lucide-react";
+import { HardHat, Wrench, Zap, ArrowRight, Drill, Building, FactoryIcon } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import ServiceCard from "@/components/ServiceCard";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 const Index = () => {
   const services = [
     {
-      title: "Professional Painting",
-      description: "Interior and exterior painting services for your home or business.",
-      icon: <Paintbrush className="h-6 w-6" />,
-      image: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=2070&auto=format&fit=crop" // Professional painter with equipment
+      title: "Building & Construction",
+      description: "Complete building services for residential and commercial projects.",
+      icon: <Building className="h-6 w-6" />,
+      image: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=2070&auto=format&fit=crop" // Construction site with workers
     },
     {
       title: "Electrical Services",
@@ -21,20 +22,69 @@ const Index = () => {
       image: "https://images.unsplash.com/photo-1565608438257-fac3c27aa6e6?q=80&w=2070&auto=format&fit=crop" // Electrician working on a panel
     },
     {
-      title: "Mechanical Repairs",
-      description: "Comprehensive mechanical services for vehicles and equipment.",
+      title: "Mechanical & Equipment",
+      description: "Comprehensive mechanical services for construction equipment and vehicles.",
       icon: <Wrench className="h-6 w-6" />,
-      image: "https://images.unsplash.com/photo-1530124566582-a618bc2615dc?q=80&w=2070&auto=format&fit=crop" // Mechanic working on a car engine
+      image: "https://images.unsplash.com/photo-1530124566582-a618bc2615dc?q=80&w=2070&auto=format&fit=crop" // Mechanic working on construction equipment
     },
+    {
+      title: "Drilling & Excavation",
+      description: "Professional drilling and excavation services for any project size.",
+      icon: <Drill className="h-6 w-6" />,
+      image: "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?q=80&w=2574&auto=format&fit=crop" // Drilling equipment at construction site
+    },
+    {
+      title: "Industrial Construction",
+      description: "Specialized industrial construction and facility development.",
+      icon: <FactoryIcon className="h-6 w-6" />,
+      image: "https://images.unsplash.com/photo-1486718448742-163732cd1544?q=80&w=2070&auto=format&fit=crop" // Industrial construction site
+    },
+    {
+      title: "Safety Inspection",
+      description: "Comprehensive safety inspections for construction sites and buildings.",
+      icon: <HardHat className="h-6 w-6" />,
+      image: "https://images.unsplash.com/photo-1581094288338-2314dddb7ece?q=80&w=2070&auto=format&fit=crop" // Safety inspector at construction site
+    },
+  ];
+
+  const testimonials = [
+    {
+      name: "John Smith",
+      role: "Project Manager",
+      quote: "The contractors we found through TradesPro completed our project ahead of schedule and under budget. Couldn't be happier!",
+      avatar: "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=2070&auto=format&fit=crop"
+    },
+    {
+      name: "Sarah Johnson",
+      role: "Homeowner",
+      quote: "Finding reliable construction professionals used to be a nightmare until I discovered TradesPro. Now it's my go-to for all home projects.",
+      avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1998&auto=format&fit=crop"
+    },
+    {
+      name: "Mike Rodriguez",
+      role: "Construction Company Owner",
+      quote: "As a service provider, TradesPro has connected us with quality clients and helped grow our business by 40% in just one year.",
+      avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=1974&auto=format&fit=crop"
+    }
+  ];
+
+  // Dynamic construction stats - for animation purposes
+  const constructionStats = [
+    { value: "1.2M+", label: "Projects Completed" },
+    { value: "3.5M+", label: "Happy Customers" },
+    { value: "4.9", label: "Customer Rating" },
+    { value: "15K+", label: "Service Providers" }
   ];
 
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
       
-      {/* Hero Section - Blue background similar to Airtasker */}
-      <section className="bg-blue-600 text-white py-16 lg:py-20 relative overflow-hidden">
-        <div className="container mx-auto px-4 lg:px-8 flex flex-col lg:flex-row items-center">
+      {/* Hero Section - Construction-themed with more dynamic elements */}
+      <section className="bg-amber-600 text-white py-16 lg:py-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20" 
+             style={{backgroundImage: "url('https://images.unsplash.com/photo-1487958449943-2429e8be8625?q=80&w=2070&auto=format&fit=crop')"}}></div>
+        <div className="container mx-auto px-4 lg:px-8 flex flex-col lg:flex-row items-center relative z-10">
           <div className="lg:w-1/2 z-10 mb-10 lg:mb-0">
             <motion.h1 
               initial={{ opacity: 0, y: -20 }}
@@ -42,106 +92,166 @@ const Index = () => {
               transition={{ duration: 0.8 }}
               className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 max-w-xl"
             >
-              Your Trusted Partner in Professional Services
+              Building Excellence, One Project at a Time
             </motion.h1>
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-xl text-blue-100 mb-8 max-w-xl"
+              className="text-xl text-amber-100 mb-8 max-w-xl"
             >
-              Post any job. Pick the best professional. Get it done.
+              Connect with top construction professionals for your next project. Quality work, guaranteed.
             </motion.p>
             
             <div className="flex flex-col sm:flex-row gap-4 mt-8">
               <Button 
-                className="bg-white text-blue-600 hover:bg-blue-50 text-lg px-8 py-6 h-auto rounded-full font-semibold"
+                className="bg-white text-amber-600 hover:bg-amber-50 text-lg px-8 py-6 h-auto rounded-full font-semibold"
                 size="lg"
               >
-                Post a job for free <ArrowRight className="ml-2 h-5 w-5" />
+                Post a construction job <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
               <Button 
-                className="bg-blue-700 text-white hover:bg-blue-800 text-lg px-8 py-6 h-auto rounded-full font-semibold"
+                className="bg-amber-700 text-white hover:bg-amber-800 text-lg px-8 py-6 h-auto rounded-full font-semibold"
                 size="lg"
               >
-                Become a Service Provider
+                Join as a Contractor
               </Button>
             </div>
             
             <div className="flex items-center gap-6 mt-10">
-              <div className="flex flex-col items-center">
-                <span className="text-xl font-bold">1M+</span>
-                <span className="text-blue-100 text-sm">Customers</span>
-              </div>
-              <div className="h-8 w-px bg-blue-400"></div>
-              <div className="flex flex-col items-center">
-                <span className="text-xl font-bold">2.5M+</span>
-                <span className="text-blue-100 text-sm">Jobs Done</span>
-              </div>
-              <div className="h-8 w-px bg-blue-400"></div>
-              <div className="flex flex-col items-center">
-                <span className="text-xl font-bold">4.8</span>
-                <span className="text-blue-100 text-sm">Customer Rating</span>
-              </div>
+              {constructionStats.map((stat, index) => (
+                <motion.div 
+                  key={index} 
+                  className="flex flex-col items-center"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.8 + (index * 0.1) }}
+                >
+                  <motion.span 
+                    className="text-xl font-bold"
+                    initial={{ scale: 0.5 }}
+                    animate={{ scale: 1 }}
+                    transition={{ 
+                      duration: 0.5, 
+                      delay: 1.2 + (index * 0.1),
+                      type: "spring",
+                      stiffness: 200
+                    }}
+                  >
+                    {stat.value}
+                  </motion.span>
+                  <span className="text-amber-100 text-sm">{stat.label}</span>
+                </motion.div>
+              ))}
             </div>
           </div>
           
           <div className="lg:w-1/2 z-10">
-            <img 
-              src="https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?q=80&w=2574&auto=format&fit=crop" 
-              alt="Service professionals" 
+            <motion.img 
+              src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=2070&auto=format&fit=crop" 
+              alt="Construction professionals" 
               className="rounded-lg shadow-2xl"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
             />
           </div>
           
           {/* Background decorative elements */}
-          <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-blue-500 rounded-full opacity-30"></div>
-          <div className="absolute -top-24 -left-24 w-80 h-80 bg-blue-500 rounded-full opacity-30"></div>
+          <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-amber-500 rounded-full opacity-30"></div>
+          <div className="absolute -top-24 -left-24 w-80 h-80 bg-amber-500 rounded-full opacity-30"></div>
         </div>
       </section>
 
-      {/* How It Works Section */}
+      {/* How It Works Section - Construction themed */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900">Post your job in seconds</h2>
-            <p className="text-xl text-gray-600">Save yourself hours and get your to-do list completed</p>
+            <motion.h2 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="text-4xl md:text-5xl font-bold mb-6 text-gray-900"
+            >
+              Building your project is easy
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="text-xl text-gray-600"
+            >
+              Get your construction or renovation project completed in three simple steps
+            </motion.p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xl mb-4">1</div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-800">Describe what you need</h3>
-              <p className="text-gray-600">Tell us what service you're looking for and when you need it.</p>
-            </div>
-            
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xl mb-4">2</div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-800">Set your budget</h3>
-              <p className="text-gray-600">Get quotes that fit your budget for any service.</p>
-            </div>
-            
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xl mb-4">3</div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-800">Choose the best provider</h3>
-              <p className="text-gray-600">Compare quotes, profiles, and reviews, then hire the best.</p>
-            </div>
+            {[
+              {
+                step: 1,
+                title: "Post your project",
+                description: "Describe your construction needs, from small repairs to major renovations.",
+                delay: 0
+              },
+              {
+                step: 2,
+                title: "Receive contractor quotes",
+                description: "Review quotes from verified construction professionals in your area.",
+                delay: 0.2
+              },
+              {
+                step: 3,
+                title: "Get it built right",
+                description: "Hire the best contractor and watch your project come to life with quality craftsmanship.",
+                delay: 0.4
+              }
+            ].map((item, index) => (
+              <motion.div 
+                key={index}
+                className="flex flex-col items-center text-center"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: item.delay }}
+                viewport={{ once: true }}
+              >
+                <motion.div 
+                  className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 font-bold text-xl mb-4"
+                  whileHover={{ scale: 1.1 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                >
+                  {item.step}
+                </motion.div>
+                <h3 className="text-xl font-semibold mb-2 text-gray-800">{item.title}</h3>
+                <p className="text-gray-600">{item.description}</p>
+              </motion.div>
+            ))}
           </div>
           
           <div className="text-center mt-12">
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-3 h-auto rounded-full">
-              Post your job
+            <Button className="bg-amber-600 hover:bg-amber-700 text-white text-lg px-8 py-3 h-auto rounded-full">
+              Post your project
             </Button>
           </div>
         </div>
       </section>
 
-      {/* Services Section */}
+      {/* Services Section - Construction focused */}
       <section className="py-16 px-4 bg-gray-50">
         <div className="container mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-10 text-gray-900">Popular services</h2>
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-3xl md:text-4xl font-bold text-center mb-10 text-gray-900"
+          >
+            Construction services we offer
+          </motion.h2>
+          
           <div className="grid md:grid-cols-3 gap-8">
-            {services.map((service, index) => (
+            {services.slice(0, 3).map((service, index) => (
               <ServiceCard
                 key={index}
                 title={service.title}
@@ -151,35 +261,120 @@ const Index = () => {
               />
             ))}
           </div>
+          
+          {/* Show more services in a carousel for dynamic interaction */}
+          <div className="mt-12 relative px-12">
+            <Carousel
+              opts={{
+                align: "start",
+                loop: true,
+              }}
+              className="w-full"
+            >
+              <CarouselContent>
+                {services.slice(3).map((service, index) => (
+                  <CarouselItem key={index} className="md:basis-1/3 lg:basis-1/3">
+                    <ServiceCard
+                      title={service.title}
+                      description={service.description}
+                      icon={service.icon}
+                      image={service.image}
+                    />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="left-0" />
+              <CarouselNext className="right-0" />
+            </Carousel>
+          </div>
+          
           <div className="text-center mt-12">
-            <Link to="/service-providers" className="inline-flex items-center text-blue-600 font-semibold hover:text-blue-800">
-              View all services <ArrowRight className="ml-1 w-5 h-5" />
+            <Link to="/service-providers" className="inline-flex items-center text-amber-600 font-semibold hover:text-amber-800">
+              View all construction services <ArrowRight className="ml-1 w-5 h-5" />
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Testimonials/CTA Section */}
+      {/* Testimonials Section */}
+      <section className="py-20 px-4 bg-white">
+        <div className="container mx-auto max-w-5xl">
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-900"
+          >
+            What our clients say
+          </motion.h2>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
+                viewport={{ once: true }}
+                className="bg-gray-50 rounded-xl p-6 shadow-sm border"
+              >
+                <div className="flex items-center mb-4">
+                  <img 
+                    src={testimonial.avatar} 
+                    alt={testimonial.name} 
+                    className="w-12 h-12 rounded-full object-cover mr-4"
+                  />
+                  <div>
+                    <h4 className="font-semibold text-gray-900">{testimonial.name}</h4>
+                    <p className="text-amber-600 text-sm">{testimonial.role}</p>
+                  </div>
+                </div>
+                <p className="text-gray-600 italic">{testimonial.quote}</p>
+                <div className="mt-4 text-amber-500">
+                  ★★★★★
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section - Construction themed */}
       <section className="py-20 px-4 bg-white">
         <div className="container mx-auto max-w-4xl text-center">
-          <div className="bg-blue-600 text-white rounded-2xl p-10 md:p-16 shadow-xl relative overflow-hidden">
-            <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-blue-500 rounded-full opacity-30"></div>
-            <div className="absolute -top-20 -left-20 w-64 h-64 bg-blue-500 rounded-full opacity-30"></div>
+          <div className="bg-amber-600 text-white rounded-2xl p-10 md:p-16 shadow-xl relative overflow-hidden">
+            <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-amber-500 rounded-full opacity-30"></div>
+            <div className="absolute -top-20 -left-20 w-64 h-64 bg-amber-500 rounded-full opacity-30"></div>
             
-            <h2 className="text-3xl md:text-4xl font-bold mb-6 relative z-10">Ready to get started?</h2>
-            <p className="text-xl text-blue-100 mb-10 relative z-10 max-w-xl mx-auto">
-              Contact us today for a free consultation and estimate. Let's bring your vision to life with our expert craftsmanship.
-            </p>
+            <motion.h2 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="text-3xl md:text-4xl font-bold mb-6 relative z-10"
+            >
+              Ready to start building?
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="text-xl text-amber-100 mb-10 relative z-10 max-w-xl mx-auto"
+            >
+              Connect with top construction professionals today and turn your vision into reality with expert craftsmanship.
+            </motion.p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
               <Button 
-                className="bg-white text-blue-600 hover:bg-blue-50 text-lg px-8 py-3 h-auto rounded-full font-semibold"
+                className="bg-white text-amber-600 hover:bg-amber-50 text-lg px-8 py-3 h-auto rounded-full font-semibold"
               >
-                Post a job for free
+                Post a construction job
               </Button>
               <Button 
-                className="bg-blue-700 text-white hover:bg-blue-800 text-lg px-8 py-3 h-auto rounded-full font-semibold"
+                className="bg-amber-700 text-white hover:bg-amber-800 text-lg px-8 py-3 h-auto rounded-full font-semibold"
               >
-                Become a Service Provider
+                Join as a Contractor
               </Button>
             </div>
           </div>
@@ -201,7 +396,7 @@ const Index = () => {
             <div>
               <h3 className="text-lg font-semibold mb-4">Services</h3>
               <ul className="space-y-2">
-                {services.map((service, index) => (
+                {services.slice(0, 3).map((service, index) => (
                   <li key={index}><Link to={`/service-providers?service=${encodeURIComponent(service.title)}`} className="text-gray-400 hover:text-white transition-colors">{service.title}</Link></li>
                 ))}
               </ul>

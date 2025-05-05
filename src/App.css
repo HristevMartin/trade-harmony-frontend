@@ -6,17 +6,13 @@
   text-align: left;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
+/* Remove the animation for simpler, more construction-focused design */
 @media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+  .construction-animation {
+    transition: transform 0.3s ease;
+  }
+  
+  .construction-animation:hover {
+    transform: translateY(-5px);
   }
 }

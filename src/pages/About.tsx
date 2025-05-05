@@ -1,5 +1,5 @@
 
-import { Building, Info, Users, ShieldCheck, ArrowRight } from "lucide-react";
+import { Building, HardHat, Drill, Wrench, ArrowRight, FactoryIcon } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -16,10 +16,11 @@ const About = () => {
     <div className="min-h-screen bg-white">
       <Navbar />
       
-      {/* Hero Section */}
-      <div className="bg-blue-600 text-white py-16 lg:py-20 relative overflow-hidden">
-        <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-blue-500 rounded-full opacity-30"></div>
-        <div className="absolute -top-24 -left-24 w-80 h-80 bg-blue-500 rounded-full opacity-30"></div>
+      {/* Hero Section - Construction themed */}
+      <div className="bg-amber-600 text-white py-16 lg:py-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-cover bg-center opacity-20" style={{backgroundImage: "url('https://images.unsplash.com/photo-1488972685288-c3fd157d7c7a?q=80&w=2070&auto=format&fit=crop')"}}></div>
+        <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-amber-500 rounded-full opacity-30"></div>
+        <div className="absolute -top-24 -left-24 w-80 h-80 bg-amber-500 rounded-full opacity-30"></div>
         
         <div className="container mx-auto px-4 relative z-10">
           <motion.h1 
@@ -28,15 +29,15 @@ const About = () => {
             transition={{ duration: 0.8 }}
             className="text-4xl md:text-5xl lg:text-6xl font-bold text-center mb-6"
           >
-            About TradesPro
+            About TradesPro Construction
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-xl text-blue-100 text-center max-w-3xl mx-auto"
+            className="text-xl text-amber-100 text-center max-w-3xl mx-auto"
           >
-            Connecting skilled professionals with clients who need their expertise since 2024
+            Building connections between construction professionals and clients since 2024
           </motion.p>
         </div>
       </div>
@@ -47,35 +48,53 @@ const About = () => {
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900">Our Mission</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              We're committed to revolutionizing the trades industry by providing a seamless platform that connects skilled professionals 
-              with clients. Our mission is to ensure quality, reliability, and satisfaction in every service provided.
+              We're committed to revolutionizing the construction industry by providing a seamless platform that connects skilled professionals 
+              with clients. Our mission is to ensure quality, reliability, and excellence in every construction project.
             </p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="bg-white rounded-xl p-8 shadow-sm border flex flex-col items-center text-center transition-transform hover:scale-105">
-              <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mb-6">
-                <Users className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-bold mb-4 text-gray-800">Community First</h3>
-              <p className="text-gray-600">Building a community of trusted professionals and satisfied customers is at the heart of everything we do.</p>
-            </div>
-            
-            <div className="bg-white rounded-xl p-8 shadow-sm border flex flex-col items-center text-center transition-transform hover:scale-105">
-              <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mb-6">
-                <ShieldCheck className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-bold mb-4 text-gray-800">Quality Guaranteed</h3>
-              <p className="text-gray-600">We vet all professionals to ensure they meet our high standards for quality and reliability.</p>
-            </div>
-            
-            <div className="bg-white rounded-xl p-8 shadow-sm border flex flex-col items-center text-center transition-transform hover:scale-105">
-              <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mb-6">
+            <motion.div 
+              className="bg-white rounded-xl p-8 shadow-sm border flex flex-col items-center text-center transition-transform hover:scale-105"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              viewport={{ once: true }}
+            >
+              <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 mb-6">
                 <Building className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-bold mb-4 text-gray-800">Service Excellence</h3>
-              <p className="text-gray-600">We're dedicated to making home improvements and repairs accessible to everyone while ensuring the highest quality.</p>
-            </div>
+              <h3 className="text-xl font-bold mb-4 text-gray-800">Quality Construction</h3>
+              <p className="text-gray-600">We connect you with top-rated construction professionals who deliver excellence on every project.</p>
+            </motion.div>
+            
+            <motion.div 
+              className="bg-white rounded-xl p-8 shadow-sm border flex flex-col items-center text-center transition-transform hover:scale-105"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              viewport={{ once: true }}
+            >
+              <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 mb-6">
+                <HardHat className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-bold mb-4 text-gray-800">Safety Guaranteed</h3>
+              <p className="text-gray-600">All our contractors are vetted to ensure they meet the highest safety standards in the industry.</p>
+            </motion.div>
+            
+            <motion.div 
+              className="bg-white rounded-xl p-8 shadow-sm border flex flex-col items-center text-center transition-transform hover:scale-105"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              viewport={{ once: true }}
+            >
+              <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 mb-6">
+                <FactoryIcon className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-bold mb-4 text-gray-800">Expert Craftsmanship</h3>
+              <p className="text-gray-600">Our network includes only the most skilled tradespeople and construction professionals in the business.</p>
+            </motion.div>
           </div>
         </div>
       </div>
@@ -84,29 +103,41 @@ const About = () => {
       <div className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
-            <div className="md:w-1/2">
+            <motion.div 
+              className="md:w-1/2"
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+            >
               <img 
-                src="https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=2069&auto=format&fit=crop" 
-                alt="Our story" 
+                src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=2070&auto=format&fit=crop" 
+                alt="Construction workers on site" 
                 className="rounded-xl shadow-lg"
               />
-            </div>
-            <div className="md:w-1/2">
+            </motion.div>
+            <motion.div 
+              className="md:w-1/2"
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+            >
               <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900">Our Story</h2>
               <p className="text-gray-600 leading-relaxed mb-6">
-                Founded in 2024, TradesPro emerged from a vision to revolutionize how people connect with skilled trades professionals. 
-                We believe in making home improvements and repairs accessible to everyone while ensuring the highest quality of service.
+                Founded in 2024, TradesPro emerged from a vision to revolutionize how people connect with skilled construction professionals. 
+                We identified a gap in the market for a platform that makes finding quality contractors simple and reliable.
               </p>
               <p className="text-gray-600 leading-relaxed mb-8">
-                What started as a small idea has grown into a platform that helps thousands of customers and professionals connect every day, 
-                creating meaningful opportunities for both service providers and those who need their expertise.
+                What started as a small idea has grown into a comprehensive construction service platform that helps thousands of customers 
+                and professionals connect every day, creating meaningful opportunities for both builders and those who need construction expertise.
               </p>
               <Link to="/contact">
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                  Contact Us <ArrowRight className="ml-2 h-4 w-4" />
+                <Button className="bg-amber-600 hover:bg-amber-700 text-white">
+                  Contact Our Team <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
@@ -121,7 +152,7 @@ const About = () => {
             viewport={{ once: true }}
             className="text-3xl md:text-4xl font-bold text-center mb-16 text-gray-900"
           >
-            Meet Our Team
+            Meet Our Construction Experts
           </motion.h2>
           
           <div className="grid md:grid-cols-3 gap-10 max-w-5xl mx-auto">
@@ -137,12 +168,12 @@ const About = () => {
                 <img
                   src={member.image}
                   alt={member.name}
-                  className="w-32 h-32 rounded-full mx-auto mb-6 object-cover border-4 border-blue-100"
+                  className="w-32 h-32 rounded-full mx-auto mb-6 object-cover border-4 border-amber-100"
                 />
                 <h3 className="text-xl font-bold text-gray-800 mb-2">{member.name}</h3>
-                <p className="text-blue-600 font-medium mb-4">{member.role}</p>
+                <p className="text-amber-600 font-medium mb-4">{member.role}</p>
                 <p className="text-gray-600 text-sm">
-                  Passionate about connecting people with the services they need and creating opportunities for skilled professionals.
+                  Expert in the construction industry with a passion for connecting skilled professionals with quality projects.
                 </p>
               </motion.div>
             ))}
@@ -153,24 +184,24 @@ const About = () => {
       {/* CTA Section */}
       <div className="py-16 px-4">
         <div className="container mx-auto max-w-4xl">
-          <div className="bg-blue-600 text-white rounded-2xl p-10 md:p-16 shadow-xl relative overflow-hidden">
-            <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-blue-500 rounded-full opacity-30"></div>
-            <div className="absolute -top-20 -left-20 w-64 h-64 bg-blue-500 rounded-full opacity-30"></div>
+          <div className="bg-amber-600 text-white rounded-2xl p-10 md:p-16 shadow-xl relative overflow-hidden">
+            <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-amber-500 rounded-full opacity-30"></div>
+            <div className="absolute -top-20 -left-20 w-64 h-64 bg-amber-500 rounded-full opacity-30"></div>
             
-            <h2 className="text-3xl md:text-4xl font-bold mb-6 relative z-10 text-center">Join Our Network</h2>
-            <p className="text-xl text-blue-100 mb-10 relative z-10 max-w-xl mx-auto text-center">
-              Whether you're looking for services or offering your skills, we're here to help you connect.
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 relative z-10 text-center">Join Our Construction Network</h2>
+            <p className="text-xl text-amber-100 mb-10 relative z-10 max-w-xl mx-auto text-center">
+              Whether you're looking for quality construction services or offering your building expertise, we're here to help you connect.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
               <Button 
-                className="bg-white text-blue-600 hover:bg-blue-50 text-lg px-8 py-3 h-auto rounded-full font-semibold"
+                className="bg-white text-amber-600 hover:bg-amber-50 text-lg px-8 py-3 h-auto rounded-full font-semibold"
               >
-                Post a job for free
+                Post a construction job
               </Button>
               <Button 
-                className="bg-blue-700 text-white hover:bg-blue-800 text-lg px-8 py-3 h-auto rounded-full font-semibold"
+                className="bg-amber-700 text-white hover:bg-amber-800 text-lg px-8 py-3 h-auto rounded-full font-semibold"
               >
-                Become a Service Provider
+                Join as a Contractor
               </Button>
             </div>
           </div>
@@ -192,9 +223,9 @@ const About = () => {
             <div>
               <h3 className="text-lg font-semibold mb-4">Services</h3>
               <ul className="space-y-2">
-                <li><Link to="/service-providers?service=Professional%20Painting" className="text-gray-400 hover:text-white transition-colors">Professional Painting</Link></li>
+                <li><Link to="/service-providers?service=Building%20%26%20Construction" className="text-gray-400 hover:text-white transition-colors">Building & Construction</Link></li>
                 <li><Link to="/service-providers?service=Electrical%20Services" className="text-gray-400 hover:text-white transition-colors">Electrical Services</Link></li>
-                <li><Link to="/service-providers?service=Mechanical%20Repairs" className="text-gray-400 hover:text-white transition-colors">Mechanical Repairs</Link></li>
+                <li><Link to="/service-providers?service=Mechanical%20%26%20Equipment" className="text-gray-400 hover:text-white transition-colors">Mechanical & Equipment</Link></li>
               </ul>
             </div>
             <div>
