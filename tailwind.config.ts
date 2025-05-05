@@ -75,10 +75,19 @@ export default {
             transform: "translateY(0)",
           },
         },
+        "fade-in": {
+          "0%": {
+            opacity: "0",
+          },
+          "100%": {
+            opacity: "1",
+          },
+        },
       },
       animation: {
         "fade-up": "fade-up 0.5s ease-out",
         "fade-down": "fade-down 0.5s ease-out",
+        "fade-in": "fade-in 0.2s ease-out",
       },
     },
   },
