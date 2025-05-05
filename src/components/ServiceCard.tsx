@@ -38,36 +38,26 @@ const ServiceCard = ({ title, description, icon, image }: ServiceCardProps) => {
       onClick={handleClick}
       className="cursor-pointer h-full"
     >
-      <Card className="group relative overflow-hidden border-none bg-gradient-to-br from-white to-gray-50 h-full flex flex-col hover:shadow-xl transition-all duration-300">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        
+      <Card className="group overflow-hidden border rounded-xl shadow-sm h-full flex flex-col hover:shadow-md transition-all duration-300 bg-white">
         {/* Image Section with AspectRatio for consistent sizing */}
         <div className="relative">
           <AspectRatio ratio={16/9} className="bg-muted">
             <img
               src={image || defaultImage}
               alt={title}
-              className="object-cover w-full h-full rounded-t-lg"
+              className="object-cover w-full h-full"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
           </AspectRatio>
         </div>
         
-        <div className="relative z-10 p-8 flex-grow flex flex-col">
-          <div className="mb-6 text-indigo-600 transform group-hover:scale-110 transition-transform duration-300">
-            {icon}
+        <div className="p-5 flex-grow flex flex-col">
+          <div className="flex items-center mb-3">
+            <div className="text-blue-600 mr-3">
+              {icon}
+            </div>
+            <h3 className="text-xl font-bold text-gray-800">{title}</h3>
           </div>
-          <h3 className="text-2xl font-bold mb-3 text-gray-800">{title}</h3>
-          <p className="text-gray-600 leading-relaxed flex-grow">{description}</p>
-          
-          <div className="mt-4">
-            <span className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors group-hover:underline">
-              Learn more
-              <svg className="ml-1 w-4 h-4 transition-transform group-hover:translate-x-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-            </span>
-          </div>
+          <p className="text-gray-600 text-sm flex-grow">{description}</p>
         </div>
       </Card>
     </motion.div>

@@ -1,138 +1,146 @@
 
-import { Paintbrush, Wrench, Zap } from "lucide-react";
+import { Paintbrush, Wrench, Zap, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import ServiceCard from "@/components/ServiceCard";
 import { motion } from "framer-motion";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/ui/carousel";
-import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const Index = () => {
-  const [currentSlide, setCurrentSlide] = useState(0);
-
-  const backgroundImages = [
-    "https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=2070&auto=format&fit=crop", // Professional painter working
-    "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?q=80&w=2069&auto=format&fit=crop", // Electrician working with wires
-    "https://images.unsplash.com/photo-1530124566582-a618bc2615dc?q=80&w=2070&auto=format&fit=crop", // Mechanic working on a car
-    "https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=2070&auto=format&fit=crop", // Construction professional working
-  ];
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % backgroundImages.length);
-    }, 5000); // Change slide every 5 seconds
-
-    return () => clearInterval(timer);
-  }, []);
-
   const services = [
     {
       title: "Professional Painting",
-      description: "Expert interior and exterior painting services for your home or business. We deliver immaculate finishes that last.",
-      icon: <Paintbrush className="h-12 w-12" />,
+      description: "Interior and exterior painting services for your home or business.",
+      icon: <Paintbrush className="h-6 w-6" />,
       image: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=2070&auto=format&fit=crop" // Professional painter with equipment
     },
     {
       title: "Electrical Services",
-      description: "Licensed electricians for all your electrical needs and installations. Safe, reliable, and up to code.",
-      icon: <Zap className="h-12 w-12" />,
+      description: "Licensed electricians for all your electrical needs and installations.",
+      icon: <Zap className="h-6 w-6" />,
       image: "https://images.unsplash.com/photo-1565608438257-fac3c27aa6e6?q=80&w=2070&auto=format&fit=crop" // Electrician working on a panel
     },
     {
       title: "Mechanical Repairs",
-      description: "Comprehensive mechanical services for vehicles and equipment. Expert diagnostics and repairs.",
-      icon: <Wrench className="h-12 w-12" />,
+      description: "Comprehensive mechanical services for vehicles and equipment.",
+      icon: <Wrench className="h-6 w-6" />,
       image: "https://images.unsplash.com/photo-1530124566582-a618bc2615dc?q=80&w=2070&auto=format&fit=crop" // Mechanic working on a car engine
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50">
+    <div className="min-h-screen bg-white">
       <Navbar />
       
-      {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center justify-center px-4 overflow-hidden">
-        {/* Background Images Carousel */}
-        <div className="absolute inset-0 z-0">
-          {backgroundImages.map((image, index) => (
-            <div
-              key={index}
-              className={`absolute inset-0 transition-opacity duration-1000 bg-cover bg-center bg-no-repeat ${
-                index === currentSlide ? "opacity-100" : "opacity-0"
-              }`}
-              style={{
-                backgroundImage: `url('${image}')`,
-              }}
+      {/* Hero Section - Blue background similar to Airtasker */}
+      <section className="bg-blue-600 text-white py-16 lg:py-20 relative overflow-hidden">
+        <div className="container mx-auto px-4 lg:px-8 flex flex-col lg:flex-row items-center">
+          <div className="lg:w-1/2 z-10 mb-10 lg:mb-0">
+            <motion.h1 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 max-w-xl"
+            >
+              Your Trusted Partner in Professional Services
+            </motion.h1>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="text-xl text-blue-100 mb-8 max-w-xl"
+            >
+              Post any job. Pick the best professional. Get it done.
+            </motion.p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 mt-8">
+              <Button 
+                className="bg-white text-blue-600 hover:bg-blue-50 text-lg px-8 py-6 h-auto rounded-full font-semibold"
+                size="lg"
+              >
+                Post a job for free <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+              <Button 
+                className="bg-blue-700 text-white hover:bg-blue-800 text-lg px-8 py-6 h-auto rounded-full font-semibold"
+                size="lg"
+              >
+                Become a Service Provider
+              </Button>
+            </div>
+            
+            <div className="flex items-center gap-6 mt-10">
+              <div className="flex flex-col items-center">
+                <span className="text-xl font-bold">1M+</span>
+                <span className="text-blue-100 text-sm">Customers</span>
+              </div>
+              <div className="h-8 w-px bg-blue-400"></div>
+              <div className="flex flex-col items-center">
+                <span className="text-xl font-bold">2.5M+</span>
+                <span className="text-blue-100 text-sm">Jobs Done</span>
+              </div>
+              <div className="h-8 w-px bg-blue-400"></div>
+              <div className="flex flex-col items-center">
+                <span className="text-xl font-bold">4.8</span>
+                <span className="text-blue-100 text-sm">Customer Rating</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="lg:w-1/2 z-10">
+            <img 
+              src="https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?q=80&w=2574&auto=format&fit=crop" 
+              alt="Service professionals" 
+              className="rounded-lg shadow-2xl"
             />
-          ))}
+          </div>
+          
+          {/* Background decorative elements */}
+          <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-blue-500 rounded-full opacity-30"></div>
+          <div className="absolute -top-24 -left-24 w-80 h-80 bg-blue-500 rounded-full opacity-30"></div>
         </div>
+      </section>
 
-        {/* Overlay */}
-        <div className="absolute inset-0 z-1 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
-        
-        {/* Slide Indicators */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex gap-2">
-          {backgroundImages.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentSlide(index)}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                index === currentSlide 
-                  ? "bg-white scale-110" 
-                  : "bg-white/50 hover:bg-white/75"
-              }`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
-
-        <div className="container mx-auto text-center relative z-10">
-          <motion.h1 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-5xl md:text-6xl font-bold mb-8 text-white"
-          >
-            Your Trusted Partner in Professional Services
-          </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-xl md:text-2xl text-gray-200 mb-10 max-w-3xl mx-auto leading-relaxed"
-          >
-            We deliver excellence in painting, electrical work, and mechanical services.
-            Quality craftsmanship backed by years of experience.
-          </motion.p>
-          <motion.button 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="bg-white text-gray-900 px-10 py-4 rounded-full text-lg font-medium hover:bg-gray-100 transition-colors shadow-lg hover:shadow-xl"
-          >
-            Get Started
-          </motion.button>
+      {/* How It Works Section */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900">Post your job in seconds</h2>
+            <p className="text-xl text-gray-600">Save yourself hours and get your to-do list completed</p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xl mb-4">1</div>
+              <h3 className="text-xl font-semibold mb-2 text-gray-800">Describe what you need</h3>
+              <p className="text-gray-600">Tell us what service you're looking for and when you need it.</p>
+            </div>
+            
+            <div className="flex flex-col items-center text-center">
+              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xl mb-4">2</div>
+              <h3 className="text-xl font-semibold mb-2 text-gray-800">Set your budget</h3>
+              <p className="text-gray-600">Get quotes that fit your budget for any service.</p>
+            </div>
+            
+            <div className="flex flex-col items-center text-center">
+              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xl mb-4">3</div>
+              <h3 className="text-xl font-semibold mb-2 text-gray-800">Choose the best provider</h3>
+              <p className="text-gray-600">Compare quotes, profiles, and reviews, then hire the best.</p>
+            </div>
+          </div>
+          
+          <div className="text-center mt-12">
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-3 h-auto rounded-full">
+              Post your job
+            </Button>
+          </div>
         </div>
       </section>
 
       {/* Services Section */}
-      <section className="py-24 px-4 bg-white">
+      <section className="py-16 px-4 bg-gray-50">
         <div className="container mx-auto">
-          <motion.h2 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-4xl font-bold text-center mb-16 bg-gradient-to-r from-gray-900 to-indigo-800 bg-clip-text text-transparent"
-          >
-            Our Professional Services
-          </motion.h2>
-          <div className="grid md:grid-cols-3 gap-8 md:gap-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-10 text-gray-900">Popular services</h2>
+          <div className="grid md:grid-cols-3 gap-8">
             {services.map((service, index) => (
               <ServiceCard
                 key={index}
@@ -143,33 +151,83 @@ const Index = () => {
               />
             ))}
           </div>
+          <div className="text-center mt-12">
+            <Link to="/service-providers" className="inline-flex items-center text-blue-600 font-semibold hover:text-blue-800">
+              View all services <ArrowRight className="ml-1 w-5 h-5" />
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-24 px-4 bg-gradient-to-br from-indigo-900 to-gray-900 text-white">
-        <div className="container mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="max-w-4xl mx-auto"
-          >
-            <h2 className="text-4xl font-bold mb-8">Ready to Get Started?</h2>
-            <p className="text-xl text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed">
+      {/* Testimonials/CTA Section */}
+      <section className="py-20 px-4 bg-white">
+        <div className="container mx-auto max-w-4xl text-center">
+          <div className="bg-blue-600 text-white rounded-2xl p-10 md:p-16 shadow-xl relative overflow-hidden">
+            <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-blue-500 rounded-full opacity-30"></div>
+            <div className="absolute -top-20 -left-20 w-64 h-64 bg-blue-500 rounded-full opacity-30"></div>
+            
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 relative z-10">Ready to get started?</h2>
+            <p className="text-xl text-blue-100 mb-10 relative z-10 max-w-xl mx-auto">
               Contact us today for a free consultation and estimate. Let's bring your vision to life with our expert craftsmanship.
             </p>
-            <motion.button 
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-white text-indigo-900 px-10 py-4 rounded-full text-lg font-medium hover:bg-gray-100 transition-colors shadow-lg hover:shadow-xl"
-            >
-              Contact Us
-            </motion.button>
-          </motion.div>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
+              <Button 
+                className="bg-white text-blue-600 hover:bg-blue-50 text-lg px-8 py-3 h-auto rounded-full font-semibold"
+              >
+                Post a job for free
+              </Button>
+              <Button 
+                className="bg-blue-700 text-white hover:bg-blue-800 text-lg px-8 py-3 h-auto rounded-full font-semibold"
+              >
+                Become a Service Provider
+              </Button>
+            </div>
+          </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-16">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div>
+              <h3 className="text-lg font-semibold mb-4">TradesPro</h3>
+              <ul className="space-y-2">
+                <li><Link to="/" className="text-gray-400 hover:text-white transition-colors">Home</Link></li>
+                <li><Link to="/about" className="text-gray-400 hover:text-white transition-colors">About</Link></li>
+                <li><Link to="/contact" className="text-gray-400 hover:text-white transition-colors">Contact</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Services</h3>
+              <ul className="space-y-2">
+                {services.map((service, index) => (
+                  <li key={index}><Link to={`/service-providers?service=${encodeURIComponent(service.title)}`} className="text-gray-400 hover:text-white transition-colors">{service.title}</Link></li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Resources</h3>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">How It Works</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Service Providers</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Blog</a></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Contact</h3>
+              <ul className="space-y-2">
+                <li className="text-gray-400">Email: contact@tradespro.com</li>
+                <li className="text-gray-400">Phone: (555) 123-4567</li>
+                <li className="text-gray-400">123 Business Ave, Suite 100</li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
+            <p>&copy; 2024 TradesPro. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
