@@ -25,7 +25,7 @@ const serviceProviders: Record<string, ServiceProvider[]> = {
       service: "Professional Painting",
       description: "Specializing in interior and exterior painting with 15 years of experience. Known for precision and attention to detail.",
       rating: 4.8,
-      image: "https://images.unsplash.com/photo-1581094288338-2314dddb7ece?q=80&w=2070&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1604357209793-fca5dca89f97?q=80&w=2044&auto=format&fit=crop", // Professional painter working on interior
       reviews: 127,
     },
     {
@@ -34,7 +34,7 @@ const serviceProviders: Record<string, ServiceProvider[]> = {
       service: "Professional Painting",
       description: "Expert in decorative painting and custom finishes. Over 10 years of experience in residential and commercial projects.",
       rating: 4.9,
-      image: "https://images.unsplash.com/photo-1574359411659-15573a68378c?q=80&w=2070&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=2070&auto=format&fit=crop", // Painter with equipment
       reviews: 89,
     },
   ],
@@ -45,7 +45,7 @@ const serviceProviders: Record<string, ServiceProvider[]> = {
       service: "Electrical Services",
       description: "Licensed electrician specializing in residential and commercial installations. Expert in smart home systems.",
       rating: 4.7,
-      image: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?q=80&w=2069&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1565608438257-fac3c27aa6e6?q=80&w=2070&auto=format&fit=crop", // Electrician working on panel
       reviews: 156,
     },
     {
@@ -54,7 +54,7 @@ const serviceProviders: Record<string, ServiceProvider[]> = {
       service: "Electrical Services",
       description: "Certified electrician with expertise in troubleshooting and repairs. Available 24/7 for emergency services.",
       rating: 4.9,
-      image: "https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?q=80&w=2070&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?q=80&w=2069&auto=format&fit=crop", // Electrician with tools
       reviews: 203,
     },
   ],
@@ -65,7 +65,7 @@ const serviceProviders: Record<string, ServiceProvider[]> = {
       service: "Mechanical Repairs",
       description: "Specialized in vehicle diagnostics and repairs. ASE certified with 20 years of experience.",
       rating: 4.8,
-      image: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2074&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1530124566582-a618bc2615dc?q=80&w=2070&auto=format&fit=crop", // Mechanic working on car
       reviews: 178,
     },
     {
@@ -74,7 +74,7 @@ const serviceProviders: Record<string, ServiceProvider[]> = {
       service: "Mechanical Repairs",
       description: "Expert in European car repairs and maintenance. Factory-trained technician with comprehensive diagnostic tools.",
       rating: 4.6,
-      image: "https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=2069&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1630515507471-620235fc09db?q=80&w=2073&auto=format&fit=crop", // Mechanic with diagnostic equipment
       reviews: 145,
     },
   ],

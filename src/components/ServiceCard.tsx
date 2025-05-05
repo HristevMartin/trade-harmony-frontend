@@ -18,8 +18,16 @@ const ServiceCard = ({ title, description, icon, image }: ServiceCardProps) => {
     navigate(`/service-providers?service=${encodeURIComponent(title)}`);
   };
 
-  // Default image if none is provided
-  const defaultImage = "https://images.unsplash.com/photo-1581094288338-2314dddb7ece?q=80&w=2070&auto=format&fit=crop";
+  // Default image specific to the service type if none is provided
+  let defaultImage = "https://images.unsplash.com/photo-1581094288338-2314dddb7ece?q=80&w=2070&auto=format&fit=crop";
+  
+  if (title.toLowerCase().includes("paint")) {
+    defaultImage = "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=2070&auto=format&fit=crop";
+  } else if (title.toLowerCase().includes("electric")) {
+    defaultImage = "https://images.unsplash.com/photo-1565608438257-fac3c27aa6e6?q=80&w=2070&auto=format&fit=crop";
+  } else if (title.toLowerCase().includes("mechanic")) {
+    defaultImage = "https://images.unsplash.com/photo-1530124566582-a618bc2615dc?q=80&w=2070&auto=format&fit=crop";
+  }
 
   return (
     <motion.div
