@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Star } from "lucide-react";
 import { useSearchParams, Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import Navbar from "@/components/Navbar";
 
 interface ServiceProvider {
@@ -129,23 +130,24 @@ const ServiceProviders = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
+              className="h-full"
             >
-              <Link to={`/service-provider/${provider.id}`}>
-                <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                  <div className="aspect-w-16 aspect-h-9">
+              <Link to={`/service-provider/${provider.id}`} className="h-full block">
+                <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
+                  <AspectRatio ratio={16/9} className="bg-muted">
                     <img
                       src={provider.image}
                       alt={provider.name}
-                      className="object-cover w-full h-48"
+                      className="object-cover w-full h-full"
                     />
-                  </div>
-                  <div className="p-6">
+                  </AspectRatio>
+                  <div className="p-6 flex flex-col flex-grow">
                     <h3 className="text-xl font-semibold mb-2">{provider.name}</h3>
                     <RatingStars rating={provider.rating} />
                     <p className="text-sm text-gray-500 mt-1">
                       {provider.reviews} reviews
                     </p>
-                    <p className="text-gray-600 mt-4">{provider.description}</p>
+                    <p className="text-gray-600 mt-4 flex-grow">{provider.description}</p>
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}

@@ -1,4 +1,3 @@
-
 import { Paintbrush, Wrench, Zap } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import ServiceCard from "@/components/ServiceCard";
@@ -33,16 +32,19 @@ const Index = () => {
       title: "Professional Painting",
       description: "Expert interior and exterior painting services for your home or business. We deliver immaculate finishes that last.",
       icon: <Paintbrush className="h-12 w-12" />,
+      image: "https://images.unsplash.com/photo-1581094288338-2314dddb7ece?q=80&w=2070&auto=format&fit=crop"
     },
     {
       title: "Electrical Services",
       description: "Licensed electricians for all your electrical needs and installations. Safe, reliable, and up to code.",
       icon: <Zap className="h-12 w-12" />,
+      image: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?q=80&w=2069&auto=format&fit=crop"
     },
     {
       title: "Mechanical Repairs",
       description: "Comprehensive mechanical services for vehicles and equipment. Expert diagnostics and repairs.",
       icon: <Wrench className="h-12 w-12" />,
+      image: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2074&auto=format&fit=crop"
     },
   ];
 
@@ -136,6 +138,7 @@ const Index = () => {
                 title={service.title}
                 description={service.description}
                 icon={service.icon}
+                image={service.image}
               />
             ))}
           </div>
