@@ -19,7 +19,7 @@ const Index = () => {
       title: "Electrical Services",
       description: "Licensed electricians for all your electrical needs and installations.",
       icon: <Zap className="h-6 w-6" />,
-      image: "https://images.unsplash.com/photo-1565608438257-fac3c27aa6e6?q=80&w=2070&auto=format&fit=crop" // Electrician working on a panel
+      image: "https://www.lecompany.co.uk/uploads/5/5/4/6/55465351/electrical-services-in-london_orig.jpg" // Electrician working on a panel
     },
     {
       title: "Mechanical & Equipment",
@@ -27,45 +27,6 @@ const Index = () => {
       icon: <Wrench className="h-6 w-6" />,
       image: "https://images.unsplash.com/photo-1530124566582-a618bc2615dc?q=80&w=2070&auto=format&fit=crop" // Mechanic working on construction equipment
     },
-    {
-      title: "Drilling & Excavation",
-      description: "Professional drilling and excavation services for any project size.",
-      icon: <Drill className="h-6 w-6" />,
-      image: "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?q=80&w=2574&auto=format&fit=crop" // Drilling equipment at construction site
-    },
-    {
-      title: "Industrial Construction",
-      description: "Specialized industrial construction and facility development.",
-      icon: <FactoryIcon className="h-6 w-6" />,
-      image: "https://images.unsplash.com/photo-1486718448742-163732cd1544?q=80&w=2070&auto=format&fit=crop" // Industrial construction site
-    },
-    {
-      title: "Safety Inspection",
-      description: "Comprehensive safety inspections for construction sites and buildings.",
-      icon: <HardHat className="h-6 w-6" />,
-      image: "https://images.unsplash.com/photo-1581094288338-2314dddb7ece?q=80&w=2070&auto=format&fit=crop" // Safety inspector at construction site
-    },
-  ];
-
-  const testimonials = [
-    {
-      name: "John Smith",
-      role: "Project Manager",
-      quote: "The contractors we found through TradesPro completed our project ahead of schedule and under budget. Couldn't be happier!",
-      avatar: "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=2070&auto=format&fit=crop"
-    },
-    {
-      name: "Sarah Johnson",
-      role: "Homeowner",
-      quote: "Finding reliable construction professionals used to be a nightmare until I discovered TradesPro. Now it's my go-to for all home projects.",
-      avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1998&auto=format&fit=crop"
-    },
-    {
-      name: "Mike Rodriguez",
-      role: "Construction Company Owner",
-      quote: "As a service provider, TradesPro has connected us with quality clients and helped grow our business by 40% in just one year.",
-      avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=1974&auto=format&fit=crop"
-    }
   ];
 
   // Dynamic construction stats - for animation purposes
@@ -164,8 +125,10 @@ const Index = () => {
       </section>
 
       {/* Services Section - Construction focused */}
-      <section className="py-16 px-4 bg-gray-50">
+      <section style={{ border: "1px solid red" }} className="py-16 px-4 bg-gray-50">
+        
         <div className="container mx-auto">
+
           <motion.h2 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -187,32 +150,7 @@ const Index = () => {
               />
             ))}
           </div>
-          
-          {/* Show more services in a carousel for dynamic interaction */}
-          <div className="mt-12 relative px-12">
-            <Carousel
-              opts={{
-                align: "start",
-                loop: true,
-              }}
-              className="w-full"
-            >
-              <CarouselContent>
-                {services.slice(3).map((service, index) => (
-                  <CarouselItem key={index} className="md:basis-1/3 lg:basis-1/3">
-                    <ServiceCard
-                      title={service.title}
-                      description={service.description}
-                      icon={service.icon}
-                      image={service.image}
-                    />
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <CarouselPrevious className="left-0" />
-              <CarouselNext className="right-0" />
-            </Carousel>
-          </div>
+        
           
           <div className="text-center mt-12">
             <Link to="/service-providers" className="inline-flex items-center text-blue-600 font-semibold hover:text-blue-800">
@@ -222,49 +160,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="py-20 px-4 bg-white">
-        <div className="container mx-auto max-w-5xl">
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-900"
-          >
-            What our clients say
-          </motion.h2>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
-                viewport={{ once: true }}
-                className="bg-gray-50 rounded-xl p-6 shadow-sm border"
-              >
-                <div className="flex items-center mb-4">
-                  <img 
-                    src={testimonial.avatar} 
-                    alt={testimonial.name} 
-                    className="w-12 h-12 rounded-full object-cover mr-4"
-                  />
-                  <div>
-                    <h4 className="font-semibold text-gray-900">{testimonial.name}</h4>
-                    <p className="text-blue-600 text-sm">{testimonial.role}</p>
-                  </div>
-                </div>
-                <p className="text-gray-600 italic">{testimonial.quote}</p>
-                <div className="mt-4 text-blue-500">
-                  ★★★★★
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-16">

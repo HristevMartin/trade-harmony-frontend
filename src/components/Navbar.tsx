@@ -83,13 +83,7 @@ const Navbar = () => {
                 </Link>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Link 
-              to="/about" 
-              className={`text-gray-700 hover:text-indigo-600 transition-colors relative group ${isActive("/about") ? "text-indigo-600" : ""}`}
-            >
-              About
-              <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 transform transition-transform ${isActive("/about") ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"}`} />
-            </Link>
+          
             <Link 
               to="/contact" 
               className={`text-gray-700 hover:text-indigo-600 transition-colors relative group ${isActive("/contact") ? "text-indigo-600" : ""}`}
