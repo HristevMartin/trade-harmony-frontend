@@ -63,7 +63,7 @@ const ServiceCard = ({ title, description, icon, image }: ServiceCardProps) => {
         
         <div className="p-5 flex-grow flex flex-col">
           <div className="flex items-center mb-3">
-            <div className="text-amber-600 mr-3">
+            <div className="text-blue-600 mr-3">
               {icon}
             </div>
             <h3 className="text-xl font-bold text-gray-800">{title}</h3>

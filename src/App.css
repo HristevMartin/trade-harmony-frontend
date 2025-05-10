@@ -6,7 +6,7 @@
   text-align: left;
 }
 
-/* Remove the animation for simpler, more construction-focused design */
+/* Subtle hover effect for construction elements */
 @media (prefers-reduced-motion: no-preference) {
   .construction-animation {
     transition: transform 0.3s ease;
@@ -16,3 +16,12 @@
     transform: translateY(-5px);
   }
 }
+
+/* Blue theme colors */
+:root {
+  --primary-blue: #1a56db;
+  --primary-blue-light: #3b82f6;
+  --primary-blue-dark: #1e40af;
+  --accent-blue: #dbeafe;
+}
+
