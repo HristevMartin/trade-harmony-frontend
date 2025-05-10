@@ -1,11 +1,10 @@
 
-import { HardHat, Wrench, Zap, ArrowRight, Drill, Building, FactoryIcon } from "lucide-react";
+import { HardHat, Wrench, Zap, ArrowRight, Building } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import ServiceCard from "@/components/ServiceCard";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 const Index = () => {
   const services = [
@@ -19,10 +18,10 @@ const Index = () => {
       title: "Electrical Services",
       description: "Licensed electricians for all your electrical needs and installations.",
       icon: <Zap className="h-6 w-6" />,
-      image: "https://www.lecompany.co.uk/uploads/5/5/4/6/55465351/electrical-services-in-london_orig.jpg" // Electrician working on a panel
+      image: "https://images.unsplash.com/photo-1565608438257-fac3c27aa6e6?q=80&w=2070&auto=format&fit=crop" // Electrician working on a panel
     },
     {
-      title: "Mechanical & Equipment",
+      title: "Mechanical Repairs",
       description: "Comprehensive mechanical services for construction equipment and vehicles.",
       icon: <Wrench className="h-6 w-6" />,
       image: "https://images.unsplash.com/photo-1530124566582-a618bc2615dc?q=80&w=2070&auto=format&fit=crop" // Mechanic working on construction equipment
@@ -125,7 +124,7 @@ const Index = () => {
       </section>
 
       {/* Services Section - Construction focused */}
-      <section style={{ border: "1px solid red" }} className="py-16 px-4 bg-gray-50">
+      <section className="py-16 px-4 bg-gray-50">
         
         <div className="container mx-auto">
 
@@ -140,7 +139,7 @@ const Index = () => {
           </motion.h2>
           
           <div className="grid md:grid-cols-3 gap-8">
-            {services.slice(0, 3).map((service, index) => (
+            {services.map((service, index) => (
               <ServiceCard
                 key={index}
                 title={service.title}
@@ -176,7 +175,7 @@ const Index = () => {
             <div>
               <h3 className="text-lg font-semibold mb-4">Services</h3>
               <ul className="space-y-2">
-                {services.slice(0, 3).map((service, index) => (
+                {services.map((service, index) => (
                   <li key={index}><Link to={`/service-providers?service=${encodeURIComponent(service.title)}`} className="text-gray-400 hover:text-white transition-colors">{service.title}</Link></li>
                 ))}
               </ul>

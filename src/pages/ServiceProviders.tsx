@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Star } from "lucide-react";
+import { Star, AlertCircle } from "lucide-react";
 import { useSearchParams, Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
@@ -49,46 +49,8 @@ const serviceProviders: Record<string, ServiceProvider[]> = {
       reviews: 89,
     },
   ],
-  "Electrical Services": [
-    {
-      id: 3,
-      name: "Mike Wilson",
-      service: "Electrical Services",
-      description: "Licensed electrician specializing in residential and commercial installations. Expert in smart home systems.",
-      rating: 4.7,
-      image: "https://images.unsplash.com/photo-1565608438257-fac3c27aa6e6?q=80&w=2070&auto=format&fit=crop", // Electrician working on panel
-      reviews: 156,
-    },
-    {
-      id: 4,
-      name: "David Chen",
-      service: "Electrical Services",
-      description: "Certified electrician with expertise in troubleshooting and repairs. Available 24/7 for emergency services.",
-      rating: 4.9,
-      image: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?q=80&w=2069&auto=format&fit=crop", // Electrician with tools
-      reviews: 203,
-    },
-  ],
-  "Mechanical Repairs": [
-    {
-      id: 5,
-      name: "Robert Martinez",
-      service: "Mechanical Repairs",
-      description: "Specialized in vehicle diagnostics and repairs. ASE certified with 20 years of experience.",
-      rating: 4.8,
-      image: "https://images.unsplash.com/photo-1530124566582-a618bc2615dc?q=80&w=2070&auto=format&fit=crop", // Mechanic working on car
-      reviews: 178,
-    },
-    {
-      id: 6,
-      name: "Tom Anderson",
-      service: "Mechanical Repairs",
-      description: "Expert in European car repairs and maintenance. Factory-trained technician with comprehensive diagnostic tools.",
-      rating: 4.6,
-      image: "https://images.unsplash.com/photo-1630515507471-620235fc09db?q=80&w=2073&auto=format&fit=crop", // Mechanic with diagnostic equipment
-      reviews: 145,
-    },
-  ],
+  "Electrical Services": [],
+  "Mechanical Repairs": [],
 };
 
 const ServiceProviders = () => {
@@ -134,44 +96,71 @@ const ServiceProviders = () => {
           Find trusted professionals in your area
         </motion.p>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {providers.map((provider, index) => (
-            <motion.div
-              key={provider.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="h-full"
-            >
-              <Link to={`/service-provider/${provider.id}`} className="h-full block">
-                <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
-                  <AspectRatio ratio={16/9} className="bg-muted">
-                    <img
-                      src={provider.image}
-                      alt={provider.name}
-                      className="object-cover w-full h-full"
-                    />
-                  </AspectRatio>
-                  <div className="p-6 flex flex-col flex-grow">
-                    <h3 className="text-xl font-semibold mb-2">{provider.name}</h3>
-                    <RatingStars rating={provider.rating} />
-                    <p className="text-sm text-gray-500 mt-1">
-                      {provider.reviews} reviews
-                    </p>
-                    <p className="text-gray-600 mt-4 flex-grow">{provider.description}</p>
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
-                    >
-                      View Profile
-                    </motion.button>
-                  </div>
-                </Card>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
+        {providers.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {providers.map((provider, index) => (
+              <motion.div
+                key={provider.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="h-full"
+              >
+                <Link to={`/service-provider/${provider.id}`} className="h-full block">
+                  <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
+                    <AspectRatio ratio={16/9} className="bg-muted">
+                      <img
+                        src={provider.image}
+                        alt={provider.name}
+                        className="object-cover w-full h-full"
+                      />
+                    </AspectRatio>
+                    <div className="p-6 flex flex-col flex-grow">
+                      <h3 className="text-xl font-semibold mb-2">{provider.name}</h3>
+                      <RatingStars rating={provider.rating} />
+                      <p className="text-sm text-gray-500 mt-1">
+                        {provider.reviews} reviews
+                      </p>
+                      <p className="text-gray-600 mt-4 flex-grow">{provider.description}</p>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+                      >
+                        View Profile
+                      </motion.button>
+                    </div>
+                  </Card>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-center py-16"
+          >
+            <div className="flex justify-center mb-6">
+              <AlertCircle className="h-16 w-16 text-blue-600" />
+            </div>
+            <h2 className="text-2xl font-semibold mb-4">No Available Offers Yet</h2>
+            <p className="text-gray-600 max-w-md mx-auto mb-8">
+              We're currently expanding our network of {serviceType} professionals. 
+              Please check back soon for available service providers.
+            </p>
+            <Link to="/">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 transition-colors"
+              >
+                Return to Home
+              </motion.button>
+            </Link>
+          </motion.div>
+        )}
       </div>
       
       <footer className="bg-gray-800 text-white py-8 mt-16">
