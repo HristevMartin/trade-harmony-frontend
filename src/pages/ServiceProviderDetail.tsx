@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import qnevImage from './qnev.png'; 
 
 interface Project {
   id: number;
@@ -103,7 +104,7 @@ const ServiceProviderDetail = () => {
     const now = new Date();
     const tomorrow = new Date(now.setDate(now.getDate() + 1));
     const formattedDate = tomorrow.toISOString().split('T')[0];
-    
+
     const eventDuration = '1';
     const eventDetails = {
       text: `Meeting with ${provider.name}`,
@@ -155,11 +156,10 @@ Best regards`;
         {[...Array(5)].map((_, index) => (
           <Star
             key={index}
-            className={`w-4 h-4 ${
-              index < Math.floor(rating)
-                ? "text-yellow-400 fill-yellow-400"
-                : "text-gray-300"
-            }`}
+            className={`w-4 h-4 ${index < Math.floor(rating)
+              ? "text-yellow-400 fill-yellow-400"
+              : "text-gray-300"
+              }`}
           />
         ))}
         <span className="text-sm text-gray-600 ml-2">{rating.toFixed(1)}</span>
@@ -171,19 +171,19 @@ Best regards`;
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       <div className="container mx-auto px-4 py-8 md:py-12 lg:py-20">
-        <Link 
+        <Link
           to="/service-providers"
           className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4 md:mb-6"
         >
           <ChevronLeft className="w-4 h-4 mr-1" />
           Back to Service Providers
         </Link>
-        
+
         <div className="bg-white rounded-lg shadow-md p-4 md:p-6 lg:p-8 mb-6 md:mb-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
             <div className="md:col-span-1">
               <img
-                src={provider.image}
+                src={qnevImage}
                 alt={provider.name}
                 className="w-full h-48 sm:h-56 md:h-64 object-cover rounded-lg shadow-md"
               />
@@ -196,7 +196,7 @@ Best regards`;
                 <span className="text-sm text-gray-600">({provider.reviews} reviews)</span>
               </div>
               <p className="text-gray-600 mb-4">{provider.description}</p>
-              
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 mb-4">
                 <div className="flex items-center gap-2">
                   <Wrench className="text-blue-600 flex-shrink-0" />
@@ -207,13 +207,13 @@ Best regards`;
                   <span className="text-sm md:text-base">Available Now</span>
                 </div>
               </div>
-              
+
               <div className="flex flex-wrap gap-2 sm:gap-4">
                 <Button size="sm" className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm" onClick={handleBookMeeting}>
                   <Video className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span>Book Meeting</span>
                 </Button>
-                <Button 
+                <Button
                   size="sm"
                   className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm"
                   onClick={handleCallClick}
@@ -221,9 +221,9 @@ Best regards`;
                   <Phone className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span>Contact Now</span>
                 </Button>
-                <Button 
+                <Button
                   size="sm"
-                  variant="outline" 
+                  variant="outline"
                   className="flex items-center gap-1 text-blue-600 border-blue-600 hover:bg-blue-50 text-xs sm:text-sm"
                   onClick={handleMessageClick}
                 >
@@ -291,7 +291,7 @@ Best regards`;
           </div>
         </div>
       </div>
-      
+
       <footer className="bg-gray-800 text-white py-6 md:py-8">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">

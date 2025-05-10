@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 const Index = () => {
+  console.log('in here')
   const services = [
     {
       title: "Building & Construction",
@@ -18,7 +19,7 @@ const Index = () => {
       title: "Electrical Services",
       description: "Licensed electricians for all your electrical needs and installations.",
       icon: <Zap className="h-6 w-6" />,
-      image: "https://images.unsplash.com/photo-1565608438257-fac3c27aa6e6?q=80&w=2070&auto=format&fit=crop" // Electrician working on a panel
+      image: "https://media.istockphoto.com/id/1469656864/photo/electrician-engineer-uses-a-multimeter-to-test-the-electrical-installation-and-power-line.jpg?s=612x612&w=0&k=20&c=h70UOpNbJYT5G2oGT-KUeIE3yXwEgsCpr25yR1rnGtU=" // Electrician working on a panel
     },
     {
       title: "Mechanical Repairs",
@@ -40,7 +41,6 @@ const Index = () => {
     <div className="min-h-screen bg-white">
       <Navbar />
       
-      {/* Hero Section - Construction-themed with blue color scheme */}
       <section className="bg-blue-600 text-white py-16 lg:py-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20" 
              style={{backgroundImage: "url('https://images.unsplash.com/photo-1487958449943-2429e8be8625?q=80&w=2070&auto=format&fit=crop')"}}></div>

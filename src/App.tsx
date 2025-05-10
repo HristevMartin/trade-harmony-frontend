@@ -11,11 +11,13 @@ import ServiceProviderDetail from "./pages/ServiceProviderDetail";
 import ProjectDetail from "./pages/ProjectDetail";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import Navbar from "./components/Navbar";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+
     <TooltipProvider>
       <Toaster />
       <Sonner />

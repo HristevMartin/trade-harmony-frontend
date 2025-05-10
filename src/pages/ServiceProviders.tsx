@@ -6,6 +6,7 @@ import { useSearchParams, Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import Navbar from "@/components/Navbar";
+import qnevImage from './qnev.png'; 
 
 interface ServiceProvider {
   id: number;
@@ -25,7 +26,7 @@ const serviceProviders: Record<string, ServiceProvider[]> = {
       service: "Building & Construction",
       description: "Expert in interior renovations, specializing in wall texturing, flooring installation, and ceiling work. 12+ years of experience in residential projects.",
       rating: 4.9,
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1974&auto=format&fit=crop",
+      image: qnevImage,
       reviews: 143,
     }
   ],
@@ -56,6 +57,7 @@ const serviceProviders: Record<string, ServiceProvider[]> = {
 const ServiceProviders = () => {
   const [searchParams] = useSearchParams();
   const serviceType = searchParams.get("service") || "Building & Construction";
+  console.log('serviceType', serviceType)
   const providers = serviceProviders[serviceType] || [];
 
   const RatingStars = ({ rating }: { rating: number }) => {
