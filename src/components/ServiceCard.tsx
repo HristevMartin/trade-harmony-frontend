@@ -48,7 +48,7 @@ const ServiceCard = ({ title, description, icon, image }: ServiceCardProps) => {
       className="cursor-pointer h-full"
       whileHover={{ y: -5 }}
     >
-      <Card className="group overflow-hidden border rounded-xl shadow-sm h-full flex flex-col hover:shadow-md transition-all duration-300 bg-white">
+      <Card className="group overflow-hidden border rounded-xl shadow-md h-full flex flex-col hover:shadow-xl transition-all duration-300 bg-white">
         {/* Image Section with AspectRatio for consistent sizing */}
         <div className="relative">
           <AspectRatio ratio={16/9} className="bg-muted">
@@ -57,7 +57,7 @@ const ServiceCard = ({ title, description, icon, image }: ServiceCardProps) => {
               alt={title}
               className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-blue-900/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </AspectRatio>
         </div>
         

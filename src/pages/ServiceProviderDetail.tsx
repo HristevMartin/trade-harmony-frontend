@@ -1,3 +1,4 @@
+
 import { useParams, Link } from "react-router-dom";
 import { Star, Calendar, Clock, Wrench, Award, Phone, Mail, Video } from "lucide-react";
 import { motion } from "framer-motion";
@@ -30,47 +31,73 @@ interface ServiceProvider {
   availability: string;
 }
 
-const mockServiceProvider: ServiceProvider = {
-  id: 1,
-  name: "John Smith",
-  service: "Professional Painting",
-  description: "Specializing in interior and exterior painting with 15 years of experience. Known for precision and attention to detail.",
-  rating: 4.8,
-  image: "https://images.unsplash.com/photo-1581094288338-2314dddb7ece?q=80&w=2070&auto=format&fit=crop",
-  reviews: 127,
-  expertise: ["Interior Painting", "Exterior Painting", "Wall Repairs", "Color Consultation", "Wallpaper Installation"],
-  yearsOfExperience: 15,
-  portfolio: [
-    {
-      id: 1,
-      title: "Modern Living Room Transformation",
-      description: "Complete interior painting with custom color matching and accent wall design.",
-      image: "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?q=80&w=2070&auto=format&fit=crop",
-      date: "January 2024"
-    },
-    {
-      id: 2,
-      title: "Historic Home Restoration",
-      description: "Exterior painting project preserving the original character of a 1920s home.",
-      image: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?q=80&w=2070&auto=format&fit=crop",
-      date: "December 2023"
-    },
-    {
-      id: 3,
-      title: "Commercial Office Makeover",
-      description: "Complete renovation of a 3000 sq ft office space with modern color schemes.",
-      image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=2069&auto=format&fit=crop",
-      date: "November 2023"
-    }
-  ],
-  email: "john.smith@example.com",
-  phone: "(555) 123-4567",
-  availability: "Monday to Friday, 8 AM - 6 PM"
+const mockServiceProviders: Record<number, ServiceProvider> = {
+  1: {
+    id: 1,
+    name: "John Smith",
+    service: "Professional Painting",
+    description: "Specializing in interior and exterior painting with 15 years of experience. Known for precision and attention to detail.",
+    rating: 4.8,
+    image: "https://images.unsplash.com/photo-1604357209793-fca5dca89f97?q=80&w=2044&auto=format&fit=crop",
+    reviews: 127,
+    expertise: ["Interior Painting", "Exterior Painting", "Wall Repairs", "Color Consultation", "Wallpaper Installation"],
+    yearsOfExperience: 15,
+    portfolio: [
+      {
+        id: 1,
+        title: "Modern Living Room Transformation",
+        description: "Complete interior painting with custom color matching and accent wall design.",
+        image: "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?q=80&w=2070&auto=format&fit=crop",
+        date: "January 2024"
+      },
+      {
+        id: 2,
+        title: "Historic Home Restoration",
+        description: "Exterior painting project preserving the original character of a 1920s home.",
+        image: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?q=80&w=2070&auto=format&fit=crop",
+        date: "December 2023"
+      },
+      {
+        id: 3,
+        title: "Commercial Office Makeover",
+        description: "Complete renovation of a 3000 sq ft office space with modern color schemes.",
+        image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=2069&auto=format&fit=crop",
+        date: "November 2023"
+      }
+    ],
+    email: "john.smith@example.com",
+    phone: "(555) 123-4567",
+    availability: "Monday to Friday, 8 AM - 6 PM"
+  },
+  7: {
+    id: 7,
+    name: "Nasko Yanev",
+    service: "Building & Construction",
+    description: "Expert in interior renovations, specializing in wall texturing, flooring installation, and ceiling work. 12+ years of experience in residential projects.",
+    rating: 4.9,
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1974&auto=format&fit=crop",
+    reviews: 143,
+    expertise: ["Interior Renovations", "Wall Texturing", "Flooring Installation", "Ceiling Work", "Room Remodeling"],
+    yearsOfExperience: 12,
+    portfolio: [
+      {
+        id: 7,
+        title: "Complete Room Renovation",
+        description: "Full interior renovation featuring custom wall texturing, premium wooden flooring, and modern ceiling design.",
+        image: "/lovable-uploads/c35fa72c-a45a-4c7b-9587-f0a045db9c09.png",
+        date: "March 2024"
+      }
+    ],
+    email: "nasko.yanev@example.com",
+    phone: "(555) 987-6543",
+    availability: "Monday to Saturday, 7 AM - 7 PM"
+  }
 };
 
 const ServiceProviderDetail = () => {
   const { id } = useParams();
-  const provider = mockServiceProvider;
+  const providerId = id ? parseInt(id) : 1;
+  const provider = mockServiceProviders[providerId] || mockServiceProviders[1];
 
   const handleBookMeeting = () => {
     const now = new Date();
@@ -155,7 +182,7 @@ Best regards`;
             </div>
             <div className="md:col-span-2">
               <h1 className="text-3xl font-bold mb-2">{provider.name}</h1>
-              <p className="text-indigo-600 font-semibold mb-2">{provider.service}</p>
+              <p className="text-blue-600 font-semibold mb-2">{provider.service}</p>
               <div className="mb-4">
                 <RatingStars rating={provider.rating} />
                 <span className="text-sm text-gray-600">({provider.reviews} reviews)</span>
@@ -163,21 +190,21 @@ Best regards`;
               <p className="text-gray-600 mb-4">{provider.description}</p>
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div className="flex items-center gap-2">
-                  <Wrench className="text-indigo-600" />
+                  <Wrench className="text-blue-600" />
                   <span>{provider.yearsOfExperience} Years Experience</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Calendar className="text-indigo-600" />
+                  <Calendar className="text-blue-600" />
                   <span>Available Now</span>
                 </div>
               </div>
               <div className="flex gap-4">
-                <Button className="flex items-center gap-2" onClick={handleBookMeeting}>
+                <Button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700" onClick={handleBookMeeting}>
                   <Video className="w-4 h-4" />
                   Book Meeting
                 </Button>
                 <Button 
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
                   onClick={handleCallClick}
                 >
                   <Phone className="w-4 h-4" />
@@ -185,7 +212,7 @@ Best regards`;
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 text-blue-600 border-blue-600 hover:bg-blue-50"
                   onClick={handleMessageClick}
                 >
                   <Mail className="w-4 h-4" />
@@ -199,14 +226,14 @@ Best regards`;
         <div className="grid md:grid-cols-2 gap-8 mb-8">
           <Card className="p-6">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Wrench className="text-indigo-600" />
+              <Wrench className="text-blue-600" />
               Areas of Expertise
             </h2>
             <div className="flex flex-wrap gap-2">
               {provider.expertise.map((skill, index) => (
                 <span
                   key={index}
-                  className="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full text-sm"
+                  className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-sm"
                 >
                   {skill}
                 </span>
@@ -215,7 +242,7 @@ Best regards`;
           </Card>
           <Card className="p-6">
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Clock className="text-indigo-600" />
+              <Clock className="text-blue-600" />
               Availability
             </h2>
             <p className="text-gray-600">{provider.availability}</p>
@@ -224,7 +251,7 @@ Best regards`;
 
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <Award className="text-indigo-600" />
+            <Award className="text-blue-600" />
             Recent Projects
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
@@ -242,7 +269,7 @@ Best regards`;
                   <div className="p-4">
                     <h3 className="font-semibold mb-2">{project.title}</h3>
                     <p className="text-gray-600 text-sm mb-2">{project.description}</p>
-                    <p className="text-sm text-indigo-600">{project.date}</p>
+                    <p className="text-sm text-blue-600">{project.date}</p>
                   </div>
                 </motion.div>
               </Link>

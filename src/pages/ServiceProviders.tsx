@@ -18,6 +18,17 @@ interface ServiceProvider {
 }
 
 const serviceProviders: Record<string, ServiceProvider[]> = {
+  "Building & Construction": [
+    {
+      id: 7,
+      name: "Nasko Yanev",
+      service: "Building & Construction",
+      description: "Expert in interior renovations, specializing in wall texturing, flooring installation, and ceiling work. 12+ years of experience in residential projects.",
+      rating: 4.9,
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1974&auto=format&fit=crop",
+      reviews: 143,
+    }
+  ],
   "Professional Painting": [
     {
       id: 1,
@@ -82,7 +93,7 @@ const serviceProviders: Record<string, ServiceProvider[]> = {
 
 const ServiceProviders = () => {
   const [searchParams] = useSearchParams();
-  const serviceType = searchParams.get("service") || "Professional Painting";
+  const serviceType = searchParams.get("service") || "Building & Construction";
   const providers = serviceProviders[serviceType] || [];
 
   const RatingStars = ({ rating }: { rating: number }) => {
@@ -151,7 +162,7 @@ const ServiceProviders = () => {
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="mt-4 w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors"
+                      className="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
                     >
                       View Profile
                     </motion.button>
