@@ -1,4 +1,3 @@
-
 import { useParams, Link } from "react-router-dom";
 import { Star, Calendar, Clock, Wrench, Award, Phone, Mail, Video, ChevronLeft } from "lucide-react";
 import { motion } from "framer-motion";
@@ -6,7 +5,8 @@ import Navbar from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import qnevImage from './qnev.png'; 
+import qnevImage from './qnev.png';
+import { useEffect, useState } from "react";
 
 interface Project {
   id: number;
@@ -96,9 +96,26 @@ const mockServiceProviders: Record<number, ServiceProvider> = {
 };
 
 const ServiceProviderDetail = () => {
-  const { id } = useParams();
-  const providerId = id ? parseInt(id) : 1;
-  console.log('show me the providerId', providerId)
+  let [personProfile, setPersonProfile] = useState([])
+  let [projectProfile, setProjectProfile] = useState([])
+  let { id } = useParams();
+
+  console.log('dsadasdas', id)
+
+  useEffect(() => {
+
+    let callTheApi = async () => {
+      let response = await fetch(`${import.meta.env.VITE_TRAVEL_SECURITY}/travel/get-profile-by-id/${id}`)
+      let data = await response.json()
+      console.log('show me the data', data)
+      setPersonProfile(data)
+    }
+
+    callTheApi()
+  }, []); // add id to the dependency array
+
+
+
   const provider = mockServiceProviders[7] || mockServiceProviders[1];
 
   const handleBookMeeting = () => {
@@ -107,23 +124,18 @@ const ServiceProviderDetail = () => {
     const formattedDate = tomorrow.toISOString().split('T')[0];
 
     const eventDuration = '1';
-    const eventDetails = {
-      text: `Meeting with ${provider.name}`,
-      dates: `${formattedDate}/${formattedDate}`,
-      details: `Meeting to discuss potential work with ${provider.name}\n\nService: ${provider.service}\n\nContact Details:\nPhone: ${provider.phone}\nEmail: ${provider.email}`,
-    };
 
     const subject = `Meeting Request with ${provider.name}`;
     const body = `Hi ${provider.name},
 
-I would like to schedule a meeting with you to discuss potential work.
+    I would like to schedule a meeting with you to discuss potential work.
 
-Proposed Date: ${formattedDate}
-Duration: ${eventDuration} hour
+    Proposed Date: ${formattedDate}
+    Duration: ${eventDuration} hour
 
-Service Interest: ${provider.service}
+    Service Interest: ${provider.service}
 
-Best regards`;
+    Best regards`;
 
     const mailtoLink = `mailto:${provider.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.location.href = mailtoLink;
@@ -168,6 +180,18 @@ Best regards`;
     );
   };
 
+  console.log('show me the provider', provider)
+
+  let constructionProvider = {
+    'building': "Building & Construction",
+    'plumbing': "Plumbing",
+    'electrical': "Electrical",
+    'painting': "Painting",
+    'carpentry': "Carpentry",
+    'hvac': "HVAC",
+    'landscaping': "Landscaping"
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -180,28 +204,28 @@ Best regards`;
           Back to Service Providers
         </Link>
 
-        <div className="bg-white rounded-lg shadow-md p-4 md:p-6 lg:p-8 mb-6 md:mb-8">
+        <div style={{ border: '3px solid green' }} className="bg-white rounded-lg shadow-md p-4 md:p-6 lg:p-8 mb-6 md:mb-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
-            <div className="md:col-span-1">
+            <div style={{ border: '1px solid red' }} className="md:col-span-1">
               <img
-                src={qnevImage}
-                alt={provider.name}
+                src={personProfile?.profileImage}
+                alt={provider.fullName}
                 className="w-full h-48 sm:h-56 md:h-64 object-cover rounded-lg shadow-md"
               />
             </div>
             <div className="md:col-span-2">
-              <h1 className="text-2xl md:text-3xl font-bold mb-2">{provider.name}</h1>
-              <p className="text-blue-600 font-semibold mb-2">{provider.service}</p>
+              <h1 className="text-2xl md:text-3xl font-bold mb-2">{personProfile?.fullName}</h1>
+              <p className="text-blue-600 font-semibold mb-2 border-b-2 border-blue-600">{Array.isArray(personProfile?.selectedTrades) ? constructionProvider[personProfile?.selectedTrades[0]] : constructionProvider[personProfile?.selectedTrades]}</p>
               <div className="mb-3 md:mb-4">
-                <RatingStars rating={provider.rating} />
-                <span className="text-sm text-gray-600">({provider.reviews} reviews)</span>
+                <RatingStars rating={4.9} />
+                <span className="text-sm text-gray-600">({143} reviews)</span>
               </div>
-              <p className="text-gray-600 mb-4">{provider.description}</p>
+              <p className="text-gray-600 mb-4">{personProfile && personProfile?.bio}</p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 mb-4">
                 <div className="flex items-center gap-2">
                   <Wrench className="text-blue-600 flex-shrink-0" />
-                  <span className="text-sm md:text-base">{provider.yearsOfExperience} Years Experience</span>
+                  <span className="text-sm md:text-base">{ personProfile && personProfile?.yearsExperience} Years Experience</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="text-blue-600 flex-shrink-0" />

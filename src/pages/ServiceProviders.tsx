@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Star, AlertCircle } from "lucide-react";
@@ -16,6 +15,10 @@ interface ServiceProvider {
   rating: number;
   image: string;
   reviews: number;
+  userId?: number;
+  profileImageUrl?: string;
+  fullName?: string;
+  bio?: string;
 }
 
 const serviceProviders: Record<string, ServiceProvider[]> = {
@@ -82,10 +85,13 @@ const ServiceProviders = () => {
   console.log('show me the serviceType', serviceType)
   const mappedServiceType = mapDatabaseToFrontend(serviceType);
 
+  let backendUrl = import.meta.env.VITE_TRAVEL_SECURITY
+  console.log('show me the bakendUrl', backendUrl)
+
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/travel/get-specific-services/${mappedServiceType}`);
+        const response = await fetch(`${import.meta.env.VITE_TRAVEL_SECURITY}/travel/get-specific-services/${mappedServiceType}`);
         if (response.ok) {
           const data = await response.json();
           console.log('show me the database data', data);
@@ -152,11 +158,14 @@ const ServiceProviders = () => {
                 transition={{ delay: index * 0.1 }}
                 className="h-full"
               >
+
+                {console.log('show me the provider', provider)}
                 <Link to={`/service-provider/${provider?.userId}`} className="h-full block">
                   <Card  className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
                     <AspectRatio ratio={16 / 9} className="bg-muted">
                       <img
-                        src={provider.profileImageUrl}
+                        src={provider?.profileImage}
+                        // src="https://storage.googleapis.com/profile_images_custom_123123/profile_image_pictures/683452692a3b10422b4e4bea/M.H_20250531_215315.png"
                         alt={provider.fullName}
                         className="object-cover w-full h-full"
                       />

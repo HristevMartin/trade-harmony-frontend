@@ -1,4 +1,3 @@
-
 import { HardHat, Wrench, Zap, ArrowRight, Building } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import ServiceCard from "@/components/ServiceCard";
@@ -9,9 +8,6 @@ import { useState, useEffect } from "react";
 
 
 const Index = () => {
-  console.log('in here')
-
-
   const services = [
     {
       title: "Building & Construction",
@@ -76,7 +72,9 @@ const Index = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/travel/get-project-services`);
+        let url = `${import.meta.env.VITE_TRAVEL_SECURITY}/travel/get-project-services`;
+        const response = await fetch(url);
+
         if (response.ok) {
           const data = await response.json();
           console.log('show me the database data', data);
@@ -114,7 +112,7 @@ const Index = () => {
     <div className="min-h-screen bg-white">
       <Navbar />
 
-      <section className="bg-blue-600 text-white py-16 lg:py-20 relative overflow-hidden">
+      <section  className="bg-blue-600 text-white py-16 lg:py-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
           style={{ backgroundImage: "url('https://images.unsplash.com/photo-1487958449943-2429e8be8625?q=80&w=2070&auto=format&fit=crop')" }}></div>
         <div className="container mx-auto px-4 lg:px-8 flex flex-col lg:flex-row items-center relative z-10">
