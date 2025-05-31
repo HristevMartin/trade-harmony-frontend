@@ -98,7 +98,8 @@ const mockServiceProviders: Record<number, ServiceProvider> = {
 const ServiceProviderDetail = () => {
   const { id } = useParams();
   const providerId = id ? parseInt(id) : 1;
-  const provider = mockServiceProviders[providerId] || mockServiceProviders[1];
+  console.log('show me the providerId', providerId)
+  const provider = mockServiceProviders[7] || mockServiceProviders[1];
 
   const handleBookMeeting = () => {
     const now = new Date();

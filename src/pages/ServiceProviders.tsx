@@ -1,15 +1,15 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Star, AlertCircle } from "lucide-react";
 import { useSearchParams, Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import Navbar from "@/components/Navbar";
-import qnevImage from './qnev.png'; 
+import qnevImage from './qnev.png';
 
 interface ServiceProvider {
-  id: number;
+  _id: number;
   name: string;
   service: string;
   description: string;
@@ -54,11 +54,56 @@ const serviceProviders: Record<string, ServiceProvider[]> = {
   "Mechanical Repairs": [],
 };
 
+const mapDatabaseToFrontend = (data: any) => {
+  const mapping = {
+    "Building & Construction": "building",
+    "Electrical Services": "electrical",
+    "Mechanical Repairs": "mechanic"
+  }
+  return mapping[data] || data;
+}
+
+const reverseMapDatabaseToFrontend = (data: any) => {
+  const mapping = {
+    "building": "Building & Construction",
+    "electrical": "Electrical Services",
+    "mechanic": "Mechanical Repairs"
+  }
+  return mapping[data] || data;
+}
+
+
 const ServiceProviders = () => {
   const [searchParams] = useSearchParams();
   const serviceType = searchParams.get("service") || "Building & Construction";
   console.log('serviceType', serviceType)
   const providers = serviceProviders[serviceType] || [];
+  const [servicesFetched, setServicesFetched] = useState<ServiceProvider[]>([]);
+  console.log('show me the serviceType', serviceType)
+  const mappedServiceType = mapDatabaseToFrontend(serviceType);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const response = await fetch(`http://localhost:8080/travel/get-specific-services/${mappedServiceType}`);
+        if (response.ok) {
+          const data = await response.json();
+          console.log('show me the database data', data);
+          const mappedData = data.map((item: any) => ({
+            ...item,
+            service: reverseMapDatabaseToFrontend(item.service)
+          }));
+          setServicesFetched(mappedData);
+        } else {
+          console.error('Failed to fetch services');
+        }
+      } catch (error) {
+        console.error('Error fetching services:', error);
+      }
+    };
+    fetchServices();
+  }, []);
+
 
   const RatingStars = ({ rating }: { rating: number }) => {
     return (
@@ -66,11 +111,10 @@ const ServiceProviders = () => {
         {[...Array(5)].map((_, index) => (
           <Star
             key={index}
-            className={`w-4 h-4 ${
-              index < Math.floor(rating)
-                ? "text-yellow-400 fill-yellow-400"
-                : "text-gray-300"
-            }`}
+            className={`w-4 h-4 ${index < Math.floor(rating)
+              ? "text-yellow-400 fill-yellow-400"
+              : "text-gray-300"
+              }`}
           />
         ))}
         <span className="text-sm text-gray-600 ml-2">{rating.toFixed(1)}</span>
@@ -85,7 +129,7 @@ const ServiceProviders = () => {
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-4xl font-bold text-center mb-4"
+          className="text-4xl font-bold text-center mb-4 mt-5"
         >
           {serviceType}
         </motion.h1>
@@ -97,10 +141,10 @@ const ServiceProviders = () => {
         >
           Find trusted professionals in your area
         </motion.p>
-        
-        {providers.length > 0 ? (
+
+        {servicesFetched.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {providers.map((provider, index) => (
+            {servicesFetched.map((provider, index) => (
               <motion.div
                 key={provider.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -108,22 +152,22 @@ const ServiceProviders = () => {
                 transition={{ delay: index * 0.1 }}
                 className="h-full"
               >
-                <Link to={`/service-provider/${provider.id}`} className="h-full block">
-                  <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
-                    <AspectRatio ratio={16/9} className="bg-muted">
+                <Link to={`/service-provider/${provider?.userId}`} className="h-full block">
+                  <Card  className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
+                    <AspectRatio ratio={16 / 9} className="bg-muted">
                       <img
-                        src={provider.image}
-                        alt={provider.name}
+                        src={provider.profileImageUrl}
+                        alt={provider.fullName}
                         className="object-cover w-full h-full"
                       />
                     </AspectRatio>
                     <div className="p-6 flex flex-col flex-grow">
                       <h3 className="text-xl font-semibold mb-2">{provider.name}</h3>
-                      <RatingStars rating={provider.rating} />
+                      <RatingStars rating={4.9} />
                       <p className="text-sm text-gray-500 mt-1">
                         {provider.reviews} reviews
                       </p>
-                      <p className="text-gray-600 mt-4 flex-grow">{provider.description}</p>
+                      <p className="text-gray-600 mt-4 flex-grow">{provider.bio}</p>
                       <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
@@ -149,7 +193,7 @@ const ServiceProviders = () => {
             </div>
             <h2 className="text-2xl font-semibold mb-4">No Available Offers Yet</h2>
             <p className="text-gray-600 max-w-md mx-auto mb-8">
-              We're currently expanding our network of {serviceType} professionals. 
+              We're currently expanding our network of {serviceType} professionals.
               Please check back soon for available service providers.
             </p>
             <Link to="/">
@@ -164,7 +208,7 @@ const ServiceProviders = () => {
           </motion.div>
         )}
       </div>
-      
+
       <footer className="bg-gray-800 text-white py-8 mt-16">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
