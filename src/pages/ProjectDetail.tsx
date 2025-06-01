@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
+import { useEffect } from "react";
 
 interface Comment {
   id: number;
@@ -29,68 +30,6 @@ interface Project {
   comments: Comment[];
 }
 
-const mockProjects: Record<number, Project> = {
-  1: {
-    id: 1,
-    title: "Modern Living Room Transformation",
-    description: "Complete interior painting with custom color matching and accent wall design. This project showcased our expertise in modern design implementation while maintaining the room's natural character. We used premium paints and innovative techniques to achieve a perfect finish.",
-    images: [
-      "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1600585154526-990dced4db0d?q=80&w=2187&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1600573472591-ee6c563aabc0?q=80&w=2187&auto=format&fit=crop"
-    ],
-    date: "January 2024",
-    providerId: 1,
-    providerName: "John Smith",
-    averageRating: 4.8,
-    comments: [
-      {
-        id: 1,
-        user: "Sarah Johnson",
-        text: "Absolutely amazing work! The attention to detail is impressive.",
-        rating: 5,
-        date: "2024-02-15"
-      },
-      {
-        id: 2,
-        user: "Mike Thompson",
-        text: "Very professional service and excellent results.",
-        rating: 4,
-        date: "2024-02-10"
-      }
-    ]
-  },
-  7: {
-    id: 7,
-    title: "Complete Room Renovation",
-    description: "This room renovation project included custom wall texturing with decorative finishes, premium wooden flooring installation, and modern ceiling design with recessed lighting. We transformed a basic space into a stylish and functional room with careful attention to every detail.",
-    images: [
-      "/lovable-uploads/c35fa72c-a45a-4c7b-9587-f0a045db9c09.png",
-      "/lovable-uploads/50d7664d-cb5a-4d65-be0b-95cdbb52e68f.png",
-      "/lovable-uploads/bd1b1888-3ba8-4625-a267-145da03ff5c5.png"
-    ],
-    date: "March 2024",
-    providerId: 7,
-    providerName: "Nasko Yanev",
-    averageRating: 4.9,
-    comments: [
-      {
-        id: 3,
-        user: "Elena Petrova",
-        text: "Nasko did an incredible job with our room renovation. The wall texturing is absolutely beautiful and the floor installation is perfect.",
-        rating: 5,
-        date: "2024-04-15"
-      },
-      {
-        id: 4,
-        user: "Alex Martinez",
-        text: "Outstanding work quality and attention to detail. The transformation is amazing!",
-        rating: 5,
-        date: "2024-04-10"
-      }
-    ]
-  }
-};
 
 const ProjectDetail = () => {
   const { id } = useParams();
@@ -98,12 +37,71 @@ const ProjectDetail = () => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [newComment, setNewComment] = useState("");
   const [newRating, setNewRating] = useState(5);
-  const project = mockProjects[projectId] || mockProjects[1];
+  const [projectDetails, setProjectDetails] = useState<any>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [showNamePopup, setShowNamePopup] = useState(false);
+  const [userName, setUserName] = useState("");
+  const [isLoadingComments, setIsLoadingComments] = useState(true);
 
-  const RatingStars = ({ rating, interactive = false, onRatingChange = (r: number) => {} }: { 
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_TRAVEL_SECURITY}/travel/get-project-by-id/${id}`);
+        const data = await response.json();
+        console.log('show me the projects', data)
+        setProjectDetails(data);
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+      }
+    }
+
+    fetchProjects();
+  }, [id]);
+
+  // Fetch comments
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        setIsLoadingComments(true);
+        const response = await fetch(`${import.meta.env.VITE_TRAVEL_SECURITY}/travel/get-comments/${id}`);
+        
+        if (response.ok) {
+          const commentsData = await response.json();
+          console.log('Fetched comments:', commentsData);
+          
+          // Access the comments array from the response
+          const commentsArray = commentsData.comments || [];
+          
+          // Transform API data to match our Comment interface
+          const transformedComments = commentsArray.map((comment: any) => ({
+            id: comment.id,
+            user: comment.user,
+            text: comment.comment,
+            rating: 5, // Default rating since API doesn't provide it
+            date: comment.date
+          }));
+          
+          setComments(transformedComments);
+        } else {
+          console.error('Failed to fetch comments');
+        }
+      } catch (error) {
+        console.error('Error fetching comments:', error);
+      } finally {
+        setIsLoadingComments(false);
+      }
+    };
+
+    if (id) {
+      fetchComments();
+    }
+  }, [id]);
+
+  const RatingStars = ({ rating, interactive = false, onRatingChange = (r: number) => {}, showRatingText = true }: { 
     rating: number;
     interactive?: boolean;
     onRatingChange?: (rating: number) => void;
+    showRatingText?: boolean;
   }) => {
     return (
       <div className="flex items-center gap-1">
@@ -118,112 +116,289 @@ const ProjectDetail = () => {
             onClick={() => interactive && onRatingChange(index + 1)}
           />
         ))}
-        <span className="text-sm text-gray-600 ml-2">{rating.toFixed(1)}</span>
+        {showRatingText && <span className="text-sm text-gray-600 ml-2">{rating.toFixed(1)}</span>}
       </div>
     );
   };
 
-  const handleSubmitComment = () => {
-    // In a real app, this would make an API call
-    console.log("Submitting comment:", { comment: newComment, rating: newRating });
-    setNewComment("");
-    setNewRating(5);
+  const handleSubmitComment = async () => {
+    if (!userName.trim()) {
+      setShowNamePopup(true);
+      return;
+    }
+
+    if (!newComment.trim()) {
+      alert("Please enter a comment");
+      return;
+    }
+
+    // Prepare comment for API submission
+    const commentData = {
+      projectId: id,
+      user: userName.trim(),
+      comment: newComment.trim(),
+      rating: newRating,
+      date: new Date().toLocaleDateString()
+    };
+
+    try {
+      const response = await fetch('http://localhost:8080/travel/save-comment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(commentData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save comment');
+      }
+
+      const savedComment = await response.json();
+
+      // Add to local state after successful API call
+      const newCommentObj: Comment = {
+        id: savedComment.id || Date.now(),
+        user: userName.trim(),
+        text: newComment.trim(),
+        rating: newRating,
+        date: new Date().toLocaleDateString()
+      };
+
+      setComments(prev => [newCommentObj, ...prev]);
+      
+      // Reset form
+      setNewComment("");
+      setNewRating(5);
+      
+      alert("Comment saved successfully!");
+    } catch (error) {
+      console.error('Error saving comment:', error);
+      alert("Failed to save comment. Please try again.");
+    }
   };
+
+  const handleNameSubmit = () => {
+    if (!userName.trim()) {
+      alert("Please enter your name");
+      return;
+    }
+    setShowNamePopup(false);
+    handleSubmitComment();
+  };
+
+  // Loading state
+  if (!projectDetails) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading project details...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <div className="container mx-auto px-4 py-20">
+      <div className="container mx-auto px-4 py-16 md:py-20">
         <Link 
-          to={`/service-provider/${project.providerId}`}
-          className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-8"
+          to={`/service-provider/${projectDetails.userId}`}
+          className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-6 md:mb-8"
         >
           <ChevronLeft className="w-4 h-4 mr-1" />
-          Back to {project.providerName}'s Profile
+          Back to Provider Profile
         </Link>
 
-        <div className="grid md:grid-cols-2 gap-8 mb-8">
-          <div>
-            <motion.img
-              key={activeImageIndex}
-              src={project.images[activeImageIndex]}
-              alt={`Project image ${activeImageIndex + 1}`}
-              className="w-full h-96 object-cover rounded-lg shadow-md mb-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3 }}
-            />
-            <div className="grid grid-cols-3 gap-4">
-              {project.images.map((image, index) => (
-                <img
-                  key={index}
-                  src={image}
-                  alt={`Thumbnail ${index + 1}`}
-                  className={`w-full h-24 object-cover rounded cursor-pointer 
-                    ${index === activeImageIndex ? 'ring-2 ring-blue-600' : ''}`}
-                  onClick={() => setActiveImageIndex(index)}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mb-6 md:mb-8">
+          <div className="order-2 lg:order-1">
+            {projectDetails.projectImages && projectDetails.projectImages.length > 0 && (
+              <>
+                <motion.img
+                  key={activeImageIndex}
+                  src={projectDetails.projectImages[activeImageIndex]}
+                  alt={`${projectDetails.title} - Image ${activeImageIndex + 1}`}
+                  className="w-full h-64 sm:h-80 md:h-96 object-cover rounded-lg shadow-md mb-4"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
                 />
-              ))}
-            </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 md:gap-4">
+                  {projectDetails.projectImages.map((image: string, index: number) => (
+                    <img
+                      key={index}
+                      src={image}
+                      alt={`Thumbnail ${index + 1}`}
+                      className={`w-full h-16 sm:h-20 md:h-24 object-cover rounded cursor-pointer transition-all duration-200
+                        ${index === activeImageIndex ? 'ring-2 ring-blue-600 shadow-md' : 'hover:opacity-80'}`}
+                      onClick={() => setActiveImageIndex(index)}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
           </div>
 
-          <div>
-            <h1 className="text-3xl font-bold mb-4">{project.title}</h1>
-            <div className="flex items-center gap-4 mb-4">
-              <Calendar className="text-blue-600" />
-              <span className="text-gray-600">{project.date}</span>
+          <div className="order-1 lg:order-2">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 md:gap-4 mb-4 md:mb-6">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{projectDetails.title}</h1>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <RatingStars rating={4.8} showRatingText={true} />
+                <span className="text-sm text-gray-500 whitespace-nowrap">(12 reviews)</span>
+              </div>
             </div>
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold mb-2">Overall Rating</h2>
-              <RatingStars rating={project.averageRating} />
+            
+            <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
+              <Calendar className="text-blue-600 w-4 h-4 md:w-5 md:h-5" />
+              <span className="text-gray-600 text-sm md:text-base">{projectDetails.projectDate}</span>
             </div>
-            <p className="text-gray-600 mb-8">{project.description}</p>
+            
+            {/* Project Specifications */}
+            {projectDetails.specifications && projectDetails.specifications.length > 0 && (
+              <div className="mb-4 md:mb-6">
+                <h2 className="text-lg md:text-xl font-semibold mb-2 md:mb-3">Project Specifications</h2>
+                <div className="flex flex-wrap gap-2">
+                  {projectDetails.specifications.map((spec: string, index: number) => (
+                    <span 
+                      key={index}
+                      className="px-2 py-1 md:px-3 md:py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full text-xs md:text-sm font-medium shadow-sm"
+                    >
+                      {spec}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            <div className="mb-4 md:mb-6">
+              <h2 className="text-lg md:text-xl font-semibold mb-2">Project Description</h2>
+              <p className="text-gray-600 text-sm md:text-base leading-relaxed">{projectDetails.description}</p>
+            </div>
           </div>
         </div>
 
         {/* Comments Section */}
-        <Card className="p-6 mb-8">
-          <h2 className="text-2xl font-bold mb-6">Comments & Reviews</h2>
+        <Card className="p-4 md:p-6 mb-6 md:mb-8">
+          <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">Comments & Reviews</h2>
           
           {/* Add Comment Form */}
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-4">Add Your Review</h3>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Your Rating</label>
-              <RatingStars 
-                rating={newRating} 
-                interactive={true}
-                onRatingChange={setNewRating}
-              />
-            </div>
+          <div className="mb-6 md:mb-8">
+            <h3 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Add Your Review</h3>
+            
             <Textarea
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               placeholder="Share your experience..."
-              className="mb-4"
+              className="mb-3 md:mb-4 text-sm md:text-base"
+              rows={3}
             />
-            <Button onClick={handleSubmitComment} className="bg-blue-600 hover:bg-blue-700">Submit Review</Button>
+            <Button 
+              onClick={handleSubmitComment} 
+              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-sm md:text-base px-4 md:px-6 py-2 md:py-3"
+            >
+              Submit Review
+            </Button>
           </div>
 
-          {/* Existing Comments */}
-          <div className="space-y-6">
-            {project.comments.map((comment) => (
-              <div key={comment.id} className="border-b border-gray-200 pb-6 last:border-0">
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex items-center gap-2">
-                    <User className="w-6 h-6 text-gray-400" />
-                    <span className="font-semibold">{comment.user}</span>
-                  </div>
-                  <RatingStars rating={comment.rating} />
-                </div>
-                <p className="text-gray-600 mb-2">{comment.text}</p>
-                <span className="text-sm text-gray-400">{comment.date}</span>
+          {/* Comments List */}
+          <div className="space-y-4 md:space-y-6">
+            {isLoadingComments ? (
+              <div className="text-center py-6 md:py-8">
+                <div className="animate-spin rounded-full h-6 w-6 md:h-8 md:w-8 border-b-2 border-blue-600 mx-auto mb-3 md:mb-4"></div>
+                <p className="text-gray-500 text-sm md:text-base">Loading comments...</p>
               </div>
-            ))}
+            ) : comments.length > 0 ? (
+              comments.map((comment) => (
+                <div key={comment.id} className="border-b border-gray-200 pb-4 md:pb-6 last:border-0">
+                  <div className="flex items-start gap-3 mb-2">
+                    <User className="w-5 h-5 md:w-6 md:h-6 text-gray-400 flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0 flex-1">
+                      <span className="font-semibold text-sm md:text-base text-gray-900 block">{comment.user}</span>
+                      <p className="text-gray-600 text-sm md:text-base leading-relaxed mt-1 md:mt-2 break-words">{comment.text}</p>
+                      <span className="text-xs md:text-sm text-gray-400 mt-1 md:mt-2 block">{comment.date}</span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-6 md:py-8 text-gray-500">
+                <p className="text-sm md:text-base">No reviews yet. Be the first to leave a review!</p>
+              </div>
+            )}
           </div>
         </Card>
       </div>
       
+      {/* Name Input Popup */}
+      {showNamePopup && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          onClick={() => setShowNamePopup(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0, y: 50 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.8, opacity: 0, y: 50 }}
+            transition={{ type: "spring", duration: 0.5 }}
+            className="bg-white rounded-2xl p-4 md:p-6 lg:p-8 shadow-2xl w-full max-w-sm mx-auto relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setShowNamePopup(false)}
+              className="absolute top-3 right-3 md:top-4 md:right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Content */}
+            <div className="text-center mb-4 md:mb-6">
+              <div className="bg-blue-100 w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                <User className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
+              </div>
+              <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1 md:mb-2">Enter Your Name</h3>
+              <p className="text-gray-600 text-sm md:text-base">Please provide your name to submit the review</p>
+            </div>
+
+            {/* Name Input */}
+            <div className="mb-4 md:mb-6">
+              <input
+                type="text"
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
+                placeholder="Your full name"
+                className="w-full px-3 py-2 md:px-4 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base"
+                onKeyPress={(e) => e.key === 'Enter' && handleNameSubmit()}
+                autoFocus
+              />
+            </div>
+
+            {/* Buttons */}
+            <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
+              <Button
+                onClick={() => setShowNamePopup(false)}
+                variant="outline"
+                className="flex-1 text-sm md:text-base py-2 md:py-3"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleNameSubmit}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-sm md:text-base py-2 md:py-3"
+              >
+                Continue
+              </Button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+
       <Footer />
     </div>
   );

@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { Star, Calendar, Clock, Wrench, Award, Phone, Mail, Video, ChevronLeft, MapPin } from "lucide-react";
+import { Star, Calendar, Clock, Wrench, Award, Phone, Mail, Video, ChevronLeft, MapPin, Edit, Save, X } from "lucide-react";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -56,8 +56,11 @@ const ServiceProviderDetail = () => {
   const [showCallPopup, setShowCallPopup] = useState(false);
   const [showBookingPopup, setShowBookingPopup] = useState(false);
   const [projectImage, setProjectImage] = useState<string>('');
-  const [projectsRegistered, setProjectsRegistered] = useState<Project[]>([]);
+  const [projectsRegistered, setProjectsRegistered] = useState<any>(null);
+  const [isEditingProject, setIsEditingProject] = useState(false);
+  const [editProjectData, setEditProjectData] = useState<any>(null);
   const { id } = useParams();
+  console.log('show me the id', id)
 
   useEffect(() => {
     const callTheApi = async () => {
@@ -73,9 +76,7 @@ const ServiceProviderDetail = () => {
     callTheApi();
   }, [id]);
 
-  console.log('show me the project image projectImage', projectImage)
-  console.log('show me the personProfile', personProfile)
-
+  console.log('dsadasdas', projectImage)
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -83,7 +84,9 @@ const ServiceProviderDetail = () => {
         const response = await fetch(`${import.meta.env.VITE_TRAVEL_SECURITY}/travel/get-project-by-id/${id}`);
         const data = await response.json();
         console.log('show me the projects', data)
-        setProjectImage(data.projectImages.map((image: string) => image).join(','));
+        let tmp = data.projectImages.map((image: string) => image)[0]
+        console.log('tmp', tmp)
+        setProjectImage(tmp);
         setProjectsRegistered(data);
       } catch (error) {
         console.error('Error fetching projects:', error);
@@ -93,8 +96,17 @@ const ServiceProviderDetail = () => {
     fetchProjects();
   }, [id]);
 
-  console.log('show me the data projects', projectsRegistered)
-
+  // Initialize edit data when project is loaded
+  useEffect(() => {
+    if (projectsRegistered) {
+      setEditProjectData({
+        title: projectsRegistered.title || '',
+        description: projectsRegistered.description || '',
+        projectDate: projectsRegistered.projectDate || '',
+        specifications: projectsRegistered.specifications || []
+      });
+    }
+  }, [projectsRegistered]);
 
   const handleBookMeeting = () => {
     if (!personProfile) return;
@@ -121,6 +133,87 @@ const ServiceProviderDetail = () => {
         onClick: () => window.location.href = `mailto:${personProfile.email}`
       },
     });
+  };
+
+  const handleEditProject = () => {
+    setIsEditingProject(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingProject(false);
+    // Reset edit data to original values
+    setEditProjectData({
+      title: projectsRegistered.title || '',
+      description: projectsRegistered.description || '',
+      projectDate: projectsRegistered.projectDate || '',
+      specifications: projectsRegistered.specifications || []
+    });
+  };
+
+  const handleSaveProject = async () => {
+    try {
+      const projectId = projectsRegistered._id?.$oid || projectsRegistered.userId;
+      
+      const updatePayload = {
+        projectId: projectId,
+        userId: projectsRegistered.userId,
+        title: editProjectData.title,
+        description: editProjectData.description,
+        projectDate: editProjectData.projectDate,
+        specifications: editProjectData.specifications
+      };
+
+      const response = await fetch(`${import.meta.env.VITE_TRAVEL_SECURITY}/travel/update-project/${projectId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatePayload)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update project');
+      }
+
+      const updatedProject = await response.json();
+      
+      // Update local state with new data
+      setProjectsRegistered(prev => ({
+        ...prev,
+        ...updatePayload
+      }));
+      
+      setIsEditingProject(false);
+      toast.success("Project updated successfully!");
+      
+    } catch (error) {
+      console.error('Error updating project:', error);
+      toast.error("Failed to update project. Please try again.");
+    }
+  };
+
+  const handleSpecificationChange = (index: number, value: string) => {
+    const newSpecs = [...editProjectData.specifications];
+    newSpecs[index] = value;
+    setEditProjectData(prev => ({
+      ...prev,
+      specifications: newSpecs
+    }));
+  };
+
+  const addSpecification = () => {
+    setEditProjectData(prev => ({
+      ...prev,
+      specifications: [...prev.specifications, '']
+    }));
+  };
+
+  const removeSpecification = (index: number) => {
+    const newSpecs = editProjectData.specifications.filter((_: any, i: number) => i !== index);
+    setEditProjectData(prev => ({
+      ...prev,
+      specifications: newSpecs
+    }));
   };
 
   const RatingStars = ({ rating }: { rating: number }) => {
@@ -201,7 +294,7 @@ const ServiceProviderDetail = () => {
             <div className="lg:col-span-1 relative">
               <div className="aspect-square lg:aspect-auto lg:h-full relative overflow-hidden">
                 <img
-                  src={personProfile?.profileImage}
+                  src={personProfile?.profileImage || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1974&auto=format&fit=crop"}
                   alt={personProfile?.fullName || "Construction Professional"}
                   className="w-full h-full object-cover"
                 />
@@ -244,7 +337,7 @@ const ServiceProviderDetail = () => {
                     transition={{ delay: 0.4, duration: 0.6 }}
                     className="text-gray-700 text-base md:text-lg leading-relaxed mb-6 md:mb-8"
                   >
-                    {personProfile?.bio || "Specializing in interior and exterior painting with 15 years of experience. Known for precision and attention to detail."}
+                    {personProfile?.bio}
                   </motion.p>
 
                   <motion.div
@@ -338,25 +431,6 @@ const ServiceProviderDetail = () => {
               </Card>
             </motion.div>
           )}
-
-          {/* <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9, duration: 0.6 }}
-          >
-            <Card className="p-4 md:p-6 lg:p-8 h-full bg-gradient-to-br from-green-50 to-teal-50 border-0 shadow-lg">
-              <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 flex items-center gap-3 text-gray-900">
-                <div className="bg-green-600 p-2 md:p-3 rounded-full">
-                  <Clock className="text-white w-5 h-5 md:w-6 md:h-6" />
-                </div>
-                <span className="text-base md:text-xl lg:text-2xl">Availability</span>
-              </h2>
-              <div className="mt-3 md:mt-4 flex items-center gap-2 text-green-600">
-                <div className="w-2.5 h-2.5 md:w-3 md:h-3 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="font-semibold text-sm md:text-base">Currently Available</span>
-              </div>
-            </Card>
-          </motion.div> */}
         </div>
 
         {/* Recent Projects */}
@@ -366,62 +440,157 @@ const ServiceProviderDetail = () => {
           transition={{ delay: 1.0, duration: 0.6 }}
           className="mb-8 md:mb-12"
         >
-          <h2 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8 flex items-center gap-3 text-gray-900">
-            <div className="bg-gradient-to-r from-yellow-500 to-orange-500 p-2 md:p-3 rounded-full">
-              <Award className="text-white w-6 h-6 md:w-8 md:h-8" />
-            </div>
-            <span className="text-xl md:text-2xl lg:text-3xl">Recent Projects</span>
-          </h2>
-          <div style={{border: '2px solid red'}} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
-            {personProfile?.portfolio ? personProfile.portfolio.map((project, index) => (
-              <Link key={projectsRegistered?.id} to={`/project/${projectsRegistered?.id}`} className="block">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1.1 + (index * 0.1), duration: 0.6 }}
-                  whileHover={{ y: -4, scale: 1.02 }}
-                  className="bg-white rounded-xl md:rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer"
-                >
-                  <div className="aspect-w-16 aspect-h-9 relative overflow-hidden">
-                    <img
-                      src={projectImage}
-                      alt={project.title}
-                      className="w-full h-40 md:h-48 object-cover transition-transform duration-300 hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
-                  </div>
-                  <div className="p-4 md:p-6">
-                    <h3 className="font-bold text-lg md:text-xl mb-2 md:mb-3 text-gray-900">{project.title}</h3>
-                    <p className="text-gray-600 mb-3 md:mb-4 leading-relaxed text-sm md:text-base">{project.description}</p>
-                    <p className="text-blue-600 font-semibold text-sm md:text-base">{project.date}</p>
-                  </div>
-                </motion.div>
-              </Link>
-            )) : (
-              // Fallback if no projects from API
-              <Link to="/project/7" className="block">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1.1, duration: 0.6 }}
-                  whileHover={{ y: -4, scale: 1.02 }}
-                  className="bg-white rounded-xl md:rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer"
-                >
-                  <div className="aspect-w-16 aspect-h-9 relative overflow-hidden">
-                    <img
-                      src="/lovable-uploads/c35fa72c-a45a-4c7b-9587-f0a045db9c09.png"
-                      alt="Complete Room Renovation"
-                      className="w-full h-40 md:h-48 object-cover transition-transform duration-300 hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
-                  </div>
-                  <div className="p-4 md:p-6">
-                    <h3 className="font-bold text-lg md:text-xl mb-2 md:mb-3 text-gray-900">Complete Room Renovation</h3>
-                    <p className="text-gray-600 mb-3 md:mb-4 leading-relaxed text-sm md:text-base">Full interior renovation featuring custom wall texturing, premium wooden flooring, and modern ceiling design.</p>
-                    <p className="text-blue-600 font-semibold text-sm md:text-base">March 2024</p>
-                  </div>
-                </motion.div>
-              </Link>
+          <div className="flex items-center justify-between mb-6 md:mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold flex items-center gap-3 text-gray-900">
+              <div className="bg-gradient-to-r from-yellow-500 to-orange-500 p-2 md:p-3 rounded-full">
+                <Award className="text-white w-6 h-6 md:w-8 md:h-8" />
+              </div>
+              <span className="text-xl md:text-2xl lg:text-3xl">Recent Projects</span>
+            </h2>
+           
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
+            {projectsRegistered && (
+              !isEditingProject ? (
+                <Link to={`/project/${id}`} className="block">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 1.1, duration: 0.6 }}
+                    whileHover={{ y: -4, scale: 1.02 }}
+                    className="bg-white rounded-xl md:rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer"
+                  >
+                    <div className="aspect-w-16 aspect-h-9 relative overflow-hidden">
+                      <img
+                        src={projectImage}
+                        alt={projectsRegistered?.title}
+                        className="w-full h-40 md:h-48 object-cover transition-transform duration-300 hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+                    </div>
+                    
+                    <div className="p-4 md:p-6">
+                      {/* View Mode */}
+                      <div className="flex flex-wrap items-center gap-2 mb-4">
+                        <span className="px-3 py-1.5 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white rounded-full text-xs font-semibold shadow-sm">
+                          Project Scope
+                        </span>
+                        {Array.isArray(projectsRegistered?.specifications) ? (
+                          projectsRegistered.specifications.map((spec: string, index: number) => (
+                            <span 
+                              key={index}
+                              className="px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full text-xs font-medium shadow-sm hover:shadow-md transition-shadow duration-200"
+                            >
+                              {spec}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="px-3 py-1.5 bg-gradient-to-r from-gray-400 to-gray-500 text-white rounded-full text-xs font-medium shadow-sm">
+                            General Construction
+                          </span>
+                        )}
+                      </div>
+                      
+                      <h3 className="font-bold text-lg md:text-xl mb-2 md:mb-3 text-gray-900">{projectsRegistered?.title}</h3>
+                      <p className="text-gray-600 mb-3 md:mb-4 leading-relaxed text-sm md:text-base">{projectsRegistered?.description}</p>
+                      <p className="text-blue-600 font-semibold text-sm md:text-base">{projectsRegistered?.projectDate}</p>
+                    </div>
+                  </motion.div>
+                </Link>
+              ) : (
+                <div className="block">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 1.1, duration: 0.6 }}
+                    className="bg-white rounded-xl md:rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300"
+                  >
+                    <div className="aspect-w-16 aspect-h-9 relative overflow-hidden">
+                      <img
+                        src={projectImage}
+                        alt={projectsRegistered?.title}
+                        className="w-full h-40 md:h-48 object-cover transition-transform duration-300 hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+                    </div>
+                    
+                    <div className="p-4 md:p-6">
+                      {/* Edit Mode */}
+                      <div className="space-y-4">
+                        {/* Project Title */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Project Title</label>
+                          <input
+                            type="text"
+                            value={editProjectData?.title || ''}
+                            onChange={(e) => setEditProjectData(prev => ({ ...prev, title: e.target.value }))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Enter project title"
+                          />
+                        </div>
+
+                        {/* Project Description */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                          <textarea
+                            value={editProjectData?.description || ''}
+                            onChange={(e) => setEditProjectData(prev => ({ ...prev, description: e.target.value }))}
+                            rows={3}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Enter project description"
+                          />
+                        </div>
+
+                        {/* Project Date */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Project Date</label>
+                          <input
+                            type="date"
+                            value={editProjectData?.projectDate || ''}
+                            onChange={(e) => setEditProjectData(prev => ({ ...prev, projectDate: e.target.value }))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+
+                        {/* Specifications */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Specifications</label>
+                          <div className="space-y-2">
+                            {editProjectData?.specifications?.map((spec: string, index: number) => (
+                              <div key={index} className="flex gap-2">
+                                <input
+                                  type="text"
+                                  value={spec}
+                                  onChange={(e) => handleSpecificationChange(index, e.target.value)}
+                                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  placeholder="Enter specification"
+                                />
+                                <Button
+                                  onClick={() => removeSpecification(index)}
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
+                                >
+                                  <X className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            ))}
+                            <Button
+                              onClick={addSpecification}
+                              variant="outline"
+                              size="sm"
+                              className="w-full text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white"
+                            >
+                              Add Specification
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
+              )
             )}
           </div>
         </motion.div>
