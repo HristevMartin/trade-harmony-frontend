@@ -2,6 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { Star, Calendar, Clock, Wrench, Award, Phone, Mail, Video, ChevronLeft, MapPin } from "lucide-react";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -52,19 +53,17 @@ interface PersonProfile {
 
 const ServiceProviderDetail = () => {
   const [personProfile, setPersonProfile] = useState<PersonProfile | null>(null);
-  const [projectProfile, setProjectProfile] = useState([]);
   const [showCallPopup, setShowCallPopup] = useState(false);
   const [showBookingPopup, setShowBookingPopup] = useState(false);
+  const [projectImage, setProjectImage] = useState<string>('');
+  const [projectsRegistered, setProjectsRegistered] = useState<Project[]>([]);
   const { id } = useParams();
-
-  console.log('dsadasdas', id)
 
   useEffect(() => {
     const callTheApi = async () => {
       try {
         const response = await fetch(`${import.meta.env.VITE_TRAVEL_SECURITY}/travel/get-profile-by-id/${id}`);
         const data = await response.json();
-        console.log('show me the data', data);
         setPersonProfile(data);
       } catch (error) {
         console.error('Error fetching profile:', error);
@@ -74,22 +73,33 @@ const ServiceProviderDetail = () => {
     callTheApi();
   }, [id]);
 
+  console.log('show me the project image projectImage', projectImage)
+  console.log('show me the personProfile', personProfile)
+
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_TRAVEL_SECURITY}/travel/get-project-by-id/${id}`);
+        const data = await response.json();
+        console.log('show me the projects', data)
+        setProjectImage(data.projectImages.map((image: string) => image).join(','));
+        setProjectsRegistered(data);
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+      }
+    }
+
+    fetchProjects();
+  }, [id]);
+
+  console.log('show me the data projects', projectsRegistered)
+
+
   const handleBookMeeting = () => {
     if (!personProfile) return;
-    
-    // Show booking popup instead of redirecting
+
     setShowBookingPopup(true);
-    
-    // Alternative options (uncomment one if you prefer):
-    
-    // Option 1: Redirect to Calendly
-    // window.open('https://calendly.com/your-calendar-link', '_blank');
-    
-    // Option 2: Redirect to Cal.com
-    // window.open('https://cal.com/your-username', '_blank');
-    
-    // Option 3: Redirect to Google Calendar
-    // window.open('https://calendar.google.com/calendar/appointments/schedules/your-schedule-id', '_blank');
   };
 
   const handleCallClick = () => {
@@ -102,7 +112,7 @@ const ServiceProviderDetail = () => {
 
   const handleMessageClick = () => {
     if (!personProfile?.email) return;
-    
+
     toast.success("Email Address", {
       description: personProfile.email,
       duration: 5000,
@@ -142,11 +152,11 @@ const ServiceProviderDetail = () => {
 
   const getServiceDisplayName = () => {
     if (!personProfile?.selectedTrades) return "Construction Professional";
-    
-    const trades = Array.isArray(personProfile.selectedTrades) 
-      ? personProfile.selectedTrades[0] 
+
+    const trades = Array.isArray(personProfile.selectedTrades)
+      ? personProfile.selectedTrades[0]
       : personProfile.selectedTrades;
-    
+
     return constructionProvider[trades] || trades;
   };
 
@@ -164,7 +174,7 @@ const ServiceProviderDetail = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
       <Navbar />
-      
+
       {/* Improved Navigation Section */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-700 py-4 pt-20 md:py-6 md:pt-24">
         <div className="container mx-auto px-4">
@@ -180,7 +190,7 @@ const ServiceProviderDetail = () => {
 
       <div className="container mx-auto px-4 mt-4 md:mt-8 relative z-10">
         {/* Profile Card */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -191,20 +201,20 @@ const ServiceProviderDetail = () => {
             <div className="lg:col-span-1 relative">
               <div className="aspect-square lg:aspect-auto lg:h-full relative overflow-hidden">
                 <img
-                  src={personProfile?.profileImage || qnevImage}
+                  src={personProfile?.profileImage}
                   alt={personProfile?.fullName || "Construction Professional"}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
               </div>
             </div>
-            
+
             {/* Profile Info Section */}
             <div className="lg:col-span-2 p-4 sm:p-6 md:p-8 lg:p-12">
               <div className="flex flex-col h-full">
                 <div className="flex-1">
                   {/* Header with name and service badge */}
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.2, duration: 0.6 }}
@@ -217,7 +227,7 @@ const ServiceProviderDetail = () => {
                       {getServiceDisplayName()}
                     </div>
                   </motion.div>
-                  
+
                   <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -227,8 +237,8 @@ const ServiceProviderDetail = () => {
                     <RatingStars rating={personProfile?.rating || 4.9} />
                     <span className="text-gray-600 ml-1 text-sm md:text-base">({personProfile?.reviews || 143} reviews)</span>
                   </motion.div>
-                  
-                  <motion.p 
+
+                  <motion.p
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.4, duration: 0.6 }}
@@ -236,8 +246,8 @@ const ServiceProviderDetail = () => {
                   >
                     {personProfile?.bio || "Specializing in interior and exterior painting with 15 years of experience. Known for precision and attention to detail."}
                   </motion.p>
-                  
-                  <motion.div 
+
+                  <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.5, duration: 0.6 }}
@@ -252,7 +262,7 @@ const ServiceProviderDetail = () => {
                         <p className="font-bold text-gray-900 text-base md:text-lg">{personProfile?.yearsExperience || 15} Years</p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-3 md:gap-4">
                       <div className="bg-green-100 p-2.5 md:p-3 rounded-full">
                         <Calendar className="text-green-600 w-5 h-5 md:w-6 md:h-6" />
@@ -264,23 +274,23 @@ const ServiceProviderDetail = () => {
                     </div>
                   </motion.div>
                 </div>
-                
+
                 {/* Action Buttons */}
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6, duration: 0.6 }}
                   className="flex flex-col sm:flex-row flex-wrap gap-3 md:gap-4"
                 >
-                  <Button 
-                    size="lg" 
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2.5 md:px-8 md:py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-sm md:text-base" 
+                  <Button
+                    size="lg"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2.5 md:px-8 md:py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-sm md:text-base"
                     onClick={handleBookMeeting}
                   >
                     <Video className="w-4 h-4 md:w-5 md:h-5 mr-2" />
                     Book Meeting
                   </Button>
-                  
+
                   <Button
                     size="lg"
                     className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white px-6 py-2.5 md:px-8 md:py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-sm md:text-base"
@@ -289,7 +299,7 @@ const ServiceProviderDetail = () => {
                     <Phone className="w-4 h-4 md:w-5 md:h-5 mr-2" />
                     Call Now
                   </Button>
-                  
+
                   {/* <Button
                     size="lg"
                     variant="outline"
@@ -328,7 +338,7 @@ const ServiceProviderDetail = () => {
               </Card>
             </motion.div>
           )}
-          
+
           {/* <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -350,7 +360,7 @@ const ServiceProviderDetail = () => {
         </div>
 
         {/* Recent Projects */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.0, duration: 0.6 }}
@@ -362,9 +372,9 @@ const ServiceProviderDetail = () => {
             </div>
             <span className="text-xl md:text-2xl lg:text-3xl">Recent Projects</span>
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
+          <div style={{border: '2px solid red'}} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
             {personProfile?.portfolio ? personProfile.portfolio.map((project, index) => (
-              <Link key={project.id} to={`/project/${project.id}`} className="block">
+              <Link key={projectsRegistered?.id} to={`/project/${projectsRegistered?.id}`} className="block">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -374,7 +384,7 @@ const ServiceProviderDetail = () => {
                 >
                   <div className="aspect-w-16 aspect-h-9 relative overflow-hidden">
                     <img
-                      src={project.image}
+                      src={projectImage}
                       alt={project.title}
                       className="w-full h-40 md:h-48 object-cover transition-transform duration-300 hover:scale-110"
                     />
@@ -510,7 +520,7 @@ const ServiceProviderDetail = () => {
                 <Calendar className="w-4 h-4" />
                 Book via Calendly
               </button>
-              
+
               <button
                 onClick={() => {
                   window.open('https://cal.com/', '_blank');
@@ -521,7 +531,7 @@ const ServiceProviderDetail = () => {
                 <Clock className="w-4 h-4" />
                 Book via Cal.com
               </button>
-              
+
               <button
                 onClick={() => {
                   const subject = `Meeting Request with ${personProfile?.fullName}`;
@@ -541,32 +551,7 @@ const ServiceProviderDetail = () => {
       )}
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-8 md:py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-            <div>
-              <h3 className="text-lg md:text-xl font-bold mb-3 md:mb-4">TradesPro</h3>
-              <p className="text-gray-400 text-sm md:text-base">Connecting skilled professionals with quality clients.</p>
-            </div>
-            <div>
-              <h3 className="text-lg md:text-xl font-bold mb-3 md:mb-4">Quick Links</h3>
-              <ul className="space-y-1 md:space-y-2 text-gray-400 text-sm md:text-base">
-                <li><a href="/" className="hover:text-white transition-colors">Home</a></li>
-                <li><a href="/about" className="hover:text-white transition-colors">About</a></li>
-                <li><a href="/contact" className="hover:text-white transition-colors">Contact</a></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-lg md:text-xl font-bold mb-3 md:mb-4">Contact</h3>
-              <p className="text-gray-400 text-sm md:text-base">Email: contact@tradespro.com</p>
-              <p className="text-gray-400 text-sm md:text-base">Phone: (555) 123-4567</p>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 mt-6 md:mt-8 pt-6 md:pt-8 text-center text-gray-400 text-sm md:text-base">
-            <p>&copy; 2024 TradesPro. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

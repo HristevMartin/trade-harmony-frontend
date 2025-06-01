@@ -1,5 +1,6 @@
 import { HardHat, Wrench, Zap, ArrowRight, Building } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import ServiceCard from "@/components/ServiceCard";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -35,8 +36,42 @@ const Index = () => {
   console.log('in here 2')
 
   const [servicesFetched, setServicesFetched] = useState<any>([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isLoadingServices, setIsLoadingServices] = useState(true);
+
+  // Carousel images representing various professional services
+  const carouselImages = [
+    {
+      url: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=2070&auto=format&fit=crop",
+      alt: "Construction & Building Professionals"
+    },
+    {
+      url: "https://contractortrainingcenter.com/cdn/shop/articles/Untitled_design_1.png?v=1693506427&width=1100",
+      alt: "Licensed Electrical Technicians"
+    },
+    {
+      url: "https://thehappyhousecleaning.co.uk/wp-content/uploads/2018/08/Oven-cleaning-homepage-pic1.jpg",
+      alt: "Professional Cleaning Services"
+    },
+    {
+      url: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=2070&auto=format&fit=crop",
+      alt: "Painting & Renovation Experts"
+    }
+  ];
+
+  // Auto-slide effect
+  useEffect(() => {
+    const slideInterval = setInterval(() => {
+      setCurrentSlide((prevSlide) => 
+        prevSlide === carouselImages.length - 1 ? 0 : prevSlide + 1
+      );
+    }, 4000); // Change slide every 4 seconds
+
+    return () => clearInterval(slideInterval);
+  }, [carouselImages.length]);
 
   const mapDatabaseToFrontend = (dbServices: any[]) => {
+    console.log('show me the dbServices', dbServices)
     // Filter and map only services that exist in the database
     return services
       .map(frontendService => {
@@ -55,7 +90,6 @@ const Index = () => {
             // Override with database values if they exist
             title: dbService.title || dbService.name || frontendService.title,
             description: dbService.description || frontendService.description,
-            // Keep frontend icon and image
             icon: frontendService.icon,
             image: frontendService.image,
             // Add any additional database fields
@@ -72,6 +106,7 @@ const Index = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
+        setIsLoadingServices(true);
         let url = `${import.meta.env.VITE_TRAVEL_SECURITY}/travel/get-project-services`;
         const response = await fetch(url);
 
@@ -93,6 +128,8 @@ const Index = () => {
         console.error('Error fetching services:', error);
         // Fallback to static services if API fails
         setServicesFetched(services);
+      } finally {
+        setIsLoadingServices(false);
       }
     };
     fetchServices();
@@ -100,12 +137,12 @@ const Index = () => {
 
   console.log('show me the servicesFetched', servicesFetched);
 
-  // Dynamic construction stats - for animation purposes
+  // Dynamic stats - for animation purposes
   const constructionStats = [
-    { value: "1.2M+", label: "Projects Completed" },
+    { value: "1.2M+", label: "Services Completed" },
     { value: "3.5M+", label: "Happy Customers" },
     { value: "4.9", label: "Customer Rating" },
-    { value: "15K+", label: "Service Providers" }
+    { value: "15K+", label: "Skilled Professionals" }
   ];
 
   return (
@@ -123,7 +160,7 @@ const Index = () => {
               transition={{ duration: 0.8 }}
               className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 max-w-xl"
             >
-              Building Excellence, One Project at a Time
+              Connect with Skilled Professionals for Every Trade
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -131,7 +168,7 @@ const Index = () => {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="text-xl text-blue-100 mb-8 max-w-xl"
             >
-              Connect with top construction professionals for your next project. Quality work, guaranteed.
+              The ultimate platform connecting skilled tradespeople with clients. From construction to cleaning, find trusted professionals for any service.
             </motion.p>
 
             <div className="flex flex-col sm:flex-row gap-4 mt-8">
@@ -139,14 +176,14 @@ const Index = () => {
                 className="bg-white text-blue-600 hover:bg-blue-50 text-lg px-8 py-6 h-auto rounded-full font-semibold"
                 size="lg"
               >
-                Post a construction job <ArrowRight className="ml-2 h-5 w-5" />
+                Find a Service Provider <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-              <Button
+              {/* <Button
                 className="bg-blue-700 text-white hover:bg-blue-800 text-lg px-8 py-6 h-auto rounded-full font-semibold"
                 size="lg"
               >
-                Join as a Contractor
-              </Button>
+                Join as a Professional
+              </Button> */}
             </div>
 
             <div className="flex items-center gap-6 mt-10">
@@ -178,14 +215,55 @@ const Index = () => {
           </div>
 
           <div className="lg:w-1/2 z-10">
-            <motion.img
-              src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=2070&auto=format&fit=crop"
-              alt="Construction professionals"
-              className="rounded-lg shadow-2xl"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
-            />
+            {/* Image Carousel */}
+            <div className="relative">
+              <div className="overflow-hidden rounded-lg shadow-2xl">
+                <motion.div 
+                  className="flex transition-transform duration-1000 ease-in-out"
+                  style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+                >
+                  {carouselImages.map((image, index) => (
+                    <motion.img
+                      key={index}
+                      src={image.url}
+                      alt={image.alt}
+                      className="w-full h-80 lg:h-96 object-cover flex-shrink-0"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.8, delay: 0.5 }}
+                    />
+                  ))}
+                </motion.div>
+              </div>
+              
+              {/* Navigation Dots */}
+              <div className="flex justify-center mt-6 space-x-2">
+                {carouselImages.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                      index === currentSlide 
+                        ? 'bg-white shadow-lg' 
+                        : 'bg-white/50 hover:bg-white/70'
+                    }`}
+                  />
+                ))}
+              </div>
+              
+              {/* Service Type Indicator */}
+              <motion.div 
+                key={currentSlide}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="mt-4 text-center"
+              >
+                <span className="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-medium">
+                  {carouselImages[currentSlide].alt}
+                </span>
+              </motion.div>
+            </div>
           </div>
 
           {/* Background decorative elements */}
@@ -194,7 +272,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Services Section - Construction focused */}
+      {/* Services Section - All trades focused */}
       <section className="py-16 px-4 bg-gray-50">
 
         <div className="container mx-auto">
@@ -206,73 +284,58 @@ const Index = () => {
             viewport={{ once: true }}
             className="text-3xl md:text-4xl font-bold text-center mb-10 text-gray-900"
           >
-            Construction services we offer
+            Featured Professional Services
           </motion.h2>
 
-          <div className="grid md:grid-cols-3 gap-8 px-4">
-            {servicesFetched.map((service: any, index: any) => (
-              <ServiceCard
-                key={index}
-                title={service.title}
-                description={service.description}
-                icon={service.icon}
-                image={service.image}
-              />
-            ))}
-          </div>
-
+          {isLoadingServices ? (
+            /* Loading State for Services */
+            <div className="grid md:grid-cols-3 gap-8 px-4">
+              {[...Array(3)].map((_, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 * index, duration: 0.6 }}
+                  className="bg-white rounded-xl shadow-lg p-6 h-80"
+                >
+                  {/* Image Skeleton */}
+                  <div className="w-full h-48 bg-gray-200 rounded-lg mb-4 animate-pulse"></div>
+                  
+                  {/* Title Skeleton */}
+                  <div className="h-6 bg-gray-200 rounded mb-3 animate-pulse"></div>
+                  
+                  {/* Description Skeleton */}
+                  <div className="space-y-2">
+                    <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-8 px-4">
+              {console.log('show me the servicesFetched', servicesFetched)}
+              {servicesFetched.map((service: any, index: any) => (
+                <ServiceCard
+                  key={index}
+                  title={service.title}
+                  description={service.description}
+                  icon={service.icon}
+                  image={service.image}
+                />
+              ))}
+            </div>
+          )}
 
           <div className="text-center mt-12">
             <Link to="/service-providers" className="inline-flex items-center text-blue-600 font-semibold hover:text-blue-800">
-              View all construction services <ArrowRight className="ml-1 w-5 h-5" />
+              View all professional services <ArrowRight className="ml-1 w-5 h-5" />
             </Link>
           </div>
         </div>
       </section>
 
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-16">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-lg font-semibold mb-4">TradesPro</h3>
-              <ul className="space-y-2">
-                <li><Link to="/" className="text-gray-400 hover:text-white transition-colors">Home</Link></li>
-                <li><Link to="/about" className="text-gray-400 hover:text-white transition-colors">About</Link></li>
-                <li><Link to="/contact" className="text-gray-400 hover:text-white transition-colors">Contact</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Services</h3>
-              <ul className="space-y-2">
-                {services.map((service, index) => (
-                  <li key={index}><Link to={`/service-providers?service=${encodeURIComponent(service.title)}`} className="text-gray-400 hover:text-white transition-colors">{service.title}</Link></li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Resources</h3>
-              <ul className="space-y-2">
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">How It Works</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Service Providers</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Blog</a></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Contact</h3>
-              <ul className="space-y-2">
-                <li className="text-gray-400">Email: contact@tradespro.com</li>
-                <li className="text-gray-400">Phone: (555) 123-4567</li>
-                <li className="text-gray-400">123 Business Ave, Suite 100</li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 TradesPro. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

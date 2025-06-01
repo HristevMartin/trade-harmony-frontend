@@ -5,6 +5,7 @@ import { useSearchParams, Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import qnevImage from './qnev.png';
 
 interface ServiceProvider {
@@ -87,12 +88,39 @@ const reverseMapDatabaseToFrontend = (data: any) => {
 
 const ServiceProviders = () => {
   const [searchParams] = useSearchParams();
-  const serviceType = searchParams.get("service") || "Building & Construction";
-  console.log('serviceType', serviceType)
-  const providers = serviceProviders[serviceType] || [];
+  const serviceType = searchParams.get("service");
+  console.log('serviceTyddsadasdasdaspe', serviceType)
   const [servicesFetched, setServicesFetched] = useState<ServiceProvider[]>([]);
   console.log('show me the serviceType', serviceType)
   const mappedServiceType = mapDatabaseToFrontend(serviceType);
+
+  const [allServices, setAllServices] = useState<ServiceProvider[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAllServices = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch(`${import.meta.env.VITE_TRAVEL_SECURITY}/travel/get-all-profiles`);
+        if (response.ok) {
+          const data = await response.json(); 
+          let dataProfiles = data.profiles
+          console.log('show me this wweee', dataProfiles)
+          setAllServices(dataProfiles);
+        } else {
+          console.error('Failed to fetch all services');
+        }
+      } catch (error) {
+        console.error('Error fetching all services:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    if (!serviceType) {
+      console.log('when service is missing', serviceType)
+      fetchAllServices();
+    }
+  }, [serviceType]);
 
   let backendUrl = import.meta.env.VITE_TRAVEL_SECURITY
   console.log('show me the bakendUrl', backendUrl)
@@ -100,6 +128,7 @@ const ServiceProviders = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
+        setIsLoading(true);
         const response = await fetch(`${import.meta.env.VITE_TRAVEL_SECURITY}/travel/get-specific-services/${mappedServiceType}`);
         if (response.ok) {
           const data = await response.json();
@@ -114,10 +143,14 @@ const ServiceProviders = () => {
         }
       } catch (error) {
         console.error('Error fetching services:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
-    fetchServices();
-  }, []);
+    if (serviceType && mappedServiceType) {
+      fetchServices();
+    }
+  }, [mappedServiceType, serviceType]);
 
   const RatingStars = ({ rating }: { rating: number }) => {
     return (
@@ -217,7 +250,27 @@ const ServiceProviders = () => {
       </div>
 
       <div className="container mx-auto px-4 -mt-12 relative z-10 pb-16">
-        {servicesFetched.length > 0 ? (
+        {isLoading ? (
+          /* Loading State */
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+            className="bg-white rounded-xl md:rounded-2xl shadow-2xl p-6 md:p-8 lg:p-12 text-center"
+          >
+            <div className="max-w-md mx-auto">
+              <div className="bg-blue-50 w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <div className="animate-spin rounded-full h-8 w-8 md:h-10 md:w-10 border-b-2 border-blue-600"></div>
+              </div>
+              <h2 className="text-xl md:text-2xl lg:text-3xl font-bold mb-4 text-gray-900">
+                Finding Professionals...
+              </h2>
+              <p className="text-gray-600 mb-8 leading-relaxed text-sm md:text-base">
+                Please wait while we load available {serviceType || 'construction'} professionals in your area.
+              </p>
+            </div>
+          </motion.div>
+        ) : (serviceType ? servicesFetched.length > 0 : allServices.length > 0) ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -228,10 +281,13 @@ const ServiceProviders = () => {
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                 <div>
                   <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">
-                    {serviceType} Specialists
+                    {serviceType ? `${serviceType} Specialists` : 'All Construction Professionals'}
                   </h2>
                   <p className="text-gray-600 text-sm md:text-base">
-                    {servicesFetched.length} verified {serviceType.toLowerCase()} professional{servicesFetched.length !== 1 ? 's' : ''} ready to help
+                    {serviceType 
+                      ? `${servicesFetched.length} verified ${serviceType.toLowerCase()} professional${servicesFetched.length !== 1 ? 's' : ''} ready to help`
+                      : `${allServices.length} verified construction professional${allServices.length !== 1 ? 's' : ''} ready to help`
+                    }
                   </p>
                 </div>
                 
@@ -241,7 +297,7 @@ const ServiceProviders = () => {
             {/* Providers Grid */}
             <div className="bg-gray-50 p-4 md:p-6 lg:p-8 rounded-b-xl md:rounded-b-2xl shadow-lg">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-                {servicesFetched.map((provider, index) => (
+                {(serviceType ? servicesFetched : allServices).map((provider, index) => (
                   <motion.div
                     key={provider._id || provider.userId || index}
                     initial={{ opacity: 0, y: 20 }}
@@ -378,44 +434,7 @@ const ServiceProviders = () => {
         )}
       </div>
 
-      {/* Enhanced Footer */}
-      <footer className="bg-gray-900 text-white py-8 md:py-12 lg:py-16">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8">
-            <div className="md:col-span-2">
-              <h3 className="text-xl md:text-2xl font-bold mb-4">TradesPro</h3>
-              <p className="text-gray-400 mb-4 md:mb-6 leading-relaxed text-sm md:text-base">
-                Connecting skilled professionals with quality clients. Building trust, delivering excellence, creating lasting partnerships in the construction industry.
-              </p>
-              <div className="flex items-center gap-2 text-green-400">
-                <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-sm font-semibold">Trusted by 10,000+ professionals</span>
-              </div>
-            </div>
-            <div>
-              <h3 className="text-lg font-bold mb-4">Quick Links</h3>
-              <ul className="space-y-2 md:space-y-3 text-gray-400 text-sm md:text-base">
-                <li><a href="/" className="hover:text-white transition-colors">Home</a></li>
-                <li><a href="/about" className="hover:text-white transition-colors">About Us</a></li>
-                <li><a href="/contact" className="hover:text-white transition-colors">Contact</a></li>
-                <li><a href="/join" className="hover:text-white transition-colors">Join as Professional</a></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-lg font-bold mb-4">Contact Info</h3>
-              <div className="space-y-2 md:space-y-3 text-gray-400 text-sm md:text-base">
-                <p>📧 contact@tradespro.com</p>
-                <p>📱 (555) 123-4567</p>
-                <p>📍 123 Business Ave, Suite 100</p>
-                <p>🕒 Mon-Fri: 8AM-6PM</p>
-              </div>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 mt-8 md:mt-12 pt-6 md:pt-8 text-center text-gray-400 text-sm md:text-base">
-            <p>&copy; 2024 TradesPro. All rights reserved. Built with ❤️ for professionals.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
