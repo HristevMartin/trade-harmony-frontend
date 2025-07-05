@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { Star, Calendar, User, ChevronLeft } from "lucide-react";
+import { Star, Calendar, User, ChevronLeft, X, CheckCircle, AlertCircle, AlertTriangle } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -30,6 +30,11 @@ interface Project {
   comments: Comment[];
 }
 
+interface Toast {
+  id: number;
+  type: 'success' | 'error' | 'warning';
+  message: string;
+}
 
 const ProjectDetail = () => {
   const { id } = useParams();
@@ -42,6 +47,83 @@ const ProjectDetail = () => {
   const [showNamePopup, setShowNamePopup] = useState(false);
   const [userName, setUserName] = useState("");
   const [isLoadingComments, setIsLoadingComments] = useState(true);
+  const [toasts, setToasts] = useState<Toast[]>([]);
+
+  // Toast functions
+  const showToast = (type: 'success' | 'error' | 'warning', message: string) => {
+    const newToast: Toast = {
+      id: Date.now(),
+      type,
+      message
+    };
+    
+    setToasts(prev => [...prev, newToast]);
+    
+    // Auto remove after 4 seconds
+    setTimeout(() => {
+      removeToast(newToast.id);
+    }, 4000);
+  };
+
+  const removeToast = (id: number) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  };
+
+  // Toast Component
+  const ToastNotification = ({ toast }: { toast: Toast }) => {
+    const getIcon = () => {
+      switch (toast.type) {
+        case 'success':
+          return <CheckCircle className="w-5 h-5 text-green-600" />;
+        case 'error':
+          return <AlertCircle className="w-5 h-5 text-red-600" />;
+        case 'warning':
+          return <AlertTriangle className="w-5 h-5 text-yellow-600" />;
+        default:
+          return <CheckCircle className="w-5 h-5 text-green-600" />;
+      }
+    };
+
+    const getBgColor = () => {
+      switch (toast.type) {
+        case 'success':
+          return 'bg-green-50 border-green-200';
+        case 'error':
+          return 'bg-red-50 border-red-200';
+        case 'warning':
+          return 'bg-yellow-50 border-yellow-200';
+        default:
+          return 'bg-green-50 border-green-200';
+      }
+    };
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, x: 300, scale: 0.8 }}
+        animate={{ opacity: 1, x: 0, scale: 1 }}
+        exit={{ opacity: 0, x: 300, scale: 0.8 }}
+        transition={{ type: "spring", duration: 0.4 }}
+        className={`${getBgColor()} border rounded-lg p-4 shadow-lg max-w-sm w-full`}
+      >
+        <div className="flex items-start gap-3">
+          <div className="flex-shrink-0">
+            {getIcon()}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-gray-900 break-words">
+              {toast.message}
+            </p>
+          </div>
+          <button
+            onClick={() => removeToast(toast.id)}
+            className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      </motion.div>
+    );
+  };
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -128,7 +210,7 @@ const ProjectDetail = () => {
     }
 
     if (!newComment.trim()) {
-      alert("Please enter a comment");
+      showToast('warning', 'Please enter a comment before submitting');
       return;
     }
 
@@ -171,16 +253,16 @@ const ProjectDetail = () => {
       setNewComment("");
       setNewRating(5);
       
-      alert("Comment saved successfully!");
+      showToast('success', 'Comment saved successfully!');
     } catch (error) {
       console.error('Error saving comment:', error);
-      alert("Failed to save comment. Please try again.");
+      showToast('error', 'Failed to save comment. Please try again.');
     }
   };
 
   const handleNameSubmit = () => {
     if (!userName.trim()) {
-      alert("Please enter your name");
+      showToast('warning', 'Please enter your name to continue');
       return;
     }
     setShowNamePopup(false);
@@ -202,6 +284,14 @@ const ProjectDetail = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
+      
+      {/* Toast Container */}
+      <div className="fixed top-4 right-4 z-50 space-y-2">
+        {toasts.map((toast) => (
+          <ToastNotification key={toast.id} toast={toast} />
+        ))}
+      </div>
+
       <div className="container mx-auto px-4 py-16 md:py-20">
         <Link 
           to={`/service-provider/${projectDetails.userId}`}

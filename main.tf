@@ -27,6 +27,7 @@ variable "app_name" {
 variable "image_name" {
   description = "Container image to deploy to Cloud Run"
   type        = string
+  default     = "gcr.io/stalwart-elixir-458022-d5/trade-harmony-frontend:v2.0"
 }
 
 provider "google" {
@@ -80,7 +81,7 @@ resource "google_vpc_access_connector" "connector" {
   ]
 }
 
-# Deploy Cloud Run service
+# Deploy Cloud Run services
 resource "google_cloud_run_service" "frontend" {
   name     = var.app_name
   location = var.region
