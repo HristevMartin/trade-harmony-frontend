@@ -37,7 +37,7 @@ const Index = () => {
 
   const [servicesFetched, setServicesFetched] = useState<any>([]);
   const [isLoadingServices, setIsLoadingServices] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [postcode, setPostcode] = useState("");
 
   const mapDatabaseToFrontend = (dbServices: any[]) => {
     return services
@@ -89,350 +89,176 @@ const Index = () => {
     fetchServices();
   }, []);
 
-  const howItWorksSteps = [
-    {
-      number: "1",
-      title: "Tell us what you need",
-      description: "Answer a few questions about your project and we'll find the right tradesperson for you",
-      icon: <Search className="h-8 w-8" />
-    },
-    {
-      number: "2", 
-      title: "Compare quotes",
-      description: "Receive up to 5 quotes from local, vetted professionals and compare prices",
-      icon: <Users className="h-8 w-8" />
-    },
-    {
-      number: "3",
-      title: "Hire with confidence",
-      description: "Choose your tradesperson based on reviews, ratings and previous work",
-      icon: <CheckCircle className="h-8 w-8" />
-    }
-  ];
-
-  const trustStats = [
-    { value: "2M+", label: "Jobs completed" },
-    { value: "50K+", label: "Trusted tradespeople" },
-    { value: "4.8★", label: "Average rating" },
-    { value: "98%", label: "Customer satisfaction" }
-  ];
-
-  const testimonials = [
-    {
-      name: "Sarah Johnson",
-      location: "London",
-      rating: 5,
-      text: "Found an excellent electrician through the platform. Quick, professional, and fairly priced!",
-      service: "Electrical Work"
-    },
-    {
-      name: "Mark Thompson", 
-      location: "Manchester",
-      rating: 5,
-      text: "The builders we found were fantastic. Completed our extension on time and within budget.",
-      service: "Building & Construction"
-    },
-    {
-      name: "Emma Davis",
-      location: "Birmingham", 
-      rating: 5,
-      text: "Great service! Multiple quotes received within hours and all were from verified professionals.",
-      service: "General Repairs"
-    }
-  ];
-
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
 
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white py-20 lg:py-28 relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/10"></div>
-        <div className="container mx-auto px-4 lg:px-8 relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight"
-            >
-              Find Trusted Local <br />
-              <span className="text-blue-200">Tradespeople</span>
-            </motion.h1>
-            
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-xl md:text-2xl text-blue-100 mb-12 max-w-3xl mx-auto"
-            >
-              Get free quotes from vetted professionals near you. Compare prices, read reviews, and hire with confidence.
-            </motion.p>
+      {/* Hero Section - MyJobQuote Style */}
+      <section className="relative bg-gradient-to-b from-blue-50 to-blue-100 overflow-hidden">
+        {/* Illustrated Background */}
+        <div className="absolute inset-0">
+          {/* Simple illustrated cityscape background */}
+          <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-blue-200 to-transparent"></div>
+          <svg className="absolute bottom-0 left-0 w-full h-48" viewBox="0 0 1200 200" xmlns="http://www.w3.org/2000/svg">
+            {/* Simple building silhouettes */}
+            <rect x="50" y="120" width="80" height="80" fill="#cbd5e1" opacity="0.6"/>
+            <rect x="150" y="100" width="60" height="100" fill="#94a3b8" opacity="0.6"/>
+            <rect x="230" y="130" width="70" height="70" fill="#cbd5e1" opacity="0.6"/>
+            <rect x="900" y="110" width="90" height="90" fill="#94a3b8" opacity="0.6"/>
+            <rect x="1010" y="125" width="75" height="75" fill="#cbd5e1" opacity="0.6"/>
+            {/* Trees */}
+            <circle cx="400" cy="160" r="25" fill="#86efac" opacity="0.7"/>
+            <rect x="395" y="160" width="10" height="40" fill="#a3a3a3" opacity="0.7"/>
+            <circle cx="800" cy="150" r="30" fill="#86efac" opacity="0.7"/>
+            <rect x="795" y="150" width="10" height="50" fill="#a3a3a3" opacity="0.7"/>
+          </svg>
+        </div>
 
-            {/* Search Form */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="bg-white rounded-2xl p-6 md:p-8 shadow-2xl max-w-2xl mx-auto"
-            >
-              <div className="space-y-4">
-                <div>
+        <div className="relative z-10 container mx-auto px-4 py-16 lg:py-24">
+          <div className="flex items-center justify-between max-w-7xl mx-auto">
+            {/* Left Tradesperson Illustration */}
+            <div className="hidden lg:block flex-shrink-0">
+              <div className="w-64 h-80 relative">
+                {/* Simplified tradesperson illustration */}
+                <div className="absolute bottom-0 left-8">
+                  {/* Body */}
+                  <div className="w-24 h-32 bg-teal-700 rounded-t-3xl relative">
+                    {/* Arms */}
+                    <div className="absolute -left-4 top-8 w-8 h-20 bg-white rounded-full transform -rotate-12"></div>
+                    <div className="absolute -right-4 top-8 w-8 h-20 bg-white rounded-full transform rotate-12"></div>
+                  </div>
+                  {/* Legs */}
+                  <div className="w-24 h-16 bg-blue-600 rounded-b-lg"></div>
+                  {/* Head */}
+                  <div className="absolute -top-16 left-4 w-16 h-16 bg-pink-300 rounded-full">
+                    {/* Hair */}
+                    <div className="absolute -top-2 left-2 w-12 h-8 bg-amber-800 rounded-full"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Center Content */}
+            <div className="flex-1 text-center max-w-2xl mx-auto">
+              <motion.h1
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+                className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 mb-4"
+              >
+                Find Tradespeople,<br />
+                <span className="text-gray-700">compare up to 3 quotes!</span>
+              </motion.h1>
+              
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="text-xl text-gray-600 mb-8"
+              >
+                It's FREE and there are no obligations
+              </motion.p>
+
+              {/* Search Form */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className="bg-white rounded-2xl p-3 shadow-xl max-w-md mx-auto flex items-center"
+              >
+                <div className="flex-1 flex items-center">
+                  <Search className="h-5 w-5 text-gray-400 ml-4 mr-3" />
                   <Input
                     type="text"
-                    placeholder="What service do you need? (e.g. electrician, plumber, builder)"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="text-lg py-6 border-2 border-gray-200 focus:border-blue-500 text-gray-900"
+                    placeholder="Enter your postcode"
+                    value={postcode}
+                    onChange={(e) => setPostcode(e.target.value)}
+                    className="border-0 text-lg py-6 focus:outline-none focus:ring-0 bg-transparent"
                   />
                 </div>
                 <Button 
                   size="lg" 
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg py-6 rounded-xl font-semibold"
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-6 rounded-xl font-semibold"
                 >
-                  Get Free Quotes
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  Get Started
                 </Button>
+              </motion.div>
+
+              {/* Trustpilot Style Reviews */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+                className="mt-8 flex items-center justify-center space-x-2"
+              >
+                <span className="text-gray-700 font-semibold">Excellent</span>
+                <div className="flex">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-5 w-5 text-green-500 fill-current" />
+                  ))}
+                </div>
+                <span className="text-gray-600">30,896 reviews on</span>
+                <span className="text-green-600 font-bold">★ Trustpilot</span>
+              </motion.div>
+            </div>
+
+            {/* Right Tradespeople Illustration */}
+            <div className="hidden lg:block flex-shrink-0">
+              <div className="w-64 h-80 relative">
+                {/* Construction worker with hard hat */}
+                <div className="absolute bottom-0 right-8">
+                  {/* Body */}
+                  <div className="w-20 h-28 bg-orange-400 rounded-t-2xl relative">
+                    {/* Safety vest stripes */}
+                    <div className="absolute top-4 left-2 right-2 h-2 bg-white opacity-80"></div>
+                    <div className="absolute top-8 left-2 right-2 h-2 bg-white opacity-80"></div>
+                  </div>
+                  {/* Legs */}
+                  <div className="w-20 h-14 bg-blue-800 rounded-b-lg"></div>
+                  {/* Head */}
+                  <div className="absolute -top-12 left-2 w-16 h-12 bg-pink-300 rounded-full"></div>
+                  {/* Hard hat */}
+                  <div className="absolute -top-16 left-1 w-18 h-8 bg-yellow-400 rounded-full"></div>
+                </div>
+                
+                {/* Taller tradesperson */}
+                <div className="absolute bottom-0 right-32">
+                  {/* Body */}
+                  <div className="w-24 h-36 bg-blue-400 rounded-t-3xl relative">
+                    {/* Tool belt */}
+                    <div className="absolute bottom-8 left-0 right-0 h-4 bg-amber-800"></div>
+                  </div>
+                  {/* Legs */}
+                  <div className="w-24 h-16 bg-blue-700 rounded-b-lg"></div>
+                  {/* Head */}
+                  <div className="absolute -top-16 left-4 w-16 h-16 bg-pink-300 rounded-full">
+                    {/* Hair */}
+                    <div className="absolute -top-1 left-3 w-10 h-6 bg-amber-700 rounded-full"></div>
+                  </div>
+                  {/* Tool in hand */}
+                  <div className="absolute top-16 -right-6 w-2 h-20 bg-gray-600 transform rotate-45"></div>
+                </div>
               </div>
-              <p className="text-gray-500 text-sm mt-4 text-center">
-                It takes less than 2 minutes
-              </p>
-            </motion.div>
-
-            {/* Trust Stats */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-              className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16"
-            >
-              {trustStats.map((stat, index) => (
-                <div key={index} className="text-center">
-                  <div className="text-2xl md:text-3xl font-bold text-white mb-1">
-                    {stat.value}
-                  </div>
-                  <div className="text-blue-200 text-sm">
-                    {stat.label}
-                  </div>
-                </div>
-              ))}
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="text-center mb-16">
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-              className="text-3xl md:text-4xl font-bold text-gray-900 mb-4"
-            >
-              How It Works
-            </motion.h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Getting quotes from local tradespeople has never been easier
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
-            {howItWorksSteps.map((step, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
-                viewport={{ once: true }}
-                className="text-center"
-              >
-                <div className="bg-blue-600 text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">
-                  {step.number}
-                </div>
-                <div className="text-blue-600 mb-4 flex justify-center">
-                  {step.icon}
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">
-                  {step.title}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {step.description}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Services Section */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="text-center mb-16">
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-              className="text-3xl md:text-4xl font-bold text-gray-900 mb-4"
-            >
-              Popular Services
-            </motion.h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Find trusted professionals for all your home improvement needs
-            </p>
-          </div>
-
-          {isLoadingServices ? (
-            <div className="grid md:grid-cols-3 gap-8">
-              {[...Array(3)].map((_, index) => (
-                <div key={index} className="bg-white rounded-xl border shadow-sm p-6 h-80">
-                  <div className="w-full h-48 bg-gray-200 rounded-lg mb-4 animate-pulse"></div>
-                  <div className="h-6 bg-gray-200 rounded mb-3 animate-pulse"></div>
-                  <div className="space-y-2">
-                    <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
-                    <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div>
-                  </div>
-                </div>
-              ))}
             </div>
-          ) : (
-            <div className="grid md:grid-cols-3 gap-8">
-              {servicesFetched.map((service: any, index: any) => (
-                <ServiceCard
-                  key={index}
-                  title={service.title}
-                  description={service.description}
-                  icon={service.icon}
-                  image={service.image}
-                />
-              ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Bottom CTA Section */}
+      <section className="bg-white py-16">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between max-w-4xl mx-auto">
+            <div className="mb-8 md:mb-0">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
+                Over 50,000 tradespeople nationwide use MyJobQuote
+              </h2>
             </div>
-          )}
-
-          <div className="text-center mt-12">
-            <Link to="/service-providers" className="inline-flex items-center text-blue-600 font-semibold hover:text-blue-800 text-lg">
-              View all services <ArrowRight className="ml-2 w-5 h-5" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="text-center mb-16">
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-              className="text-3xl md:text-4xl font-bold text-gray-900 mb-4"
+            <Button 
+              size="lg" 
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg"
             >
-              What Our Customers Say
-            </motion.h2>
-            <p className="text-xl text-gray-600">
-              Join thousands of satisfied customers
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-              >
-                <Card className="h-full border-0 shadow-md hover:shadow-lg transition-shadow duration-300">
-                  <CardContent className="p-6">
-                    <div className="flex items-center mb-4">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
-                      ))}
-                    </div>
-                    <p className="text-gray-700 mb-6 leading-relaxed">
-                      "{testimonial.text}"
-                    </p>
-                    <div className="border-t pt-4">
-                      <div className="font-semibold text-gray-900">
-                        {testimonial.name}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {testimonial.location} • {testimonial.service}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Trust & Safety Section */}
-      <section className="py-20 bg-blue-600 text-white">
-        <div className="container mx-auto px-4 lg:px-8">
-          <div className="text-center mb-16">
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-              className="text-3xl md:text-4xl font-bold mb-4"
-            >
-              Your Safety is Our Priority
-            </motion.h2>
-            <p className="text-xl text-blue-100 max-w-2xl mx-auto">
-              All our tradespeople are thoroughly vetted and insured
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-              className="text-center"
-            >
-              <Shield className="h-12 w-12 text-blue-200 mx-auto mb-4" />
-              <h3 className="text-xl font-bold mb-3">Fully Vetted</h3>
-              <p className="text-blue-100">
-                Every tradesperson undergoes thorough background checks and verification
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
-              className="text-center"
-            >
-              <CheckCircle className="h-12 w-12 text-blue-200 mx-auto mb-4" />
-              <h3 className="text-xl font-bold mb-3">Insured & Qualified</h3>
-              <p className="text-blue-100">
-                All professionals carry full insurance and relevant qualifications
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              viewport={{ once: true }}
-              className="text-center"
-            >
-              <Clock className="h-12 w-12 text-blue-200 mx-auto mb-4" />
-              <h3 className="text-xl font-bold mb-3">24/7 Support</h3>
-              <p className="text-blue-100">
-                Our customer support team is here to help whenever you need us
-              </p>
-            </motion.div>
+              Sign up as a trade
+            </Button>
           </div>
         </div>
       </section>
