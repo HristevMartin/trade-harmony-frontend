@@ -4,21 +4,22 @@ import Footer from "@/components/Footer";
 import ServiceCard from "@/components/ServiceCard";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 
 const Index = () => {
+  const navigate = useNavigate();
   const services = [
     {
-      title: "Building & Construction",
+      title: "Book a Builder",
       description: "Complete building services for residential and commercial projects.",
       icon: <Building className="h-6 w-6" />,
       image: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=2070&auto=format&fit=crop", // Construction site with workers
       dbField: "building"
     },
     {
-      title: "Electrical Services", 
+      title: "Find Electricians", 
       description: "Licensed electricians for all your electrical needs and installations.",
       icon: <Zap className="h-6 w-6" />,
       image: "https://media.istockphoto.com/id/1469656864/photo/electrician-engineer-uses-a-multimeter-to-test-the-electrical-installation-and-power-line.jpg?s=612x612&w=0&k=20&c=h70UOpNbJYT5G2oGT-KUeIE3yXwEgsCpr25yR1rnGtU=", // Electrician working on a panel
@@ -43,19 +44,13 @@ const Index = () => {
   const carouselImages = [
     {
       url: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=2070&auto=format&fit=crop",
-      alt: "Construction & Building Professionals"
+      alt: "Book a Builder",
+      service: "Book a Builder"
     },
     {
       url: "https://contractortrainingcenter.com/cdn/shop/articles/Untitled_design_1.png?v=1693506427&width=1100",
-      alt: "Licensed Electrical Technicians"
-    },
-    {
-      url: "https://thehappyhousecleaning.co.uk/wp-content/uploads/2018/08/Oven-cleaning-homepage-pic1.jpg",
-      alt: "Professional Cleaning Services"
-    },
-    {
-      url: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=2070&auto=format&fit=crop",
-      alt: "Painting & Renovation Experts"
+      alt: "Find Electricians",
+      service: "Find Electricians"
     }
   ];
 
@@ -135,8 +130,6 @@ const Index = () => {
     fetchServices();
   }, []);
 
-  console.log('show me the servicesFetched', servicesFetched);
-
   // Dynamic stats - for animation purposes
   const constructionStats = [
     { value: "1.2M+", label: "Services Completed" },
@@ -175,6 +168,7 @@ const Index = () => {
               <Button
                 className="bg-white text-blue-600 hover:bg-blue-50 text-lg px-8 py-6 h-auto rounded-full font-semibold"
                 size="lg"
+                onClick={() => navigate('/service-providers')}
               >
                 Find a Service Provider <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
@@ -227,10 +221,11 @@ const Index = () => {
                       key={index}
                       src={image.url}
                       alt={image.alt}
-                      className="w-full h-80 lg:h-96 object-cover flex-shrink-0"
+                      className="w-full h-80 lg:h-96 object-cover flex-shrink-0 cursor-pointer hover:scale-105 transition-transform duration-300"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.8, delay: 0.5 }}
+                      onClick={() => navigate(`/service-providers?service=${encodeURIComponent(image.service)}`)}
                     />
                   ))}
                 </motion.div>
@@ -284,7 +279,7 @@ const Index = () => {
             viewport={{ once: true }}
             className="text-3xl md:text-4xl font-bold text-center mb-10 text-gray-900"
           >
-            Featured Professional Services
+            Hire Trusted Tradespeople Near You
           </motion.h2>
 
           {isLoadingServices ? (
@@ -314,7 +309,6 @@ const Index = () => {
             </div>
           ) : (
             <div className="grid md:grid-cols-3 gap-8 px-4">
-              {console.log('show me the servicesFetched', servicesFetched)}
               {servicesFetched.map((service: any, index: any) => (
                 <ServiceCard
                   key={index}

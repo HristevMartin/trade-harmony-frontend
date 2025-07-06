@@ -23,14 +23,14 @@ const Navbar = () => {
       dbField: "building"
     },
     {
-      title: "Electrical Services", 
+      title: "Electrical Services",
       description: "Licensed electrical installation & repairs",
       icon: <Zap className="h-4 w-4" />,
       dbField: "electrical"
     },
     {
       title: "Mechanical Repairs",
-      description: "Expert diagnosis & repair solutions", 
+      description: "Expert diagnosis & repair solutions",
       icon: <Wrench className="h-4 w-4" />,
       dbField: "mechanic"
     },
@@ -41,13 +41,13 @@ const Navbar = () => {
     return services
       .map(frontendService => {
         // Find matching database service by dbField
-        const dbService = dbServices.find(db => 
+        const dbService = dbServices.find(db =>
           db.trade === frontendService.dbField ||
-          db.type === frontendService.dbField || 
+          db.type === frontendService.dbField ||
           db.service_type === frontendService.dbField ||
           db.name?.toLowerCase() === frontendService.dbField
         );
-        
+
         if (dbService) {
           // Merge database data with frontend configuration
           return {
@@ -60,7 +60,7 @@ const Navbar = () => {
             ...dbService
           };
         }
-        
+
         // Return null if no database match found
         return null;
       })
@@ -76,11 +76,11 @@ const Navbar = () => {
         if (response.ok) {
           const data = await response.json();
           console.log('Navbar: show me the database data', data);
-          
+
           // Map database data to frontend services using our mapping
           const mappedServices = mapDatabaseToFrontend(data);
           console.log('Navbar: mapped services', mappedServices);
-          
+
           setAvailableServices(mappedServices);
         } else {
           console.error('Failed to fetch services');
@@ -105,10 +105,10 @@ const Navbar = () => {
               TradesPro
             </Link>
           </div>
-          
+
           <div className="hidden md:flex space-x-8">
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className={`text-gray-700 hover:text-indigo-600 transition-colors relative group ${isActive("/") ? "text-indigo-600" : ""}`}
             >
               Home
@@ -121,8 +121,8 @@ const Navbar = () => {
                   <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 transform transition-transform ${isActive("/service-providers") ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"}`} />
                 </span>
               </DropdownMenuTrigger>
-              <DropdownMenuContent 
-                className="w-64 bg-white p-1 rounded-lg shadow-lg border border-gray-100 animate-fade-in" 
+              <DropdownMenuContent
+                className="w-64 bg-white p-1 rounded-lg shadow-lg border border-gray-100 animate-fade-in"
                 sideOffset={8}
               >
                 <div className="p-2 mb-1 text-sm font-medium text-gray-500 border-b border-gray-100">
@@ -131,11 +131,10 @@ const Navbar = () => {
                 {availableServices.map((service: any, index: number) => (
                   <Link key={index} to={`/service-providers?service=${encodeURIComponent(service.title)}`}>
                     <DropdownMenuItem className="flex items-center gap-3 py-3 cursor-pointer hover:bg-indigo-50 hover:text-indigo-600 transition-colors rounded-md">
-                      <div className={`p-1.5 rounded-md ${
-                        service.title.includes('Building') ? 'bg-indigo-100 text-indigo-600' :
-                        service.title.includes('Electrical') ? 'bg-yellow-100 text-yellow-600' :
-                        'bg-blue-100 text-blue-600'
-                      }`}>
+                      <div className={`p-1.5 rounded-md ${service.title.includes('Building') ? 'bg-indigo-100 text-indigo-600' :
+                          service.title.includes('Electrical') ? 'bg-yellow-100 text-yellow-600' :
+                            'bg-blue-100 text-blue-600'
+                        }`}>
                         {service.icon}
                       </div>
                       <div>
@@ -153,14 +152,17 @@ const Navbar = () => {
                 </Link>
               </DropdownMenuContent>
             </DropdownMenu>
-          
-            {/* <Link 
-              to="/contact" 
-              className={`text-gray-700 hover:text-indigo-600 transition-colors relative group ${isActive("/contact") ? "text-indigo-600" : ""}`}
+
+
+            <a
+              href="https://managementbigcommerce-298718238493.europe-west3.run.app/en/backoffice/welcome-login"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-700 hover:text-indigo-600 transition-colors relative group"
             >
-              Contact
-              <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 transform transition-transform ${isActive("/contact") ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"}`} />
-            </Link> */}
+              For Professionals
+              <span className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 transform transition-transform scale-x-0 group-hover:scale-x-100" />
+            </a>
           </div>
 
           <div className="md:hidden">
@@ -184,8 +186,8 @@ const Navbar = () => {
                     <DropdownMenuItem className="flex items-center gap-2 cursor-pointer hover:bg-indigo-50 hover:text-indigo-600 transition-colors rounded-md py-2">
                       <div className={
                         service.title.includes('Building') ? 'text-indigo-600' :
-                        service.title.includes('Electrical') ? 'text-yellow-600' :
-                        'text-blue-600'
+                          service.title.includes('Electrical') ? 'text-yellow-600' :
+                            'text-blue-600'
                       }>
                         {service.icon}
                       </div>
@@ -194,6 +196,17 @@ const Navbar = () => {
                   </Link>
                 ))}
                 <DropdownMenuSeparator />
+                <a
+                  href="https://managementbigcommerce-298718238493.europe-west3.run.app/en/backoffice/welcome-login"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-700 hover:text-indigo-600 transition-colors"
+                >
+                  <DropdownMenuItem className="cursor-pointer hover:bg-indigo-50 hover:text-indigo-600 transition-colors rounded-md py-2">
+                    For Professionals
+                  </DropdownMenuItem>
+                </a>
+
                 {/* <Link to="/about">
                   <DropdownMenuItem className="cursor-pointer hover:bg-indigo-50 hover:text-indigo-600 transition-colors rounded-md py-2">
                     About

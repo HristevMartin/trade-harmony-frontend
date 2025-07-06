@@ -35,7 +35,7 @@ const serviceProviders: Record<string, ServiceProvider[]> = {
       _id: 7,
       id: 7,
       name: "Nasko Yanev",
-      service: "Building & Construction",
+      service: "Book a Builder",
       description: "Expert in interior renovations, specializing in wall texturing, flooring installation, and ceiling work. 12+ years of experience in residential projects.",
       rating: 4.9,
       image: qnevImage,
@@ -70,8 +70,8 @@ const serviceProviders: Record<string, ServiceProvider[]> = {
 
 const mapDatabaseToFrontend = (data: any) => {
   const mapping = {
-    "Building & Construction": "building",
-    "Electrical Services": "electrical",
+    "Book a Builder": "building",
+    "Find Electricians": "electrical",
     "Mechanical Repairs": "mechanic"
   }
   return mapping[data] || data;
@@ -79,8 +79,8 @@ const mapDatabaseToFrontend = (data: any) => {
 
 const reverseMapDatabaseToFrontend = (data: any) => {
   const mapping = {
-    "building": "Building & Construction",
-    "electrical": "Electrical Services",
+    "building": "Book a Builder",
+    "electrical": "Find Electricians",
     "mechanic": "Mechanical Repairs"
   }
   return mapping[data] || data;
@@ -281,7 +281,7 @@ const ServiceProviders = () => {
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                 <div>
                   <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">
-                    {serviceType ? `${serviceType} Specialists` : 'All Construction Professionals'}
+                    {serviceType ? `${serviceType} Specialists` : 'All Traders'}
                   </h2>
                   <p className="text-gray-600 text-sm md:text-base">
                     {serviceType 
