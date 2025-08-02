@@ -57,7 +57,7 @@ resource "google_compute_network" "vpc_network" {
   depends_on              = [google_project_service.compute_api]
 }
 
-# Create subnet
+# Create subnest
 resource "google_compute_subnetwork" "vpc_subnet" {
   name          = "${var.app_name}-subnet"
   ip_cidr_range = "10.0.0.0/24"
