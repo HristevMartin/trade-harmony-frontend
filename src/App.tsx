@@ -15,6 +15,8 @@ import Navbar from "./components/Navbar";
 
 const queryClient = new QueryClient();
 
+// test
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
 
