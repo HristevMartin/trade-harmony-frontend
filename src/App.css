@@ -6,7 +6,7 @@
   text-align: left;
 }
 
-/* Subtle hover effect for construction elements */
+/* Subtle hover seffect for construction elements */
 @media (prefers-reduced-motion: no-preference) {
   .construction-animation {
     transition: transform 0.3s ease;
