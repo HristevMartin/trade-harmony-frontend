@@ -12,6 +12,7 @@ import ProjectDetail from "./pages/ProjectDetail";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Navbar from "./components/Navbar";
+import PostJob from "./pages/PostJob";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/project/:id" element={<ProjectDetail />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/post-job" element={<PostJob />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
