@@ -106,7 +106,7 @@ const Navbar = () => {
           </motion.div>
 
           <nav className="hidden md:flex items-center space-x-8">
-            <a href="#" className="text-foreground hover:text-trust-blue transition-colors font-medium">Home</a>
+            <a href="/" className="text-foreground hover:text-trust-blue transition-colors font-medium">Home</a>
             <a href="#" className="text-foreground hover:text-trust-blue transition-colors font-medium">Services</a>
             <a href="#" className="text-foreground hover:text-trust-blue transition-colors font-medium">How it Works</a>
             <a href="#" className="text-foreground hover:text-trust-blue transition-colors font-medium">Contact</a>
