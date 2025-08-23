@@ -53,6 +53,18 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        "trust-blue": {
+          DEFAULT: "hsl(var(--trust-blue))",
+          foreground: "hsl(var(--trust-blue-foreground))",
+        },
+        "trust-green": {
+          DEFAULT: "hsl(var(--trust-green))",
+          foreground: "hsl(var(--trust-green-foreground))",
+        },
+        "accent-orange": {
+          DEFAULT: "hsl(var(--accent-orange))",
+          foreground: "hsl(var(--accent-orange-foreground))",
+        },
       },
       keyframes: {
         "fade-up": {

@@ -1,265 +1,365 @@
 
-import { HardHat, Wrench, Zap, ArrowRight, Building, Search, CheckCircle, Star, Users, Shield, Clock } from "lucide-react";
+import { 
+  HardHat, 
+  Wrench, 
+  Zap, 
+  ArrowRight, 
+  Building, 
+  Search, 
+  CheckCircle, 
+  Star, 
+  Users, 
+  Shield, 
+  Clock,
+  Droplets,
+  PaintBucket,
+  Trees,
+  Thermometer,
+  Hammer,
+  ClipboardList,
+  MessageSquareQuote,
+  Handshake,
+  MapPin,
+  Quote
+} from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import ServiceCard from "@/components/ServiceCard";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
 
 const Index = () => {
+  const [postcode, setPostcode] = useState("");
+  const [selectedService, setSelectedService] = useState("");
+
   const services = [
-    {
-      title: "Building & Construction",
-      description: "Complete building services for residential and commercial projects.",
-      icon: <Building className="h-6 w-6" />,
-      image: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=2070&auto=format&fit=crop",
-      dbField: "building"
-    },
-    {
-      title: "Electrical Services", 
-      description: "Licensed electricians for all your electrical needs and installations.",
-      icon: <Zap className="h-6 w-6" />,
-      image: "https://media.istockphoto.com/id/1469656864/photo/electrician-engineer-uses-a-multimeter-to-test-the-electrical-installation-and-power-line.jpg?s=612x612&w=0&k=20&c=h70UOpNbJYT5G2oGT-KUeIE3yXwEgsCpr25yR1rnGtU=",
-      dbField: "electrical"
-    },
-    {
-      title: "Mechanical Repairs",
-      description: "Comprehensive mechanical services for construction equipment and vehicles.", 
-      icon: <Wrench className="h-6 w-6" />,
-      image: "https://images.unsplash.com/photo-1530124566582-a618bc2615dc?q=80&w=2070&auto=format&fit=crop",
-      dbField: "mechanic"
-    },
+    { name: "Plumbing", icon: <Droplets className="h-8 w-8" />, color: "text-trust-blue" },
+    { name: "Electrical", icon: <Zap className="h-8 w-8" />, color: "text-yellow-500" },
+    { name: "Carpentry", icon: <Hammer className="h-8 w-8" />, color: "text-amber-600" },
+    { name: "Roofing", icon: <Building className="h-8 w-8" />, color: "text-slate-600" },
+    { name: "Painting", icon: <PaintBucket className="h-8 w-8" />, color: "text-purple-500" },
+    { name: "Gardening", icon: <Trees className="h-8 w-8" />, color: "text-trust-green" },
+    { name: "Heating & Cooling", icon: <Thermometer className="h-8 w-8" />, color: "text-red-500" },
+    { name: "Mechanical Repairs", icon: <Wrench className="h-8 w-8" />, color: "text-gray-600" },
   ];
 
-  const [servicesFetched, setServicesFetched] = useState<any>([]);
-  const [isLoadingServices, setIsLoadingServices] = useState(true);
-  const [postcode, setPostcode] = useState("");
+  const testimonials = [
+    {
+      text: "Found an excellent electrician within hours. Professional service and fair pricing!",
+      name: "Sarah Mitchell",
+      location: "Leeds",
+      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
+    },
+    {
+      text: "Amazing plumber fixed our emergency leak quickly. Highly recommend this platform!",
+      name: "John Davies",
+      location: "Manchester",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face"
+    },
+    {
+      text: "Got 3 quotes for garden landscaping. Saved me time and money!",
+      name: "Emma Thompson",
+      location: "Birmingham",
+      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face"
+    }
+  ];
 
-  const mapDatabaseToFrontend = (dbServices: any[]) => {
-    return services
-      .map(frontendService => {
-        const dbService = dbServices.find(db => 
-          db.trade === frontendService.dbField ||
-          db.type === frontendService.dbField || 
-          db.service_type === frontendService.dbField ||
-          db.name?.toLowerCase() === frontendService.dbField
-        );
-        
-        if (dbService) {
-          return {
-            ...frontendService,
-            title: dbService.title || dbService.name || frontendService.title,
-            description: dbService.description || frontendService.description,
-            icon: frontendService.icon,
-            image: frontendService.image,
-            ...dbService
-          };
-        }
-        
-        return null;
-      })
-      .filter(service => service !== null);
-  };
-
-  useEffect(() => {
-    const fetchServices = async () => {
-      try {
-        setIsLoadingServices(true);
-        let url = `${import.meta.env.VITE_TRAVEL_SECURITY}/travel/get-project-services`;
-        const response = await fetch(url);
-
-        if (response.ok) {
-          const data = await response.json();
-          const mappedServices = mapDatabaseToFrontend(data);
-          setServicesFetched(mappedServices);
-        } else {
-          setServicesFetched(services);
-        }
-      } catch (error) {
-        console.error('Error fetching services:', error);
-        setServicesFetched(services);
-      } finally {
-        setIsLoadingServices(false);
-      }
-    };
-    fetchServices();
-  }, []);
+  const recentActivities = [
+    "Sarah in Leeds booked a Plumber 5 mins ago",
+    "John in Manchester got 3 quotes for Electrical Work",
+    "Emma in Birmingham hired a Carpenter",
+    "Mike in Bristol found a Roofer 10 mins ago"
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-
-      {/* Hero Section - MyJobQuote Style */}
-      <section className="relative bg-gradient-to-b from-blue-50 to-blue-100 overflow-hidden">
-        {/* Illustrated Background */}
-        <div className="absolute inset-0">
-          {/* Simple illustrated cityscape background */}
-          <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-blue-200 to-transparent"></div>
-          <svg className="absolute bottom-0 left-0 w-full h-48" viewBox="0 0 1200 200" xmlns="http://www.w3.org/2000/svg">
-            {/* Simple building silhouettes */}
-            <rect x="50" y="120" width="80" height="80" fill="#cbd5e1" opacity="0.6"/>
-            <rect x="150" y="100" width="60" height="100" fill="#94a3b8" opacity="0.6"/>
-            <rect x="230" y="130" width="70" height="70" fill="#cbd5e1" opacity="0.6"/>
-            <rect x="900" y="110" width="90" height="90" fill="#94a3b8" opacity="0.6"/>
-            <rect x="1010" y="125" width="75" height="75" fill="#cbd5e1" opacity="0.6"/>
-            {/* Trees */}
-            <circle cx="400" cy="160" r="25" fill="#86efac" opacity="0.7"/>
-            <rect x="395" y="160" width="10" height="40" fill="#a3a3a3" opacity="0.7"/>
-            <circle cx="800" cy="150" r="30" fill="#86efac" opacity="0.7"/>
-            <rect x="795" y="150" width="10" height="50" fill="#a3a3a3" opacity="0.7"/>
-          </svg>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="text-2xl font-bold text-trust-blue">TradeFinder</div>
+            
+            <nav className="hidden md:flex items-center space-x-8">
+              <a href="#" className="text-foreground hover:text-trust-blue transition-colors">Home</a>
+              <a href="#" className="text-foreground hover:text-trust-blue transition-colors">Services</a>
+              <a href="#" className="text-foreground hover:text-trust-blue transition-colors">How it Works</a>
+              <a href="#" className="text-foreground hover:text-trust-blue transition-colors">Contact</a>
+            </nav>
+            
+            <Button variant="outline" className="border-trust-blue text-trust-blue hover:bg-trust-blue hover:text-trust-blue-foreground">
+              Join as a Tradesperson
+            </Button>
+          </div>
         </div>
+      </header>
 
-        <div className="relative z-10 container mx-auto px-4 py-16 lg:py-24">
-          <div className="flex items-center justify-between max-w-7xl mx-auto">
-            {/* Left Tradesperson Illustration */}
-            <div className="hidden lg:block flex-shrink-0">
-              <div className="w-64 h-80 relative">
-                {/* Simplified tradesperson illustration */}
-                <div className="absolute bottom-0 left-8">
-                  {/* Body */}
-                  <div className="w-24 h-32 bg-teal-700 rounded-t-3xl relative">
-                    {/* Arms */}
-                    <div className="absolute -left-4 top-8 w-8 h-20 bg-white rounded-full transform -rotate-12"></div>
-                    <div className="absolute -right-4 top-8 w-8 h-20 bg-white rounded-full transform rotate-12"></div>
-                  </div>
-                  {/* Legs */}
-                  <div className="w-24 h-16 bg-blue-600 rounded-b-lg"></div>
-                  {/* Head */}
-                  <div className="absolute -top-16 left-4 w-16 h-16 bg-pink-300 rounded-full">
-                    {/* Hair */}
-                    <div className="absolute -top-2 left-2 w-12 h-8 bg-amber-800 rounded-full"></div>
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-trust-blue/5 via-background to-trust-green/5 py-16 lg:py-24">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6"
+            >
+              Find trusted tradespeople{" "}
+              <span className="text-trust-blue">near you</span>
+            </motion.h1>
+            
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="text-xl text-muted-foreground mb-8"
+            >
+              Get up to 3 free quotes from verified professionals — no obligation.
+            </motion.p>
+
+            {/* Search Form */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="bg-card rounded-2xl p-4 shadow-xl max-w-2xl mx-auto mb-8"
+            >
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1">
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Input
+                      type="text"
+                      placeholder="Enter your postcode"
+                      value={postcode}
+                      onChange={(e) => setPostcode(e.target.value)}
+                      className="pl-10 h-12 text-base"
+                    />
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Center Content */}
-            <div className="flex-1 text-center max-w-2xl mx-auto">
-              <motion.h1
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
-                className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 mb-4"
-              >
-                Find Tradespeople,<br />
-                <span className="text-gray-700">compare up to 3 quotes!</span>
-              </motion.h1>
-              
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                className="text-xl text-gray-600 mb-8"
-              >
-                It's FREE and there are no obligations
-              </motion.p>
-
-              {/* Search Form */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-                className="bg-white rounded-2xl p-3 shadow-xl max-w-md mx-auto flex items-center"
-              >
-                <div className="flex-1 flex items-center">
-                  <Search className="h-5 w-5 text-gray-400 ml-4 mr-3" />
-                  <Input
-                    type="text"
-                    placeholder="Enter your postcode"
-                    value={postcode}
-                    onChange={(e) => setPostcode(e.target.value)}
-                    className="border-0 text-lg py-6 focus:outline-none focus:ring-0 bg-transparent"
-                  />
+                <div className="flex-1">
+                  <Select value={selectedService} onValueChange={setSelectedService}>
+                    <SelectTrigger className="h-12 text-base">
+                      <SelectValue placeholder="Select a service" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {services.map((service) => (
+                        <SelectItem key={service.name} value={service.name}>
+                          <div className="flex items-center gap-2">
+                            <span className={service.color}>{service.icon}</span>
+                            {service.name}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <Button 
                   size="lg" 
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-6 rounded-xl font-semibold"
+                  className="bg-accent-orange hover:bg-accent-orange/90 text-accent-orange-foreground h-12 px-8 font-semibold"
                 >
                   Get Started
+                  <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
-              </motion.div>
+              </div>
+            </motion.div>
 
-              {/* Trustpilot Style Reviews */}
+            {/* Trust Proof */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+              className="flex items-center justify-center space-x-2"
+            >
+              <span className="text-foreground font-semibold">Excellent</span>
+              <div className="flex">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="h-5 w-5 text-trust-green fill-current" />
+                ))}
+              </div>
+              <span className="text-muted-foreground">30,000+ reviews on</span>
+              <span className="text-trust-green font-bold">★ Trustpilot</span>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Service Categories Grid */}
+      <section className="py-16 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-foreground mb-4">Popular Services</h2>
+            <p className="text-muted-foreground text-lg">Find trusted professionals for any home improvement project</p>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+            {services.map((service, index) => (
               <motion.div
+                key={service.name}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.6 }}
-                className="mt-8 flex items-center justify-center space-x-2"
+                transition={{ duration: 0.5, delay: index * 0.1 }}
               >
-                <span className="text-gray-700 font-semibold">Excellent</span>
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 text-green-500 fill-current" />
-                  ))}
-                </div>
-                <span className="text-gray-600">30,896 reviews on</span>
-                <span className="text-green-600 font-bold">★ Trustpilot</span>
+                <Card className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer group">
+                  <CardContent className="p-6 text-center">
+                    <div className={`${service.color} mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                      {service.icon}
+                    </div>
+                    <h3 className="font-semibold text-foreground">{service.name}</h3>
+                  </CardContent>
+                </Card>
               </motion.div>
-            </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-            {/* Right Tradespeople Illustration */}
-            <div className="hidden lg:block flex-shrink-0">
-              <div className="w-64 h-80 relative">
-                {/* Construction worker with hard hat */}
-                <div className="absolute bottom-0 right-8">
-                  {/* Body */}
-                  <div className="w-20 h-28 bg-orange-400 rounded-t-2xl relative">
-                    {/* Safety vest stripes */}
-                    <div className="absolute top-4 left-2 right-2 h-2 bg-white opacity-80"></div>
-                    <div className="absolute top-8 left-2 right-2 h-2 bg-white opacity-80"></div>
-                  </div>
-                  {/* Legs */}
-                  <div className="w-20 h-14 bg-blue-800 rounded-b-lg"></div>
-                  {/* Head */}
-                  <div className="absolute -top-12 left-2 w-16 h-12 bg-pink-300 rounded-full"></div>
-                  {/* Hard hat */}
-                  <div className="absolute -top-16 left-1 w-18 h-8 bg-yellow-400 rounded-full"></div>
+      {/* How It Works Section */}
+      <section className="py-16 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-foreground mb-4">How It Works</h2>
+            <p className="text-muted-foreground text-lg">Get quotes in three simple steps</p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            {[
+              {
+                icon: <ClipboardList className="h-12 w-12" />,
+                title: "Post your job",
+                description: "Tell us what you need doing and when you need it completed."
+              },
+              {
+                icon: <MessageSquareQuote className="h-12 w-12" />,
+                title: "Get up to 3 quotes",
+                description: "Receive free quotes from verified local tradespeople."
+              },
+              {
+                icon: <Handshake className="h-12 w-12" />,
+                title: "Choose your tradesperson",
+                description: "Compare quotes, read reviews, and hire the best professional."
+              }
+            ].map((step, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.2 }}
+                className="text-center"
+              >
+                <div className="bg-trust-blue/10 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-4">
+                  <div className="text-trust-blue">{step.icon}</div>
                 </div>
-                
-                {/* Taller tradesperson */}
-                <div className="absolute bottom-0 right-32">
-                  {/* Body */}
-                  <div className="w-24 h-36 bg-blue-400 rounded-t-3xl relative">
-                    {/* Tool belt */}
-                    <div className="absolute bottom-8 left-0 right-0 h-4 bg-amber-800"></div>
-                  </div>
-                  {/* Legs */}
-                  <div className="w-24 h-16 bg-blue-700 rounded-b-lg"></div>
-                  {/* Head */}
-                  <div className="absolute -top-16 left-4 w-16 h-16 bg-pink-300 rounded-full">
-                    {/* Hair */}
-                    <div className="absolute -top-1 left-3 w-10 h-6 bg-amber-700 rounded-full"></div>
-                  </div>
-                  {/* Tool in hand */}
-                  <div className="absolute top-16 -right-6 w-2 h-20 bg-gray-600 transform rotate-45"></div>
+                <div className="bg-trust-blue text-trust-blue-foreground rounded-full w-8 h-8 flex items-center justify-center mx-auto mb-4 text-sm font-bold">
+                  {index + 1}
                 </div>
+                <h3 className="text-xl font-semibold text-foreground mb-2">{step.title}</h3>
+                <p className="text-muted-foreground">{step.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Social Proof & Trust Section */}
+      <section className="py-16 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-foreground mb-4">What Our Customers Say</h2>
+            <div className="flex items-center justify-center gap-4 mb-8">
+              <div className="flex items-center gap-2">
+                <Shield className="h-6 w-6 text-trust-green" />
+                <span className="text-sm text-muted-foreground">All tradespeople are verified & insured</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
+            {testimonials.map((testimonial, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <Card className="h-full">
+                  <CardContent className="p-6">
+                    <Quote className="h-8 w-8 text-trust-blue mb-4" />
+                    <p className="text-muted-foreground mb-4">"{testimonial.text}"</p>
+                    <div className="flex items-center gap-3">
+                      <img 
+                        src={testimonial.avatar} 
+                        alt={testimonial.name}
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                      <div>
+                        <p className="font-semibold text-foreground">{testimonial.name}</p>
+                        <p className="text-sm text-muted-foreground">{testimonial.location}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+          
+          <div className="flex justify-center">
+            <div className="flex items-center gap-8 text-muted-foreground">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-trust-blue">30,000+</div>
+                <div className="text-sm">Happy Customers</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-trust-green">50,000+</div>
+                <div className="text-sm">Verified Tradespeople</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-accent-orange">99%</div>
+                <div className="text-sm">Customer Satisfaction</div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Bottom CTA Section */}
-      <section className="bg-white py-16">
+      {/* Recent Activity Feed */}
+      <section className="py-8 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between max-w-4xl mx-auto">
-            <div className="mb-8 md:mb-0">
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
-                Over 50,000 tradespeople nationwide use MyJobQuote
-              </h2>
-            </div>
-            <Button 
-              size="lg" 
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg"
+          <div className="overflow-hidden">
+            <motion.div
+              animate={{ x: [0, -1000] }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              className="flex gap-8 whitespace-nowrap"
             >
-              Sign up as a trade
-            </Button>
+              {[...recentActivities, ...recentActivities].map((activity, index) => (
+                <div key={index} className="flex items-center gap-2 text-muted-foreground">
+                  <CheckCircle className="h-4 w-4 text-trust-green" />
+                  <span className="text-sm">{activity}</span>
+                </div>
+              ))}
+            </motion.div>
           </div>
+        </div>
+      </section>
+
+      {/* Mid-page CTA Band */}
+      <section className="py-16 bg-trust-blue text-trust-blue-foreground">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Over 50,000 tradespeople nationwide are ready to help.
+          </h2>
+          <p className="text-xl mb-8 opacity-90">
+            Join thousands of satisfied customers who found their perfect tradesperson
+          </p>
+          <Button 
+            size="lg" 
+            className="bg-accent-orange hover:bg-accent-orange/90 text-accent-orange-foreground text-lg px-8 py-6"
+          >
+            Post Your Job Today
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
         </div>
       </section>
 
