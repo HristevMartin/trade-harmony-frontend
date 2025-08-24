@@ -18,6 +18,7 @@ import Footer from "./components/Footer";
 import EditJobs from "./pages/EditJobs";
 import TradesPerson from "./pages/TradesPerson";
 import TradesPersonOnboarding from "./pages/TradesPersonOnboarding";
+import TradesPersonJobs from "./pages/TradesPersonJobs";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
           <Route path="/edit-job/:id" element={<EditJobs />} />
           <Route path="/tradesperson" element={<TradesPerson />} />
           <Route path="/tradesperson/onboarding" element={<TradesPersonOnboarding />} />
+          <Route path="/tradesperson/jobs" element={<TradesPersonJobs />} />
         </Routes>
         <Footer />
       </BrowserRouter>
