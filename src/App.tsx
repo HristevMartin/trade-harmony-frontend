@@ -16,6 +16,7 @@ import PostJob from "./pages/PostJob";
 import JobDetail from "./pages/JobDetail";
 import Footer from "./components/Footer";
 import EditJobs from "./pages/EditJobs";
+import TradesPerson from "./pages/TradesPerson";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
           <Route path="/jobs/:id" element={<JobDetail />} />
           <Route path="/edit-job/:id" element={<EditJobs />} />
+          <Route path="/tradesperson" element={<TradesPerson />} />
         </Routes>
         <Footer />
       </BrowserRouter>

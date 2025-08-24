@@ -119,8 +119,8 @@ const Navbar = () => {
             variant="outline"
             className="border-trust-blue text-trust-blue hover:bg-trust-blue hover:text-trust-blue-foreground transition-all duration-300 hover:scale-105 text-sm md:text-base px-3 md:px-4"
           >
-            <span className="hidden sm:inline">Join as a Tradesperson</span>
-            <span className="sm:hidden">Join as a Tradesperson</span>
+            <span onClick={() => navigate('/tradesperson')} className="hidden sm:inline">Join as a Tradesperson</span>
+            <span onClick={() => navigate('/tradesperson')} className="sm:hidden">Join as a Tradesperson</span>
           </Button>
         </div>
       </div>
