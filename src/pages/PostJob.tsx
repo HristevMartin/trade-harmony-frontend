@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SuccessModal from "@/components/SuccessModal";
 import ErrorModal from "@/components/ErrorModal";
+import AuthModal from "@/components/AuthModal";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -114,6 +115,8 @@ const PostJob = () => {
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [showErrorModal, setShowErrorModal] = useState(false);
     const [errorModalMessage, setErrorModalMessage] = useState('');
+    const [showAuthModal, setShowAuthModal] = useState(false);
+    const [pendingSubmission, setPendingSubmission] = useState(false);
 
     // Calculate completion progress for each step
     const getStepCompletion = () => {
@@ -286,9 +289,27 @@ const PostJob = () => {
 
     const API_URL = import.meta.env.VITE_API_URL;
 
+    // Check if user is authenticated
+    const isAuthenticated = () => {
+        const token = localStorage.getItem('access_token');
+        return !!token;
+    };
+
+    // Handle authentication success
+    const handleAuthSuccess = (authData: { id: string; role: string; token: string; email?: string }) => {
+        console.log('Authentication successful:', authData);
+        setShowAuthModal(false);
+        
+        // If there was a pending submission, proceed with it
+        if (pendingSubmission) {
+            setPendingSubmission(false);
+            // Call the actual job submission
+            submitJobData();
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsSubmitting(true);
         
         // Clear any previous errors
         setFormErrors({});
@@ -309,72 +330,106 @@ const PostJob = () => {
             isValid = false;
         }
         
-        if (isValid) {
-            try {
-                // Create FormData for file upload
-                const formDataToSend = new FormData();
+        if (!isValid) {
+            return;
+        }
+
+        // Check if user is authenticated
+        if (!isAuthenticated()) {
+            // Show auth modal and mark submission as pending
+            setPendingSubmission(true);
+            setShowAuthModal(true);
+            return;
+        }
+
+        await submitJobData();
+    };
+
+    const submitJobData = async () => {
+        setIsSubmitting(true);
+        
+        try {
+            // Create FormData for file upload
+            const formDataToSend = new FormData();
+            
+            // Add form fields
+            Object.keys(formData).forEach(key => {
+                const value = formData[key as keyof typeof formData];
+                if (value !== null && value !== undefined) {
+                    formDataToSend.append(key, value.toString());
+                }
+            });
+            
+            // Add images
+            uploadedImages.forEach((file, index) => {
+                formDataToSend.append(`images`, file);
+            });
+
+            // Add userId from auth data
+            const authUser = localStorage.getItem('auth_user');
+            if (authUser) {
+                const userData = JSON.parse(authUser);
+                formDataToSend.append('userId', userData.id);
+            }
+
+            // Add auth token to headers
+            const token = localStorage.getItem('access_token');
+            const headers: HeadersInit = {};
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            console.log('Sending form data:', {
+                formData,
+                imageCount: uploadedImages.length,
+                API_URL,
+                hasToken: !!token
+            });
+
+            console.log('formDataToSend', formDataToSend);
+            
+            const submitDataRequest = await fetch(`${API_URL}/travel/save-client-project`, {
+                method: 'POST',
+                headers,
+                body: formDataToSend,
+            });
+            
+            if (submitDataRequest.ok) {
+                const data = await submitDataRequest.json();
+                console.log('Success response:', data);
+                let localStorageData = JSON.stringify({
+                    jobId: data.project_id,
+                })
+                localStorage.setItem('jobId', localStorageData);
+                setShowSuccessModal(true);
+            } else {
+                const errorData = await submitDataRequest.text();
+                console.error('Server error:', errorData);
                 
-                // Add form fields
-                Object.keys(formData).forEach(key => {
-                    const value = formData[key as keyof typeof formData];
-                    if (value !== null && value !== undefined) {
-                        formDataToSend.append(key, value.toString());
-                    }
-                });
-                
-                // Add images
-                uploadedImages.forEach((file, index) => {
-                    formDataToSend.append(`images`, file);
-                });
-                
-                console.log('Sending form data:', {
-                    formData,
-                    imageCount: uploadedImages.length,
-                    API_URL
-                });
-                
-                const submitDataRequest = await fetch(`${API_URL}/travel/save-client-project`, {
-                    method: 'POST',
-                    body: formDataToSend,
-                });
-                
-                if (submitDataRequest.ok) {
-                    const data = await submitDataRequest.json();
-                    console.log('Success response:', data);
-                    let localStorageData = JSON.stringify({
-                        jobId: data.project_id,
-                    })
-                    localStorage.setItem('jobId', localStorageData);
-                    setShowSuccessModal(true);
-                } else {
-                    const errorData = await submitDataRequest.text();
-                    console.error('Server error:', errorData);
-                    
-                    // Try to parse error response
-                    try {
-                        const errorJson = JSON.parse(errorData);
-                        if (errorJson.errors) {
-                            // If there are specific field errors, show them inline
-                            setFormErrors(errorJson.errors);
-                        } else {
-                            // If it's a general server error, show error modal
-                            setErrorModalMessage(errorJson.message || 'Server error occurred. Please try again.');
-                            setShowErrorModal(true);
-                        }
-                    } catch {
-                        // If error response isn't JSON, show error modal
-                        setErrorModalMessage('Server error occurred. Please try again later.');
+                // Try to parse error response
+                try {
+                    const errorJson = JSON.parse(errorData);
+                    if (errorJson.errors) {
+                        // If there are specific field errors, show them inline
+                        setFormErrors(errorJson.errors);
+                    } else {
+                        // If it's a general server error, show error modal
+                        setErrorModalMessage(errorJson.message || 'Server error occurred. Please try again.');
                         setShowErrorModal(true);
                     }
+                } catch {
+                    // If error response isn't JSON, show error modal
+                    setErrorModalMessage('Server error occurred. Please try again later.');
+                    setShowErrorModal(true);
                 }
-            } catch (error) {
-                console.error('Request failed:', error);
-                setErrorModalMessage('Please check your connection and try again.');
-                setShowErrorModal(true);
             }
+        } catch (error) {
+            console.error('Request failed:', error);
+            setErrorModalMessage('Please check your connection and try again.');
+            setShowErrorModal(true);
+        } finally {
+            setIsSubmitting(false);
         }
-        
-        setIsSubmitting(false);
     };
 
     const steps = [
@@ -863,7 +918,7 @@ const PostJob = () => {
                             <button 
                                 type="submit" 
                                 className="inline-flex items-center justify-center rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-medium px-6 py-3 shadow-md hover:shadow-lg transition w-full md:w-auto md:px-12 md:py-4 md:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled={uploadedImages.length === 0 || isSubmitting}
+                                disabled={uploadedImages.length === 0 || isSubmitting || showAuthModal}
                                 aria-busy={isSubmitting}
                             >
                                 {isSubmitting ? (
@@ -879,7 +934,10 @@ const PostJob = () => {
                                 )}
                             </button>
                             <p className="text-xs text-slate-500 mt-2 text-center">
-                                We'll notify local tradespeople right away.
+                                {!isAuthenticated() 
+                                    ? "You'll be asked to sign in or create an account."
+                                    : "We'll notify local tradespeople right away."
+                                }
                             </p>
                         </div>
 
@@ -888,7 +946,7 @@ const PostJob = () => {
                             <button 
                                 type="submit" 
                                 className="inline-flex items-center justify-center rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-medium px-6 py-3 shadow-md hover:shadow-lg transition w-full disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled={uploadedImages.length === 0 || isSubmitting}
+                                disabled={uploadedImages.length === 0 || isSubmitting || showAuthModal}
                                 aria-busy={isSubmitting}
                             >
                                 {isSubmitting ? (
@@ -971,6 +1029,16 @@ const PostJob = () => {
                     text: "Try Again",
                     onClick: handleRetrySubmit
                 }}
+            />
+
+            {/* Auth Modal */}
+            <AuthModal
+                isOpen={showAuthModal}
+                onClose={() => {
+                    setShowAuthModal(false);
+                    setPendingSubmission(false);
+                }}
+                onSuccess={handleAuthSuccess}
             />
         </>
     );

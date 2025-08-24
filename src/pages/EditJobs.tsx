@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
+import ErrorModal from "@/components/ErrorModal";
 import {
     HiArrowLeft,
     HiWrenchScrewdriver,
@@ -100,6 +101,8 @@ const EditJob = () => {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showSuccess, setShowSuccess] = useState(false);
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [errorModalMessage, setErrorModalMessage] = useState('');
     
     const [formData, setFormData] = useState<FormData>({
         job_title: '',
@@ -170,7 +173,8 @@ const EditJob = () => {
         const totalImages = formData.existing_images.length + formData.images.length + files.length;
         
         if (totalImages > 5) {
-            alert('Maximum 5 images allowed');
+            setErrorModalMessage('Maximum 5 images allowed');
+            setShowErrorModal(true);
             return;
         }
 
@@ -231,6 +235,13 @@ const EditJob = () => {
             // Add total image count for validation
             formDataToSend.append('total_images_count', (formData.existing_images.length + formData.images.length).toString());
 
+            // Add userId from auth data
+            const authUser = localStorage.getItem('auth_user');
+            if (authUser) {
+                const userData = JSON.parse(authUser);
+                formDataToSend.append('userId', userData.id);
+            }
+
             // Log what we're sending for debugging
             console.log('Sending to API:', {
                 job_title: formData.job_title,
@@ -263,7 +274,8 @@ const EditJob = () => {
             
         } catch (err) {
             console.error('Error saving job:', err);
-            alert('Failed to save changes. Please try again.');
+            setErrorModalMessage('Failed to save changes. Please try again.');
+            setShowErrorModal(true);
         } finally {
             setSaving(false);
         }
@@ -705,6 +717,18 @@ const EditJob = () => {
                         </Button>
                     </div>
                 </div>
+
+                {/* Error Modal */}
+                <ErrorModal
+                    isOpen={showErrorModal}
+                    onClose={() => setShowErrorModal(false)}
+                    title="Error"
+                    message={errorModalMessage}
+                    actionButton={{
+                        text: "Try Again",
+                        onClick: () => setShowErrorModal(false)
+                    }}
+                />
             </div>
         </>
     );
