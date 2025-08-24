@@ -13,6 +13,9 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Navbar from "./components/Navbar";
 import PostJob from "./pages/PostJob";
+import JobDetail from "./pages/JobDetail";
+import Footer from "./components/Footer";
+import EditJobs from "./pages/EditJobs";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +28,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <Navbar />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/service-providers" element={<ServiceProviders />} />
@@ -34,7 +38,10 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/post-job" element={<PostJob />} />
           <Route path="*" element={<NotFound />} />
+          <Route path="/jobs/:id" element={<JobDetail />} />
+          <Route path="/edit-job/:id" element={<EditJobs />} />
         </Routes>
+        <Footer />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

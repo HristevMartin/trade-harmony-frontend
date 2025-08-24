@@ -2,7 +2,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SuccessModal from "@/components/SuccessModal";
 import ErrorModal from "@/components/ErrorModal";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,7 @@ import { X } from "lucide-react";
 
 const PostJob = () => {
     const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
     
     // Get country from query param and validate it exists in our mapping
     const countryParam = searchParams.get('country')?.toUpperCase() || 'GB';
@@ -170,10 +171,12 @@ const PostJob = () => {
 
     const handleViewJob = () => {
         const jobData = localStorage.getItem('jobId');
+        console.log('in here the jobData is', jobData);
         if (jobData) {
             const { jobId } = JSON.parse(jobData);
             setShowSuccessModal(false);
-            window.location.href = `/jobs/${jobId}`;
+            // Navigate with postSuccess state to show the banner
+            navigate(`/jobs/${jobId}`, { state: { postSuccess: true } });
         }
     };
 
@@ -366,7 +369,7 @@ const PostJob = () => {
                 }
             } catch (error) {
                 console.error('Request failed:', error);
-                setErrorModalMessage('Network error. Please check your connection and try again.');
+                setErrorModalMessage('Please check your connection and try again.');
                 setShowErrorModal(true);
             }
         }
@@ -389,7 +392,6 @@ const PostJob = () => {
 
     return (
         <>
-            <Navbar />
             <div className="min-h-screen bg-slate-50">
                 <div className="max-w-3xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-10">
                     {/* Header */}
@@ -723,7 +725,8 @@ const PostJob = () => {
                                     <div className="space-y-2">
                                         {[
                                             { value: 'asap', label: 'ASAP' },
-                                            { value: 'week', label: 'Within a week' },
+                                            { value: 'this_week', label: 'Within a week' },
+                                            { value: 'this_month', label: 'Within a month' },
                                             { value: 'flexible', label: 'Flexible' }
                                         ].map((option) => (
                                             <label 
@@ -806,8 +809,8 @@ const PostJob = () => {
                                     <div className="space-y-2">
                                         {[
                                             { value: 'email', label: 'Email' },
-                                            { value: 'phone', label: 'Phone' },
-                                            { value: 'either', label: 'Either' }
+                                            // { value: 'phone', label: 'Phone' },
+                                            // { value: 'either', label: 'Either' }
                                         ].map((option) => (
                                             <label 
                                                 key={option.value}
@@ -856,7 +859,7 @@ const PostJob = () => {
                         </div>
 
                         {/* Final CTA */}
-                        <div className="text-center space-y-4 mt-8">
+                        <div className="text-center space-y-4 mt-8 sm:block hidden md:block md:mt-0">
                             <button 
                                 type="submit" 
                                 className="inline-flex items-center justify-center rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-medium px-6 py-3 shadow-md hover:shadow-lg transition w-full md:w-auto md:px-12 md:py-4 md:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
@@ -942,7 +945,6 @@ const PostJob = () => {
                     </form>
                 </div>
             </div>
-            <Footer />
             
             {/* Success Modal */}
             <SuccessModal
@@ -963,7 +965,7 @@ const PostJob = () => {
             <ErrorModal
                 isOpen={showErrorModal}
                 onClose={handleErrorModalClose}
-                title="Oops! Something went wrong"
+                title="Please try again"
                 message={errorModalMessage}
                 actionButton={{
                     text: "Try Again",

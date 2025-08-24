@@ -43,10 +43,10 @@ const Modal: React.FC<ModalProps> = ({
   if (!isOpen) return null;
 
   const sizeClasses = {
-    sm: 'max-w-sm sm:max-w-md',
-    md: 'max-w-md sm:max-w-lg',
-    lg: 'max-w-lg sm:max-w-2xl',
-    xl: 'max-w-xl sm:max-w-4xl'
+    sm: 'max-w-xs sm:max-w-sm',
+    md: 'max-w-sm sm:max-w-md',
+    lg: 'max-w-md sm:max-w-lg',
+    xl: 'max-w-lg sm:max-w-2xl'
   };
 
   const handleBackdropClick = (e: React.MouseEvent) => {
@@ -57,7 +57,7 @@ const Modal: React.FC<ModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 flex items-center justify-center p-3 sm:p-4 bg-black bg-opacity-50"
+      className="fixed inset-0 flex items-center justify-center p-4 sm:p-6 bg-black bg-opacity-50 backdrop-blur-sm"
       style={{ zIndex: 9999 }}
       onClick={handleBackdropClick}
       role="dialog"
@@ -65,7 +65,7 @@ const Modal: React.FC<ModalProps> = ({
       aria-labelledby={title ? 'modal-title' : undefined}
     >
       <div 
-        className={`relative w-full ${sizeClasses[size]} bg-white rounded-xl sm:rounded-2xl shadow-2xl ring-1 ring-slate-200 transform transition-all duration-300 ease-out max-h-[90vh] overflow-y-auto`}
+        className={`relative w-full ${sizeClasses[size]} bg-white rounded-2xl shadow-xl ring-1 ring-slate-200/50 transform transition-all duration-300 ease-out max-h-[85vh] overflow-y-auto`}
         role="document"
       >
         {/* Header */}

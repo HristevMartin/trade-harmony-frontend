@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Building, Wrench, Zap } from "lucide-react";
 
 import { motion } from "framer-motion";
@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const isActive = (path: string) => location.pathname === path;
   const [availableServices, setAvailableServices] = useState<any>([]);
 
@@ -97,12 +98,14 @@ const Navbar = () => {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <motion.div
+            onClick={() => navigate('/')}
+            style={{ cursor: 'pointer' }}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
             className="text-2xl font-bold text-trust-blue"
           >
-            TradeFinder
+            JobHub
           </motion.div>
 
           <nav className="hidden md:flex items-center space-x-8">
@@ -117,7 +120,7 @@ const Navbar = () => {
             className="border-trust-blue text-trust-blue hover:bg-trust-blue hover:text-trust-blue-foreground transition-all duration-300 hover:scale-105 text-sm md:text-base px-3 md:px-4"
           >
             <span className="hidden sm:inline">Join as a Tradesperson</span>
-            <span className="sm:hidden">Join Now</span>
+            <span className="sm:hidden">Join as a Tradesperson</span>
           </Button>
         </div>
       </div>
