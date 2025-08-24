@@ -19,10 +19,10 @@ import EditJobs from "./pages/EditJobs";
 import TradesPerson from "./pages/TradesPerson";
 import TradesPersonOnboarding from "./pages/TradesPersonOnboarding";
 import TradesPersonJobs from "./pages/TradesPersonJobs";
+import HomeownerGetProjects from "./pages/HomeownerGetProjects";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
-
-// test
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -39,6 +39,7 @@ const App = () => (
           <Route path="/project/:id" element={<ProjectDetail />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/post-job" element={<PostJob />} />
           <Route path="*" element={<NotFound />} />
           <Route path="/jobs/:id" element={<JobDetail />} />
@@ -46,6 +47,7 @@ const App = () => (
           <Route path="/tradesperson" element={<TradesPerson />} />
           <Route path="/tradesperson/onboarding" element={<TradesPersonOnboarding />} />
           <Route path="/tradesperson/jobs" element={<TradesPersonJobs />} />
+          <Route path="/homeowner/get-projects" element={<HomeownerGetProjects />} />
         </Routes>
         <Footer />
       </BrowserRouter>

@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ChevronLeft, ChevronRight, Upload, X, CheckCircle, Badge } from 'lucide-react';
+import AuthModal from '@/components/AuthModal';
 
 type ProDraft = {
   name: string;
@@ -61,43 +62,119 @@ const TradesPersonOnboarding = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isCompleted, setIsCompleted] = useState(false);
   const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [pendingRegistration, setPendingRegistration] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
-  // Load from localStorage on mount
-  useEffect(() => {
-    // Check for existing auth user to prefill
-    const authUser = localStorage.getItem('auth_user');
-    let prefillData = {};
-    
-    if (authUser) {
-      try {
-        const userData = JSON.parse(authUser);
-        prefillData = {
-          name: userData.name || '',
-          email: userData.email || ''
-        };
-      } catch (error) {
-        console.error('Error parsing auth user:', error);
-      }
-    }
-
-    // Load draft
-    const savedDraft = localStorage.getItem('pro_onboarding_draft');
-    if (savedDraft) {
-      try {
-        const parsedDraft = JSON.parse(savedDraft);
-        setFormData({ ...initialProDraft, ...prefillData, ...parsedDraft });
-      } catch (error) {
-        console.error('Error loading saved draft:', error);
-        setFormData({ ...initialProDraft, ...prefillData });
-      }
-    } else {
-      setFormData({ ...initialProDraft, ...prefillData });
+  // Function to clear corrupted localStorage data
+  const clearCorruptedData = useCallback(() => {
+    try {
+      localStorage.removeItem('pro_onboarding_draft');
+      console.log('Cleared corrupted onboarding draft');
+    } catch (error) {
+      console.error('Error clearing localStorage:', error);
     }
   }, []);
 
-  // Save draft to localStorage
+  // Load from localStorage on mount
+  useEffect(() => {
+    const loadInitialData = () => {
+      try {
+        // Check for existing auth user to prefill
+        const authUser = localStorage.getItem('auth_user');
+        let prefillData = {};
+        
+        if (authUser) {
+          try {
+            const userData = JSON.parse(authUser);
+            prefillData = {
+              name: userData.name || '',
+              email: userData.email || ''
+            };
+          } catch (error) {
+            console.error('Error parsing auth user:', error);
+            // Clear corrupted auth data
+            localStorage.removeItem('auth_user');
+          }
+        }
+
+        // Load draft
+        const savedDraft = localStorage.getItem('pro_onboarding_draft');
+        if (savedDraft) {
+          try {
+            const parsedDraft = JSON.parse(savedDraft);
+            
+            // Validate the parsed draft has expected structure
+            if (parsedDraft && typeof parsedDraft === 'object') {
+              // Filter out any invalid or corrupted data
+              const validDraft = {
+                name: parsedDraft.name || '',
+                email: parsedDraft.email || '',
+                phone: parsedDraft.phone || '',
+                primaryTrade: parsedDraft.primaryTrade || '',
+                otherServices: Array.isArray(parsedDraft.otherServices) ? parsedDraft.otherServices : [],
+                city: parsedDraft.city || '',
+                postcode: parsedDraft.postcode || '',
+                radiusKm: typeof parsedDraft.radiusKm === 'number' ? parsedDraft.radiusKm : 10,
+                experienceYears: typeof parsedDraft.experienceYears === 'number' ? parsedDraft.experienceYears : undefined,
+                certifications: parsedDraft.certifications || '',
+                bio: parsedDraft.bio || '',
+                portfolio: Array.isArray(parsedDraft.portfolio) ? [] : [], // Don't restore File objects
+                marketingConsent: Boolean(parsedDraft.marketingConsent)
+              };
+              
+              setFormData({ ...initialProDraft, ...prefillData, ...validDraft });
+            } else {
+              throw new Error('Invalid draft structure');
+            }
+          } catch (error) {
+            console.error('Error loading saved draft:', error);
+            // Clear corrupted draft data
+            localStorage.removeItem('pro_onboarding_draft');
+            setFormData({ ...initialProDraft, ...prefillData });
+          }
+        } else {
+          setFormData({ ...initialProDraft, ...prefillData });
+        }
+      } catch (error) {
+        console.error('Error loading initial data:', error);
+        // Clear corrupted data and fallback to clean state
+        clearCorruptedData();
+        setFormData(initialProDraft);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadInitialData();
+  }, [clearCorruptedData]);
+
+  // Check user role on component mount
+  useEffect(() => {
+    const roleCheck = checkUserRole();
+    if (!roleCheck.isValid) {
+      setErrors(prev => ({ ...prev, general: roleCheck.message }));
+      // Scroll to top to make the error message visible
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, []);
+
+  // Save draft to localStorage (excluding File objects)
   const saveDraft = useCallback(() => {
-    localStorage.setItem('pro_onboarding_draft', JSON.stringify(formData));
+    try {
+      // Create a safe version of formData without File objects
+      const draftToSave = {
+        ...formData,
+        portfolio: [] // Don't save File objects - they can't be serialized
+      };
+      localStorage.setItem('pro_onboarding_draft', JSON.stringify(draftToSave));
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      // If saving fails, remove the corrupted draft
+      localStorage.removeItem('pro_onboarding_draft');
+    }
   }, [formData]);
 
   // Save draft on step change and unload
@@ -215,12 +292,22 @@ const TradesPersonOnboarding = () => {
   };
 
   const nextStep = () => {
+    // Prevent navigation if there's a role validation error
+    if (errors.general && errors.general.includes('Customer accounts cannot register')) {
+      return;
+    }
+    
     if (validateStep(currentStep) && currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
   };
 
   const prevStep = () => {
+    // Prevent navigation if there's a role validation error
+    if (errors.general && errors.general.includes('Customer accounts cannot register')) {
+      return;
+    }
+    
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
@@ -289,15 +376,234 @@ const TradesPersonOnboarding = () => {
     }
   };
 
-  const completeRegistration = () => {
-    if (validateStep(4)) {
-      setIsCompleted(true);
-      localStorage.removeItem('pro_onboarding_draft');
+  // Check if user is authenticated
+  const isAuthenticated = () => {
+    return !!localStorage.getItem('access_token');
+  };
+
+  // Check if authenticated user has correct role for tradesperson registration
+  const checkUserRole = () => {
+    const token = localStorage.getItem('access_token');
+    const authUser = localStorage.getItem('auth_user');
+    
+    if (!token || !authUser) {
+      return { isValid: true, message: '' }; // Not authenticated, allow to proceed with auth modal
+    }
+
+    try {
+      const userData = JSON.parse(authUser);
+      if (userData.role === 'customer' || userData.role === 'CUSTOMER') {
+        return {
+          isValid: false,
+          message: 'Customer accounts cannot register as tradespeople. Please create a new trader account or switch to a trader account to complete registration.'
+        };
+      }
+      return { isValid: true, message: '' };
+    } catch (error) {
+      console.error('Error parsing user data:', error);
+      // If we can't parse user data, clear it and allow to proceed
+      localStorage.removeItem('auth_user');
+      localStorage.removeItem('access_token');
+      return { isValid: true, message: '' };
+    }
+  };
+
+  // Handle authentication success
+  const handleAuthSuccess = useCallback((authData: { id: string; role: string; token: string; email?: string }) => {
+    console.log('Authentication successful:', authData);
+    
+    // Clear any previous errors
+    setErrors(prev => ({ ...prev, general: '' }));
+    
+    setShowAuthModal(false);
+    
+    // Check if the authenticated user has the correct role
+    if (authData.role === 'customer' || authData.role === 'CUSTOMER') {
+      setErrors(prev => ({ 
+        ...prev, 
+        general: 'Customer accounts cannot register as tradespeople. Please create a new trader account or switch to a trader account to complete registration.' 
+      }));
+      setPendingRegistration(false);
+      // Scroll to top to make the error message visible
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    
+    if (pendingRegistration) {
+      setPendingRegistration(false);
+      // Use a ref or state to prevent double execution
+      submitRegistration();
+    }
+  }, [pendingRegistration, isSubmitting, hasSubmitted]);
+
+  // Complete registration after auth success
+  const submitRegistration = async () => {
+    // Prevent double submission
+    if (isSubmitting || hasSubmitted) {
+      console.log('Submission already in progress or completed, skipping...');
+      return;
+    }
+
+    console.log('Saving tradesperson data after authentication...');
+    
+    // Check authentication status
+    const token = localStorage.getItem('access_token');
+    const authUser = localStorage.getItem('auth_user');
+    
+    if (!token || !authUser) {
+      console.error('No authentication data found');
+      setErrors({ general: 'Authentication required. Please try again.' });
+      return;
+    }
+
+    setIsSubmitting(true);
+    setHasSubmitted(true);
+    
+    try {
+      // Create FormData for file upload (exactly like PostJob component)
+      const formDataToSend = new FormData();
       
-      // Redirect after showing success
-      setTimeout(() => {
-        navigate('/tradesperson/jobs');
-      }, 2000);
+      // Add basic tradesperson information - mimic PostJob's approach
+      const tradespersonData = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || '',
+        primaryTrade: formData.primaryTrade,
+        otherServices: JSON.stringify(formData.otherServices), // Convert array to JSON string
+        city: formData.city,
+        postcode: formData.postcode,
+        radiusKm: formData.radiusKm.toString(),
+        experienceYears: (formData.experienceYears || 0).toString(),
+        certifications: formData.certifications || '',
+        bio: formData.bio || '',
+        marketingConsent: formData.marketingConsent.toString()
+      };
+
+      // Add form fields exactly like PostJob
+      Object.keys(tradespersonData).forEach(key => {
+        const value = tradespersonData[key as keyof typeof tradespersonData];
+        if (value !== null && value !== undefined) {
+          formDataToSend.append(key, value.toString());
+        }
+      });
+
+      // Add portfolio images with the correct field name for the API
+      formData.portfolio.forEach((file, index) => {
+        formDataToSend.append('projectImages', file); // Use 'projectImages' key as expected by API
+      });
+
+      // Add userId from auth data exactly like PostJob
+      if (authUser) {
+        const userData = JSON.parse(authUser);
+        formDataToSend.append('userId', userData.id);
+      }
+
+      // Add auth token to headers exactly like PostJob
+      const headers: HeadersInit = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      console.log('Sending tradesperson data to:', `${import.meta.env.VITE_API_URL}/travel/save-trader-project`);
+      console.log('Form data includes:', {
+        name: formData.name,
+        email: formData.email,
+        primaryTrade: formData.primaryTrade,
+        portfolioCount: formData.portfolio.length,
+        hasToken: !!token
+      });
+      
+      // Debug: Log all FormData entries
+      console.log('FormData entries:');
+      for (let [key, value] of formDataToSend.entries()) {
+        if (value instanceof File) {
+          console.log(`${key}:`, `File(${value.name}, ${value.size} bytes, ${value.type})`);
+        } else {
+          console.log(`${key}:`, value);
+        }
+      }
+      
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/save-trader-project`, {
+        method: 'POST',
+        headers,
+        body: formDataToSend
+      });
+
+      console.log('Tradesperson data save response status:', response.status);
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Tradesperson data saved successfully:', data);
+        
+        setIsCompleted(true);
+        localStorage.removeItem('pro_onboarding_draft');
+        console.log('Tradesperson registration flow completed');
+        
+        // Redirect after showing success
+        setTimeout(() => {
+          navigate('/tradesperson/jobs');
+        }, 2000);
+      } else {
+        const errorText = await response.text();
+        console.error('Failed to save tradesperson data:', response.status, 'Response:', errorText);
+        
+        // Try to parse error response
+        try {
+          const errorJson = JSON.parse(errorText);
+          if (errorJson.message) {
+            setErrors({ general: errorJson.message });
+          } else {
+            setErrors({ general: 'Failed to save your information. Please try again.' });
+          }
+        } catch {
+          setErrors({ general: 'Server error occurred. Please try again later.' });
+        }
+        setHasSubmitted(false);
+      }
+    } catch (error) {
+      console.error('Error saving tradesperson data:', error);
+      
+      // More specific error messages
+      if (error.message.includes('NetworkError') || error.message.includes('fetch')) {
+        setErrors({ general: 'Network error. Please check your internet connection and try again.' });
+      } else if (error.message.includes('Server error: 401')) {
+        setErrors({ general: 'Authentication expired. Please log in again.' });
+        // Clear auth data if unauthorized
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('auth_user');
+      } else {
+        setErrors({ general: error.message || 'Failed to save your information. Please try again.' });
+      }
+      setHasSubmitted(false);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const completeRegistration = () => {
+    if (!validateStep(4)) {
+      return;
+    }
+
+    // Clear any previous errors
+    setErrors(prev => ({ ...prev, general: '' }));
+
+    // Check user role first (for authenticated users)
+    const roleCheck = checkUserRole();
+    if (!roleCheck.isValid) {
+      setErrors(prev => ({ ...prev, general: roleCheck.message }));
+      // Scroll to top to make the error message visible
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (isAuthenticated()) {
+      // User is already authenticated, proceed with registration
+      submitRegistration();
+    } else {
+      // User not authenticated, show auth modal
+      setPendingRegistration(true);
+      setShowAuthModal(true);
     }
   };
 
@@ -310,6 +616,32 @@ const TradesPersonOnboarding = () => {
       e.preventDefault(); // Prevent form submission
     }
   };
+
+  // Debug log for rendering issues (only in development)
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development' && currentStep === 4) {
+      console.log('Step 4 Debug:', {
+        currentStep,
+        isCompleted,
+        showAuthModal,
+        hasFormData: !!formData,
+        errors: Object.keys(errors),
+        isSubmitting
+      });
+    }
+  }, [currentStep, isCompleted, showAuthModal, formData, errors, isSubmitting]);
+
+  // Show loading state while initializing
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (isCompleted) {
     return (
@@ -360,6 +692,48 @@ const TradesPersonOnboarding = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 md:space-y-6">
+            {/* General Error Display - Show on all steps */}
+            {errors.general && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3 flex-1">
+                    <p className="text-sm font-medium text-red-800 mb-3">
+                      {errors.general}
+                    </p>
+                    {errors.general.includes('Customer accounts cannot register') && (
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => {
+                            localStorage.removeItem('access_token');
+                            localStorage.removeItem('auth_user');
+                            setErrors(prev => ({ ...prev, general: '' }));
+                            window.location.reload();
+                          }}
+                          className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                        >
+                          Logout & Create Trader Account
+                        </button>
+                        {/* No dismiss button for role validation errors - user must resolve the conflict */}
+                      </div>
+                    )}
+                    {!errors.general.includes('Customer accounts cannot register') && (
+                      <button
+                        onClick={() => setErrors(prev => ({ ...prev, general: '' }))}
+                        className="mt-2 text-xs text-red-500 hover:text-red-700 underline"
+                      >
+                        Dismiss
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Step 1: Personal Details */}
             {currentStep === 1 && (
               <>
@@ -651,7 +1025,7 @@ const TradesPersonOnboarding = () => {
             <Button
               variant="outline"
               onClick={prevStep}
-              disabled={currentStep === 1}
+              disabled={currentStep === 1 || (errors.general && errors.general.includes('Customer accounts cannot register'))}
               className="flex items-center gap-2"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -661,7 +1035,7 @@ const TradesPersonOnboarding = () => {
             {currentStep < 4 ? (
               <Button
                 onClick={nextStep}
-                disabled={!isStepValid(currentStep)}
+                disabled={!isStepValid(currentStep) || (errors.general && errors.general.includes('Customer accounts cannot register'))}
                 className="flex items-center gap-2"
               >
                 Next
@@ -670,10 +1044,17 @@ const TradesPersonOnboarding = () => {
             ) : (
               <Button
                 onClick={completeRegistration}
-                disabled={!isStepValid(currentStep)}
+                disabled={!isStepValid(currentStep) || isSubmitting || (errors.general && errors.general.includes('Customer accounts cannot register'))}
                 className="bg-success hover:bg-success/90 text-success-foreground"
               >
-                Complete Registration
+                {isSubmitting ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Submitting...
+                  </div>
+                ) : (
+                  isAuthenticated() ? 'Complete Registration' : 'Login to Complete Registration'
+                )}
               </Button>
             )}
           </div>
@@ -684,7 +1065,7 @@ const TradesPersonOnboarding = () => {
           <Button
             variant="outline"
             onClick={prevStep}
-            disabled={currentStep === 1}
+            disabled={currentStep === 1 || (errors.general && errors.general.includes('Customer accounts cannot register'))}
             className="flex items-center gap-2"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -694,7 +1075,7 @@ const TradesPersonOnboarding = () => {
           {currentStep < 4 ? (
             <Button
               onClick={nextStep}
-              disabled={!isStepValid(currentStep)}
+              disabled={!isStepValid(currentStep) || (errors.general && errors.general.includes('Customer accounts cannot register'))}
               className="flex items-center gap-2"
             >
               Next
@@ -703,13 +1084,31 @@ const TradesPersonOnboarding = () => {
           ) : (
             <Button
               onClick={completeRegistration}
-              disabled={!isStepValid(currentStep)}
+              disabled={!isStepValid(currentStep) || isSubmitting || (errors.general && errors.general.includes('Customer accounts cannot register'))}
               className="bg-success hover:bg-success/90 text-success-foreground"
             >
-              Complete Registration
+              {isSubmitting ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Submitting...
+                </div>
+              ) : (
+                isAuthenticated() ? 'Complete Registration' : 'Login to Complete Registration'
+              )}
             </Button>
           )}
         </div>
+
+        {/* Auth Modal */}
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => {
+            setShowAuthModal(false);
+            setPendingRegistration(false);
+          }}
+          onSuccess={handleAuthSuccess}
+          role="trader"
+        />
       </div>
     </div>
   );

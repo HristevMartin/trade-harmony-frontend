@@ -17,9 +17,10 @@ interface AuthModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: (authData: AuthData) => void;
+    role?: string; // Optional role to specify user type (e.g., 'trader', 'customer')
 }
 
-const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
+const AuthModal = ({ isOpen, onClose, onSuccess, role = 'customer' }: AuthModalProps) => {
     const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -31,25 +32,33 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     const handleInputChange = (field: string, value: string) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
-        
-        // Clear error when user starts typing
-        if (errors[field]) {
-            setErrors(prev => {
-                const newErrors = { ...prev };
-                delete newErrors[field];
+        setFormData(prev => {
+            const newData = { ...prev, [field]: value };
+            
+            // Clear errors after state update, with access to new values
+            setErrors(prevErrors => {
+                const newErrors = { ...prevErrors };
+                
+                // Clear current field error
+                if (newErrors[field]) {
+                    delete newErrors[field];
+                }
+                
+                // Clear confirmPassword error when either password field changes
+                // But only if passwords now match
+                if (field === 'password' || field === 'confirmPassword') {
+                    if (field === 'password' && newData.confirmPassword && newData.password === newData.confirmPassword) {
+                        delete newErrors.confirmPassword;
+                    } else if (field === 'confirmPassword' && newData.password === value) {
+                        delete newErrors.confirmPassword;
+                    }
+                }
+                
                 return newErrors;
             });
-        }
-
-        // Also clear confirmPassword error when either password field changes
-        if ((field === 'password' || field === 'confirmPassword') && errors.confirmPassword) {
-            setErrors(prev => {
-                const newErrors = { ...prev };
-                delete newErrors.confirmPassword;
-                return newErrors;
-            });
-        }
+            
+            return newData;
+        });
     };
 
     const validateForm = () => {
@@ -94,7 +103,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
             const endpoint = activeTab === 'login' ? '/travel/login' : '/travel/register';
             const payload = activeTab === 'login' 
                 ? { email: formData.email, password: formData.password }
-                : { email: formData.email, password: formData.password };
+                : { email: formData.email, password: formData.password, role: role };
 
             const response = await fetch(`${import.meta.env.VITE_API_URL}${endpoint}`, {
                 method: 'POST',
@@ -114,6 +123,9 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                     role: data.role,
                     email: formData.email
                 }));
+
+                // Dispatch custom event to notify other components of auth change
+                window.dispatchEvent(new Event('authChange'));
 
                 // Call success callback
                 onSuccess({
