@@ -316,7 +316,8 @@ const PostJob = () => {
 
         try {
             const userData = JSON.parse(authUser);
-            if (userData.role === 'trader' || userData.role === 'TRADER') {
+            const userRole = Array.isArray(userData.role) ? userData.role : [userData.role];
+            if (userRole.includes('trader') || userRole.includes('TRADER')) {
                 return {
                     isValid: false,
                     message: 'Traders cannot post homeowner projects. Please create a new customer account or switch to a customer account to post a job.'
@@ -338,7 +339,8 @@ const PostJob = () => {
         setShowAuthModal(false);
         
         // Check if the authenticated user has the correct role
-        if (authData.role === 'trader' || authData.role === 'TRADER') {
+        const authUserRole = Array.isArray(authData.role) ? authData.role : [authData.role];
+        if (authUserRole.includes('trader') || authUserRole.includes('TRADER')) {
             setFormErrors(prev => ({ 
                 ...prev, 
                 general: 'Traders cannot post homeowner projects. Please create a new customer account or switch to a customer account to post a job.' 
@@ -1081,6 +1083,9 @@ const PostJob = () => {
                         </fieldset>
                     </form>
                 </div>
+                
+                {/* Mobile spacer for fixed sticky button */}
+                <div className="h-20 md:hidden" />
             </div>
             
             {/* Success Modal */}

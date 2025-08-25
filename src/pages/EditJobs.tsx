@@ -718,6 +718,9 @@ const EditJob = () => {
                     </div>
                 </div>
 
+                {/* Mobile spacer for fixed sticky footer */}
+                <div className="h-20 md:hidden" />
+
                 {/* Error Modal */}
                 <ErrorModal
                     isOpen={showErrorModal}

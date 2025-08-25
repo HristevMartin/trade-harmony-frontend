@@ -392,7 +392,8 @@ const TradesPersonOnboarding = () => {
 
     try {
       const userData = JSON.parse(authUser);
-      if (userData.role === 'customer' || userData.role === 'CUSTOMER') {
+      const userRole = Array.isArray(userData.role) ? userData.role : [userData.role];
+      if (userRole.includes('customer') || userRole.includes('CUSTOMER')) {
         return {
           isValid: false,
           message: 'Customer accounts cannot register as tradespeople. Please create a new trader account or switch to a trader account to complete registration.'
@@ -418,7 +419,8 @@ const TradesPersonOnboarding = () => {
     setShowAuthModal(false);
     
     // Check if the authenticated user has the correct role
-    if (authData.role === 'customer' || authData.role === 'CUSTOMER') {
+    const authUserRole = Array.isArray(authData.role) ? authData.role : [authData.role];
+    if (authUserRole.includes('customer') || authUserRole.includes('CUSTOMER')) {
       setErrors(prev => ({ 
         ...prev, 
         general: 'Customer accounts cannot register as tradespeople. Please create a new trader account or switch to a trader account to complete registration.' 
@@ -1098,6 +1100,9 @@ const TradesPersonOnboarding = () => {
             </Button>
           )}
         </div>
+
+        {/* Mobile spacer for fixed sticky navigation */}
+        <div className="h-24 md:hidden" />
 
         {/* Auth Modal */}
         <AuthModal

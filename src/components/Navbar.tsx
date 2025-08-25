@@ -136,7 +136,9 @@ const Navbar = () => {
     setIsMobileMenuOpen(false);
   };
 
-  const isCustomer = user?.role === 'customer' || user?.role === 'USER';
+  // check if user?.role is array or string properly
+  const isCustomer = Array.isArray(user?.role) ? user?.role.includes('customer') : user?.role === 'customer' || user?.role === 'USER';
+  console.log('show me the isCustomer', isCustomer);
   const isLoggedIn = !!user;
 
   const handleLogout = () => {
@@ -179,7 +181,7 @@ const Navbar = () => {
             {/* My Projects - Only show for customers */}
             {isCustomer && (
               <button 
-                onClick={() => handleNavigation('/my-projects')} 
+                onClick={() => handleNavigation('/homeowner/my-projects')} 
                 className={`text-foreground hover:text-trust-blue transition-colors font-medium flex items-center gap-2 ${isActive('/my-projects') ? 'text-trust-blue' : ''}`}
               >
                 My Projects

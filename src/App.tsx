@@ -47,7 +47,7 @@ const App = () => (
           <Route path="/tradesperson" element={<TradesPerson />} />
           <Route path="/tradesperson/onboarding" element={<TradesPersonOnboarding />} />
           <Route path="/tradesperson/jobs" element={<TradesPersonJobs />} />
-          <Route path="/homeowner/get-projects" element={<HomeownerGetProjects />} />
+          <Route path="/homeowner/my-projects" element={<HomeownerGetProjects />} />
         </Routes>
         <Footer />
       </BrowserRouter>
