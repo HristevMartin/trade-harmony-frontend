@@ -37,7 +37,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-
 const Index = () => {
   const [postcode, setPostcode] = useState("");
   const [selectedService, setSelectedService] = useState("");
@@ -46,9 +45,46 @@ const Index = () => {
   const [isHovering, setIsHovering] = useState(false);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
+  const [user, setUser] = useState<any>(null);
 
   const navigate = useNavigate();
 
+  // Check user authentication and role on mount
+  useEffect(() => {
+    const checkAuthState = () => {
+      const authUser = localStorage.getItem('auth_user');
+      if (authUser) {
+        try {
+          const userData = JSON.parse(authUser);
+          setUser(userData);
+        } catch (error) {
+          console.error('Error parsing user data:', error);
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+    };
+
+    checkAuthState();
+    window.addEventListener('storage', checkAuthState);
+    window.addEventListener('authChange', checkAuthState);
+
+    return () => {
+      window.removeEventListener('storage', checkAuthState);
+      window.removeEventListener('authChange', checkAuthState);
+    };
+  }, []);
+
+  // Check if user is a trader (any status)
+  const isTrader = user && (
+    Array.isArray(user.role) 
+      ? user.role.includes('trader') || user.role.includes('master')
+      : user.role === 'trader' || user.role === 'master'
+  );
+
+  // Show Popular Services for anonymous users and homeowners, hide for traders
+  const showPopularServices = !isTrader;
 
   const countries = [
     { name: "United Kingdom", code: "UK", flag: "🇬🇧" },
@@ -59,14 +95,14 @@ const Index = () => {
   ];
 
   const services = [
-    { name: "Plumbing", icon: <Droplets className="h-8 w-8" />, color: "text-trust-blue" },
-    { name: "Electrical", icon: <Zap className="h-8 w-8" />, color: "text-yellow-500" },
-    { name: "Carpentry", icon: <Hammer className="h-8 w-8" />, color: "text-amber-600" },
-    { name: "Roofing", icon: <Building className="h-8 w-8" />, color: "text-slate-600" },
-    { name: "Painting", icon: <PaintBucket className="h-8 w-8" />, color: "text-purple-500" },
-    { name: "Gardening", icon: <Trees className="h-8 w-8" />, color: "text-trust-green" },
-    { name: "Heating & Cooling", icon: <Thermometer className="h-8 w-8" />, color: "text-red-500" },
-    { name: "Mechanical Repairs", icon: <Wrench className="h-8 w-8" />, color: "text-gray-600" },
+    { name: "Plumbing", icon: <Droplets className="h-8 w-8" />, color: "text-trust-blue", slug: "plumbing" },
+    { name: "Electrical", icon: <Zap className="h-8 w-8" />, color: "text-yellow-500", slug: "electrical" },
+    { name: "Carpentry", icon: <Hammer className="h-8 w-8" />, color: "text-amber-600", slug: "carpentry" },
+    { name: "Roofing", icon: <Building className="h-8 w-8" />, color: "text-slate-600", slug: "roofing" },
+    { name: "Painting", icon: <PaintBucket className="h-8 w-8" />, color: "text-purple-500", slug: "painting" },
+    { name: "Gardening", icon: <Trees className="h-8 w-8" />, color: "text-trust-green", slug: "gardening" },
+    { name: "Heating & Cooling", icon: <Thermometer className="h-8 w-8" />, color: "text-red-500", slug: "heating-cooling" },
+    { name: "Mechanical Repairs", icon: <Wrench className="h-8 w-8" />, color: "text-gray-600", slug: "mechanical-repairs" },
   ];
 
   const testimonials = [
@@ -81,7 +117,7 @@ const Index = () => {
     {
       text: "Amazing plumber fixed our emergency leak quickly. Highly recommend this platform! Saved us from a potential disaster.",
       name: "John Davies",
-      location: "Manchester", 
+      location: "Manchester",
       avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
       rating: 5,
       service: "Plumbing"
@@ -171,6 +207,26 @@ const Index = () => {
     console.log('show me postcode', postcode);
     navigate(`/post-job?country=${selectedCountry}&postcode=${postcode}`);
   }
+
+  // Handle service tile click
+  const handleServiceClick = (serviceSlug: string) => {
+    if (isTrader) {
+      // Redirect traders to jobs page
+      navigate('/tradesperson/jobs');
+      return;
+    }
+    
+    // Navigate to post job with category preselected
+    navigate(`/post-job?category=${serviceSlug}`);
+  };
+
+  // Handle service tile key press
+  const handleServiceKeyPress = (e: React.KeyboardEvent, serviceSlug: string) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleServiceClick(serviceSlug);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -293,24 +349,24 @@ const Index = () => {
             
             {/* Hero Title Section */}
             <div className="text-center">
-              <motion.h1
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
                 className="font-bold leading-tight text-[clamp(1.8rem,5vw,3.2rem)] text-foreground mb-6 md:mb-8 max-w-4xl mx-auto"
-              >
+            >
                 Post your job and connect with trusted tradespeople{" "}
-                <span className="text-trust-blue">near you</span>
-              </motion.h1>
-              
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
+              <span className="text-trust-blue">near you</span>
+            </motion.h1>
+            
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
                 className="text-slate-600 text-[clamp(1rem,2.8vw,1.25rem)] mb-8 md:mb-10 max-w-3xl mx-auto leading-relaxed"
-              >
+            >
                 It's free to post. Tradespeople apply to your job, and you choose the right one.
-              </motion.p>
+            </motion.p>
             </div>
 
             {/* Search Form Section */}
@@ -323,7 +379,7 @@ const Index = () => {
               <div className="bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/70 rounded-xl shadow-lg p-3 sm:p-4 md:p-5">
                 <div className="space-y-4 md:space-y-0 md:flex md:gap-3">
                   {/* Country Dropdown */}
-                  <div className="flex-1">
+                <div className="flex-1">
                     <label htmlFor="country-select" className="sr-only">Select Country</label>
                     <Select value={selectedCountry} onValueChange={setSelectedCountry}>
                       <SelectTrigger 
@@ -331,19 +387,19 @@ const Index = () => {
                         className="w-full h-12 min-h-[48px] text-base rounded-xl border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-colors bg-white"
                       >
                         <SelectValue placeholder="Country" />
-                      </SelectTrigger>
-                      <SelectContent>
+                    </SelectTrigger>
+                    <SelectContent>
                         {countries.map((country) => (
                           <SelectItem key={country.code} value={country.code}>
-                            <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2">
                               <span>{country.flag}</span>
                               <span>{country.name}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
                   {/* Location Input */}
                   <div className="flex-1">
@@ -363,8 +419,8 @@ const Index = () => {
 
                   {/* CTA Button - Hidden on mobile, replaced by sticky */}
                   <div className="hidden md:block flex-1">
-                    <Button 
-                      size="lg" 
+                <Button 
+                  size="lg" 
                       className="bg-trust-blue hover:bg-trust-blue/90 text-white h-12 min-h-[48px] w-full font-semibold px-6 py-3 text-base rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
                       onClick={handlePostJob}
                     >
@@ -373,8 +429,8 @@ const Index = () => {
                         <span className="lg:hidden">Post Job</span>
                         <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                       </span>
-                    </Button>
-                  </div>
+                </Button>
+              </div>
                 </div>
               </div>
             </motion.div>
@@ -409,13 +465,13 @@ const Index = () => {
                 role="note" 
                 aria-label="Social proof"
                 className="flex items-center justify-center gap-2 text-sm sm:text-base opacity-90"
-              >
-                <span className="text-foreground font-semibold">Excellent</span>
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 text-trust-green fill-current" />
-                  ))}
-                </div>
+            >
+              <span className="text-foreground font-semibold">Excellent</span>
+              <div className="flex">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="h-5 w-5 text-trust-green fill-current" />
+                ))}
+              </div>
                 <span className="text-muted-foreground">5,000+ reviews on</span>
                 <span className="text-trust-green font-bold">Trustpilot</span>
               </p>
@@ -437,20 +493,21 @@ const Index = () => {
       </section>
 
       {/* Service Categories Grid */}
-      <section className="py-4 md:py-14 bg-background">
-        <div className="space-y-6 md:space-y-10">
-          <div className="text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">Popular Services</h2>
-              <p className="text-muted-foreground text-lg">Connect with trusted professionals for any home improvement project with our verified tradespeople network</p>
-            </motion.div>
+      {showPopularServices && (
+        <section className="py-4 md:py-14 bg-background">
+          <div className="space-y-6 md:space-y-10">
+            <div className="text-center">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+              >
+                <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">Popular Services</h2>
+                <p className="text-muted-foreground text-lg">Connect with trusted professionals for any home improvement project with our verified tradespeople network</p>
+              </motion.div>
           </div>
           
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
             {services.map((service, index) => (
               <motion.div
                 key={service.name}
@@ -458,18 +515,24 @@ const Index = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
-                <Card className="rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition cursor-pointer group border hover:border-trust-blue/30 bg-gradient-to-br from-card to-card/50">
-                  <CardContent className="p-0 text-center relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-trust-blue/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <div className={`${service.color} mb-3 transition-all duration-300 relative z-10 flex justify-center`}>
-                      <div className="w-8 h-8" aria-hidden="true">
-                        {service.icon}
+                  <Card 
+                    className="rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition cursor-pointer group border hover:border-trust-blue/30 bg-gradient-to-br from-card to-card/50"
+                    onClick={() => handleServiceClick(service.slug)}
+                    onKeyPress={(e) => handleServiceKeyPress(e, service.slug)}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <CardContent className="p-0 text-center relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-br from-trust-blue/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className={`${service.color} mb-3 transition-all duration-300 relative z-10 flex justify-center`}>
+                        <div className="w-8 h-8" aria-hidden="true">
+                      {service.icon}
+                    </div>
                       </div>
-                    </div>
-                    <h3 className="font-semibold text-sm sm:text-base text-foreground group-hover:text-trust-blue transition-colors relative z-10">{service.name}</h3>
-                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <Sparkles className="h-3 w-3 text-trust-blue" />
-                    </div>
+                      <h3 className="font-semibold text-sm sm:text-base text-foreground group-hover:text-trust-blue transition-colors relative z-10">{service.name}</h3>
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <Sparkles className="h-3 w-3 text-trust-blue" />
+                      </div>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -477,6 +540,7 @@ const Index = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* How It Works Section */}
       <section className="py-8 md:py-14 bg-muted/30">
@@ -541,12 +605,12 @@ const Index = () => {
               transition={{ duration: 0.6 }}
             >
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">What Our Customers Say</h2>
-              <div className="flex items-center justify-center gap-4 mb-8">
-                <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center gap-4 mb-8">
+              <div className="flex items-center gap-2">
                   <Shield className="h-6 w-6 text-trust-green" aria-hidden="true" />
                   <span className="text-muted-foreground">All tradespeople are verified & insured</span>
-                </div>
               </div>
+            </div>
             </motion.div>
           </div>
           
@@ -561,7 +625,7 @@ const Index = () => {
               onTouchEnd={handleTouchEnd}
             >
               <AnimatePresence mode="wait">
-                <motion.div
+              <motion.div
                   key={currentTestimonial}
                   initial={{ opacity: 0, x: 100 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -605,11 +669,11 @@ const Index = () => {
                           <p className="text-trust-blue font-semibold text-xs sm:text-sm bg-trust-blue/10 px-2 sm:px-3 py-1 rounded-full mt-1 inline-block">
                             {testimonials[currentTestimonial].service}
                           </p>
-                        </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
               </AnimatePresence>
             </div>
             
@@ -680,9 +744,9 @@ const Index = () => {
 
       {/* Recent Activity Feed */}
       <section className="py-8 md:py-14 bg-muted/30">
-        <div className="overflow-hidden">
-          <motion.div
-            animate={{ x: [0, -1000] }}
+          <div className="overflow-hidden">
+            <motion.div
+              animate={{ x: [0, -1000] }}
             transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
             className="flex gap-12 whitespace-nowrap"
           >
@@ -692,9 +756,9 @@ const Index = () => {
                 <span className="text-sm font-medium">
                   {activity.text} <span className="font-bold text-foreground">{activity.location}</span> {activity.action} <span className="font-bold text-trust-blue">{activity.service}</span> <span className="text-xs opacity-75">{activity.time}</span>
                 </span>
-              </div>
-            ))}
-          </motion.div>
+                </div>
+              ))}
+            </motion.div>
         </div>
       </section>
 
@@ -710,21 +774,21 @@ const Index = () => {
             transition={{ duration: 0.8 }}
           >
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6">
-              Over 50,000 tradespeople nationwide are ready to help.
-            </h2>
+            Over 50,000 tradespeople nationwide are ready to help.
+          </h2>
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-6 sm:mb-8 md:mb-10 opacity-90 leading-relaxed">
               Join thousands of satisfied customers who found their perfect tradesperson through our platform
-            </p>
-            <Button 
-              size="lg" 
+          </p>
+          <Button 
+            size="lg" 
               className="bg-accent-orange hover:bg-accent-orange/90 text-white px-4 py-3 text-[15px] sm:text-lg sm:px-10 sm:py-6 h-auto min-h-[44px] font-semibold group transition-all duration-300 shadow-xl hover:shadow-2xl w-full sm:w-auto"
               onClick={handlePostJob}
-            >
+          >
               <span className="flex items-center">
-                Post Your Job Today
+            Post Your Job Today
                 <ArrowRight className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6 group-hover:translate-x-1 transition-transform" />
               </span>
-            </Button>
+          </Button>
           </motion.div>
         </div>
       </section>

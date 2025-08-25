@@ -40,11 +40,25 @@ const PostJob = () => {
         'ES': '🇪🇸 Spain',
     };
     
+    // Service categories array
+    const serviceCategories = [
+        'Plumbing', 'Electrical', 'Carpentry', 'Roofing', 'Painting', 
+        'Gardening', 'Heating & Cooling', 'Flooring', 'Cleaning'
+    ];
+    
     // Use the country if it exists in our mapping, otherwise default to GB
     const initialCountry = countryCodeMap[countryParam as keyof typeof countryCodeMap] ? countryParam : 'GB';
     const initialPostcode = searchParams.get('postcode') || '';
     
-    console.log('Query params:', { country: countryParam, postcode: initialPostcode, mappedCountry: initialCountry });
+    // Get category from query param and find the exact match from serviceCategories
+    const categoryParam = searchParams.get('category') || '';
+    
+    // Find exact category match (case-insensitive)
+    const initialCategory = categoryParam 
+        ? serviceCategories.find(cat => cat.toLowerCase() === categoryParam.toLowerCase()) || ''
+        : '';
+    
+    console.log('Query params:', { country: countryParam, postcode: initialPostcode, mappedCountry: initialCountry, category: categoryParam, matchedCategory: initialCategory });
     
     // Extract city/town from postcode parameter if available
     const extractCityFromPostcode = (postcode: string, country: string) => {
@@ -96,7 +110,7 @@ const PostJob = () => {
     const [formData, setFormData] = useState({
         country: initialCountry,
         location: extractCityFromPostcode(initialPostcode, initialCountry),
-        serviceCategory: '',
+        serviceCategory: initialCategory,
         jobTitle: '',
         jobDescription: '',
         budget: '',
@@ -142,9 +156,10 @@ const PostJob = () => {
         setFormData(prev => ({ 
             ...prev, 
             country: initialCountry, 
-            location: extractCityFromPostcode(initialPostcode, initialCountry)
+            location: extractCityFromPostcode(initialPostcode, initialCountry),
+            serviceCategory: initialCategory
         }));
-    }, [initialCountry, initialPostcode]);
+    }, [initialCountry, initialPostcode, initialCategory]);
 
     // Check user role on component mount
     useEffect(() => {
@@ -498,11 +513,6 @@ const PostJob = () => {
         { number: 3, title: 'Photos', icon: HiCamera },
         { number: 4, title: 'Contact', icon: HiUserCircle },
         { number: 5, title: 'Review', icon: HiCheckCircle }
-    ];
-
-    const serviceCategories = [
-        'Plumbing', 'Electrical', 'Carpentry', 'Roofing', 'Painting', 
-        'Gardening', 'Heating & Cooling', 'Flooring', 'Cleaning'
     ];
 
     return (
