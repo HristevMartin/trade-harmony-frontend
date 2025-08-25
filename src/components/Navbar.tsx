@@ -83,6 +83,7 @@ const Navbar = () => {
       }
     };
 
+
     // Check auth state on mount
     checkAuthState();
 
@@ -97,6 +98,41 @@ const Navbar = () => {
       window.removeEventListener('authChange', checkAuthState);
     };
   }, []);
+
+
+  useEffect(() => {
+    const refetchUserRole = async () => {
+      const authUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
+      const userId = authUser?.id;
+      if (userId) {
+        try {
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/get-user-role?userId=${userId}`);
+          const data = await response.json();
+          console.log('show me the user role', data);
+          
+          // Update the user data with new role
+          if (data.trader) {
+            const updatedUser = { ...authUser, role: data.trader };
+            localStorage.setItem('auth_user', JSON.stringify(updatedUser));
+            setUser(updatedUser);
+            console.log('Updated user role to:', data.trader);
+          } else if (data.role) {
+            // Handle case where API returns role directly
+            const updatedUser = { ...authUser, role: data.role };
+            localStorage.setItem('auth_user', JSON.stringify(updatedUser));
+            setUser(updatedUser);
+            console.log('Updated user role to:', data.role);
+          }
+        } catch (error) {
+          console.error('Error fetching user role:', error);
+        }
+      } else {
+        console.log('No user ID found');
+      }
+    }
+    refetchUserRole();
+  }, []);
+
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -140,6 +176,12 @@ const Navbar = () => {
   const isCustomer = Array.isArray(user?.role) ? user?.role.includes('customer') : user?.role === 'customer' || user?.role === 'USER';
   console.log('show me the isCustomer', isCustomer);
   const isLoggedIn = !!user;
+
+  const isTrader = Array.isArray(user?.role) 
+    ? user?.role.some(role => ['master', 'trader', 'tradesperson', 'MASTER', 'TRADER', 'TRADESPERSON'].includes(role))
+    : ['master', 'trader', 'tradesperson', 'MASTER', 'TRADER', 'TRADESPERSON'].includes(user?.role);
+  console.log('show me the isTrader', isTrader);
+  console.log('user role:', user?.role);
 
   const handleLogout = () => {
     localStorage.removeItem('access_token');
@@ -185,6 +227,15 @@ const Navbar = () => {
                 className={`text-foreground hover:text-trust-blue transition-colors font-medium flex items-center gap-2 ${isActive('/homeowner/my-projects') ? 'text-trust-blue' : ''}`}
               >
                 My Projects
+              </button>
+            )}
+
+            {isTrader && (
+              <button 
+                onClick={() => handleNavigation('/tradesperson/jobs')} 
+                className={`text-foreground hover:text-trust-blue transition-colors font-medium flex items-center gap-2 ${isActive('/tradesperson/jobs') ? 'text-trust-blue' : ''}`}
+              >
+                View Jobs
               </button>
             )}
             
