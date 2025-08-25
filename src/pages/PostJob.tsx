@@ -146,6 +146,16 @@ const PostJob = () => {
         }));
     }, [initialCountry, initialPostcode]);
 
+    // Check user role on component mount
+    useEffect(() => {
+        const roleCheck = checkUserRole();
+        if (!roleCheck.isValid) {
+            setFormErrors(prev => ({ ...prev, general: roleCheck.message }));
+            // Scroll to top to make the error message visible
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }, []);
+
     const handleInputChange = (field: string, value: string | boolean) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
@@ -295,10 +305,51 @@ const PostJob = () => {
         return !!token;
     };
 
+    // Check if authenticated user has correct role for posting jobs
+    const checkUserRole = () => {
+        const token = localStorage.getItem('access_token');
+        const authUser = localStorage.getItem('auth_user');
+        
+        if (!token || !authUser) {
+            return { isValid: true, message: '' }; // Not authenticated, allow to proceed with auth modal
+        }
+
+        try {
+            const userData = JSON.parse(authUser);
+            const userRole = Array.isArray(userData.role) ? userData.role : [userData.role];
+            if (userRole.includes('trader') || userRole.includes('TRADER')) {
+                return {
+                    isValid: false,
+                    message: 'Traders cannot post homeowner projects. Please create a new customer account or switch to a customer account to post a job.'
+                };
+            }
+            return { isValid: true, message: '' };
+        } catch (error) {
+            console.error('Error parsing user data:', error);
+            // If we can't parse user data, clear it and allow to proceed
+            localStorage.removeItem('auth_user');
+            localStorage.removeItem('access_token');
+            return { isValid: true, message: '' };
+        }
+    };
+
     // Handle authentication success
     const handleAuthSuccess = (authData: { id: string; role: string; token: string; email?: string }) => {
         console.log('Authentication successful:', authData);
         setShowAuthModal(false);
+        
+        // Check if the authenticated user has the correct role
+        const authUserRole = Array.isArray(authData.role) ? authData.role : [authData.role];
+        if (authUserRole.includes('trader') || authUserRole.includes('TRADER')) {
+            setFormErrors(prev => ({ 
+                ...prev, 
+                general: 'Traders cannot post homeowner projects. Please create a new customer account or switch to a customer account to post a job.' 
+            }));
+            setPendingSubmission(false);
+            // Scroll to top to make the error message visible
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
         
         // If there was a pending submission, proceed with it
         if (pendingSubmission) {
@@ -331,6 +382,15 @@ const PostJob = () => {
         }
         
         if (!isValid) {
+            return;
+        }
+
+        // Check user role first (for authenticated users)
+        const roleCheck = checkUserRole();
+        if (!roleCheck.isValid) {
+            setFormErrors(prev => ({ ...prev, general: roleCheck.message }));
+            // Scroll to top to make the error message visible
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         }
 
@@ -525,16 +585,37 @@ const PostJob = () => {
                         {/* General Error Message */}
                         {formErrors.general && (
                             <div className="rounded-xl bg-red-50 border border-red-200 p-4 mb-6">
-                                <div className="flex items-center">
+                                <div className="flex items-start">
                                     <div className="flex-shrink-0">
                                         <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
                                         </svg>
                                     </div>
-                                    <div className="ml-3">
-                                        <p className="text-sm font-medium text-red-800">
+                                    <div className="ml-3 flex-1">
+                                        <p className="text-sm font-medium text-red-800 mb-3">
                                             {formErrors.general}
                                         </p>
+                                        {formErrors.general.includes('Traders cannot post') && (
+                                            <div className="flex gap-3">
+                                                <button
+                                                    onClick={() => {
+                                                        localStorage.removeItem('access_token');
+                                                        localStorage.removeItem('auth_user');
+                                                        setFormErrors(prev => ({ ...prev, general: '' }));
+                                                        window.location.reload();
+                                                    }}
+                                                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                                >
+                                                    Logout & Create Customer Account
+                                                </button>
+                                                {/* <button
+                                                    onClick={() => setFormErrors(prev => ({ ...prev, general: '' }))}
+                                                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-red-700 bg-transparent hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                                >
+                                                    Dismiss
+                                                </button> */}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -1002,6 +1083,9 @@ const PostJob = () => {
                         </fieldset>
                     </form>
                 </div>
+                
+                {/* Mobile spacer for fixed sticky button */}
+                <div className="h-20 md:hidden" />
             </div>
             
             {/* Success Modal */}
