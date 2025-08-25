@@ -182,7 +182,7 @@ const Navbar = () => {
             {isCustomer && (
               <button 
                 onClick={() => handleNavigation('/homeowner/my-projects')} 
-                className={`text-foreground hover:text-trust-blue transition-colors font-medium flex items-center gap-2 ${isActive('/my-projects') ? 'text-trust-blue' : ''}`}
+                className={`text-foreground hover:text-trust-blue transition-colors font-medium flex items-center gap-2 ${isActive('/homeowner/my-projects') ? 'text-trust-blue' : ''}`}
               >
                 My Projects
               </button>
@@ -259,7 +259,7 @@ const Navbar = () => {
                 {/* My Projects - Only show for customers */}
                 {isCustomer && (
                   <button 
-                    onClick={() => handleNavigation('/my-projects')} 
+                    onClick={() => handleNavigation('/homeowner/my-projects')} 
                     className={`flex items-center gap-2 w-full text-left py-2 px-4 rounded-lg transition-colors ${isActive('/my-projects') ? 'bg-trust-blue/10 text-trust-blue' : 'text-foreground hover:bg-muted'}`}
                   >
                     My Projects

@@ -365,7 +365,7 @@ const Index = () => {
                   <div className="hidden md:block flex-1">
                     <Button 
                       size="lg" 
-                      className="bg-accent-orange hover:bg-accent-orange/90 text-accent-orange-foreground h-12 min-h-[48px] w-full font-semibold px-6 py-3 text-base rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
+                      className="bg-trust-blue hover:bg-trust-blue/90 text-white h-12 min-h-[48px] w-full font-semibold px-6 py-3 text-base rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
                       onClick={handlePostJob}
                     >
                       <span className="flex items-center justify-center">
@@ -377,6 +377,25 @@ const Index = () => {
                   </div>
                 </div>
               </div>
+            </motion.div>
+
+            {/* Mobile CTA Button - Shows under form on mobile */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+              className="mt-4 md:hidden"
+            >
+              <Button 
+                size="lg" 
+                className="bg-trust-blue hover:bg-trust-blue/90 text-white w-full min-h-[48px] px-6 py-3 text-base font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl group"
+                onClick={handlePostJob}
+              >
+                <span className="flex items-center justify-center">
+                  Post Your Job Today
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </span>
+              </Button>
             </motion.div>
 
             {/* Trustpilot Social Proof */}
@@ -680,7 +699,7 @@ const Index = () => {
       </section>
 
       {/* Mid-page CTA Band */}
-      <section className="py-8 md:py-14 bg-gradient-to-r from-trust-blue via-trust-blue to-trust-blue/90 text-trust-blue-foreground relative overflow-hidden">
+      <section className="py-8 md:py-14 mb-8 md:mb-14 bg-gradient-to-r from-trust-blue via-trust-blue to-trust-blue/90 text-trust-blue-foreground relative overflow-hidden">
         {/* Background Elements */}
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJtMzYgMzQgNi0yIDYgMi02IDJ6bTAgNGwzLTEgMy0xIDMgMSAzIDEtNiAyem0wLTEwIDMtMSAzIDEtNiAyem0wLTQgMy0xIDMgMS02IDJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
         
@@ -698,7 +717,7 @@ const Index = () => {
             </p>
             <Button 
               size="lg" 
-              className="bg-accent-orange hover:bg-accent-orange/90 text-accent-orange-foreground px-4 py-3 text-[15px] sm:text-lg sm:px-10 sm:py-6 h-auto min-h-[44px] font-semibold group transition-all duration-300 shadow-xl hover:shadow-2xl w-full sm:w-auto"
+              className="bg-accent-orange hover:bg-accent-orange/90 text-white px-4 py-3 text-[15px] sm:text-lg sm:px-10 sm:py-6 h-auto min-h-[44px] font-semibold group transition-all duration-300 shadow-xl hover:shadow-2xl w-full sm:w-auto"
               onClick={handlePostJob}
             >
               <span className="flex items-center">
@@ -710,23 +729,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Mobile spacer for sticky CTA */}
-      <div className="h-20 md:hidden" />
-      
-      </div>
-      
-      {/* Mobile Sticky CTA */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 p-3 md:hidden">
-        <Button 
-          size="lg" 
-          className="bg-accent-orange hover:bg-accent-orange/90 text-accent-orange-foreground w-full min-h-[44px] px-4 py-3 text-[15px] font-semibold group transition-all duration-300 shadow-lg hover:shadow-xl"
-          onClick={handlePostJob}
-        >
-          <span className="flex items-center justify-center">
-            Post Job
-            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-          </span>
-        </Button>
       </div>
 
     </div>

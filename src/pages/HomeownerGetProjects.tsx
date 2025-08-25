@@ -174,9 +174,10 @@ const HomeownerGetProjects = () => {
           </p>
         </div>
         
+        {/* Desktop button */}
         <Button
           onClick={() => navigate('/post-job')}
-          className="mt-4 sm:mt-0 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all"
+          className="hidden sm:flex mt-4 sm:mt-0 bg-trust-blue hover:bg-trust-blue/90 text-white px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all"
         >
           <HiPlus className="w-5 h-5 mr-2" />
           Post New Job
@@ -196,7 +197,7 @@ const HomeownerGetProjects = () => {
             </p>
             <Button
               onClick={() => navigate('/post-job')}
-              className="bg-orange-500 hover:bg-orange-600 text-white"
+              className="bg-trust-blue hover:bg-trust-blue/90 text-white"
             >
               Post Your First Job
             </Button>
@@ -215,7 +216,7 @@ const HomeownerGetProjects = () => {
                     {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
                   </Badge>
                   <span className="text-xs text-slate-500">
-                    #{project.project_id.split('-')[0]}
+                    Job: {project.project_id.split('-')[0]}
                   </span>
                 </div>
                 
@@ -230,21 +231,27 @@ const HomeownerGetProjects = () => {
                 </p>
 
                 {/* Project Image */}
-                {project.image_urls && project.image_urls.length > 0 && (
-                  <div className="mb-4">
-                    <img
-                      src={project.image_urls[0]}
-                      alt="Project"
-                      className="w-full h-32 object-cover rounded-lg"
-                      loading="lazy"
-                    />
+                <div className="mb-4">
+                  <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-slate-100">
+                    {project.image_urls && project.image_urls.length > 0 ? (
+                      <img
+                        src={project.image_urls[0]}
+                        alt="Project"
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+                        <HiPhoto className="w-8 h-8 text-slate-400" />
+                      </div>
+                    )}
                     {project.image_count > 1 && (
-                      <p className="text-xs text-slate-500 mt-1">
-                        +{project.image_count - 1} more photo{project.image_count > 2 ? 's' : ''}
-                      </p>
+                      <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-md">
+                        +{project.image_count - 1} more
+                      </div>
                     )}
                   </div>
-                )}
+                </div>
 
                 {/* Project Details */}
                 <div className="space-y-2 mb-4">
@@ -274,7 +281,7 @@ const HomeownerGetProjects = () => {
                 {/* Action Buttons */}
                 <div className="flex gap-2">
                   <Button
-                    onClick={() => navigate(`/jobs/${project.id}`)}
+                    onClick={() => navigate(`/jobs/${project.project_id}`)}
                     variant="outline"
                     size="sm"
                     className="flex-1 text-xs"
@@ -284,7 +291,7 @@ const HomeownerGetProjects = () => {
                   </Button>
                   
                   <Button
-                    onClick={() => navigate(`/jobs/${project.id}`)}
+                    onClick={() => navigate(`/edit-job/${project?.project_id}`)}
                     variant="outline"
                     size="sm"
                     className="flex-1 text-xs"
@@ -298,6 +305,17 @@ const HomeownerGetProjects = () => {
           ))}
         </div>
       )}
+      
+      {/* Mobile button - fixed to bottom of screen */}
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 z-50">
+        <Button
+          onClick={() => navigate('/post-job')}
+          className="w-full bg-trust-blue hover:bg-trust-blue/90 text-white px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all"
+        >
+          <HiPlus className="w-5 h-5 mr-2" />
+          Post New Job
+        </Button>
+      </div>
     </div>
   );
 };
