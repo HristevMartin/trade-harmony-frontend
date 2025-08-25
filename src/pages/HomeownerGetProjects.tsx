@@ -39,7 +39,7 @@ const HomeownerGetProjects = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  // Get the user id from the local storage - fix extraction
+  // Get the user id from the local storage - fsix extraction
   const getUserId = () => {
     try {
       const userData = localStorage.getItem('auth_user');
