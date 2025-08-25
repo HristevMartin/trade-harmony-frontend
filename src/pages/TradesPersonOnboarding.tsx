@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ChevronLeft, ChevronRight, Upload, X, CheckCircle, Badge } from 'lucide-react';
 import AuthModal from '@/components/AuthModal';
 
@@ -543,7 +544,7 @@ const TradesPersonOnboarding = () => {
         
         // Redirect after showing success
         setTimeout(() => {
-          navigate('/tradesperson/jobs');
+          navigate('/');
         }, 2000);
       } else {
         const errorText = await response.text();
@@ -895,18 +896,21 @@ const TradesPersonOnboarding = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="serviceRadius">Service Radius</Label>
-                  <select
-                    id="serviceRadius"
-                    value={formData.radiusKm}
-                    onChange={(e) => updateFormData('radiusKm', parseInt(e.target.value))}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  <Select
+                    value={formData.radiusKm.toString()}
+                    onValueChange={(value) => updateFormData('radiusKm', parseInt(value))}
                   >
-                    {radiusOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select service radius" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {radiusOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value.toString()}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">

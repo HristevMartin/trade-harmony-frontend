@@ -437,7 +437,7 @@ const Index = () => {
       </section>
 
       {/* Service Categories Grid */}
-      <section className="py-8 md:py-14 bg-background">
+      <section className="py-4 md:py-14 bg-background">
         <div className="space-y-6 md:space-y-10">
           <div className="text-center">
             <motion.div
