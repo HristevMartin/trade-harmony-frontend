@@ -515,7 +515,7 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.2 }}
-                className="rounded-xl p-4 sm:p-6 bg-white/70 ring-1 ring-slate-200 text-center group cursor-pointer flex-1"
+                className="rounded-xl p-4 sm:p-6 bg-white/70 ring-1 ring-slate-200 text-center group flex-1"
               >
                 <div className="bg-trust-blue/10 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 group-hover:bg-trust-blue/20 transition-all duration-300">
                   <div className="text-trust-blue transition-transform duration-300" aria-hidden="true">{step.icon}</div>

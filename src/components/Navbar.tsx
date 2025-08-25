@@ -255,9 +255,6 @@ const Navbar = () => {
               </button>
             )}
             
-            <a href="#services" className="text-foreground hover:text-trust-blue transition-colors font-medium">Services</a>
-            <a href="#how-it-works" className="text-foreground hover:text-trust-blue transition-colors font-medium">How it Works</a>
-            <a href="#contact" className="text-foreground hover:text-trust-blue transition-colors font-medium">Contact</a>
           </nav>
 
           {/* Desktop Auth & CTA Buttons */}
@@ -342,30 +339,6 @@ const Navbar = () => {
                     View Jobs
                   </button>
                 )}
-                
-                <a 
-                  href="#services" 
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block py-2 px-4 rounded-lg text-foreground hover:bg-muted transition-colors"
-                >
-                  Services
-                </a>
-                
-                <a 
-                  href="#how-it-works" 
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block py-2 px-4 rounded-lg text-foreground hover:bg-muted transition-colors"
-                >
-                  How it Works
-                </a>
-                
-                <a 
-                  href="#contact" 
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block py-2 px-4 rounded-lg text-foreground hover:bg-muted transition-colors"
-                >
-                  Contact
-                </a>
                 
                 {/* Mobile Auth & CTA Buttons */}
                 <div className="pt-2 border-t border-border/10 space-y-3">
