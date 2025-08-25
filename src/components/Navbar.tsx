@@ -110,8 +110,15 @@ const Navbar = () => {
           const data = await response.json();
           console.log('show me the user role', data);
           
-          // Update the user data with new role
-          if (data.trader) {
+          // Handle the case where API returns an array of roles
+          if (Array.isArray(data)) {
+            // Update user with the array of roles from API
+            const updatedUser = { ...authUser, role: data };
+            localStorage.setItem('auth_user', JSON.stringify(updatedUser));
+            setUser(updatedUser);
+            console.log('Updated user role to:', data);
+          } else if (data.trader) {
+            // Handle legacy format if needed
             const updatedUser = { ...authUser, role: data.trader };
             localStorage.setItem('auth_user', JSON.stringify(updatedUser));
             setUser(updatedUser);
@@ -120,7 +127,6 @@ const Navbar = () => {
             // Handle case where API returns role directly
             const updatedUser = { ...authUser, role: data.role };
             localStorage.setItem('auth_user', JSON.stringify(updatedUser));
-            setUser(updatedUser);
             console.log('Updated user role to:', data.role);
           }
         } catch (error) {
@@ -177,11 +183,21 @@ const Navbar = () => {
   console.log('show me the isCustomer', isCustomer);
   const isLoggedIn = !!user;
 
+  // Only show "View Jobs" for users with master role (verified traders)
+  // Regular traders without master role will not see this option
+  // Note: Traders stay as "trader" role, they don't get changed to "customer"
   const isTrader = Array.isArray(user?.role) 
-    ? user?.role.some(role => ['master', 'trader', 'tradesperson', 'MASTER', 'TRADER', 'TRADESPERSON'].includes(role))
-    : ['master', 'trader', 'tradesperson', 'MASTER', 'TRADER', 'TRADESPERSON'].includes(user?.role);
+    ? user?.role.includes('master') // Only show View Jobs if user has master role
+    : user?.role === 'master'; // Fallback for string role
   console.log('show me the isTrader', isTrader);
   console.log('user role:', user?.role);
+  console.log('user role type:', typeof user?.role);
+  console.log('isTrader calculation:', {
+    isArray: Array.isArray(user?.role),
+    roleValue: user?.role,
+    includesMaster: Array.isArray(user?.role) ? user?.role.includes('master') : false,
+    equalsMaster: user?.role === 'master'
+  });
 
   const handleLogout = () => {
     localStorage.removeItem('access_token');
@@ -311,9 +327,19 @@ const Navbar = () => {
                 {isCustomer && (
                   <button 
                     onClick={() => handleNavigation('/homeowner/my-projects')} 
-                    className={`flex items-center gap-2 w-full text-left py-2 px-4 rounded-lg transition-colors ${isActive('/my-projects') ? 'bg-trust-blue/10 text-trust-blue' : 'text-foreground hover:bg-muted'}`}
+                    className={`flex items-center gap-2 w-full text-left py-2 px-4 rounded-lg transition-colors ${isActive('/homeowner/my-projects') ? 'bg-trust-blue/10 text-trust-blue' : 'text-foreground hover:bg-muted'}`}
                   >
                     My Projects
+                  </button>
+                )}
+
+                {/* View Jobs - Only show for verified traders (master role) */}
+                {isTrader && (
+                  <button 
+                    onClick={() => handleNavigation('/tradesperson/jobs')} 
+                    className={`flex items-center gap-2 w-full text-left py-2 px-4 rounded-lg transition-colors ${isActive('/tradesperson/jobs') ? 'bg-trust-blue/10 text-trust-blue' : 'text-foreground hover:bg-muted'}`}
+                  >
+                    View Jobs
                   </button>
                 )}
                 

@@ -608,12 +608,12 @@ const PostJob = () => {
                                                 >
                                                     Logout & Create Customer Account
                                                 </button>
-                                                <button
+                                                {/* <button
                                                     onClick={() => setFormErrors(prev => ({ ...prev, general: '' }))}
                                                     className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-red-700 bg-transparent hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                                                 >
                                                     Dismiss
-                                                </button>
+                                                </button> */}
                                             </div>
                                         )}
                                     </div>
