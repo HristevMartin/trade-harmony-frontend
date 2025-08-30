@@ -762,29 +762,6 @@ const TradesPersonJobs = () => {
                   })}
                 </div>
 
-                {/* Sort Control */}
-                <div className="flex items-center gap-2 ml-auto">
-                  <span className="text-sm text-slate-600 font-medium">Sort:</span>
-                  <div className="inline-flex bg-slate-100 rounded-lg p-1">
-                    {[
-                      { key: 'newest', label: 'Newest' },
-                      { key: 'budget', label: 'Highest Budget' },
-                      { key: 'nearest', label: 'Nearest' }
-                    ].map(({ key, label }) => (
-                      <button
-                        key={key}
-                        onClick={() => setSortBy(key as typeof sortBy)}
-                        className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
-                          sortBy === key
-                            ? 'bg-white text-slate-900 shadow-sm'
-                            : 'text-slate-600 hover:text-slate-900'
-                        }`}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
               </div>
 
             </motion.div>
