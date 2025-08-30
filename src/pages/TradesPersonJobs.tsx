@@ -208,24 +208,14 @@ const TradesPersonJobs = () => {
     return filtered;
   }, [jobs, filters, sortBy]);
 
-  // Get unique values for filter options
+  // Get unique values for filter options (excluding completed jobs)
   const filterOptions = useMemo(() => {
-    const categories = [...new Set(jobs.map(job => job.service_category).filter(Boolean))];
-    const locations = [...new Set(jobs.map(job => job.location).filter(Boolean))];
-    const urgencies = [...new Set(jobs.map(job => formatUrgency(job.urgency)).filter(Boolean))];
+    // First filter out completed jobs before generating filter options
+    const activeJobs = jobs.filter(job => !(job.status && job.status.toLowerCase() === 'completed'));
     
-    // Debug logging for Birmingham issue
-    if (locations.includes('Birmingham')) {
-      console.log('Birmingham jobs found:', jobs.filter(job => 
-        job.location.toLowerCase().trim() === 'birmingham'
-      ).length);
-      console.log('All unique locations:', locations);
-      console.log('Sample Birmingham job locations:', jobs
-        .filter(job => job.location.toLowerCase().includes('birmingham'))
-        .map(job => `"${job.location}"`)
-        .slice(0, 3)
-      );
-    }
+    const categories = [...new Set(activeJobs.map(job => job.service_category).filter(Boolean))];
+    const locations = [...new Set(activeJobs.map(job => job.location).filter(Boolean))];
+    const urgencies = [...new Set(activeJobs.map(job => formatUrgency(job.urgency)).filter(Boolean))];
     
     return { categories, locations, urgencies };
   }, [jobs]);
