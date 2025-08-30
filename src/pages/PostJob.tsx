@@ -25,6 +25,7 @@ import {
   HiLockClosed 
 } from "react-icons/hi2";
 import { X } from "lucide-react";
+import UKLocationInput from "@/components/UKLocationInput";
 
 const PostJob = () => {
     const [searchParams] = useSearchParams();
@@ -34,10 +35,6 @@ const PostJob = () => {
     const countryParam = searchParams.get('country')?.toUpperCase() || 'GB';
     const countryCodeMap = {
         'GB': '🇬🇧 United Kingdom',
-        'BG': '🇧🇬 Bulgaria',
-        'DE': '🇩🇪 Germany',
-        'FR': '🇫🇷 France',
-        'ES': '🇪🇸 Spain',
     };
     
     // Service categories array
@@ -110,6 +107,8 @@ const PostJob = () => {
     const [formData, setFormData] = useState({
         country: initialCountry,
         location: extractCityFromPostcode(initialPostcode, initialCountry),
+        postcode: '',
+        area: '',
         serviceCategory: initialCategory,
         jobTitle: '',
         jobDescription: '',
@@ -134,11 +133,15 @@ const PostJob = () => {
 
     // Calculate completion progress for each step
     const getStepCompletion = () => {
+        const locationComplete = formData.country === 'GB' 
+            ? (formData.postcode && formData.area && formData.postcode.trim() !== '' && formData.area.trim() !== '')
+            : (formData.location && formData.location.trim() !== '');
+            
         const steps = {
-            1: formData.country && formData.location, // Location
+            1: formData.country && locationComplete, // Location
             2: formData.serviceCategory && formData.jobTitle && formData.jobDescription.length >= 20, // Details
             3: uploadedImages.length > 0, // Photos
-            4: formData.firstName && formData.email, // Contact
+            4: formData.firstName && formData.email && formData.phone, // Contact
             5: formData.gdprConsent // Review/Consent
         };
         return steps;
@@ -266,14 +269,48 @@ const PostJob = () => {
         switch (field) {
             case 'jobTitle':
                 if (!value || (value as string).length < 5) {
-                    errors[field] = 'Job title must be at least 5 characters';
+                    errors[field] = 'Job title is required (minimum 5 characters)';
                 } else if ((value as string).length > 120) {
                     errors[field] = 'Job title must be less than 120 characters';
                 }
                 break;
             case 'jobDescription':
                 if (!value || (value as string).length < 20) {
-                    errors[field] = 'Please provide a detailed description (minimum 20 characters)';
+                    errors[field] = 'Job description is required (minimum 20 characters)';
+                }
+                break;
+            case 'serviceCategory':
+                if (!value || value === '') {
+                    errors[field] = 'Service category is required';
+                }
+                break;
+            case 'budget':
+                if (!value || value === '') {
+                    errors[field] = 'Budget range is required';
+                }
+                break;
+            case 'location':
+                if (!value || (value as string).trim() === '') {
+                    errors[field] = 'Location is required';
+                }
+                break;
+            case 'postcode':
+                if (formData.country === 'GB') {
+                    if (!value || (value as string).trim() === '') {
+                        errors[field] = 'Postcode is required';
+                    } else {
+                        const ukPostcodeRegex = /^[A-Z]{1,2}[0-9]{1,2}[A-Z]?\s?[0-9][A-Z]{2}$/i;
+                        if (!ukPostcodeRegex.test((value as string).trim())) {
+                            errors[field] = 'Please enter a valid UK postcode (e.g., SW1A 1AA)';
+                        }
+                    }
+                }
+                break;
+            case 'area':
+                if (formData.country === 'GB') {
+                    if (!value || (value as string).trim() === '') {
+                        errors[field] = 'Area is required';
+                    }
                 }
                 break;
             case 'email':
@@ -283,8 +320,8 @@ const PostJob = () => {
                 }
                 break;
             case 'phone':
-                if (formData.contactMethod === 'phone' && (!value || (value as string).length < 10)) {
-                    errors[field] = 'Phone number is required when phone contact is selected';
+                if (!value || (value as string).length < 10) {
+                    errors[field] = 'Phone number is required (minimum 10 digits)';
                 }
                 break;
             case 'firstName':
@@ -381,7 +418,9 @@ const PostJob = () => {
         setFormErrors({});
         
         // Validate all fields
-        const fieldsToValidate = ['jobTitle', 'jobDescription', 'email', 'firstName', 'phone', 'urgency', 'gdprConsent'];
+        const fieldsToValidate = formData.country === 'GB' 
+            ? ['postcode', 'area', 'serviceCategory', 'jobTitle', 'jobDescription', 'budget', 'email', 'firstName', 'phone', 'urgency', 'gdprConsent']
+            : ['location', 'serviceCategory', 'jobTitle', 'jobDescription', 'budget', 'email', 'firstName', 'phone', 'urgency', 'gdprConsent'];
         let isValid = true;
         
         fieldsToValidate.forEach(field => {
@@ -656,16 +695,51 @@ const PostJob = () => {
                                     </Select>
                                 </div>
                                 <div>
-                                    <Label htmlFor="location" className="text-sm font-medium text-slate-700">Town/City or Postcode</Label>
-                                    <Input
-                                        id="location"
-                                        value={formData.location}
-                                        onChange={(e) => handleInputChange('location', e.target.value)}
-                                        placeholder="Enter your postcode or area"
-                                        className="rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0"
-                                        aria-describedby="location-help"
-                                    />
-                                    <p id="location-help" className="text-xs text-slate-500 mt-1">We'll use this to find local tradespeople</p>
+                                    {formData.country === 'GB' ? (
+                                        <UKLocationInput
+                                            value={{
+                                                country: formData.country,
+                                                postcode: formData.postcode,
+                                                area: formData.area
+                                            }}
+                                            onChange={(locationData) => {
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    postcode: locationData.postcode,
+                                                    area: locationData.area
+                                                }));
+                                            }}
+                                            errors={{
+                                                postcode: formErrors.postcode,
+                                                area: formErrors.area
+                                            }}
+                                        />
+                                    ) : (
+                                        <>
+                                            <Label htmlFor="location" className="text-sm font-medium text-slate-700">
+                                                Town/City or Postcode <span className="text-red-500">*</span>
+                                            </Label>
+                                            <Input
+                                                id="location"
+                                                value={formData.location}
+                                                onChange={(e) => handleInputChange('location', e.target.value)}
+                                                onBlur={(e) => handleBlur('location', e.target.value)}
+                                                placeholder="Enter your postcode or area"
+                                                className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${
+                                                    formErrors.location ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
+                                                }`}
+                                                aria-invalid={!!formErrors.location}
+                                                aria-describedby={formErrors.location ? 'location-error' : 'location-help'}
+                                            />
+                                            {formErrors.location ? (
+                                                <p id="location-error" className="text-xs text-red-600 mt-1">{formErrors.location}</p>
+                                            ) : (
+                                                <p id="location-help" className="text-xs text-slate-500 mt-1">
+                                                    We'll use this to find local tradespeople
+                                                </p>
+                                            )}
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </fieldset>
@@ -678,11 +752,18 @@ const PostJob = () => {
                             </legend>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <Label htmlFor="serviceCategory" className="text-sm font-medium text-slate-700">Service Category</Label>
-                                    <Select value={formData.serviceCategory} onValueChange={(value) => handleInputChange('serviceCategory', value)}>
+                                    <Label htmlFor="serviceCategory" className="text-sm font-medium text-slate-700">Service Category <span className="text-red-500">*</span></Label>
+                                    <Select value={formData.serviceCategory} onValueChange={(value) => {
+                                        handleInputChange('serviceCategory', value);
+                                        handleBlur('serviceCategory', value);
+                                    }}>
                                         <SelectTrigger 
                                             id="serviceCategory"
-                                            className="rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0"
+                                            className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${
+                                                formErrors.serviceCategory ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
+                                            }`}
+                                            aria-invalid={!!formErrors.serviceCategory}
+                                            aria-describedby={formErrors.serviceCategory ? 'serviceCategory-error' : 'serviceCategory-help'}
                                         >
                                             <SelectValue placeholder="Select a service" />
                                         </SelectTrigger>
@@ -692,10 +773,15 @@ const PostJob = () => {
                                             ))}
                                         </SelectContent>
                                     </Select>
+                                    {formErrors.serviceCategory ? (
+                                        <p id="serviceCategory-error" className="text-xs text-red-600 mt-1">{formErrors.serviceCategory}</p>
+                                    ) : (
+                                        <p id="serviceCategory-help" className="text-xs text-slate-500 mt-1">Required - select the type of work needed</p>
+                                    )}
                                 </div>
                                 <div>
                                     <div className="flex justify-between items-center">
-                                        <Label htmlFor="jobTitle" className="text-sm font-medium text-slate-700">Job Title</Label>
+                                        <Label htmlFor="jobTitle" className="text-sm font-medium text-slate-700">Job Title <span className="text-red-500">*</span></Label>
                                         <span className="text-xs text-slate-500">{formData.jobTitle.length}/120</span>
                                     </div>
                                     <Input
@@ -714,12 +800,12 @@ const PostJob = () => {
                                     {formErrors.jobTitle ? (
                                         <p id="jobTitle-error" className="text-xs text-red-600 mt-1">{formErrors.jobTitle}</p>
                                     ) : (
-                                        <p id="jobTitle-help" className="text-xs text-slate-500 mt-1">Brief summary of what you need</p>
+                                        <p id="jobTitle-help" className="text-xs text-slate-500 mt-1">Required - brief summary of what you need</p>
                                     )}
                                 </div>
                                 <div className="md:col-span-2">
                                     <div className="flex justify-between items-center">
-                                        <Label htmlFor="jobDescription" className="text-sm font-medium text-slate-700">Job Description</Label>
+                                        <Label htmlFor="jobDescription" className="text-sm font-medium text-slate-700">Job Description <span className="text-red-500">*</span></Label>
                                         <span className="text-xs text-slate-500">{formData.jobDescription.length} characters</span>
                                     </div>
                                     <Textarea
@@ -751,7 +837,7 @@ const PostJob = () => {
                                         <p id="jobDescription-error" className="text-xs text-red-600 mt-1">{formErrors.jobDescription}</p>
                                     ) : (
                                         <div>
-                                            <p id="jobDescription-help" className="text-xs text-slate-500 mt-1">Be as detailed as possible to get accurate quotes</p>
+                                            <p id="jobDescription-help" className="text-xs text-slate-500 mt-1">Required - be as detailed as possible to get accurate quotes</p>
                                             <div className="text-xs text-slate-400 mt-2 space-y-1">
                                                 <p>Examples:</p>
                                                 <p>"• Kitchen tap is dripping constantly and won't turn off properly"</p>
@@ -847,13 +933,23 @@ const PostJob = () => {
                         <fieldset className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-5 md:p-6 mb-5 md:mb-6 transition-shadow hover:shadow-md">
                             <legend className="text-lg font-semibold text-slate-900 flex items-center gap-2 mb-4 px-2">
                                 <HiAdjustmentsHorizontal className="w-5 h-5 text-blue-600" aria-hidden="true" />
-                                Optional Details
+                                Budget & Timeline
                             </legend>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <Label htmlFor="budget" className="text-sm font-medium text-slate-700">Budget Range</Label>
-                                    <Select value={formData.budget} onValueChange={(value) => handleInputChange('budget', value)}>
-                                        <SelectTrigger className="rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100">
+                                    <Label htmlFor="budget" className="text-sm font-medium text-slate-700">Budget Range <span className="text-red-500">*</span></Label>
+                                    <Select value={formData.budget} onValueChange={(value) => {
+                                        handleInputChange('budget', value);
+                                        handleBlur('budget', value);
+                                    }}>
+                                        <SelectTrigger 
+                                            id="budget"
+                                            className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${
+                                                formErrors.budget ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
+                                            }`}
+                                            aria-invalid={!!formErrors.budget}
+                                            aria-describedby={formErrors.budget ? 'budget-error' : 'budget-help'}
+                                        >
                                             <SelectValue placeholder="Select budget range" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -863,6 +959,11 @@ const PostJob = () => {
                                             <SelectItem value="over-500">£500+</SelectItem>
                                         </SelectContent>
                                     </Select>
+                                    {formErrors.budget ? (
+                                        <p id="budget-error" className="text-xs text-red-600 mt-1">{formErrors.budget}</p>
+                                    ) : (
+                                        <p id="budget-help" className="text-xs text-slate-500 mt-1">Required - helps tradespeople provide accurate quotes</p>
+                                    )}
                                 </div>
                                 <div>
                                     <Label className="text-sm font-medium text-slate-700 block mb-3">
@@ -918,37 +1019,67 @@ const PostJob = () => {
                             <div className="space-y-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <Label htmlFor="firstName" className="text-sm font-medium text-slate-700">First Name</Label>
+                                        <Label htmlFor="firstName" className="text-sm font-medium text-slate-700">First Name <span className="text-red-500">*</span></Label>
                                         <Input
                                             id="firstName"
                                             value={formData.firstName}
                                             onChange={(e) => handleInputChange('firstName', e.target.value)}
+                                            onBlur={(e) => handleBlur('firstName', e.target.value)}
                                             placeholder="Your first name"
-                                            className="rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                            className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${
+                                                formErrors.firstName ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
+                                            }`}
+                                            aria-invalid={!!formErrors.firstName}
+                                            aria-describedby={formErrors.firstName ? 'firstName-error' : 'firstName-help'}
                                         />
+                                        {formErrors.firstName ? (
+                                            <p id="firstName-error" className="text-xs text-red-600 mt-1">{formErrors.firstName}</p>
+                                        ) : (
+                                            <p id="firstName-help" className="text-xs text-slate-500 mt-1">Required for tradespeople to address you</p>
+                                        )}
                                     </div>
                                     <div>
-                                        <Label htmlFor="email" className="text-sm font-medium text-slate-700">Email Address</Label>
+                                        <Label htmlFor="email" className="text-sm font-medium text-slate-700">Email Address <span className="text-red-500">*</span></Label>
                                         <Input
                                             id="email"
                                             type="email"
                                             value={formData.email}
                                             onChange={(e) => handleInputChange('email', e.target.value)}
+                                            onBlur={(e) => handleBlur('email', e.target.value)}
                                             placeholder="your@email.com"
-                                            className="rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                            className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${
+                                                formErrors.email ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
+                                            }`}
+                                            aria-invalid={!!formErrors.email}
+                                            aria-describedby={formErrors.email ? 'email-error' : 'email-help'}
                                         />
+                                        {formErrors.email ? (
+                                            <p id="email-error" className="text-xs text-red-600 mt-1">{formErrors.email}</p>
+                                        ) : (
+                                            <p id="email-help" className="text-xs text-slate-500 mt-1">Required for receiving quotes and updates</p>
+                                        )}
                                     </div>
                                 </div>
                                 <div>
-                                    <Label htmlFor="phone" className="text-sm font-medium text-slate-700">Phone Number (Optional)</Label>
+                                    <Label htmlFor="phone" className="text-sm font-medium text-slate-700">Phone Number <span className="text-red-500">*</span></Label>
                                     <Input
                                         id="phone"
                                         type="tel"
                                         value={formData.phone}
                                         onChange={(e) => handleInputChange('phone', e.target.value)}
+                                        onBlur={(e) => handleBlur('phone', e.target.value)}
                                         placeholder="Your phone number"
-                                        className="rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                        className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${
+                                            formErrors.phone ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
+                                        }`}
+                                        aria-invalid={!!formErrors.phone}
+                                        aria-describedby={formErrors.phone ? 'phone-error' : 'phone-help'}
                                     />
+                                    {formErrors.phone ? (
+                                        <p id="phone-error" className="text-xs text-red-600 mt-1">{formErrors.phone}</p>
+                                    ) : (
+                                        <p id="phone-help" className="text-xs text-slate-500 mt-1">Required for tradespeople to contact you</p>
+                                    )}
                                 </div>
                                 <div>
                                     <Label className="text-sm font-medium text-slate-700 block mb-3">Preferred Contact Method</Label>
