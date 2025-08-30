@@ -76,6 +76,54 @@ const TradesPersonJobs = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Handle ESC key and focus trap for mobile sheet
+  useEffect(() => {
+    if (!showMobileFilters) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowMobileFilters(false);
+      }
+    };
+
+    // Focus trap
+    const sheet = document.getElementById('filters-sheet');
+    if (sheet) {
+      const focusableElements = sheet.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      const firstElement = focusableElements[0] as HTMLElement;
+      const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+      const handleTabKey = (event: KeyboardEvent) => {
+        if (event.key === 'Tab') {
+          if (event.shiftKey) {
+            if (document.activeElement === firstElement) {
+              event.preventDefault();
+              lastElement?.focus();
+            }
+          } else {
+            if (document.activeElement === lastElement) {
+              event.preventDefault();
+              firstElement?.focus();
+            }
+          }
+        }
+      };
+
+      // Focus first element when sheet opens
+      firstElement?.focus();
+
+      document.addEventListener('keydown', handleKeyDown);
+      document.addEventListener('keydown', handleTabKey);
+
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown);
+        document.removeEventListener('keydown', handleTabKey);
+      };
+    }
+  }, [showMobileFilters]);
+
   // Initialize filters from URL on mount
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -534,16 +582,16 @@ const TradesPersonJobs = () => {
             </div>
           </motion.div>
 
-          {/* Sticky Filter Bar */}
+          {/* Desktop Sticky Filter Bar */}
           <div className="sticky top-14 z-40 mb-8">
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="backdrop-blur bg-white/70 border border-slate-200/60 shadow-sm rounded-2xl px-4 py-4"
+              className="hidden md:block backdrop-blur bg-white/70 border border-slate-200/60 shadow-sm rounded-2xl px-4 py-4"
             >
               {/* Desktop Filters */}
-              <div className="hidden md:flex flex-wrap gap-3 items-center">
+              <div className="flex flex-wrap gap-3 items-center">
                 {/* Category Chip Popover */}
                 <div className="relative" data-popover>
                   <button
@@ -747,18 +795,6 @@ const TradesPersonJobs = () => {
                 </div>
               </div>
 
-              {/* Mobile Filter Button */}
-              <div className="md:hidden">
-                <button
-                  onClick={() => setShowMobileFilters(true)}
-                  className="inline-flex items-center gap-2 rounded-full px-4 h-10 bg-white hover:bg-slate-50 ring-1 ring-slate-200 text-slate-700 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 w-full justify-center"
-                >
-                  <Filter className="h-4 w-4" />
-                  <span className="text-sm font-medium">
-                    Filters ({filters.categories.length + filters.locations.length + (filters.urgency ? 1 : 0)})
-                  </span>
-                </button>
-              </div>
             </motion.div>
 
             {/* Active Filters Pills */}
@@ -843,26 +879,57 @@ const TradesPersonJobs = () => {
             )}
           </div>
 
+          {/* Mobile FAB */}
+          <button
+            onClick={() => setShowMobileFilters(true)}
+            className="sm:hidden fixed right-4 bottom-[calc(env(safe-area-inset-bottom)+1rem)] z-50 inline-flex h-11 items-center gap-2 rounded-full px-4 bg-indigo-600 text-white shadow-lg ring-1 ring-indigo-500/20 active:scale-[0.98] transition focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            aria-haspopup="dialog"
+            aria-controls="filters-sheet"
+            aria-expanded={showMobileFilters}
+          >
+            <Filter className="h-4 w-4" />
+            <span className="text-sm font-medium">
+              Filters ({filters.categories.length + filters.locations.length + (filters.urgency ? 1 : 0)})
+            </span>
+          </button>
+
           {/* Mobile Filter Bottom Sheet */}
           {showMobileFilters && (
-            <div className="fixed inset-0 z-50 md:hidden">
-              <div className="absolute inset-0 bg-black/50" onClick={() => setShowMobileFilters(false)} />
+            <div className="fixed inset-0 z-50 sm:hidden">
               <motion.div
-                initial={{ y: '100%' }}
-                animate={{ y: 0 }}
-                exit={{ y: '100%' }}
-                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-6 max-h-[80vh] overflow-y-auto"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="absolute inset-0 bg-black/50"
+                onClick={() => setShowMobileFilters(false)}
+                aria-hidden="true"
+              />
+              <motion.div
+                initial={{ y: '100%', opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: '100%', opacity: 0 }}
+                transition={{ duration: 0.18, ease: 'easeOut' }}
+                className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[80vh] overflow-y-auto"
+                id="filters-sheet"
+                role="dialog"
+                aria-labelledby="filters-title"
+                aria-modal="true"
+                style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1rem)' }}
               >
+                <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-slate-900">Filters & Sort</h3>
+                  <h3 id="filters-title" className="text-lg font-semibold text-slate-900">Filters</h3>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setShowMobileFilters(false)}
-                    className="p-2"
+                    onClick={() => {
+                      setFilters({ categories: [], locations: [] });
+                      setSortBy('newest');
+                    }}
+                    className="text-slate-600 hover:text-slate-900"
                   >
-                    ×
+                    Clear all
                   </Button>
                 </div>
                 
@@ -892,21 +959,18 @@ const TradesPersonJobs = () => {
 
                 {/* Mobile Location Filter */}
                 <div className="mb-6">
-                  <h4 className="text-sm font-medium text-slate-700 mb-3">Locations</h4>
+                  <h4 className="text-sm font-medium text-slate-700 mb-3">Location</h4>
                   <div className="space-y-2">
                     {filterOptions.locations.map(location => (
                       <label key={location} className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg cursor-pointer">
                         <input
-                          type="checkbox"
+                          type="radio"
+                          name="location"
                           checked={filters.locations.includes(location)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setFilters(prev => ({ ...prev, locations: [...prev.locations, location] }));
-                            } else {
-                              setFilters(prev => ({ ...prev, locations: prev.locations.filter(l => l !== location) }));
-                            }
+                          onChange={() => {
+                            setFilters(prev => ({ ...prev, locations: [location] }));
                           }}
-                          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                          className="border-slate-300 text-indigo-600 focus:ring-indigo-500"
                         />
                         <span className="text-sm text-slate-700">{location}</span>
                       </label>
@@ -970,23 +1034,21 @@ const TradesPersonJobs = () => {
                   </div>
                 </div>
 
-                <div className="flex gap-3">
+                <div className="space-y-3">
                   <Button
                     onClick={() => setShowMobileFilters(false)}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white h-12 rounded-xl font-medium"
                   >
-                    Apply Filters
+                    Apply
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={() => {
-                      setFilters({ categories: [], locations: [] });
-                      setSortBy('newest');
-                    }}
-                    className="flex-1"
+                    onClick={() => setShowMobileFilters(false)}
+                    className="w-full h-12 rounded-xl font-medium border-slate-300 text-slate-700 hover:bg-slate-50"
                   >
-                    Clear All
+                    Cancel
                   </Button>
+                </div>
                 </div>
               </motion.div>
             </div>
@@ -1013,12 +1075,12 @@ const TradesPersonJobs = () => {
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Refresh Jobs
                   </Button>
-                  <Button 
+                  {/* <Button 
                     variant="outline"
                     className="border-slate-300 text-slate-700 hover:bg-slate-50 px-6 py-3 rounded-lg font-medium"
                   >
                     Set Job Alerts
-                  </Button>
+                  </Button> */}
                 </div>
               </div>
             ) : (
