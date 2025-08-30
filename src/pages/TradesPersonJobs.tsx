@@ -179,8 +179,13 @@ const TradesPersonJobs = () => {
   // Filter and sort jobs
   const visibleJobs = useMemo(() => {
     let filtered = jobs.filter(job => {
+      // Exclude completed jobs from being displayed
+      if (job.status && job.status.toLowerCase() === 'completed') return false;
+      
       if (filters.categories.length > 0 && !filters.categories.includes(job.service_category)) return false;
-      if (filters.locations.length > 0 && !filters.locations.includes(job.location)) return false;
+      if (filters.locations.length > 0 && !filters.locations.some(filterLocation => 
+        job.location.toLowerCase().trim() === filterLocation.toLowerCase().trim()
+      )) return false;
       if (filters.urgency && formatUrgency(job.urgency) !== filters.urgency) return false;
       return true;
     });
@@ -208,6 +213,19 @@ const TradesPersonJobs = () => {
     const categories = [...new Set(jobs.map(job => job.service_category).filter(Boolean))];
     const locations = [...new Set(jobs.map(job => job.location).filter(Boolean))];
     const urgencies = [...new Set(jobs.map(job => formatUrgency(job.urgency)).filter(Boolean))];
+    
+    // Debug logging for Birmingham issue
+    if (locations.includes('Birmingham')) {
+      console.log('Birmingham jobs found:', jobs.filter(job => 
+        job.location.toLowerCase().trim() === 'birmingham'
+      ).length);
+      console.log('All unique locations:', locations);
+      console.log('Sample Birmingham job locations:', jobs
+        .filter(job => job.location.toLowerCase().includes('birmingham'))
+        .map(job => `"${job.location}"`)
+        .slice(0, 3)
+      );
+    }
     
     return { categories, locations, urgencies };
   }, [jobs]);
@@ -263,35 +281,6 @@ const TradesPersonJobs = () => {
     return `${Math.floor(diffInHours / 24)}d ago`;
   };
 
-  const getStatusVariant = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return 'secondary';
-      case 'active':
-        return 'default';
-      case 'completed':
-        return 'outline';
-      case 'closed':
-        return 'outline';
-      default:
-        return 'secondary';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'pending': 
-        return 'bg-amber-50 text-amber-700 border-amber-200';
-      case 'active': 
-        return 'bg-blue-50 text-blue-700 border-blue-200';
-      case 'completed': 
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-      case 'closed': 
-        return 'bg-slate-50 text-slate-600 border-slate-200';
-      default: 
-        return 'bg-slate-50 text-slate-600 border-slate-200';
-    }
-  };
 
  
 
@@ -742,18 +731,21 @@ const TradesPersonJobs = () => {
                 
                 {/* Urgency Toggle Chips */}
                 <div className="flex items-center gap-2">
-                  {[
-                    { label: 'ASAP', icon: AlertCircle },
-                    { label: 'This week', icon: Calendar },
-                    { label: 'Flexible', icon: Clock }
-                  ].map(({ label, icon: Icon }) => {
-                    const isPressed = filters.urgency === label;
+                  {filterOptions.urgencies.map((urgency) => {
+                    const getUrgencyIcon = (urgencyLabel: string) => {
+                      if (urgencyLabel === 'ASAP') return AlertCircle;
+                      if (urgencyLabel === 'This week') return Calendar;
+                      return Clock;
+                    };
+                    
+                    const Icon = getUrgencyIcon(urgency);
+                    const isPressed = filters.urgency === urgency;
                     return (
                       <button
-                        key={label}
+                        key={urgency}
                         onClick={() => setFilters(prev => ({ 
                           ...prev, 
-                          urgency: prev.urgency === label ? undefined : label 
+                          urgency: prev.urgency === urgency ? undefined : urgency 
                         }))}
                         className={`inline-flex items-center gap-2 rounded-full px-3 h-9 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                           isPressed 
@@ -761,10 +753,10 @@ const TradesPersonJobs = () => {
                             : 'bg-white hover:bg-slate-50 ring-1 ring-slate-200 text-slate-700'
                         }`}
                         aria-pressed={isPressed}
-                        aria-label={`Filter by ${label} urgency`}
+                        aria-label={`Filter by ${urgency} urgency`}
                       >
                         <Icon className="h-4 w-4" />
-                        <span className="text-sm font-medium">{label}</span>
+                        <span className="text-sm font-medium">{urgency}</span>
                       </button>
                     );
                   })}
@@ -982,18 +974,21 @@ const TradesPersonJobs = () => {
                 <div className="mb-6">
                   <h4 className="text-sm font-medium text-slate-700 mb-3">Urgency</h4>
                   <div className="flex flex-wrap gap-2">
-                    {[
-                      { label: 'ASAP', icon: AlertCircle },
-                      { label: 'This week', icon: Calendar },
-                      { label: 'Flexible', icon: Clock }
-                    ].map(({ label, icon: Icon }) => {
-                      const isPressed = filters.urgency === label;
+                    {filterOptions.urgencies.map((urgency) => {
+                      const getUrgencyIcon = (urgencyLabel: string) => {
+                        if (urgencyLabel === 'ASAP') return AlertCircle;
+                        if (urgencyLabel === 'This week') return Calendar;
+                        return Clock;
+                      };
+                      
+                      const Icon = getUrgencyIcon(urgency);
+                      const isPressed = filters.urgency === urgency;
                       return (
                         <button
-                          key={label}
+                          key={urgency}
                           onClick={() => setFilters(prev => ({ 
                             ...prev, 
-                            urgency: prev.urgency === label ? undefined : label 
+                            urgency: prev.urgency === urgency ? undefined : urgency 
                           }))}
                           className={`inline-flex items-center gap-2 rounded-full px-4 h-10 transition-all ${
                             isPressed 
@@ -1003,7 +998,7 @@ const TradesPersonJobs = () => {
                           aria-pressed={isPressed}
                         >
                           <Icon className="h-4 w-4" />
-                          <span className="text-sm font-medium">{label}</span>
+                          <span className="text-sm font-medium">{urgency}</span>
                         </button>
                       );
                     })}
@@ -1125,12 +1120,6 @@ const TradesPersonJobs = () => {
                             </div>
                             {/* Gradient overlay for readability */}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
-                            {/* Status badge */}
-                            <div className="absolute top-3 right-3">
-                              <Badge className={`${getStatusColor(job.status)} text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm`}>
-                                {job.status}
-                              </Badge>
-                            </div>
                           </div>
                           
                           <CardContent className="p-6 flex flex-col h-full">
