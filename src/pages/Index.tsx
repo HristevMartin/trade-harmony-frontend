@@ -348,7 +348,7 @@ const Index = () => {
           <div className="max-w-5xl mx-auto px-4">
             
             {/* Hero Title Section */}
-            <div className="text-center">
+            <div  className="text-center">
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -695,24 +695,18 @@ const Index = () => {
             </button>
             
             {/* Dots Indicator */}
-            <div className="flex justify-center mt-6 sm:mt-8 gap-2">
+            <div className="flex justify-center mt-6 sm:mt-8 gap-3">
               {testimonials.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentTestimonial(index)}
-                  className={`min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center transition-all duration-300 ${
+                  className={`w-3 h-3 rounded-full transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-trust-blue/50 focus:ring-offset-2 ${
                     index === currentTestimonial 
-                      ? 'bg-trust-blue/20' 
-                      : 'hover:bg-trust-blue/10'
+                      ? 'bg-trust-blue scale-125 shadow-sm' 
+                      : 'bg-trust-blue/30 hover:bg-trust-blue/50'
                   }`}
                   aria-label={`Go to testimonial ${index + 1}`}
-                >
-                  <div className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                    index === currentTestimonial 
-                      ? 'bg-trust-blue scale-125' 
-                      : 'bg-trust-blue/30'
-                  }`} />
-                </button>
+                />
               ))}
             </div>
           </div>
