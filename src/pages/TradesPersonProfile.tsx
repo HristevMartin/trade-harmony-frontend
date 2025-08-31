@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 
 const TradesPersonProfile = () => {
+    const apiUrl = import.meta.env.VITE_API_URL;
     const [traderProfile, setTraderProfile] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -202,7 +203,89 @@ const TradesPersonProfile = () => {
         }
     };
 
-    const apiUrl = import.meta.env.VITE_API_URL;
+    const handleCertificationImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file || !userId) return;
+
+        // Validate file size (10MB max)
+        if (file.size > 10 * 1024 * 1024) {
+            toast({
+                title: "File Too Large",
+                description: "Please select an image smaller than 10MB.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        try {
+            setUploadingImage(true);
+            
+            const formData = new FormData();
+            
+            // Add all existing profile data
+            formData.append('name', traderProfile.name || '');
+            formData.append('email', traderProfile.email || '');
+            formData.append('phone', traderProfile.phone || '');
+            formData.append('primaryTrade', traderProfile.primaryTrade || '');
+            formData.append('otherServices', traderProfile.otherServices || '[]');
+            formData.append('city', traderProfile.city || '');
+            formData.append('postcode', traderProfile.postcode || '');
+            formData.append('radiusKm', traderProfile.radiusKm || '');
+            formData.append('experienceYears', traderProfile.experienceYears || '');
+            formData.append('certifications', traderProfile.certifications || '');
+            formData.append('bio', traderProfile.bio || '');
+            formData.append('marketingConsent', traderProfile.marketingConsent || 'false');
+            
+            // Add the certification image
+            formData.append('certification_image', file);
+            
+            // Add existing certification images to maintain them
+            if (traderProfile.certificationImages) {
+                traderProfile.certificationImages.forEach((imageUrl, index) => {
+                    formData.append('existing_certification_images', imageUrl);
+                });
+            }
+
+            // Add existing portfolio images to maintain them
+            if (traderProfile.projectImages) {
+                traderProfile.projectImages.forEach((imageUrl, index) => {
+                    formData.append('existing_portfolio_images', imageUrl);
+                });
+            }
+
+            const response = await fetch(`${apiUrl}/travel/get-trader-project/${userId}`, {
+                method: 'PUT',
+                body: formData,
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                // Update the trader profile with the response data
+                setTraderProfile(data.project || data.trader);
+                
+                toast({
+                    title: "Certification Image Uploaded",
+                    description: "Your certification image has been successfully uploaded.",
+                });
+            } else {
+                throw new Error(data.error || 'Failed to upload certification image');
+            }
+        } catch (error) {
+            console.error('Error uploading certification image:', error);
+            toast({
+                title: "Upload Failed",
+                description: "Failed to upload certification image. Please try again.",
+                variant: "destructive",
+            });
+        } finally {
+            setUploadingImage(false);
+            // Reset the input
+            if (event.target) {
+                event.target.value = '';
+            }
+        }
+    };
     
     // Safely get userId from localStorage
     const getUserId = () => {
@@ -779,6 +862,84 @@ const TradesPersonProfile = () => {
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* Certification Images */}
+                                <div className="mt-6">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h4 className="font-semibold text-lg">Certification Images</h4>
+                                        <div className="relative">
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleCertificationImageUpload}
+                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                                disabled={uploadingImage}
+                                            />
+                                            <Button 
+                                                variant="outline" 
+                                                size="sm" 
+                                                className="border-primary/20 hover:bg-primary/5"
+                                                disabled={uploadingImage}
+                                            >
+                                                <Camera className="h-4 w-4 mr-2" />
+                                                {uploadingImage ? 'Uploading...' : 'Add Images'}
+                                            </Button>
+                                        </div>
+                                    </div>
+
+                                    {traderProfile.certificationImages && traderProfile.certificationImages.length > 0 ? (
+                                        <div className="relative max-w-sm mx-auto">
+                                            <Carousel className="w-full">
+                                                <CarouselContent>
+                                                    {traderProfile.certificationImages.map((image: string, index: number) => (
+                                                        <CarouselItem key={index}>
+                                                            <div className="relative group overflow-hidden rounded-xl bg-muted/20 aspect-[3/4]">
+                                                                <img 
+                                                                    src={image} 
+                                                                    alt={`Certification ${index + 1}`}
+                                                                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                                                />
+                                                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                                                    <div className="absolute bottom-3 left-3 text-white">
+                                                                        <p className="text-sm font-medium">Certificate {index + 1}</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </CarouselItem>
+                                                    ))}
+                                                </CarouselContent>
+                                                <CarouselPrevious />
+                                                <CarouselNext />
+                                            </Carousel>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-8 bg-muted/20 rounded-xl border-2 border-dashed border-muted/40">
+                                            <Award className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                                            <h3 className="text-sm font-medium text-foreground mb-1">No Certification Images</h3>
+                                            <p className="text-xs text-muted-foreground mb-4 max-w-xs mx-auto">
+                                                Upload images of your certifications to build client trust
+                                            </p>
+                                            <div className="relative inline-block">
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={handleCertificationImageUpload}
+                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                                    disabled={uploadingImage}
+                                                />
+                                                <Button 
+                                                    variant="outline" 
+                                                    size="sm"
+                                                    className="border-primary/20 hover:bg-primary/5"
+                                                    disabled={uploadingImage}
+                                                >
+                                                    <Camera className="h-4 w-4 mr-2" />
+                                                    {uploadingImage ? 'Uploading...' : 'Upload Images'}
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </CardContent>
                         </Card>
 
@@ -914,59 +1075,6 @@ const TradesPersonProfile = () => {
                                      </div>
                                  )}
                              </CardContent>
-                          </Card>
-
-                          {/* Certifications */}
-                          <Card className="shadow-xl bg-gradient-to-br from-card to-card/80 border-0">
-                              <CardHeader className="pb-6">
-                                  <CardTitle className="text-2xl flex items-center">
-                                      <Award className="h-6 w-6 mr-3 text-primary" />
-                                      Certifications
-                                  </CardTitle>
-                              </CardHeader>
-                              <CardContent>
-                                  {traderProfile.certificationImages && traderProfile.certificationImages.length > 0 ? (
-                                      <div className="space-y-6">
-                                          <div className="bg-gradient-to-r from-muted/30 to-muted/20 p-4 rounded-xl border border-muted/20">
-                                              <p className="text-foreground font-medium mb-2">Certifications:</p>
-                                              <p className="text-muted-foreground">{traderProfile.certifications}</p>
-                                          </div>
-                                          
-                                          <div className="relative">
-                                              <Carousel className="w-full max-w-xs mx-auto">
-                                                  <CarouselContent>
-                                                      {traderProfile.certificationImages.map((image: string, index: number) => (
-                                                          <CarouselItem key={index}>
-                                                              <div className="relative group overflow-hidden rounded-xl bg-muted/20 aspect-[3/4]">
-                                                                  <img 
-                                                                      src={image} 
-                                                                      alt={`Certification ${index + 1}`}
-                                                                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                                                  />
-                                                                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                                                      <div className="absolute bottom-3 left-3 text-white">
-                                                                          <p className="text-sm font-medium">Certification {index + 1}</p>
-                                                                      </div>
-                                                                  </div>
-                                                              </div>
-                                                          </CarouselItem>
-                                                      ))}
-                                                  </CarouselContent>
-                                                  <CarouselPrevious />
-                                                  <CarouselNext />
-                                              </Carousel>
-                                          </div>
-                                      </div>
-                                  ) : (
-                                      <div className="text-center py-12 bg-muted/20 rounded-xl border-2 border-dashed border-muted/40">
-                                          <Award className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                                          <h3 className="text-lg font-medium text-foreground mb-2">No Certifications</h3>
-                                          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                                              Certifications help build trust with potential clients by showcasing your professional qualifications.
-                                          </p>
-                                      </div>
-                                  )}
-                              </CardContent>
                           </Card>
 
                       </div>
