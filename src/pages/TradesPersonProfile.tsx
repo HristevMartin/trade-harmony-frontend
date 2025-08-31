@@ -568,100 +568,148 @@ const TradesPersonProfile = () => {
                                         <Briefcase className="h-6 w-6 mr-3 text-primary" />
                                         Services & Expertise
                                     </CardTitle>
-                                    <Button variant="outline" size="sm" className="border-primary/20 hover:bg-primary/5">
-                                        <Edit3 className="h-4 w-4 mr-2" />
-                                        Edit Services
-                                    </Button>
                                 </div>
                             </CardHeader>
                             <CardContent className="space-y-8">
                                 <div>
-                                    <h4 className="font-semibold mb-4 text-lg">Primary Specialization</h4>
-                                    <div className="relative">
-                                        <Badge variant="default" className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-6 py-3 text-lg font-medium border-0 shadow-lg">
-                                            <Award className="h-4 w-4 mr-2" />
-                                            {traderProfile.primaryTrade}
-                                        </Badge>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h4 className="font-semibold text-lg">Primary Specialization</h4>
+                                        {editingField !== 'primaryTrade' && (
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => {
+                                                    setEditingField('primaryTrade');
+                                                    setTempData({ primaryTrade: traderProfile.primaryTrade });
+                                                }}
+                                                className="border-primary/20 hover:bg-primary/5"
+                                            >
+                                                <Edit3 className="h-3 w-3 mr-2" />
+                                                Edit
+                                            </Button>
+                                        )}
                                     </div>
+                                    
+                                    {editingField === 'primaryTrade' ? (
+                                        <div className="space-y-4">
+                                            <select
+                                                value={tempData.primaryTrade || ''}
+                                                onChange={(e) => setTempData({ ...tempData, primaryTrade: e.target.value })}
+                                                className="w-full p-3 border border-border/20 rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                            >
+                                                <option value="">Select Primary Trade</option>
+                                                {getServiceOptions().map((service, index) => (
+                                                    <option key={index} value={service}>
+                                                        {service}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    size="sm"
+                                                    onClick={() => saveProfile('primaryTrade', tempData.primaryTrade)}
+                                                    disabled={saving || !tempData.primaryTrade}
+                                                >
+                                                    <Save className="h-3 w-3 mr-1" />
+                                                    Save Trade
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={cancelEditing}
+                                                >
+                                                    <X className="h-3 w-3 mr-1" />
+                                                    Cancel
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="relative">
+                                            <Badge variant="default" className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-6 py-3 text-lg font-medium border-0 shadow-lg">
+                                                <Award className="h-4 w-4 mr-2" />
+                                                {traderProfile.primaryTrade}
+                                            </Badge>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <Separator className="my-6" />
 
-                                 <div>
-                                     <div className="flex items-center justify-between mb-4">
-                                         <h4 className="font-semibold text-lg">Additional Services</h4>
-                                         {!editingServices && (
-                                             <Button
-                                                 size="sm"
-                                                 variant="outline"
-                                                 onClick={startEditingServices}
-                                                 className="border-primary/20 hover:bg-primary/5"
-                                             >
-                                                 <Edit3 className="h-3 w-3 mr-2" />
-                                                 Edit
-                                             </Button>
-                                         )}
-                                     </div>
-                                     
-                                     {editingServices ? (
-                                         <div className="space-y-4">
-                                             <div className="max-h-64 overflow-y-auto border border-border/20 rounded-lg p-4 bg-muted/10">
-                                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                     {getServiceOptions().map((service, index) => (
-                                                         <div key={index} className="flex items-center space-x-2">
-                                                             <Checkbox
-                                                                 id={`service-${index}`}
-                                                                 checked={selectedServices.includes(service)}
-                                                                 onCheckedChange={() => handleServiceToggle(service)}
-                                                             />
-                                                             <Label
-                                                                 htmlFor={`service-${index}`}
-                                                                 className="text-sm font-medium cursor-pointer"
-                                                             >
-                                                                 {service}
-                                                             </Label>
-                                                         </div>
-                                                     ))}
-                                                 </div>
-                                             </div>
-                                             <div className="flex gap-2">
-                                                 <Button
-                                                     size="sm"
-                                                     onClick={saveServices}
-                                                     disabled={saving}
-                                                 >
-                                                     <Save className="h-3 w-3 mr-1" />
-                                                     Save Services
-                                                 </Button>
-                                                 <Button
-                                                     size="sm"
-                                                     variant="outline"
-                                                     onClick={cancelEditing}
-                                                 >
-                                                     <X className="h-3 w-3 mr-1" />
-                                                     Cancel
-                                                 </Button>
-                                             </div>
-                                         </div>
-                                     ) : (
-                                         <div className="min-h-[80px] flex items-center">
-                                             {getOtherServices().length > 0 ? (
-                                                 <div className="flex flex-wrap gap-3">
-                                                     {getOtherServices().map((service: string, index: number) => (
-                                                         <Badge key={index} variant="secondary" className="px-4 py-2 text-sm">
-                                                             {service}
-                                                         </Badge>
-                                                     ))}
-                                                 </div>
-                                             ) : (
-                                                 <div className="w-full text-center p-8 bg-muted/20 rounded-xl border-2 border-dashed border-muted/40">
-                                                     <p className="text-muted-foreground text-lg">No additional services listed</p>
-                                                     <p className="text-sm text-muted-foreground/70 mt-1">Add more services to attract more clients</p>
-                                                 </div>
-                                             )}
-                                         </div>
-                                     )}
-                                 </div>
+                                <div>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h4 className="font-semibold text-lg">Additional Services</h4>
+                                        {!editingServices && (
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={startEditingServices}
+                                                className="border-primary/20 hover:bg-primary/5"
+                                            >
+                                                <Edit3 className="h-3 w-3 mr-2" />
+                                                Edit
+                                            </Button>
+                                        )}
+                                    </div>
+                                    
+                                    {editingServices ? (
+                                        <div className="space-y-4">
+                                            <div className="max-h-64 overflow-y-auto border border-border/20 rounded-lg p-4 bg-muted/10">
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                    {getServiceOptions().map((service, index) => (
+                                                        <div key={index} className="flex items-center space-x-2">
+                                                            <Checkbox
+                                                                id={`service-${index}`}
+                                                                checked={selectedServices.includes(service)}
+                                                                onCheckedChange={() => handleServiceToggle(service)}
+                                                            />
+                                                            <Label
+                                                                htmlFor={`service-${index}`}
+                                                                className="text-sm font-medium cursor-pointer"
+                                                            >
+                                                                {service}
+                                                            </Label>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    size="sm"
+                                                    onClick={saveServices}
+                                                    disabled={saving}
+                                                >
+                                                    <Save className="h-3 w-3 mr-1" />
+                                                    Save Services
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={cancelEditing}
+                                                >
+                                                    <X className="h-3 w-3 mr-1" />
+                                                    Cancel
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="min-h-[80px] flex items-center">
+                                            {getOtherServices().length > 0 ? (
+                                                <div className="flex flex-wrap gap-3">
+                                                    {getOtherServices().map((service: string, index: number) => (
+                                                        <Badge key={index} variant="secondary" className="px-4 py-2 text-sm">
+                                                            {service}
+                                                        </Badge>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <div className="w-full text-center p-8 bg-muted/20 rounded-xl border-2 border-dashed border-muted/40">
+                                                    <p className="text-muted-foreground text-lg">No additional services listed</p>
+                                                    <p className="text-sm text-muted-foreground/70 mt-1">Add more services to attract more clients</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
 
                                 <Separator className="my-6" />
 
