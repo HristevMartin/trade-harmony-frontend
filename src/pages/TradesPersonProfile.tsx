@@ -159,21 +159,6 @@ const TradesPersonProfile = () => {
             // Add the portfolio image
             formData.append('portfolio_image', file);
             
-            // Add user ID for identification
-            formData.append('userId', userId);
-            
-            // Add current profile data to maintain existing information
-            formData.append('first_name', traderProfile.first_name || '');
-            formData.append('last_name', traderProfile.last_name || '');
-            formData.append('email', traderProfile.email || '');
-            formData.append('phone', traderProfile.phone || '');
-            formData.append('location', traderProfile.location || '');
-            formData.append('bio', traderProfile.bio || '');
-            formData.append('website', traderProfile.website || '');
-            
-            // Add services as JSON string
-            formData.append('services', JSON.stringify(traderProfile.services || []));
-            
             // Add existing portfolio images to maintain them
             if (traderProfile.projectImages) {
                 traderProfile.projectImages.forEach((imageUrl, index) => {
@@ -181,7 +166,7 @@ const TradesPersonProfile = () => {
                 });
             }
 
-            const response = await fetch(`${apiUrl}/tradesperson/profile`, {
+            const response = await fetch(`${apiUrl}/travel/get-trader-project/${userId}`, {
                 method: 'PUT',
                 body: formData,
             });
