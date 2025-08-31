@@ -157,7 +157,7 @@ const TradesPersonProfile = () => {
             const formData = new FormData();
             formData.append('image', file);
 
-            const response = await fetch(`${apiUrl}/travel/get-trader-project/${userId}`, {
+            const response = await fetch(`${apiUrl}/tradesperson/profile`, {
                 method: 'POST',
                 body: formData,
             });
