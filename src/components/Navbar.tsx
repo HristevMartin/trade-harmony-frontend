@@ -153,12 +153,10 @@ const Navbar = () => {
   console.log('show me the isCustomer', isCustomer);
   const isLoggedIn = !!user;
 
-  // Only show "View Jobs" for users with master role (verified traders)
-  // Regular traders without master role will not see this option
-  // Note: Traders stay as "trader" role, they don't get changed to "customer"
+  // Show "View Jobs" for users with trader role
   const isTrader = Array.isArray(user?.role) 
-    ? user?.role.includes('master') // Only show View Jobs if user has master role
-    : user?.role === 'master'; // Fallback for string role
+    ? user?.role.includes('trader') // Show View Jobs if user has trader role
+    : user?.role === 'trader'; // Fallback for string role
 
   // Check if user already has trader role (hide join button)
   const hasTraderRole = Array.isArray(user?.role) 
