@@ -316,20 +316,31 @@ const TradesPersonProfile = () => {
         }
     };
     
-    // Safely get userId from localStorage
-    const getUserId = () => {
+    // Safely get userId and user data from localStorage
+    const getUserData = () => {
         try {
             const localStorageData = localStorage.getItem('auth_user');
-            if (!localStorageData) return null;
+            if (!localStorageData) return { userId: null, userData: null };
             const userData = JSON.parse(localStorageData);
-            return userData?.id;
+            return { userId: userData?.id, userData };
         } catch (error) {
             console.error('Error parsing user data:', error);
-            return null;
+            return { userId: null, userData: null };
         }
     };
 
-    const userId = getUserId();
+    const { userId, userData } = getUserData();
+    
+    // Check if user has master role for verified professional status
+    const hasVerifiedProfessionalStatus = () => {
+        if (!userData || !userData.role) return false;
+        
+        // Handle both array and string role formats
+        if (Array.isArray(userData.role)) {
+            return userData.role.includes('master');
+        }
+        return userData.role === 'master';
+    };
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -695,14 +706,16 @@ const TradesPersonProfile = () => {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-950/20 dark:to-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
-                                    <div className="flex items-center space-x-3">
-                                        <div className="bg-green-500 p-1.5 rounded-full">
-                                            <CheckCircle className="h-4 w-4 text-white" />
+                                {hasVerifiedProfessionalStatus() && (
+                                    <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-950/20 dark:to-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="bg-green-500 p-1.5 rounded-full">
+                                                <CheckCircle className="h-4 w-4 text-white" />
+                                            </div>
+                                            <span className="font-medium text-green-800 dark:text-green-200">Verified Professional</span>
                                         </div>
-                                        <span className="font-medium text-green-800 dark:text-green-200">Verified Professional</span>
                                     </div>
-                                </div>
+                                )}
                                 
                                 <div className="grid grid-cols-2 gap-3">
                                     <div className="text-center p-3 bg-muted/30 rounded-lg">
