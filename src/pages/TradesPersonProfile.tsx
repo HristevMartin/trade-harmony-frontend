@@ -254,7 +254,6 @@ const TradesPersonProfile = () => {
                         <div className="relative">
                             <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full blur-2xl scale-110"></div>
                             <Avatar className="relative h-32 w-32 border-4 border-background shadow-2xl">
-                                <AvatarImage src={traderProfile.projectImages?.[0] || ''} alt={traderProfile.name} className="object-cover" />
                                 <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground text-2xl font-bold">
                                     {traderProfile.name?.split(' ').map((n: string) => n[0]).join('') || 'TP'}
                                 </AvatarFallback>
@@ -791,13 +790,65 @@ const TradesPersonProfile = () => {
                                      </div>
                                  )}
                              </CardContent>
+                          </Card>
+
+                         {/* Portfolio Gallery */}
+                         <Card className="shadow-xl bg-gradient-to-br from-card to-card/80 border-0">
+                             <CardHeader className="pb-6">
+                                 <div className="flex items-center justify-between">
+                                     <CardTitle className="text-2xl flex items-center">
+                                         <Camera className="h-6 w-6 mr-3 text-primary" />
+                                         Portfolio Gallery
+                                     </CardTitle>
+                                     <Button 
+                                         variant="outline" 
+                                         size="sm" 
+                                         className="border-primary/20 hover:bg-primary/5"
+                                     >
+                                         <Camera className="h-4 w-4 mr-2" />
+                                         Add Images
+                                     </Button>
+                                 </div>
+                             </CardHeader>
+                             <CardContent>
+                                 {traderProfile.projectImages && traderProfile.projectImages.length > 0 ? (
+                                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                         {traderProfile.projectImages.map((image: string, index: number) => (
+                                             <div key={index} className="relative group overflow-hidden rounded-xl bg-muted/20 aspect-square">
+                                                 <img 
+                                                     src={image} 
+                                                     alt={`Portfolio work ${index + 1}`}
+                                                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                                 />
+                                                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                                     <div className="absolute bottom-3 left-3 text-white">
+                                                         <p className="text-sm font-medium">Project {index + 1}</p>
+                                                     </div>
+                                                 </div>
+                                             </div>
+                                         ))}
+                                     </div>
+                                 ) : (
+                                     <div className="text-center py-12 bg-muted/20 rounded-xl border-2 border-dashed border-muted/40">
+                                         <Camera className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                                         <h3 className="text-lg font-medium text-foreground mb-2">No Portfolio Images</h3>
+                                         <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                                             Showcase your best work by adding photos of completed projects. High-quality images help attract more clients.
+                                         </p>
+                                         <Button variant="outline" className="border-primary/20 hover:bg-primary/5">
+                                             <Camera className="h-4 w-4 mr-2" />
+                                             Upload Your First Image
+                                         </Button>
+                                     </div>
+                                 )}
+                             </CardContent>
                          </Card>
 
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
+                     </div>
+                 </div>
+             </div>
+         </div>
+     );
 };
 
 export default TradesPersonProfile;
