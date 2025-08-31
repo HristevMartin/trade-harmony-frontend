@@ -24,7 +24,8 @@ import {
     Clock,
     CheckCircle,
     Save,
-    X
+    X,
+    Trash2
 } from "lucide-react";
 
 const TradesPersonProfile = () => {
@@ -928,6 +929,29 @@ const TradesPersonProfile = () => {
                                                         <div className="absolute bottom-2 left-2 text-white">
                                                             <p className="text-xs font-medium">Certificate {index + 1}</p>
                                                         </div>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="destructive"
+                                                            className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                                            onClick={async () => {
+                                                                try {
+                                                                    const updatedImages = traderProfile.certificationImages.filter((_, i) => i !== index);
+                                                                    await saveProfile('certificationImages', updatedImages);
+                                                                    toast({
+                                                                        title: "Image deleted",
+                                                                        description: "Certification image has been removed from your profile.",
+                                                                    });
+                                                                } catch (error) {
+                                                                    toast({
+                                                                        title: "Error",
+                                                                        description: "Failed to delete image. Please try again.",
+                                                                        variant: "destructive",
+                                                                    });
+                                                                }
+                                                            }}
+                                                        >
+                                                            <Trash2 className="h-3 w-3" />
+                                                        </Button>
                                                     </div>
                                                 </div>
                                             ))}
