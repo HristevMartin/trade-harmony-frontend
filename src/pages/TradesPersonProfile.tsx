@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useToast } from "@/hooks/use-toast";
 import {
     User,
@@ -913,13 +914,66 @@ const TradesPersonProfile = () => {
                                      </div>
                                  )}
                              </CardContent>
-                         </Card>
+                          </Card>
 
-                     </div>
-                 </div>
-             </div>
-         </div>
-     );
+                          {/* Certifications */}
+                          <Card className="shadow-xl bg-gradient-to-br from-card to-card/80 border-0">
+                              <CardHeader className="pb-6">
+                                  <CardTitle className="text-2xl flex items-center">
+                                      <Award className="h-6 w-6 mr-3 text-primary" />
+                                      Certifications
+                                  </CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                  {traderProfile.certificationImages && traderProfile.certificationImages.length > 0 ? (
+                                      <div className="space-y-6">
+                                          <div className="bg-gradient-to-r from-muted/30 to-muted/20 p-4 rounded-xl border border-muted/20">
+                                              <p className="text-foreground font-medium mb-2">Certifications:</p>
+                                              <p className="text-muted-foreground">{traderProfile.certifications}</p>
+                                          </div>
+                                          
+                                          <div className="relative">
+                                              <Carousel className="w-full max-w-xs mx-auto">
+                                                  <CarouselContent>
+                                                      {traderProfile.certificationImages.map((image: string, index: number) => (
+                                                          <CarouselItem key={index}>
+                                                              <div className="relative group overflow-hidden rounded-xl bg-muted/20 aspect-[3/4]">
+                                                                  <img 
+                                                                      src={image} 
+                                                                      alt={`Certification ${index + 1}`}
+                                                                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                                                  />
+                                                                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                                                      <div className="absolute bottom-3 left-3 text-white">
+                                                                          <p className="text-sm font-medium">Certification {index + 1}</p>
+                                                                      </div>
+                                                                  </div>
+                                                              </div>
+                                                          </CarouselItem>
+                                                      ))}
+                                                  </CarouselContent>
+                                                  <CarouselPrevious />
+                                                  <CarouselNext />
+                                              </Carousel>
+                                          </div>
+                                      </div>
+                                  ) : (
+                                      <div className="text-center py-12 bg-muted/20 rounded-xl border-2 border-dashed border-muted/40">
+                                          <Award className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                                          <h3 className="text-lg font-medium text-foreground mb-2">No Certifications</h3>
+                                          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                                              Certifications help build trust with potential clients by showcasing your professional qualifications.
+                                          </p>
+                                      </div>
+                                  )}
+                              </CardContent>
+                          </Card>
+
+                      </div>
+                  </div>
+              </div>
+          </div>
+      );
 };
 
 export default TradesPersonProfile;
