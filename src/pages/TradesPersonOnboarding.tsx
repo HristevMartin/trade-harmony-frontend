@@ -561,6 +561,7 @@ const TradesPersonOnboarding = () => {
         email: formData.email,
         primaryTrade: formData.primaryTrade,
         portfolioCount: formData.portfolio.length,
+        certificationImagesCount: formData.certificationImages.length,
         hasToken: !!token
       });
       
