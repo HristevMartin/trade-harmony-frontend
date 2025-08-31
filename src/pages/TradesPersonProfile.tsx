@@ -126,7 +126,8 @@ const TradesPersonProfile = () => {
 
     // Start editing services
     const startEditingServices = () => {
-        setSelectedServices(getOtherServices());
+        const currentServices = getOtherServices();
+        setSelectedServices([...currentServices]); // Create a copy to avoid mutations
         setEditingServices(true);
     };
 
@@ -134,6 +135,7 @@ const TradesPersonProfile = () => {
     const saveServices = async () => {
         const servicesJson = JSON.stringify(selectedServices);
         await saveProfile('otherServices', servicesJson);
+        setEditingServices(false); // Close editing mode after save
     };
 
     // Cancel editing
