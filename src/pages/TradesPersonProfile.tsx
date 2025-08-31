@@ -205,7 +205,20 @@ const TradesPersonProfile = () => {
 
     const handleCertificationImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
-        if (!file || !userId) return;
+        if (!file || !userId) {
+            console.log('No file selected or user not authenticated:', { file: !!file, userId });
+            return;
+        }
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            toast({
+                title: "Invalid File Type",
+                description: "Please select an image file (JPG, PNG, etc.).",
+                variant: "destructive",
+            });
+            return;
+        }
 
         // Validate file size (10MB max)
         if (file.size > 10 * 1024 * 1024) {
@@ -217,40 +230,46 @@ const TradesPersonProfile = () => {
             return;
         }
 
+        console.log('Starting certification image upload:', {
+            fileName: file.name,
+            fileSize: file.size,
+            fileType: file.type,
+            userId
+        });
+
         try {
             setUploadingImage(true);
             
             const formData = new FormData();
             
-            // Add all existing profile data
-            formData.append('name', traderProfile.name || '');
-            formData.append('email', traderProfile.email || '');
-            formData.append('phone', traderProfile.phone || '');
-            formData.append('primaryTrade', traderProfile.primaryTrade || '');
-            formData.append('otherServices', traderProfile.otherServices || '[]');
-            formData.append('city', traderProfile.city || '');
-            formData.append('postcode', traderProfile.postcode || '');
-            formData.append('radiusKm', traderProfile.radiusKm || '');
-            formData.append('experienceYears', traderProfile.experienceYears || '');
-            formData.append('certifications', traderProfile.certifications || '');
-            formData.append('bio', traderProfile.bio || '');
-            formData.append('marketingConsent', traderProfile.marketingConsent || 'false');
-            
-            // Add the certification image
-            formData.append('certification_image', file);
+            // Add the certification image with the correct field name expected by the API
+            formData.append('certificationImages', file);
             
             // Add existing certification images to maintain them
-            if (traderProfile.certificationImages) {
+            if (traderProfile.certificationImages && Array.isArray(traderProfile.certificationImages)) {
                 traderProfile.certificationImages.forEach((imageUrl, index) => {
                     formData.append('existing_certification_images', imageUrl);
                 });
             }
 
             // Add existing portfolio images to maintain them
-            if (traderProfile.projectImages) {
+            if (traderProfile.projectImages && Array.isArray(traderProfile.projectImages)) {
                 traderProfile.projectImages.forEach((imageUrl, index) => {
                     formData.append('existing_portfolio_images', imageUrl);
                 });
+            }
+
+            // Add userId for the API
+            formData.append('userId', userId);
+
+            // Debug: Log FormData entries
+            console.log('FormData entries for certification upload:');
+            for (let [key, value] of formData.entries()) {
+                if (value instanceof File) {
+                    console.log(`${key}:`, `File(${value.name}, ${value.size} bytes, ${value.type})`);
+                } else {
+                    console.log(`${key}:`, value);
+                }
             }
 
             const response = await fetch(`${apiUrl}/travel/get-trader-project/${userId}`, {
@@ -258,7 +277,16 @@ const TradesPersonProfile = () => {
                 body: formData,
             });
 
+            console.log('Certification upload response status:', response.status);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Certification upload failed:', response.status, errorText);
+                throw new Error(`Server error: ${response.status}`);
+            }
+
             const data = await response.json();
+            console.log('Certification upload response data:', data);
             
             if (data.success) {
                 // Update the trader profile with the response data
@@ -275,7 +303,7 @@ const TradesPersonProfile = () => {
             console.error('Error uploading certification image:', error);
             toast({
                 title: "Upload Failed",
-                description: "Failed to upload certification image. Please try again.",
+                description: `Failed to upload certification image: ${error.message}`,
                 variant: "destructive",
             });
         } finally {
