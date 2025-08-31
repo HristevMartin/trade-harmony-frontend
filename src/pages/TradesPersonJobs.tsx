@@ -309,7 +309,7 @@ const TradesPersonJobs = () => {
       'default': Briefcase
     };
     const IconComponent = categoryIcons[category?.toLowerCase()] || categoryIcons.default;
-    return <IconComponent className="h-8 w-8 text-blue-500" />;
+    return <IconComponent className="h-10 w-10 text-blue-600" />;
   };
 
   const LoadingSkeleton = () => (
@@ -772,7 +772,7 @@ const TradesPersonJobs = () => {
                       </button>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="bg-slate-900 text-white text-xs px-3 py-2 rounded-lg shadow-lg z-[60]">
-                      <p>Filter jobs by how quickly they need to be completed</p>
+                      <p>Filter jobs by start time</p>
                     </TooltipContent>
                   </Tooltip>
                 </div>
@@ -1072,7 +1072,7 @@ const TradesPersonJobs = () => {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
                   <AnimatePresence>
                     {visibleJobs.map((job, index) => (
                       <motion.div
@@ -1081,11 +1081,11 @@ const TradesPersonJobs = () => {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
                         transition={{ delay: index * 0.1 }}
-                        whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                        whileHover={{ y: -6, scale: 1.02, transition: { duration: 0.3, ease: 'easeOut' } }}
                       >
-                        <Card className="overflow-hidden bg-white border border-slate-200 hover:shadow-lg hover:border-slate-300 hover:-translate-y-0.5 transition-all duration-200 group h-full rounded-xl cursor-pointer">
+                        <Card className="overflow-hidden bg-white border border-slate-200/60 hover:shadow-2xl hover:shadow-blue-500/10 hover:border-blue-300/60 transition-all duration-300 group h-full rounded-2xl cursor-pointer backdrop-blur-sm">
                           {/* Card Header with Job Image */}
-                          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-t-xl">
+                          <div className="relative aspect-[3/2] w-full overflow-hidden rounded-t-2xl bg-gradient-to-br from-slate-50 to-slate-100">
                             {job.image_urls && job.image_urls.length > 0 ? (
                               <img 
                                 src={job.image_urls[0]} 
@@ -1102,57 +1102,79 @@ const TradesPersonJobs = () => {
                             ) : null}
                             {/* Fallback */}
                             <div 
-                              className={`absolute inset-0 bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center ${
+                              className={`absolute inset-0 bg-gradient-to-br from-blue-50 via-slate-50 to-indigo-50 flex items-center justify-center ${
                                 job.image_urls && job.image_urls.length > 0 ? 'hidden' : 'flex'
                               }`}
                             >
-                              <div className="p-3 bg-white rounded-xl shadow-sm border border-slate-200">
+                              <div className="p-4 bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-slate-200/50">
                                 {getCategoryIcon(job.service_category)}
                               </div>
                             </div>
-                            {/* Gradient overlay for readability */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
+                            {/* Enhanced gradient overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/5 pointer-events-none" />
+                            
+                            {/* Top badges row */}
+                            <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
+                              {/* Budget Badge */}
+                              <Badge className="bg-white/95 text-slate-700 text-xs font-semibold px-3 py-1.5 rounded-full shadow-md backdrop-blur-sm border border-slate-200/50">
+                                <PoundSterling className="h-3 w-3 mr-1" />
+                                {formatBudget(job.budget)}
+                              </Badge>
+                              
+                              {/* Urgency Badge */}
+                              <Badge className={`text-xs font-semibold px-3 py-1.5 rounded-full shadow-md backdrop-blur-sm ${
+                                formatUrgency(job.urgency) === 'ASAP' 
+                                  ? 'bg-red-500/95 text-white border border-red-400/50' 
+                                  : formatUrgency(job.urgency) === 'This week'
+                                    ? 'bg-amber-500/95 text-white border border-amber-400/50'
+                                    : 'bg-blue-500/95 text-white border border-blue-400/50'
+                              }`}>
+                                <Clock className="h-3 w-3 mr-1" />
+                                {formatUrgency(job.urgency)}
+                              </Badge>
+                            </div>
                           </div>
                           
-                          <CardContent className="p-6 flex flex-col h-full">
-                            {/* Title */}
-                            <div className="mb-2">
-                              <h3 className="text-lg font-bold text-slate-900 line-clamp-2 leading-tight group-hover:text-blue-700 transition-colors">
-                                {job.job_title}
-                              </h3>
-                              <div className="text-xs text-slate-500 font-medium mt-1">
-                                Posted {formatTimeAgo(job.created_at)}
+                          <CardContent className="p-5 sm:p-6 flex flex-col h-full">
+                            {/* Header with Category Badge */}
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200 text-xs font-medium px-2 py-0.5">
+                                    {job.additional_data?.serviceCategory || job.service_category}
+                                  </Badge>
+                                  <div className="text-xs text-slate-500 font-medium">
+                                    {formatTimeAgo(job.created_at)}
+                                  </div>
+                                </div>
+                                <h3 className="text-lg sm:text-xl font-bold text-slate-900 line-clamp-2 leading-tight group-hover:text-blue-700 transition-colors mb-1">
+                                  {job.job_title}
+                                </h3>
                               </div>
                             </div>
                             
-                            {/* Meta Information Row */}
-                            <div className="flex flex-wrap items-center gap-4 mb-4 text-sm text-slate-600">
-                              <div className="flex items-center gap-1.5">
-                                <MapPin className="h-3.5 w-3.5 text-slate-400" />
-                                <span className="font-medium">{job.additional_data?.nuts || job.nuts || job.location}</span>
+                            {/* Location */}
+                            <div className="flex items-center gap-2 mb-4">
+                              <div className="p-1.5 bg-slate-100 rounded-lg">
+                                <MapPin className="h-4 w-4 text-slate-600" />
                               </div>
-                              <div className="flex items-center gap-1.5">
-                                <PoundSterling className="h-3.5 w-3.5 text-slate-400" />
-                                <span className="font-medium">{formatBudget(job.budget)}</span>
-                              </div>
-                              <div className="flex items-center gap-1.5">
-                                <Clock className="h-3.5 w-3.5 text-slate-400" />
-                                <span className="font-medium">{formatUrgency(job.urgency)}</span>
-                              </div>
+                              <span className="text-sm font-medium text-slate-700 truncate">
+                                {job.additional_data?.nuts || job.nuts || job.location}
+                              </span>
                             </div>
                             
                             {/* Description */}
-                            <div className="flex-1">
-                              <p className="text-slate-600 text-sm line-clamp-2 leading-relaxed">
+                            <div className="flex-1 mb-4">
+                              <p className="text-slate-600 text-sm leading-relaxed line-clamp-3">
                                 {job.job_description}
                               </p>
                             </div>
                             
                             {/* Card Footer - Action Buttons */}
-                            <div className="pt-4 mt-4 border-t border-slate-100">
-                              <div className="flex flex-col sm:flex-row gap-2">
+                            <div className="pt-4 mt-auto border-t border-slate-100">
+                              <div className="flex flex-col sm:flex-row gap-3">
                                 <Button 
-                                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition-all shadow-sm hover:shadow-md"
+                                  className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
                                   aria-label={`Apply for ${job.job_title}`}
                                 >
                                   <Send className="h-4 w-4 mr-2" />
@@ -1160,11 +1182,11 @@ const TradesPersonJobs = () => {
                                 </Button>
                                 <Button 
                                   variant="outline"
-                                  className="flex-1 border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 font-medium py-2.5 rounded-lg transition-all"
+                                  className="flex-1 border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-blue-300 hover:text-blue-700 font-medium py-3 rounded-xl transition-all shadow-sm hover:shadow-md"
                                   aria-label={`View details for ${job.job_title}`}
                                 >
                                   <Eye className="h-4 w-4 mr-2" />
-                                  View Details
+                                  Details
                                 </Button>
                               </div>
                             </div>

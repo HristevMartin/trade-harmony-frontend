@@ -212,7 +212,7 @@ const JobDetail = () => {
                                 <HiCheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 flex-shrink-0 mt-0.5 sm:mt-0" />
                                 <div className="flex-1">
                                     <p className="text-green-800 font-medium text-sm sm:text-base leading-tight">
-                                        ✅ Your job has been updated successfully.
+                                        Your job has been updated.
                                     </p>
                                 </div>
                                 <Button
@@ -236,7 +236,7 @@ const JobDetail = () => {
                                 <HiCheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 flex-shrink-0 mt-0.5 sm:mt-0" />
                                 <div className="flex-1">
                                     <p className="text-green-800 font-medium text-sm sm:text-base leading-tight">
-                                        Your job has been posted successfully! Local tradespeople will be notified shortly.
+                                        Your job has been posted! Local tradespeople will be notified shortly.
                                     </p>
                                 </div>
                                 <Button

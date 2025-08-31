@@ -252,12 +252,20 @@ const Navbar = () => {
             )}
 
             {isTrader && (
-              <button 
-                onClick={() => handleNavigation('/tradesperson/jobs')} 
-                className={`text-foreground hover:text-trust-blue transition-colors font-medium flex items-center gap-2 ${isActive('/tradesperson/jobs') ? 'text-trust-blue' : ''}`}
-              >
-                View Jobs
-              </button>
+              <>
+                <button 
+                  onClick={() => handleNavigation('/tradesperson/jobs')} 
+                  className={`text-foreground hover:text-trust-blue transition-colors font-medium flex items-center gap-2 ${isActive('/tradesperson/jobs') ? 'text-trust-blue' : ''}`}
+                >
+                  View Jobs
+                </button>
+                <button 
+                  onClick={() => handleNavigation('/tradesperson/profile')} 
+                  className={`text-foreground hover:text-trust-blue transition-colors font-medium flex items-center gap-2 ${isActive('/tradesperson/profile') ? 'text-trust-blue' : ''}`}
+                >
+                  My Profile
+                </button>
+              </>
             )}
             
           </nav>
@@ -337,14 +345,23 @@ const Navbar = () => {
                   </button>
                 )}
 
-                {/* View Jobs - Only show for verified traders (master role) */}
+                {/* View Jobs & Profile - Only show for verified traders (master role) */}
                 {isTrader && (
-                  <button 
-                    onClick={() => handleNavigation('/tradesperson/jobs')} 
-                    className={`flex items-center gap-2 w-full text-left py-2 px-4 rounded-lg transition-colors ${isActive('/tradesperson/jobs') ? 'bg-trust-blue/10 text-trust-blue' : 'text-foreground hover:bg-muted'}`}
-                  >
-                    View Jobs
-                  </button>
+                  <>
+                    <button 
+                      onClick={() => handleNavigation('/tradesperson/jobs')} 
+                      className={`flex items-center gap-2 w-full text-left py-2 px-4 rounded-lg transition-colors ${isActive('/tradesperson/jobs') ? 'bg-trust-blue/10 text-trust-blue' : 'text-foreground hover:bg-muted'}`}
+                    >
+                      View Jobs
+                    </button>
+                    <button 
+                      onClick={() => handleNavigation('/tradesperson/profile')} 
+                      className={`flex items-center gap-2 w-full text-left py-2 px-4 rounded-lg transition-colors ${isActive('/tradesperson/profile') ? 'bg-trust-blue/10 text-trust-blue' : 'text-foreground hover:bg-muted'}`}
+                    >
+                      <User className="h-4 w-4" />
+                      My Profile
+                    </button>
+                  </>
                 )}
                 
                 {/* Mobile Auth & CTA Buttons */}

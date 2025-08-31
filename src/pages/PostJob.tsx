@@ -139,7 +139,7 @@ const PostJob = () => {
         const steps = {
             1: formData.country && locationComplete, // Location
             2: formData.serviceCategory && formData.jobTitle && formData.jobDescription.length >= 20, // Details
-            3: uploadedImages.length > 0, // Photos
+            3: true, // Photos (optional)
             4: formData.firstName && formData.email && formData.phone, // Contact
             5: formData.gdprConsent // Review/Consent
         };
@@ -422,10 +422,6 @@ const PostJob = () => {
             }
         });
         
-        if (uploadedImages.length === 0) {
-            setFormErrors(prev => ({ ...prev, photos: 'At least one photo is required' }));
-            isValid = false;
-        }
         
         if (!isValid) {
             return;
@@ -846,7 +842,7 @@ const PostJob = () => {
                         <fieldset className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-5 md:p-6 mb-5 md:mb-6 transition-shadow hover:shadow-md">
                             <legend className="text-lg font-semibold text-slate-900 flex items-center gap-2 mb-4 px-2">
                                 <HiCamera className="w-5 h-5 text-blue-600" aria-hidden="true" />
-                                Photos (Required)
+                                Photos (Optional)
                             </legend>
                             <div className={`border-2 border-dashed rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors p-6 text-center border-slate-300 ${
                                 uploadedImages.length >= 5 ? 'opacity-50 pointer-events-none' : ''
@@ -856,7 +852,7 @@ const PostJob = () => {
                                 <p className="text-sm text-slate-600 mb-4">
                                     {uploadedImages.length >= 5 
                                         ? 'Maximum 5 photos reached' 
-                                        : `Upload at least 1 photo (${uploadedImages.length}/5)`
+                                        : `Optional - add photos to help tradespeople understand your job (${uploadedImages.length}/5)`
                                     }
                                 </p>
                                 <input
@@ -1132,7 +1128,7 @@ const PostJob = () => {
                             <button 
                                 type="submit" 
                                 className="inline-flex items-center justify-center rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-medium px-6 py-3 shadow-md hover:shadow-lg transition w-full md:w-auto md:px-12 md:py-4 md:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled={uploadedImages.length === 0 || isSubmitting || showAuthModal}
+                                disabled={isSubmitting || showAuthModal}
                                 aria-busy={isSubmitting}
                             >
                                 {isSubmitting ? (
@@ -1153,6 +1149,9 @@ const PostJob = () => {
                                     : "We'll notify local tradespeople right away."
                                 }
                             </p>
+                            <p className="text-xs text-slate-400 mt-1 text-center">
+                                Photos are optional but help you get better quotes
+                            </p>
                         </div>
 
                         {/* Mobile Sticky CTA */}
@@ -1160,7 +1159,7 @@ const PostJob = () => {
                             <button 
                                 type="submit" 
                                 className="inline-flex items-center justify-center rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-medium px-6 py-3 shadow-md hover:shadow-lg transition w-full disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled={uploadedImages.length === 0 || isSubmitting || showAuthModal}
+                                disabled={isSubmitting || showAuthModal}
                                 aria-busy={isSubmitting}
                             >
                                 {isSubmitting ? (

@@ -21,6 +21,8 @@ import TradesPersonOnboarding from "./pages/TradesPersonOnboarding";
 import TradesPersonJobs from "./pages/TradesPersonJobs";
 import HomeownerGetProjects from "./pages/HomeownerGetProjects";
 import Auth from "./pages/Auth";
+import TradesPersonProfile from "./pages/TradesPersonProfile";
+
 
 const queryClient = new QueryClient();
 
@@ -48,6 +50,7 @@ const App = () => (
           <Route path="/tradesperson/onboarding" element={<TradesPersonOnboarding />} />
           <Route path="/tradesperson/jobs" element={<TradesPersonJobs />} />
           <Route path="/homeowner/my-projects" element={<HomeownerGetProjects />} />
+          <Route path="/tradesperson/profile" element={<TradesPersonProfile />} />
         </Routes>
         <Footer />
       </BrowserRouter>
