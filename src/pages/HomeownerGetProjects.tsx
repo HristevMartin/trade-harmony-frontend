@@ -13,7 +13,7 @@ import {
   HiPhoto,
   HiPlus
 } from "react-icons/hi2";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, CheckCircle, Trash2, Edit } from "lucide-react";
 
 interface Project {
   id: string;
@@ -141,11 +141,11 @@ const HomeownerGetProjects = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'active': return 'bg-blue-100 text-blue-800';
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'cancelled': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'pending': return 'bg-accent-orange/10 text-accent-orange border border-accent-orange/20';
+      case 'active': return 'bg-trust-blue/10 text-trust-blue border border-trust-blue/20';
+      case 'completed': return 'bg-trust-green/10 text-trust-green border border-trust-green/20';
+      case 'cancelled': return 'bg-muted text-muted-foreground border border-border';
+      default: return 'bg-muted text-muted-foreground border border-border';
     }
   };
 
@@ -289,26 +289,41 @@ const HomeownerGetProjects = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 md:py-10 w-full">
-          <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
+          <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-8">
             {/* Spinner */}
             <div className="flex items-center justify-center">
-              <RefreshCw className="h-8 w-8 text-trust-blue animate-spin" />
+              <RefreshCw className="h-10 w-10 text-trust-blue animate-spin" />
             </div>
             
             {/* Loading text */}
             <div className="text-center space-y-2">
-              <h2 className="text-xl font-semibold text-slate-900">Loading Your Jobs</h2>
+              <h2 className="text-2xl font-semibold text-foreground">Loading Your Jobs</h2>
+              <p className="text-muted-foreground">Please wait while we fetch your projects...</p>
             </div>
             
-            {/* Optional skeleton preview */}
-            <div className="w-full max-w-4xl">
-              <div className="animate-pulse space-y-6">
-                <div className="h-6 bg-gray-200 rounded w-1/4 mx-auto"></div>
+            {/* Skeleton cards */}
+            <div className="w-full max-w-5xl">
+              <div className="animate-pulse space-y-8">
+                <div className="h-8 bg-muted rounded-md w-1/3 mx-auto"></div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-48 bg-gray-200 rounded-2xl"></div>
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <Card key={i} className="shadow-sm">
+                      <CardContent className="p-6 space-y-4">
+                        <div className="h-4 bg-muted rounded w-3/4"></div>
+                        <div className="h-3 bg-muted rounded w-1/2"></div>
+                        <div className="h-32 bg-muted rounded-lg"></div>
+                        <div className="space-y-2">
+                          <div className="h-3 bg-muted rounded w-full"></div>
+                          <div className="h-3 bg-muted rounded w-2/3"></div>
+                        </div>
+                        <div className="flex gap-2">
+                          <div className="h-8 bg-muted rounded flex-1"></div>
+                          <div className="h-8 bg-muted rounded flex-1"></div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
               </div>
@@ -321,14 +336,21 @@ const HomeownerGetProjects = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 md:py-10 w-full">
           <div className="flex items-center justify-center min-h-[60vh]">
-            <Card className="max-w-md mx-auto">
-              <CardContent className="p-6 text-center">
-                <h2 className="text-lg font-semibold text-red-600 mb-2">Error</h2>
-                <p className="text-gray-600 mb-4">{error}</p>
-                <Button onClick={() => window.location.reload()}>
+            <Card className="max-w-md mx-auto shadow-lg border-destructive/20">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 bg-destructive/10 rounded-full flex items-center justify-center">
+                  <HiPhoto className="w-8 h-8 text-destructive" />
+                </div>
+                <h2 className="text-xl font-semibold text-destructive mb-3">Something went wrong</h2>
+                <p className="text-muted-foreground mb-6">{error}</p>
+                <Button 
+                  onClick={() => window.location.reload()}
+                  className="bg-trust-blue hover:bg-trust-blue/90 text-trust-blue-foreground"
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
                   Try Again
                 </Button>
               </CardContent>
@@ -340,193 +362,207 @@ const HomeownerGetProjects = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
       {/* Success Toast */}
       {showSuccess && (
-        <div className="fixed top-4 right-4 z-50 bg-green-50 border border-green-200 rounded-lg p-4 shadow-lg">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 text-green-600">✓</div>
-            <span className="text-green-800 font-medium">{successMessage}</span>
+        <div className="fixed top-6 right-6 z-50 bg-trust-green/10 border border-trust-green/20 rounded-xl p-4 shadow-lg backdrop-blur-sm">
+          <div className="flex items-center gap-3">
+            <CheckCircle className="w-5 h-5 text-trust-green" />
+            <span className="text-trust-green font-medium">{successMessage}</span>
           </div>
         </div>
       )}
       
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 md:py-10">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground mb-2">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 md:py-12">
+        {/* Header Section */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground mb-4">
             My Jobs
           </h1>
-          <p className="text-slate-600">
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             Manage your posted jobs and track their progress
           </p>
+          
+          {/* Post New Job Button */}
+          <Button
+            onClick={() => navigate('/post-job')}
+            className="bg-trust-blue hover:bg-trust-blue/90 text-trust-blue-foreground px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+            size="lg"
+          >
+            <HiPlus className="w-5 h-5 mr-2" />
+            Post New Job
+          </Button>
         </div>
-        
-        {/* Desktop button */}
-        <Button
-          onClick={() => navigate('/post-job')}
-          className="hidden sm:flex mt-4 sm:mt-0 bg-trust-blue hover:bg-trust-blue/90 text-white px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all"
-        >
-          <HiPlus className="w-5 h-5 mr-2" />
-          Post New Job
-        </Button>
-      </div>
 
-      {/* Projects Grid */}
-      {projects.length === 0 ? (
-        <Card className="max-w-md mx-auto">
-          <CardContent className="p-8 text-center">
-            <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-              <HiPhoto className="w-8 h-8 text-gray-400" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2">No projects yet</h3>
-            <p className="text-gray-600 mb-4">
-              Get started by posting your first job
-            </p>
-            <Button
-              onClick={() => navigate('/post-job')}
-              className="bg-trust-blue hover:bg-trust-blue/90 text-white"
-            >
-              Post Your First Job
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project) => (
-            <Card 
-              key={project.id} 
-              className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 hover:shadow-md transition-shadow overflow-hidden"
-            >
-              <CardHeader className="p-5 pb-3">
-                <div className="flex items-start justify-between mb-3">
-                  <Badge className={`${getStatusColor(project.status)} border-0`}>
-                    {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
-                  </Badge>
-                  <span className="text-xs text-slate-500">
-                    Job: {project.project_id.split('-')[0]}
-                  </span>
-                </div>
-                
-                <CardTitle className="text-lg font-semibold text-slate-900 line-clamp-2">
-                  {project.job_title}
-                </CardTitle>
-              </CardHeader>
-
-              <CardContent className="p-5 pt-0">
-                <p className="text-sm text-slate-600 line-clamp-3 mb-4">
-                  {project.job_description}
-                </p>
-
-                {/* Project Image */}
-                <div className="mb-4">
-                  <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-slate-100">
-                    {project.image_urls && project.image_urls.length > 0 ? (
-                      <img
-                        src={project.image_urls[0]}
-                        alt="Project"
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-                        <HiPhoto className="w-8 h-8 text-slate-400" />
-                      </div>
-                    )}
-                    {project.image_count > 1 && (
-                      <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-md">
-                        +{project.image_count - 1} more
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Project Details */}
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center gap-2 text-sm text-slate-600">
-                    <HiMapPin className="w-4 h-4" />
-                    <span>
-                      {project.additional_data?.location}, {project.additional_data?.country}
+        {/* Projects Grid */}
+        {projects.length === 0 ? (
+          <Card className="max-w-lg mx-auto shadow-lg bg-gradient-to-br from-card via-card to-card/80">
+            <CardContent className="p-12 text-center">
+              <div className="w-20 h-20 mx-auto mb-6 bg-trust-blue/10 rounded-full flex items-center justify-center">
+                <HiPhoto className="w-10 h-10 text-trust-blue" />
+              </div>
+              <h3 className="text-2xl font-semibold mb-3 text-foreground">No projects yet</h3>
+              <p className="text-muted-foreground mb-8 text-lg">
+                Ready to find skilled tradespeople? Post your first job and get quotes from professionals in your area.
+              </p>
+              <Button
+                onClick={() => navigate('/post-job')}
+                className="bg-trust-blue hover:bg-trust-blue/90 text-trust-blue-foreground px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+                size="lg"
+              >
+                <HiPlus className="w-5 h-5 mr-2" />
+                Post Your First Job
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {projects.map((project) => (
+              <Card 
+                key={project.id} 
+                className="group rounded-2xl bg-gradient-to-br from-card via-card to-card/80 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-border/50 hover:border-trust-blue/30"
+              >
+                <CardHeader className="p-6 pb-4">
+                  <div className="flex items-start justify-between mb-4">
+                    <Badge className={`${getStatusColor(project.status)} font-medium px-3 py-1 rounded-full text-xs`}>
+                      {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-md">
+                      #{project.project_id.split('-')[0]}
                     </span>
                   </div>
                   
-                  <div className="flex items-center gap-2 text-sm text-slate-600">
-                    <HiCurrencyPound className="w-4 h-4" />
-                    <span>{formatBudget(project.budget)}</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 text-sm text-slate-600">
-                    <HiClock className="w-4 h-4" />
-                    <span>{formatUrgency(project.urgency)}</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 text-sm text-slate-500">
-                    <HiCalendarDays className="w-4 h-4" />
-                    <span>Posted {formatDate(project.created_at)}</span>
-                  </div>
-                </div>
+                  <CardTitle className="text-xl font-bold text-foreground line-clamp-2 group-hover:text-trust-blue transition-colors">
+                    {project.job_title}
+                  </CardTitle>
+                </CardHeader>
 
-                {/* Action Buttons */}
-                <div className="space-y-2">
-                  {/* View and Edit buttons */}
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={() => navigate(`/jobs/${project.project_id}`)}
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 text-xs"
-                    >
-                      <HiEye className="w-4 h-4 mr-1" />
-                      View
-                    </Button>
-                    
-                    <Button
-                      onClick={() => navigate(`/edit-job/${project?.project_id}`)}
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 text-xs"
-                    >
-                      <HiPencilSquare className="w-4 h-4 mr-1" />
-                      Edit
-                    </Button>
+                <CardContent className="p-6 pt-0">
+                  <p className="text-muted-foreground line-clamp-3 mb-6 leading-relaxed">
+                    {project.job_description}
+                  </p>
+
+                  {/* Project Image */}
+                  <div className="mb-6">
+                    <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-muted/30 ring-1 ring-border/50">
+                      {project.image_urls && project.image_urls.length > 0 ? (
+                        <img
+                          src={project.image_urls[0]}
+                          alt="Project"
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted/80">
+                          <HiPhoto className="w-12 h-12 text-muted-foreground" />
+                        </div>
+                      )}
+                      {project.image_count > 1 && (
+                        <div className="absolute bottom-3 right-3 bg-black/80 text-white text-xs px-3 py-1 rounded-full backdrop-blur-sm">
+                          +{project.image_count - 1} more
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Status Action buttons */}
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <button
-                      onClick={() => handleMarkComplete(project)}
-                      className="px-3 py-1 text-sm rounded-md bg-green-100 text-green-700 hover:bg-green-200 transition-colors flex-1"
-                      aria-label="Mark job as complete"
-                    >
-                      Mark as Complete
-                    </button>
+                  {/* Project Details */}
+                  <div className="space-y-3 mb-6">
+                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                      <div className="w-8 h-8 rounded-full bg-trust-blue/10 flex items-center justify-center">
+                        <HiMapPin className="w-4 h-4 text-trust-blue" />
+                      </div>
+                      <span className="font-medium">
+                        {project.additional_data?.location}, {project.additional_data?.country}
+                      </span>
+                    </div>
                     
-                    <button
-                      onClick={() => handleCloseJob(project)}
-                      className="px-3 py-1 text-sm rounded-md bg-red-100 text-red-700 hover:bg-red-200 transition-colors flex-1"
-                      aria-label="Delete job"
-                    >
-                      Delete Job
-                    </button>
+                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                      <div className="w-8 h-8 rounded-full bg-trust-green/10 flex items-center justify-center">
+                        <HiCurrencyPound className="w-4 h-4 text-trust-green" />
+                      </div>
+                      <span className="font-medium">{formatBudget(project.budget)}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                      <div className="w-8 h-8 rounded-full bg-accent-orange/10 flex items-center justify-center">
+                        <HiClock className="w-4 h-4 text-accent-orange" />
+                      </div>
+                      <span className="font-medium">{formatUrgency(project.urgency)}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                        <HiCalendarDays className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                      <span>Posted {formatDate(project.created_at)}</span>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+
+                  {/* Action Buttons */}
+                  <div className="space-y-3">
+                    {/* Primary Actions */}
+                    <div className="flex gap-3">
+                      <Button
+                        onClick={() => navigate(`/jobs/${project.project_id}`)}
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 border-trust-blue/20 text-trust-blue hover:bg-trust-blue/10 hover:border-trust-blue/40"
+                      >
+                        <HiEye className="w-4 h-4 mr-2" />
+                        View
+                      </Button>
+                      
+                      <Button
+                        onClick={() => navigate(`/edit-job/${project?.project_id}`)}
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 border-border hover:bg-muted/50"
+                      >
+                        <Edit className="w-4 h-4 mr-2" />
+                        Edit
+                      </Button>
+                    </div>
+                    
+                    {/* Secondary Actions */}
+                    <div className="flex gap-3">
+                      {project.status !== 'completed' && (
+                        <Button
+                          onClick={() => handleMarkComplete(project)}
+                          size="sm"
+                          className="flex-1 bg-trust-green hover:bg-trust-green/90 text-trust-green-foreground"
+                        >
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          Complete
+                        </Button>
+                      )}
+                      
+                      <Button
+                        onClick={() => handleCloseJob(project)}
+                        variant="outline"
+                        size="sm"
+                        className={`border-destructive/20 text-destructive hover:bg-destructive/10 hover:border-destructive/40 ${project.status !== 'completed' ? 'flex-1' : 'w-full'}`}
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* Mobile FAB */}
+        <div className="fixed bottom-8 right-8 sm:hidden">
+          <Button
+            onClick={() => navigate('/post-job')}
+            size="lg"
+            className="rounded-full h-16 w-16 shadow-xl bg-trust-blue hover:bg-trust-blue/90 text-trust-blue-foreground hover:shadow-2xl transition-all transform hover:scale-110"
+          >
+            <HiPlus className="w-7 h-7" />
+          </Button>
         </div>
-      )}
-      
-      {/* Mobile button - fixed to bottom of screen */}
-      <div className="sm:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 z-50">
-        <Button
-          onClick={() => navigate('/post-job')}
-          className="w-full bg-trust-blue hover:bg-trust-blue/90 text-white px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all"
-        >
-          <HiPlus className="w-5 h-5 mr-2" />
-          Post New Job
-        </Button>
-      </div>
       </div>
 
       {/* Confirmation Modal */}
