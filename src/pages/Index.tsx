@@ -242,7 +242,7 @@ const Index = () => {
       <div className="max-w-6xl lg:max-w-7xl mx-auto px-4 sm:px-6">
 
       {/* Hero Section */}
-      <section className="relative min-h-[80vh] lg:min-h-[85vh] overflow-hidden bg-gradient-to-br from-trust-blue/5 via-background to-trust-green/5">
+      <section className="relative min-h-[80vh] lg:min-h-[85vh] overflow-hidden bg-gradient-to-br from-primary/5 via-background to-secondary/5 before:absolute before:inset-0 before:bg-gradient-to-t before:from-background/40 before:via-transparent before:to-transparent before:z-[1]">
         {/* Background Decorative Images - Positioned Outside Content Area */}
         <div className="absolute inset-0 z-0 pointer-events-none">
           {/* Left Side Images */}
@@ -376,7 +376,7 @@ const Index = () => {
               transition={{ duration: 0.8, delay: 0.4 }}
               className="mt-6"
             >
-              <div className="bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/70 rounded-xl shadow-lg p-3 sm:p-4 md:p-5">
+              <div className="bg-gradient-to-br from-card/95 via-card/90 to-card/85 backdrop-blur-xl shadow-2xl ring-1 ring-primary/10 rounded-2xl p-4 sm:p-5 md:p-6 border border-primary/5">
                 <div className="space-y-4 md:space-y-0 md:flex md:gap-3">
                   {/* Country Dropdown */}
                 <div className="flex-1">
@@ -419,9 +419,9 @@ const Index = () => {
 
                   {/* CTA Button - Hidden on mobile, replaced by sticky */}
                   <div className="hidden md:block flex-1">
-                <Button 
+                  <Button 
                   size="lg" 
-                      className="bg-trust-blue hover:bg-trust-blue/90 text-white h-12 min-h-[48px] w-full font-semibold px-6 py-3 text-base rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
+                      className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground h-12 min-h-[48px] w-full font-semibold px-6 py-3 text-base rounded-xl transition-all duration-300 shadow-xl hover:shadow-2xl group"
                       onClick={handlePostJob}
                     >
                       <span className="flex items-center justify-center">
@@ -444,7 +444,7 @@ const Index = () => {
             >
               <Button 
                 size="lg" 
-                className="bg-trust-blue hover:bg-trust-blue/90 text-white w-full min-h-[48px] px-6 py-3 text-base font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl group"
+                className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground w-full min-h-[48px] px-6 py-3 text-base font-semibold rounded-xl transition-all duration-300 shadow-xl hover:shadow-2xl group"
                 onClick={handlePostJob}
               >
                 <span className="flex items-center justify-center">
@@ -516,7 +516,7 @@ const Index = () => {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
                   <Card 
-                    className="rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition cursor-pointer group border hover:border-trust-blue/30 bg-gradient-to-br from-card to-card/50"
+                    className="rounded-2xl p-4 sm:p-6 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group border-2 border-primary/10 hover:border-primary/30 bg-gradient-to-br from-card via-card/95 to-card/80 hover:scale-105 backdrop-blur-sm"
                     onClick={() => handleServiceClick(service.slug)}
                     onKeyPress={(e) => handleServiceKeyPress(e, service.slug)}
                     role="button"
@@ -543,7 +543,7 @@ const Index = () => {
       )}
 
       {/* How It Works Section */}
-      <section className="py-8 md:py-14 bg-muted/30">
+      <section className="py-8 md:py-14 bg-gradient-to-br from-secondary/5 via-muted/30 to-secondary/10">
         <div className="space-y-6 md:space-y-10">
           <div className="text-center">
             <motion.div
@@ -579,7 +579,7 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.2 }}
-                className="rounded-xl p-4 sm:p-6 bg-white/70 ring-1 ring-slate-200 text-center group flex-1"
+                className="rounded-2xl p-6 sm:p-8 bg-gradient-to-br from-card via-card/95 to-card/90 ring-2 ring-primary/10 text-center group flex-1 shadow-xl hover:shadow-2xl transition-all duration-300 border border-primary/5 hover:ring-primary/20"
               >
                 <div className="bg-trust-blue/10 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 group-hover:bg-trust-blue/20 transition-all duration-300">
                   <div className="text-trust-blue transition-transform duration-300" aria-hidden="true">{step.icon}</div>
@@ -719,17 +719,17 @@ const Index = () => {
             className="flex justify-center"
           >
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-              <div className="group cursor-default">
-                <div className="text-3xl md:text-4xl font-bold text-trust-blue mb-2 transition-transform">30,000+</div>
-                <div className="text-muted-foreground">Happy Customers</div>
+              <div className="group cursor-default bg-gradient-to-br from-card/80 to-card/60 p-6 rounded-2xl border border-primary/10 shadow-lg hover:shadow-xl transition-all duration-300">
+                <div className="text-3xl md:text-4xl font-bold text-primary mb-2 transition-transform group-hover:scale-110">30,000+</div>
+                <div className="text-muted-foreground font-medium">Happy Customers</div>
               </div>
-              <div className="group cursor-default">
-                <div className="text-3xl md:text-4xl font-bold text-trust-green mb-2 transition-transform">50,000+</div>
-                <div className="text-muted-foreground">Verified Tradespeople</div>
+              <div className="group cursor-default bg-gradient-to-br from-card/80 to-card/60 p-6 rounded-2xl border border-secondary/10 shadow-lg hover:shadow-xl transition-all duration-300">
+                <div className="text-3xl md:text-4xl font-bold text-secondary mb-2 transition-transform group-hover:scale-110">50,000+</div>
+                <div className="text-muted-foreground font-medium">Verified Tradespeople</div>
               </div>
-              <div className="group cursor-default">
-                <div className="text-3xl md:text-4xl font-bold text-accent-orange mb-2 transition-transform">99%</div>
-                <div className="text-muted-foreground">Customer Satisfaction</div>
+              <div className="group cursor-default bg-gradient-to-br from-card/80 to-card/60 p-6 rounded-2xl border border-accent/10 shadow-lg hover:shadow-xl transition-all duration-300">
+                <div className="text-3xl md:text-4xl font-bold text-accent mb-2 transition-transform group-hover:scale-110">99%</div>
+                <div className="text-muted-foreground font-medium">Customer Satisfaction</div>
               </div>
             </div>
           </motion.div>
@@ -757,7 +757,7 @@ const Index = () => {
       </section>
 
       {/* Mid-page CTA Band */}
-      <section className="py-8 md:py-14 mb-8 md:mb-14 bg-gradient-to-r from-trust-blue via-trust-blue to-trust-blue/90 text-trust-blue-foreground relative overflow-hidden">
+      <section className="py-8 md:py-14 mb-8 md:mb-14 bg-gradient-to-r from-primary via-primary to-primary/90 text-primary-foreground relative overflow-hidden">
         {/* Background Elements */}
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJtMzYgMzQgNi0yIDYgMi02IDJ6bTAgNGwzLTEgMy0xIDMgMSAzIDEtNiAyem0wLTEwIDMtMSAzIDEtNiAyem0wLTQgMy0xIDMgMS02IDJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
         
