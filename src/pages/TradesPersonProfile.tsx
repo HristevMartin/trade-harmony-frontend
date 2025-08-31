@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,7 @@ import {
   Clock,
   CheckCircle
 } from "lucide-react";
+
 
 const TradesPersonProfile = () => {
   // Mock data - in real app this would come from API/context
@@ -41,6 +42,23 @@ const TradesPersonProfile = () => {
     availability: "Available",
     responseTime: "Usually responds within 2 hours"
   });
+
+  const [traderProfile,setTraderProfile] = useState({});
+
+  const apiUrl = import.meta.env.VITE_API_URL;
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await fetch(`${apiUrl}/travel/get-tradesperson-profile`);
+        const data = await response.json();
+        setTraderProfile(data);
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">

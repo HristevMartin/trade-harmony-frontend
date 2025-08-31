@@ -503,39 +503,36 @@ const HomeownerGetProjects = () => {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="space-y-2 sm:space-y-3">
+                  <div className="space-y-3 sm:space-y-3">
                     {/* Primary Actions */}
-                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-3">
                       <Button
                         onClick={() => navigate(`/jobs/${project.project_id}`)}
                         variant="outline"
-                        size="sm"
-                        className="flex-1 border-trust-blue/20 text-trust-blue hover:bg-trust-blue/10 hover:border-trust-blue/40 text-xs sm:text-sm"
+                        className="flex-1 min-h-[44px] px-4 py-3 border-trust-blue/20 text-trust-blue hover:bg-trust-blue/10 hover:border-trust-blue/40 text-sm sm:text-sm font-medium rounded-xl transition-all"
                       >
-                        <HiEye className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                        <HiEye className="w-4 h-4 mr-2" />
                         View Details
                       </Button>
                       
                       <Button
                         onClick={() => navigate(`/edit-job/${project?.project_id}`)}
                         variant="outline"
-                        size="sm"
-                        className="flex-1 border-border hover:bg-muted/50 text-xs sm:text-sm"
+                        className="flex-1 min-h-[44px] px-4 py-3 border-border hover:bg-muted/50 text-sm sm:text-sm font-medium rounded-xl transition-all"
                       >
-                        <Edit className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                        <Edit className="w-4 h-4 mr-2" />
                         Edit Job
                       </Button>
                     </div>
                     
                     {/* Secondary Actions */}
-                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-3">
                       {project.status !== 'completed' && (
                         <Button
                           onClick={() => handleMarkComplete(project)}
-                          size="sm"
-                          className="flex-1 bg-trust-green hover:bg-trust-green/90 text-trust-green-foreground text-xs sm:text-sm"
+                          className="flex-1 min-h-[44px] px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm sm:text-sm font-medium rounded-xl transition-all shadow-sm"
                         >
-                          <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                          <CheckCircle className="w-4 h-4 mr-2" />
                           Mark Complete
                         </Button>
                       )}
@@ -543,10 +540,9 @@ const HomeownerGetProjects = () => {
                       <Button
                         onClick={() => handleCloseJob(project)}
                         variant="outline"
-                        size="sm"
-                        className={`border-destructive/20 text-destructive hover:bg-destructive/10 hover:border-destructive/40 text-xs sm:text-sm ${project.status !== 'completed' ? 'flex-1' : 'w-full'}`}
+                        className={`min-h-[44px] px-4 py-3 border-red-200 text-red-700 hover:bg-red-50 hover:border-red-300 text-sm sm:text-sm font-medium rounded-xl transition-all ${project.status !== 'completed' ? 'flex-1' : 'w-full'}`}
                       >
-                        <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                        <Trash2 className="w-4 h-4 mr-2" />
                         Delete Job
                       </Button>
                     </div>
