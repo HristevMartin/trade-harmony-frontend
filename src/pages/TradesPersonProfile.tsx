@@ -127,57 +127,56 @@ const TradesPersonProfile = () => {
         <div className="min-h-screen bg-gradient-to-br from-background via-muted/5 to-background">
             {/* Hero Section */}
             <div className="relative bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 border-b border-border/5">
-                <div className="container mx-auto px-4 py-8 md:py-12 max-w-6xl">
-                    <div className="flex flex-col lg:flex-row items-center gap-6 lg:gap-8">
-                        <div className="relative flex-shrink-0">
+                <div className="container mx-auto px-4 py-12 max-w-6xl">
+                    <div className="flex flex-col md:flex-row items-center gap-8">
+                        <div className="relative">
                             <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full blur-2xl scale-110"></div>
-                            <Avatar className="relative h-28 w-28 sm:h-32 sm:w-32 lg:h-36 lg:w-36 border-4 border-background shadow-2xl">
+                            <Avatar className="relative h-32 w-32 border-4 border-background shadow-2xl">
                                 <AvatarImage src={traderProfile.projectImages?.[0] || ''} alt={traderProfile.name} className="object-cover" />
-                                <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground text-xl sm:text-2xl lg:text-3xl font-bold">
+                                <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground text-2xl font-bold">
                                     {traderProfile.name?.split(' ').map((n: string) => n[0]).join('') || 'TP'}
                                 </AvatarFallback>
                             </Avatar>
                             <Button
                                 size="icon"
                                 variant="secondary"
-                                className="absolute -bottom-2 -right-2 h-8 w-8 sm:h-10 sm:w-10 rounded-full shadow-lg border-2 border-background hover:scale-105 transition-transform"
+                                className="absolute -bottom-2 -right-2 h-10 w-10 rounded-full shadow-lg border-2 border-background hover:scale-105 transition-transform"
                             >
-                                <Camera className="h-4 w-4 sm:h-5 sm:w-5" />
+                                <Camera className="h-5 w-5" />
                             </Button>
                         </div>
 
-                        <div className="flex-1 text-center lg:text-left">
-                            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-3 leading-tight">
+                        <div className="flex-1 text-center md:text-left">
+                            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-3">
                                 {traderProfile.name}
                             </h1>
-                            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mb-4">
-                                <Badge variant="default" className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground border-0 px-4 py-2 text-sm sm:text-base font-medium shadow-lg">
-                                    <Award className="h-4 w-4 mr-2" />
+                            <div className="flex items-center justify-center md:justify-start gap-2 mb-4">
+                                <Badge variant="default" className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground border-0 px-4 py-2 text-base font-medium">
                                     {traderProfile.primaryTrade} Specialist
                                 </Badge>
-                                <Badge variant="outline" className="border-primary/40 text-primary px-3 py-2 text-sm sm:text-base font-semibold bg-primary/5">
-                                    {traderProfile.experienceYears} years experience
+                                <Badge variant="outline" className="border-primary/30 text-primary px-3 py-1">
+                                    {traderProfile.experienceYears} years exp.
                                 </Badge>
                             </div>
-                            <p className="text-muted-foreground text-base sm:text-lg lg:text-xl max-w-2xl leading-relaxed">
-                                Professional {traderProfile.primaryTrade.toLowerCase()} services in {traderProfile.city} and surrounding areas within {traderProfile.radiusKm}km radius
+                            <p className="text-muted-foreground text-lg max-w-2xl">
+                                Professional {traderProfile.primaryTrade.toLowerCase()} services in {traderProfile.city} and surrounding areas
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-3 sm:gap-4 lg:gap-6 w-full lg:w-auto">
-                            <div className="bg-gradient-to-br from-card to-card/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 lg:p-6 border border-border/20 shadow-lg hover:shadow-xl transition-all duration-300 min-w-[80px] sm:min-w-[100px]">
-                                <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-primary mb-1">{traderProfile.experienceYears}</div>
-                                <div className="text-xs sm:text-sm lg:text-base text-muted-foreground font-medium leading-tight">Years<br className="hidden sm:block" /><span className="sm:hidden"> </span>Experience</div>
+                        <div className="grid grid-cols-3 gap-4 text-center">
+                            <div className="bg-background/50 backdrop-blur-sm rounded-xl p-4 border border-border/20">
+                                <div className="text-2xl font-bold text-primary">{traderProfile.experienceYears}</div>
+                                <div className="text-sm text-muted-foreground">Years Experience</div>
                             </div>
-                            <div className="bg-gradient-to-br from-card to-card/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 lg:p-6 border border-border/20 shadow-lg hover:shadow-xl transition-all duration-300 min-w-[80px] sm:min-w-[100px]">
-                                <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-primary mb-1">{traderProfile.radiusKm}<span className="text-lg sm:text-xl lg:text-2xl">km</span></div>
-                                <div className="text-xs sm:text-sm lg:text-base text-muted-foreground font-medium leading-tight">Service<br className="hidden sm:block" /><span className="sm:hidden"> </span>Radius</div>
+                            <div className="bg-background/50 backdrop-blur-sm rounded-xl p-4 border border-border/20">
+                                <div className="text-2xl font-bold text-primary">{traderProfile.radiusKm}km</div>
+                                <div className="text-sm text-muted-foreground">Service Radius</div>
                             </div>
-                            <div className="bg-gradient-to-br from-card to-card/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 lg:p-6 border border-border/20 shadow-lg hover:shadow-xl transition-all duration-300 min-w-[80px] sm:min-w-[100px]">
-                                <div className="text-2xl sm:text-3xl lg:text-4xl font-black text-primary mb-1 flex items-center justify-center">
-                                    <Star className="h-6 w-6 sm:h-8 sm:w-8 lg:h-10 lg:w-10 fill-current" />
+                            <div className="bg-background/50 backdrop-blur-sm rounded-xl p-4 border border-border/20">
+                                <div className="text-2xl font-bold text-primary flex items-center justify-center">
+                                    <Star className="h-5 w-5 fill-current" />
                                 </div>
-                                <div className="text-xs sm:text-sm lg:text-base text-muted-foreground font-medium leading-tight">Verified<br className="hidden sm:block" /><span className="sm:hidden"> </span>Pro</div>
+                                <div className="text-sm text-muted-foreground">Verified Pro</div>
                             </div>
                         </div>
                     </div>
@@ -264,14 +263,14 @@ const TradesPersonProfile = () => {
                                     </div>
                                 </div>
                                 
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="text-center p-4 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl border border-primary/20">
-                                        <div className="text-3xl font-black text-primary mb-1">{traderProfile.experienceYears}</div>
-                                        <div className="text-sm font-medium text-muted-foreground">Years Experience</div>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="text-center p-3 bg-muted/30 rounded-lg">
+                                        <div className="text-2xl font-bold text-primary">{traderProfile.experienceYears}</div>
+                                        <div className="text-xs text-muted-foreground">Years Experience</div>
                                     </div>
-                                    <div className="text-center p-4 bg-gradient-to-br from-secondary/5 to-secondary/10 rounded-xl border border-secondary/20">
-                                        <div className="text-3xl font-black text-secondary mb-1">{traderProfile.radiusKm}<span className="text-xl">km</span></div>
-                                        <div className="text-sm font-medium text-muted-foreground">Coverage Area</div>
+                                    <div className="text-center p-3 bg-muted/30 rounded-lg">
+                                        <div className="text-2xl font-bold text-primary">{traderProfile.radiusKm}km</div>
+                                        <div className="text-xs text-muted-foreground">Coverage Area</div>
                                     </div>
                                 </div>
                             </CardContent>
@@ -370,39 +369,6 @@ const TradesPersonProfile = () => {
                             </CardContent>
                         </Card>
 
-                        {/* Availability Status */}
-                        <Card className="shadow-xl bg-gradient-to-br from-card to-card/80 border-0">
-                            <CardHeader className="pb-6">
-                                <div className="flex items-center justify-between">
-                                    <CardTitle className="text-2xl flex items-center">
-                                        <Clock className="h-6 w-6 mr-3 text-primary" />
-                                        Availability
-                                    </CardTitle>
-                                    <Button variant="outline" size="sm" className="border-primary/20 hover:bg-primary/5">
-                                        <Edit3 className="h-4 w-4 mr-2" />
-                                        Update Status
-                                    </Button>
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-950/20 dark:to-green-900/20 p-6 rounded-xl border border-green-200 dark:border-green-800">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center space-x-4">
-                                            <div className="bg-green-500 p-3 rounded-full">
-                                                <CheckCircle className="h-6 w-6 text-white" />
-                                            </div>
-                                            <div>
-                                                <p className="font-semibold text-green-800 dark:text-green-200 text-lg">Available for New Projects</p>
-                                                <p className="text-sm text-green-700 dark:text-green-300">Usually responds within 2 hours</p>
-                                            </div>
-                                        </div>
-                                        <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 px-3 py-1">
-                                            Online Now
-                                        </Badge>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
                     </div>
                 </div>
             </div>
