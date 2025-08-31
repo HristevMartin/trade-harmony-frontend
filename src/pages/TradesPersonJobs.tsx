@@ -497,89 +497,80 @@ const TradesPersonJobs = () => {
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted/5 to-background">
         <div className="container mx-auto px-4 max-w-6xl py-8">
           {/* Hero Section */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-8"
+            className="text-center mb-12"
           >
-            <div className="mb-6">
-              <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
-                Available Jobs
-              </h1>
-              <p className="text-lg text-slate-600">Find your next opportunity with trusted clients</p>
+            <div className="relative bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 rounded-3xl p-8 mb-8 border border-border/5">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-3xl blur-3xl scale-110 -z-10"></div>
+              <div className="relative">
+                <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-4">
+                  Available Jobs
+                </h1>
+                <p className="text-xl text-muted-foreground max-w-2xl mx-auto">Find your next opportunity with trusted clients</p>
+              </div>
             </div>
             
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto">
+            {/* Enhanced Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
               <motion.div 
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.1 }}
-                className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm"
+                className="bg-gradient-to-br from-card to-card/80 rounded-2xl p-6 border-0 shadow-xl"
               >
-                <div className="flex items-center justify-center mb-2">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <Briefcase className="h-5 w-5 text-blue-600" />
+                <div className="flex items-center justify-center mb-3">
+                  <div className="p-3 bg-gradient-to-r from-primary to-primary/80 rounded-2xl shadow-lg">
+                    <Briefcase className="h-6 w-6 text-primary-foreground" />
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-slate-900">{visibleJobs.length}</div>
-                <div className="text-sm text-slate-500">Active Jobs</div>
+                <div className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-1">{visibleJobs.length}</div>
+                <div className="text-sm text-muted-foreground font-medium">Active Jobs</div>
               </motion.div>
               
               <motion.div 
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.2 }}
-                className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm"
+                className="bg-gradient-to-br from-card to-card/80 rounded-2xl p-6 border-0 shadow-xl"
               >
-                <div className="flex items-center justify-center mb-2">
-                  <div className="p-2 bg-emerald-100 rounded-lg">
-                    <CheckCircle className="h-5 w-5 text-emerald-600" />
+                <div className="flex items-center justify-center mb-3">
+                  <div className="p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-2xl shadow-lg">
+                    <CheckCircle className="h-6 w-6 text-white" />
                   </div>
                 </div>
-                {loading ? (
-                  <div className="flex items-center justify-center">
-                    <RefreshCw className="h-6 w-6 text-slate-400 animate-spin" />
-                  </div>
-                ) : (
-                  <div className="text-2xl font-bold text-slate-900">95%</div>
-                )}
-                <div className="text-sm text-slate-500">Success Rate</div>
+                <div className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-1">95%</div>
+                <div className="text-sm text-muted-foreground font-medium">Success Rate</div>
               </motion.div>
               
               <motion.div 
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.3 }}
-                className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm"
+                className="bg-gradient-to-br from-card to-card/80 rounded-2xl p-6 border-0 shadow-xl"
               >
-                <div className="flex items-center justify-center mb-2">
-                  <div className="p-2 bg-amber-100 rounded-lg">
-                    <Clock className="h-5 w-5 text-amber-600" />
+                <div className="flex items-center justify-center mb-3">
+                  <div className="p-3 bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl shadow-lg">
+                    <Clock className="h-6 w-6 text-white" />
                   </div>
                 </div>
-                {loading ? (
-                  <div className="flex items-center justify-center">
-                    <RefreshCw className="h-6 w-6 text-slate-400 animate-spin" />
-                  </div>
-                ) : (
-                  <div className="text-2xl font-bold text-slate-900">24h</div>
-                )}
-                <div className="text-sm text-slate-500">Avg Response</div>
+                <div className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-1">24h</div>
+                <div className="text-sm text-muted-foreground font-medium">Avg Response</div>
               </motion.div>
             </div>
           </motion.div>
 
-          {/* Desktop Sticky Filter Bar */}
+          {/* Enhanced Desktop Sticky Filter Bar */}
           <div className="sticky top-14 z-40 mb-8">
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="hidden md:block backdrop-blur bg-white/70 border border-slate-200/60 shadow-sm rounded-2xl px-4 py-4"
+              className="hidden md:block bg-card/80 backdrop-blur-sm border border-border/20 shadow-xl rounded-2xl px-6 py-5"
             >
               {/* Desktop Filters */}
               <div className="flex flex-wrap gap-3 items-center">
@@ -587,7 +578,7 @@ const TradesPersonJobs = () => {
                 <div className="relative" data-popover>
                   <button
                     onClick={() => setOpenPopovers(prev => ({ ...prev, category: !prev.category }))}
-                    className="inline-flex items-center gap-2 rounded-full px-3 h-9 bg-white hover:bg-slate-50 ring-1 ring-slate-200 text-slate-700 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="inline-flex items-center gap-2 rounded-xl px-4 h-10 bg-background hover:bg-muted/50 border border-border/20 text-foreground transition-all focus:outline-none focus:ring-2 focus:ring-primary shadow-sm hover:shadow-md"
                     aria-expanded={openPopovers.category}
                   >
                     <Building2 className="h-4 w-4" />
@@ -602,7 +593,7 @@ const TradesPersonJobs = () => {
                       }
                     </span>
                     {filters.categories.length > 0 && (
-                      <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-medium text-white bg-blue-500 rounded-full">
+                      <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-medium text-primary-foreground bg-primary rounded-full">
                         {filters.categories.length}
                       </span>
                     )}
@@ -610,8 +601,8 @@ const TradesPersonJobs = () => {
                   </button>
                   
                   {openPopovers.category && (
-                    <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl border border-slate-200 shadow-lg z-50">
-                      <div className="p-3 space-y-2 max-h-64 overflow-y-auto">
+                    <div className="absolute top-full left-0 mt-2 w-64 bg-card rounded-2xl border border-border/20 shadow-2xl z-50 backdrop-blur-sm">
+                      <div className="p-4 space-y-2 max-h-64 overflow-y-auto">
                         {filterOptions.categories.map((category, index) => (
                           <div key={category}>
                             <label className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg cursor-pointer">
@@ -1083,14 +1074,14 @@ const TradesPersonJobs = () => {
                         transition={{ delay: index * 0.1 }}
                         whileHover={{ y: -6, scale: 1.02, transition: { duration: 0.3, ease: 'easeOut' } }}
                       >
-                        <Card className="overflow-hidden bg-white border border-slate-200/60 hover:shadow-2xl hover:shadow-blue-500/10 hover:border-blue-300/60 transition-all duration-300 group h-full rounded-2xl cursor-pointer backdrop-blur-sm">
+                        <Card className="overflow-hidden bg-gradient-to-br from-card to-card/80 border-0 shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 group h-full rounded-2xl cursor-pointer backdrop-blur-sm">
                           {/* Card Header with Job Image */}
-                          <div className="relative aspect-[3/2] w-full overflow-hidden rounded-t-2xl bg-gradient-to-br from-slate-50 to-slate-100">
+                          <div className="relative aspect-[3/2] w-full overflow-hidden rounded-t-2xl bg-gradient-to-br from-muted/20 to-muted/40">
                             {job.image_urls && job.image_urls.length > 0 ? (
                               <img 
                                 src={job.image_urls[0]} 
                                 alt={job.job_title}
-                                className="h-full w-full object-cover"
+                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                                 loading="lazy"
                                 onError={(e) => {
                                   const target = e.target as HTMLImageElement;
@@ -1100,13 +1091,13 @@ const TradesPersonJobs = () => {
                                 }}
                               />
                             ) : null}
-                            {/* Fallback */}
+                            {/* Enhanced Fallback */}
                             <div 
-                              className={`absolute inset-0 bg-gradient-to-br from-blue-50 via-slate-50 to-indigo-50 flex items-center justify-center ${
+                              className={`absolute inset-0 bg-gradient-to-br from-primary/10 via-muted/20 to-secondary/10 flex items-center justify-center ${
                                 job.image_urls && job.image_urls.length > 0 ? 'hidden' : 'flex'
                               }`}
                             >
-                              <div className="p-4 bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-slate-200/50">
+                              <div className="p-6 bg-card/90 backdrop-blur-sm rounded-2xl shadow-xl border border-border/20">
                                 {getCategoryIcon(job.service_category)}
                               </div>
                             </div>
@@ -1116,7 +1107,7 @@ const TradesPersonJobs = () => {
                             {/* Top badges row */}
                             <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
                               {/* Budget Badge */}
-                              <Badge className="bg-white/95 text-slate-700 text-xs font-semibold px-3 py-1.5 rounded-full shadow-md backdrop-blur-sm border border-slate-200/50">
+                              <Badge className="bg-card/95 text-foreground text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm border border-border/30">
                                 <PoundSterling className="h-3 w-3 mr-1" />
                                 {formatBudget(job.budget)}
                               </Badge>
@@ -1140,14 +1131,14 @@ const TradesPersonJobs = () => {
                             <div className="flex items-start justify-between mb-3">
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-2">
-                                  <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200 text-xs font-medium px-2 py-0.5">
+                                  <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-xs font-medium px-2 py-0.5">
                                     {job.additional_data?.serviceCategory || job.service_category}
                                   </Badge>
-                                  <div className="text-xs text-slate-500 font-medium">
+                                  <div className="text-xs text-muted-foreground font-medium">
                                     {formatTimeAgo(job.created_at)}
                                   </div>
                                 </div>
-                                <h3 className="text-lg sm:text-xl font-bold text-slate-900 line-clamp-2 leading-tight group-hover:text-blue-700 transition-colors mb-1">
+                                <h3 className="text-lg sm:text-xl font-bold text-foreground line-clamp-2 leading-tight group-hover:text-primary transition-colors mb-1">
                                   {job.job_title}
                                 </h3>
                               </div>
@@ -1155,26 +1146,26 @@ const TradesPersonJobs = () => {
                             
                             {/* Location */}
                             <div className="flex items-center gap-2 mb-4">
-                              <div className="p-1.5 bg-slate-100 rounded-lg">
-                                <MapPin className="h-4 w-4 text-slate-600" />
+                              <div className="p-1.5 bg-muted/30 rounded-lg">
+                                <MapPin className="h-4 w-4 text-muted-foreground" />
                               </div>
-                              <span className="text-sm font-medium text-slate-700 truncate">
+                              <span className="text-sm font-medium text-foreground truncate">
                                 {job.additional_data?.nuts || job.nuts || job.location}
                               </span>
                             </div>
                             
                             {/* Description */}
                             <div className="flex-1 mb-4">
-                              <p className="text-slate-600 text-sm leading-relaxed line-clamp-3">
+                              <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3">
                                 {job.job_description}
                               </p>
                             </div>
                             
                             {/* Card Footer - Action Buttons */}
-                            <div className="pt-4 mt-auto border-t border-slate-100">
+                            <div className="pt-4 mt-auto border-t border-border/20">
                               <div className="flex flex-col sm:flex-row gap-3">
                                 <Button 
-                                  className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+                                  className="flex-1 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold py-3 rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
                                   aria-label={`Apply for ${job.job_title}`}
                                 >
                                   <Send className="h-4 w-4 mr-2" />
@@ -1182,7 +1173,7 @@ const TradesPersonJobs = () => {
                                 </Button>
                                 <Button 
                                   variant="outline"
-                                  className="flex-1 border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-blue-300 hover:text-blue-700 font-medium py-3 rounded-xl transition-all shadow-sm hover:shadow-md"
+                                  className="flex-1 border-border/30 text-foreground hover:bg-muted/50 hover:border-primary/30 hover:text-primary font-medium py-3 rounded-xl transition-all shadow-sm hover:shadow-md"
                                   aria-label={`View details for ${job.job_title}`}
                                 >
                                   <Eye className="h-4 w-4 mr-2" />
