@@ -13,6 +13,7 @@ import {
   HiPhoto,
   HiPlus
 } from "react-icons/hi2";
+import { RefreshCw } from "lucide-react";
 
 interface Project {
   id: string;
@@ -37,9 +38,27 @@ const HomeownerGetProjects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    confirmText: string;
+    confirmStyle: string;
+    isLoading: boolean;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+    confirmText: '',
+    confirmStyle: '',
+    isLoading: false
+  });
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
 
-  // Get the user id from the local storage - fsix extraction
   const getUserId = () => {
     try {
       const userData = localStorage.getItem('auth_user');
@@ -130,15 +149,170 @@ const HomeownerGetProjects = () => {
     }
   };
 
+  const openConfirmModal = (title: string, message: string, onConfirm: () => void, confirmText: string, confirmStyle: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title,
+      message,
+      onConfirm,
+      confirmText,
+      confirmStyle,
+      isLoading: false
+    });
+  };
+
+  const closeConfirmModal = () => {
+    setConfirmModal(prev => ({ ...prev, isOpen: false }));
+  };
+
+  const handleMarkComplete = (project: Project) => {
+    openConfirmModal(
+      "Mark Job as Complete",
+      "Are you sure you want to mark this job as complete? This action will update the job status.",
+      async () => {
+        try {
+          // Set loading state
+          setConfirmModal(prev => ({ ...prev, isLoading: true }));
+          
+          // Prepare FormData similar to EditJobs.tsx
+          const formDataToSend = new FormData();
+          
+          // Add all existing job data
+          formDataToSend.append('job_title', project.job_title);
+          formDataToSend.append('job_description', project.job_description);
+          formDataToSend.append('location', project.additional_data?.location || '');
+          formDataToSend.append('budget', project.budget);
+          formDataToSend.append('urgency', project.urgency);
+          formDataToSend.append('status', 'completed'); // Mark as completed
+          
+          // Add contact and additional information
+          formDataToSend.append('first_name', ''); // These might not be available in the project data
+          formDataToSend.append('email', '');
+          formDataToSend.append('phone', '');
+          formDataToSend.append('country', project.additional_data?.country || '');
+          formDataToSend.append('service_category', project.additional_data?.serviceCategory || '');
+          
+          // Add existing image URLs
+          if (project.image_urls && project.image_urls.length > 0) {
+            project.image_urls.forEach((imageUrl) => {
+              formDataToSend.append('existing_images', imageUrl);
+            });
+          }
+          
+          // Add userId from auth data
+          const authUser = localStorage.getItem('auth_user');
+          if (authUser) {
+            const userData = JSON.parse(authUser);
+            formDataToSend.append('userId', userData.id);
+          }
+
+          const response = await fetch(`${apiUrl}/travel/edit-client-project/${project.project_id}`, {
+            method: 'PUT',
+            body: formDataToSend
+          });
+
+          const data = await response.json();
+          
+          if (data.success) {
+            // Refresh the projects list to show updated status
+            const updatedProjects = projects.map(p => 
+              p.id === project.id ? { ...p, status: 'completed' } : p
+            );
+            setProjects(updatedProjects);
+            setSuccessMessage('Job marked as complete!');
+            setShowSuccess(true);
+            closeConfirmModal();
+            
+            // Hide success message after 3 seconds
+            setTimeout(() => {
+              setShowSuccess(false);
+            }, 3000);
+          } else {
+            throw new Error(data.message || 'Failed to mark job as complete');
+          }
+          
+        } catch (error) {
+          console.error('Error marking job as complete:', error);
+          setError('Failed to mark job as complete. Please try again.');
+          setConfirmModal(prev => ({ ...prev, isLoading: false }));
+        }
+      },
+      "Mark Complete",
+      "bg-green-600 hover:bg-green-700 text-white"
+    );
+  };
+
+  const handleCloseJob = (project: Project) => {
+    openConfirmModal(
+      "Delete Job",
+      "Are you sure you want to delete this job? This action cannot be undone.",
+      async () => {
+        try {
+          // Set loading state
+          setConfirmModal(prev => ({ ...prev, isLoading: true }));
+          
+          const response = await fetch(`${apiUrl}/travel/edit-client-project/${project.project_id}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+
+          const data = await response.json();
+          
+          if (data.success) {
+            // Remove the deleted project from the list
+            const updatedProjects = projects.filter(p => p.id !== project.id);
+            setProjects(updatedProjects);
+            setSuccessMessage('Job deleted successfully!');
+            setShowSuccess(true);
+            closeConfirmModal();
+            
+            // Hide success message after 3 seconds
+            setTimeout(() => {
+              setShowSuccess(false);
+            }, 3000);
+          } else {
+            throw new Error(data.message || 'Failed to delete job');
+          }
+          
+        } catch (error) {
+          console.error('Error deleting job:', error);
+          setError('Failed to delete job. Please try again.');
+          setConfirmModal(prev => ({ ...prev, isLoading: false }));
+        }
+      },
+      "Delete Job",
+      "bg-red-600 hover:bg-red-700 text-white"
+    );
+  };
+
   if (loading) {
     return (
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 md:py-10">
-        <div className="animate-pulse space-y-6">
-          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-64 bg-gray-200 rounded-2xl"></div>
-            ))}
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 md:py-10 w-full">
+          <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
+            {/* Spinner */}
+            <div className="flex items-center justify-center">
+              <RefreshCw className="h-8 w-8 text-trust-blue animate-spin" />
+            </div>
+            
+            {/* Loading text */}
+            <div className="text-center space-y-2">
+              <h2 className="text-xl font-semibold text-slate-900">Loading Your Jobs</h2>
+            </div>
+            
+            {/* Optional skeleton preview */}
+            <div className="w-full max-w-4xl">
+              <div className="animate-pulse space-y-6">
+                <div className="h-6 bg-gray-200 rounded w-1/4 mx-auto"></div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="h-48 bg-gray-200 rounded-2xl"></div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -147,27 +321,42 @@ const HomeownerGetProjects = () => {
 
   if (error) {
     return (
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 md:py-10">
-        <Card className="max-w-md mx-auto">
-          <CardContent className="p-6 text-center">
-            <h2 className="text-lg font-semibold text-red-600 mb-2">Error</h2>
-            <p className="text-gray-600 mb-4">{error}</p>
-            <Button onClick={() => window.location.reload()}>
-              Try Again
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 md:py-10 w-full">
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <Card className="max-w-md mx-auto">
+              <CardContent className="p-6 text-center">
+                <h2 className="text-lg font-semibold text-red-600 mb-2">Error</h2>
+                <p className="text-gray-600 mb-4">{error}</p>
+                <Button onClick={() => window.location.reload()}>
+                  Try Again
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 md:py-10">
+    <div className="min-h-screen bg-slate-50">
+      {/* Success Toast */}
+      {showSuccess && (
+        <div className="fixed top-4 right-4 z-50 bg-green-50 border border-green-200 rounded-lg p-4 shadow-lg">
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 text-green-600">✓</div>
+            <span className="text-green-800 font-medium">{successMessage}</span>
+          </div>
+        </div>
+      )}
+      
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 md:py-10">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
         <div>
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground mb-2">
-            My Projects
+            My Jobs
           </h1>
           <p className="text-slate-600">
             Manage your posted jobs and track their progress
@@ -279,26 +468,48 @@ const HomeownerGetProjects = () => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => navigate(`/jobs/${project.project_id}`)}
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 text-xs"
-                  >
-                    <HiEye className="w-4 h-4 mr-1" />
-                    View
-                  </Button>
-                  
-                  <Button
-                    onClick={() => navigate(`/edit-job/${project?.project_id}`)}
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 text-xs"
-                  >
-                    <HiPencilSquare className="w-4 h-4 mr-1" />
-                    Edit
-                  </Button>
+                <div className="space-y-2">
+                  {/* View and Edit buttons */}
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => navigate(`/jobs/${project.project_id}`)}
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 text-xs"
+                    >
+                      <HiEye className="w-4 h-4 mr-1" />
+                      View
+                    </Button>
+                    
+                    <Button
+                      onClick={() => navigate(`/edit-job/${project?.project_id}`)}
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 text-xs"
+                    >
+                      <HiPencilSquare className="w-4 h-4 mr-1" />
+                      Edit
+                    </Button>
+                  </div>
+
+                  {/* Status Action buttons */}
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <button
+                      onClick={() => handleMarkComplete(project)}
+                      className="px-3 py-1 text-sm rounded-md bg-green-100 text-green-700 hover:bg-green-200 transition-colors flex-1"
+                      aria-label="Mark job as complete"
+                    >
+                      Mark as Complete
+                    </button>
+                    
+                    <button
+                      onClick={() => handleCloseJob(project)}
+                      className="px-3 py-1 text-sm rounded-md bg-red-100 text-red-700 hover:bg-red-200 transition-colors flex-1"
+                      aria-label="Delete job"
+                    >
+                      Delete Job
+                    </button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -316,6 +527,47 @@ const HomeownerGetProjects = () => {
           Post New Job
         </Button>
       </div>
+      </div>
+
+      {/* Confirmation Modal */}
+      {confirmModal.isOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 animate-in fade-in-0 zoom-in-95 duration-200">
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                {confirmModal.title}
+              </h3>
+              <p className="text-slate-600 mb-6">
+                {confirmModal.message}
+              </p>
+              
+              <div className="flex gap-3 justify-end">
+                <Button
+                  onClick={closeConfirmModal}
+                  variant="outline"
+                  className="px-4 py-2"
+                >
+                  Cancel
+                </Button>
+                <button
+                  onClick={confirmModal.onConfirm}
+                  disabled={confirmModal.isLoading}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${confirmModal.confirmStyle} disabled:opacity-50`}
+                >
+                  {confirmModal.isLoading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 inline-block" />
+                      Processing...
+                    </>
+                  ) : (
+                    confirmModal.confirmText
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

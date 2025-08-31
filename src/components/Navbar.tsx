@@ -189,6 +189,11 @@ const Navbar = () => {
   const isTrader = Array.isArray(user?.role) 
     ? user?.role.includes('master') // Only show View Jobs if user has master role
     : user?.role === 'master'; // Fallback for string role
+
+  // Check if user already has trader role (hide join button)
+  const hasTraderRole = Array.isArray(user?.role) 
+    ? user?.role.includes('trader')
+    : user?.role === 'trader';
   console.log('show me the isTrader', isTrader);
   console.log('user role:', user?.role);
   console.log('user role type:', typeof user?.role);
@@ -278,14 +283,16 @@ const Navbar = () => {
               </button>
             )}
             
-            {/* CTA Button */}
-            <Button
-              onClick={() => handleNavigation('/tradesperson/onboarding')}
-              variant="outline"
-              className="border-trust-blue text-trust-blue hover:bg-trust-blue hover:text-trust-blue-foreground transition-all duration-300 hover:scale-105"
-            >
-              Join as a Tradesperson
-            </Button>
+            {/* CTA Button - Only show if user doesn't have trader role */}
+            {!hasTraderRole && (
+              <Button
+                onClick={() => handleNavigation('/tradesperson/onboarding')}
+                variant="outline"
+                className="border-trust-blue text-trust-blue hover:bg-trust-blue hover:text-trust-blue-foreground transition-all duration-300 hover:scale-105"
+              >
+                Join as a Tradesperson
+              </Button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -360,15 +367,17 @@ const Navbar = () => {
                     </button>
                   )}
                   
-                  {/* CTA Button */}
-                  <Button
-                    onClick={() => handleNavigation('/tradesperson/onboarding')}
-                    variant="outline"
-                    className="w-full border-trust-blue text-trust-blue hover:bg-trust-blue hover:text-trust-blue-foreground transition-all duration-300"
-                  >
-                    <User className="h-4 w-4 mr-2" />
-                    Join as a Tradesperson
-                  </Button>
+                  {/* CTA Button - Only show if user doesn't have trader role */}
+                  {!hasTraderRole && (
+                    <Button
+                      onClick={() => handleNavigation('/tradesperson/onboarding')}
+                      variant="outline"
+                      className="w-full border-trust-blue text-trust-blue hover:bg-trust-blue hover:text-trust-blue-foreground transition-all duration-300"
+                    >
+                      <User className="h-4 w-4 mr-2" />
+                      Join as a Tradesperson
+                    </Button>
+                  )}
                 </div>
               </nav>
             </motion.div>
