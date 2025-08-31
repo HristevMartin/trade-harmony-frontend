@@ -916,29 +916,21 @@ const TradesPersonProfile = () => {
                                     </div>
 
                                     {traderProfile.certificationImages && traderProfile.certificationImages.length > 0 ? (
-                                        <div className="relative max-w-xs mx-auto">
-                                            <Carousel className="w-full">
-                                                <CarouselContent>
-                                                    {traderProfile.certificationImages.map((image: string, index: number) => (
-                                                        <CarouselItem key={index}>
-                                                            <div className="relative group overflow-hidden rounded-lg bg-muted/20 aspect-square w-32 h-32 mx-auto">
-                                                                <img 
-                                                                    src={image} 
-                                                                    alt={`Certification ${index + 1}`}
-                                                                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                                                />
-                                                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                                                    <div className="absolute bottom-2 left-2 text-white">
-                                                                        <p className="text-xs font-medium">Certificate {index + 1}</p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </CarouselItem>
-                                                    ))}
-                                                </CarouselContent>
-                                                <CarouselPrevious className="h-6 w-6" />
-                                                <CarouselNext className="h-6 w-6" />
-                                            </Carousel>
+                                        <div className="flex flex-wrap gap-3">
+                                            {traderProfile.certificationImages.map((image: string, index: number) => (
+                                                <div key={index} className="relative group overflow-hidden rounded-lg bg-muted/20 aspect-square w-32 h-32">
+                                                    <img 
+                                                        src={image} 
+                                                        alt={`Certification ${index + 1}`}
+                                                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                                    />
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                                        <div className="absolute bottom-2 left-2 text-white">
+                                                            <p className="text-xs font-medium">Certificate {index + 1}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     ) : (
                                         <div className="text-center py-6 bg-muted/20 rounded-lg border-2 border-dashed border-muted/40">
