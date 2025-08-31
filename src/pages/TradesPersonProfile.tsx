@@ -38,6 +38,7 @@ const TradesPersonProfile = () => {
     const [tempData, setTempData] = useState<any>({});
     const [selectedServices, setSelectedServices] = useState<string[]>([]);
     const [saving, setSaving] = useState(false);
+    const [uploadingImage, setUploadingImage] = useState(false);
 
     // Service options - simplified to match popular services
     const getServiceOptions = () => {
@@ -144,6 +145,51 @@ const TradesPersonProfile = () => {
         setEditingServices(false);
         setTempData({});
         setSelectedServices([]);
+    };
+
+    // Handle image upload
+    const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file || !userId) return;
+
+        setUploadingImage(true);
+        try {
+            const formData = new FormData();
+            formData.append('image', file);
+
+            const response = await fetch(`${apiUrl}/travel/upload-portfolio-image/${userId}`, {
+                method: 'POST',
+                body: formData,
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                // Update the trader profile with the new image
+                const updatedImages = [...(traderProfile.projectImages || []), data.imageUrl];
+                await saveProfile('projectImages', updatedImages);
+                
+                toast({
+                    title: "Image Uploaded",
+                    description: "Your portfolio image has been successfully uploaded.",
+                });
+            } else {
+                throw new Error(data.error || 'Failed to upload image');
+            }
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            toast({
+                title: "Upload Failed",
+                description: "Failed to upload image. Please try again.",
+                variant: "destructive",
+            });
+        } finally {
+            setUploadingImage(false);
+            // Reset the input
+            if (event.target) {
+                event.target.value = '';
+            }
+        }
     };
 
     const apiUrl = import.meta.env.VITE_API_URL;
@@ -258,13 +304,6 @@ const TradesPersonProfile = () => {
                                     {traderProfile.name?.split(' ').map((n: string) => n[0]).join('') || 'TP'}
                                 </AvatarFallback>
                             </Avatar>
-                            <Button
-                                size="icon"
-                                variant="secondary"
-                                className="absolute -bottom-2 -right-2 h-10 w-10 rounded-full shadow-lg border-2 border-background hover:scale-105 transition-transform"
-                            >
-                                <Camera className="h-5 w-5" />
-                            </Button>
                         </div>
 
                         <div className="flex-1 text-center md:text-left">
@@ -800,14 +839,24 @@ const TradesPersonProfile = () => {
                                          <Camera className="h-6 w-6 mr-3 text-primary" />
                                          Portfolio Gallery
                                      </CardTitle>
-                                     <Button 
-                                         variant="outline" 
-                                         size="sm" 
-                                         className="border-primary/20 hover:bg-primary/5"
-                                     >
-                                         <Camera className="h-4 w-4 mr-2" />
-                                         Add Images
-                                     </Button>
+                                     <div className="relative">
+                                         <input
+                                             type="file"
+                                             accept="image/*"
+                                             onChange={handleImageUpload}
+                                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                             disabled={uploadingImage}
+                                         />
+                                         <Button 
+                                             variant="outline" 
+                                             size="sm" 
+                                             className="border-primary/20 hover:bg-primary/5"
+                                             disabled={uploadingImage}
+                                         >
+                                             <Camera className="h-4 w-4 mr-2" />
+                                             {uploadingImage ? 'Uploading...' : 'Add Images'}
+                                         </Button>
+                                     </div>
                                  </div>
                              </CardHeader>
                              <CardContent>
@@ -835,10 +884,23 @@ const TradesPersonProfile = () => {
                                          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
                                              Showcase your best work by adding photos of completed projects. High-quality images help attract more clients.
                                          </p>
-                                         <Button variant="outline" className="border-primary/20 hover:bg-primary/5">
-                                             <Camera className="h-4 w-4 mr-2" />
-                                             Upload Your First Image
-                                         </Button>
+                                         <div className="relative inline-block">
+                                             <input
+                                                 type="file"
+                                                 accept="image/*"
+                                                 onChange={handleImageUpload}
+                                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                                 disabled={uploadingImage}
+                                             />
+                                             <Button 
+                                                 variant="outline" 
+                                                 className="border-primary/20 hover:bg-primary/5"
+                                                 disabled={uploadingImage}
+                                             >
+                                                 <Camera className="h-4 w-4 mr-2" />
+                                                 {uploadingImage ? 'Uploading...' : 'Upload Your First Image'}
+                                             </Button>
+                                         </div>
                                      </div>
                                  )}
                              </CardContent>
