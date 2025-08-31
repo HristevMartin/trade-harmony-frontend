@@ -108,7 +108,6 @@ const PostJob = () => {
         country: initialCountry,
         location: extractCityFromPostcode(initialPostcode, initialCountry),
         postcode: '',
-        area: '',
         serviceCategory: initialCategory,
         jobTitle: '',
         jobDescription: '',
@@ -134,7 +133,7 @@ const PostJob = () => {
     // Calculate completion progress for each step
     const getStepCompletion = () => {
         const locationComplete = formData.country === 'GB' 
-            ? (formData.postcode && formData.area && formData.postcode.trim() !== '' && formData.area.trim() !== '')
+            ? (formData.location && formData.location.trim() !== '' && formData.postcode && formData.postcode.trim() !== '')
             : (formData.location && formData.location.trim() !== '');
             
         const steps = {
@@ -303,13 +302,6 @@ const PostJob = () => {
                         if (!ukPostcodeRegex.test((value as string).trim())) {
                             errors[field] = 'Please enter a valid UK postcode (e.g., SW1A 1AA)';
                         }
-                    }
-                }
-                break;
-            case 'area':
-                if (formData.country === 'GB') {
-                    if (!value || (value as string).trim() === '') {
-                        errors[field] = 'Area is required';
                     }
                 }
                 break;
@@ -699,19 +691,19 @@ const PostJob = () => {
                                         <UKLocationInput
                                             value={{
                                                 country: formData.country,
-                                                postcode: formData.postcode,
-                                                area: formData.area
+                                                location: formData.location,
+                                                postcode: formData.postcode
                                             }}
                                             onChange={(locationData) => {
                                                 setFormData(prev => ({
                                                     ...prev,
-                                                    postcode: locationData.postcode,
-                                                    area: locationData.area
+                                                    location: locationData.location,
+                                                    postcode: locationData.postcode
                                                 }));
                                             }}
                                             errors={{
-                                                postcode: formErrors.postcode,
-                                                area: formErrors.area
+                                                location: formErrors.location,
+                                                postcode: formErrors.postcode
                                             }}
                                         />
                                     ) : (

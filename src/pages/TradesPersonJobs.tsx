@@ -43,6 +43,11 @@ interface Job {
   image_urls: string[];
   created_at: string;
   status: string;
+  nuts?: string;
+  additional_data?: {
+    nuts?: string;
+    [key: string]: any;
+  };
 }
 
 const TradesPersonJobs = () => {
@@ -182,10 +187,13 @@ const TradesPersonJobs = () => {
       // Exclude completed jobs from being displayed
       if (job.status && job.status.toLowerCase() === 'completed') return false;
       
-      if (filters.categories.length > 0 && !filters.categories.includes(job.service_category)) return false;
-      if (filters.locations.length > 0 && !filters.locations.some(filterLocation => 
-        job.location.toLowerCase().trim() === filterLocation.toLowerCase().trim()
-      )) return false;
+      if (filters.categories.length > 0 && !filters.categories.includes(job.additional_data?.serviceCategory || job.service_category)) return false;
+      if (filters.locations.length > 0 && !filters.locations.some(filterLocation => {
+        // Use nuts field for filtering, fallback to location if nuts is not available
+        const jobNuts = job.additional_data?.nuts || job.nuts;
+        const jobLocation = jobNuts || job.location;
+        return jobLocation?.toLowerCase().trim() === filterLocation.toLowerCase().trim();
+      })) return false;
       if (filters.urgency && formatUrgency(job.urgency) !== filters.urgency) return false;
       return true;
     });
@@ -213,8 +221,12 @@ const TradesPersonJobs = () => {
     // First filter out completed jobs before generating filter options
     const activeJobs = jobs.filter(job => !(job.status && job.status.toLowerCase() === 'completed'));
     
-    const categories = [...new Set(activeJobs.map(job => job.service_category).filter(Boolean))];
-    const locations = [...new Set(activeJobs.map(job => job.location).filter(Boolean))];
+    const categories = [...new Set(activeJobs.map(job => job.additional_data?.serviceCategory || job.service_category).filter(Boolean))];
+    // Use nuts field for location options, fallback to location if nuts is not available
+    const locations = [...new Set(activeJobs.map(job => {
+      const jobNuts = job.additional_data?.nuts || job.nuts;
+      return jobNuts || job.location;
+    }).filter(Boolean))];
     const urgencies = [...new Set(activeJobs.map(job => formatUrgency(job.urgency)).filter(Boolean))];
     
     return { categories, locations, urgencies };
@@ -615,7 +627,7 @@ const TradesPersonJobs = () => {
                                 }}
                                 className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                               />
-                              <span className="text-sm text-slate-700 capitalize">{category}</span>
+                              <span className="text-sm text-slate-700">{category}</span>
                             </label>
                             {index < filterOptions.categories.length - 1 && <div className="h-px bg-slate-100 my-1" />}
                           </div>
@@ -721,35 +733,48 @@ const TradesPersonJobs = () => {
                 
                 {/* Urgency Toggle Chips */}
                 <div className="flex items-center gap-2">
-                  {filterOptions.urgencies.map((urgency) => {
-                    const getUrgencyIcon = (urgencyLabel: string) => {
-                      if (urgencyLabel === 'ASAP') return AlertCircle;
-                      if (urgencyLabel === 'This week') return Calendar;
-                      return Clock;
-                    };
-                    
-                    const Icon = getUrgencyIcon(urgency);
-                    const isPressed = filters.urgency === urgency;
-                    return (
-                      <button
-                        key={urgency}
-                        onClick={() => setFilters(prev => ({ 
-                          ...prev, 
-                          urgency: prev.urgency === urgency ? undefined : urgency 
-                        }))}
-                        className={`inline-flex items-center gap-2 rounded-full px-3 h-9 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                          isPressed 
-                            ? 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200' 
-                            : 'bg-white hover:bg-slate-50 ring-1 ring-slate-200 text-slate-700'
-                        }`}
-                        aria-pressed={isPressed}
-                        aria-label={`Filter by ${urgency} urgency`}
-                      >
-                        <Icon className="h-4 w-4" />
-                        <span className="text-sm font-medium">{urgency}</span>
+                  <div className="flex items-center gap-2">
+                    {filterOptions.urgencies.map((urgency) => {
+                      const getUrgencyIcon = (urgencyLabel: string) => {
+                        if (urgencyLabel === 'ASAP') return AlertCircle;
+                        if (urgencyLabel === 'This week') return Calendar;
+                        return Clock;
+                      };
+                      
+                      const Icon = getUrgencyIcon(urgency);
+                      const isPressed = filters.urgency === urgency;
+                      return (
+                        <button
+                          key={urgency}
+                          onClick={() => setFilters(prev => ({ 
+                            ...prev, 
+                            urgency: prev.urgency === urgency ? undefined : urgency 
+                          }))}
+                          className={`inline-flex items-center gap-2 rounded-full px-3 h-9 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                            isPressed 
+                              ? 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200' 
+                              : 'bg-white hover:bg-slate-50 ring-1 ring-slate-200 text-slate-700'
+                          }`}
+                          aria-pressed={isPressed}
+                          aria-label={`Filter by ${urgency} urgency`}
+                        >
+                          <Icon className="h-4 w-4" />
+                          <span className="text-sm font-medium">{urgency}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button className="text-slate-400 hover:text-slate-600 transition-colors ml-1">
+                        <AlertCircle className="h-4 w-4" />
                       </button>
-                    );
-                  })}
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="bg-slate-900 text-white text-xs px-3 py-2 rounded-lg shadow-lg z-[60]">
+                      <p>Filter jobs by how quickly they need to be completed</p>
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
 
               </div>
@@ -910,7 +935,7 @@ const TradesPersonJobs = () => {
                           }}
                           className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                         />
-                        <span className="text-sm text-slate-700 capitalize">{category}</span>
+                        <span className="text-sm text-slate-700">{category}</span>
                       </label>
                     ))}
                   </div>
@@ -1104,7 +1129,7 @@ const TradesPersonJobs = () => {
                             <div className="flex flex-wrap items-center gap-4 mb-4 text-sm text-slate-600">
                               <div className="flex items-center gap-1.5">
                                 <MapPin className="h-3.5 w-3.5 text-slate-400" />
-                                <span className="font-medium">{job.location}</span>
+                                <span className="font-medium">{job.additional_data?.nuts || job.nuts || job.location}</span>
                               </div>
                               <div className="flex items-center gap-1.5">
                                 <PoundSterling className="h-3.5 w-3.5 text-slate-400" />

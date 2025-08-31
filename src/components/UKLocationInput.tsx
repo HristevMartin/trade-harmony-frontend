@@ -1,39 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { HiShieldCheck } from "react-icons/hi2";
 
 interface LocationData {
   country: string;
+  location: string;
   postcode: string;
-  area: string;
 }
 
 interface UKLocationInputProps {
   value: LocationData;
   onChange: (data: LocationData) => void;
   errors?: {
+    location?: string;
     postcode?: string;
-    area?: string;
   };
 }
 
 const UKLocationInput: React.FC<UKLocationInputProps> = ({ value, onChange, errors = {} }) => {
   const [postcodeError, setPostcodeError] = useState('');
-  const [areaError, setAreaError] = useState('');
+  const [locationError, setLocationError] = useState('');
 
   // UK postcode validation regex - matches formats like SW1A 1AA, M1 1AA, B33 8TH
   const ukPostcodeRegex = /^[A-Z]{1,2}[0-9]{1,2}[A-Z]?\s?[0-9][A-Z]{2}$/i;
-
-  // Common UK areas/neighborhoods for the dropdown
-  const ukAreas = [
-    'City Centre', 'Town Centre', 'Old Town', 'New Town',
-    'North', 'South', 'East', 'West',
-    'Central', 'Downtown', 'Suburb',
-    'Village', 'Industrial Estate', 'Business Park',
-    'Residential Area', 'Historic Quarter'
-  ];
 
   const validatePostcode = (postcode: string) => {
     if (!postcode.trim()) {
@@ -45,11 +35,23 @@ const UKLocationInput: React.FC<UKLocationInputProps> = ({ value, onChange, erro
     return '';
   };
 
-  const validateArea = (area: string) => {
-    if (!area.trim()) {
-      return 'Area is required';
+  const validateLocation = (location: string) => {
+    if (!location.trim()) {
+      return 'Location is required';
     }
     return '';
+  };
+
+  const handleLocationChange = (newLocation: string) => {
+    onChange({
+      ...value,
+      location: newLocation
+    });
+  };
+
+  const handleLocationBlur = () => {
+    const error = validateLocation(value.location);
+    setLocationError(error);
   };
 
   const handlePostcodeChange = (newPostcode: string) => {
@@ -67,24 +69,36 @@ const UKLocationInput: React.FC<UKLocationInputProps> = ({ value, onChange, erro
     setPostcodeError(error);
   };
 
-  const handleAreaChange = (newArea: string) => {
-    onChange({
-      ...value,
-      area: newArea
-    });
-  };
-
-  const handleAreaBlur = () => {
-    const error = validateArea(value.area);
-    setAreaError(error);
-  };
-
   // Use external errors if provided, otherwise use internal state
+  const displayLocationError = errors.location || locationError;
   const displayPostcodeError = errors.postcode || postcodeError;
-  const displayAreaError = errors.area || areaError;
 
   return (
     <div className="space-y-4">
+      {/* Location Input */}
+      <div>
+        <Label htmlFor="uk-location" className="text-sm font-medium text-slate-700">
+          Town/City <span className="text-red-500">*</span>
+        </Label>
+        <Input
+          id="uk-location"
+          value={value.location}
+          onChange={(e) => handleLocationChange(e.target.value)}
+          onBlur={handleLocationBlur}
+          placeholder="e.g., London, Manchester, Birmingham"
+          className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${
+            displayLocationError ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
+          }`}
+          aria-invalid={!!displayLocationError}
+          aria-describedby={displayLocationError ? 'location-error' : 'location-help'}
+        />
+        {displayLocationError ? (
+          <p id="location-error" className="text-xs text-red-600 mt-1">{displayLocationError}</p>
+        ) : (
+          <p id="location-help" className="text-xs text-slate-500 mt-1">Enter your town or city</p>
+        )}
+      </div>
+
       {/* Postcode Input */}
       <div>
         <Label htmlFor="uk-postcode" className="text-sm font-medium text-slate-700">
@@ -109,42 +123,12 @@ const UKLocationInput: React.FC<UKLocationInputProps> = ({ value, onChange, erro
         )}
       </div>
 
-      {/* Area Input */}
-      <div>
-        <Label htmlFor="uk-area" className="text-sm font-medium text-slate-700">
-          Area/Neighborhood <span className="text-red-500">*</span>
-        </Label>
-        <Select value={value.area} onValueChange={handleAreaChange}>
-          <SelectTrigger 
-            id="uk-area"
-            className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${
-              displayAreaError ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
-            }`}
-            aria-invalid={!!displayAreaError}
-            aria-describedby={displayAreaError ? 'area-error' : 'area-help'}
-          >
-            <SelectValue placeholder="Select your area" />
-          </SelectTrigger>
-          <SelectContent>
-            {ukAreas.map((area) => (
-              <SelectItem key={area} value={area}>{area}</SelectItem>
-            ))}
-            <SelectItem value="other">Other (please specify in job description)</SelectItem>
-          </SelectContent>
-        </Select>
-        {displayAreaError ? (
-          <p id="area-error" className="text-xs text-red-600 mt-1">{displayAreaError}</p>
-        ) : (
-          <p id="area-help" className="text-xs text-slate-500 mt-1">Select the area where you need the work done</p>
-        )}
-      </div>
-
       {/* Privacy Note */}
       <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
         <HiShieldCheck className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" aria-hidden="true" />
         <p className="text-xs text-blue-800">
-          <strong>Privacy:</strong> Traders will only see your area, not your exact postcode. 
-          Your postcode helps us find local professionals.
+          <strong>Privacy:</strong> Traders will see your location and postcode to find local work opportunities. 
+          This helps us connect you with nearby professionals.
         </p>
       </div>
     </div>
