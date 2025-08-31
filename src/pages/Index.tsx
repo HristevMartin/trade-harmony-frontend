@@ -720,15 +720,15 @@ const Index = () => {
           >
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
               <div className="group cursor-default bg-gradient-to-br from-card/80 to-card/60 p-6 rounded-2xl border border-primary/10 shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="text-3xl md:text-4xl font-bold text-primary mb-2 transition-transform group-hover:scale-110">30,000+</div>
+                <div className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-200 mb-2 transition-transform group-hover:scale-110">30,000+</div>
                 <div className="text-muted-foreground font-medium">Happy Customers</div>
               </div>
               <div className="group cursor-default bg-gradient-to-br from-card/80 to-card/60 p-6 rounded-2xl border border-secondary/10 shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="text-3xl md:text-4xl font-bold text-secondary mb-2 transition-transform group-hover:scale-110">50,000+</div>
+                <div className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-200 mb-2 transition-transform group-hover:scale-110">50,000+</div>
                 <div className="text-muted-foreground font-medium">Verified Tradespeople</div>
               </div>
               <div className="group cursor-default bg-gradient-to-br from-card/80 to-card/60 p-6 rounded-2xl border border-accent/10 shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="text-3xl md:text-4xl font-bold text-accent mb-2 transition-transform group-hover:scale-110">99%</div>
+                <div className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-200 mb-2 transition-transform group-hover:scale-110">99%</div>
                 <div className="text-muted-foreground font-medium">Customer Satisfaction</div>
               </div>
             </div>
