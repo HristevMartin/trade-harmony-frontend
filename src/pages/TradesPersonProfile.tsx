@@ -155,19 +155,43 @@ const TradesPersonProfile = () => {
         setUploadingImage(true);
         try {
             const formData = new FormData();
-            formData.append('image', file);
+            
+            // Add the portfolio image
+            formData.append('portfolio_image', file);
+            
+            // Add user ID for identification
+            formData.append('userId', userId);
+            
+            // Add current profile data to maintain existing information
+            formData.append('first_name', traderProfile.first_name || '');
+            formData.append('last_name', traderProfile.last_name || '');
+            formData.append('email', traderProfile.email || '');
+            formData.append('phone', traderProfile.phone || '');
+            formData.append('location', traderProfile.location || '');
+            formData.append('bio', traderProfile.bio || '');
+            formData.append('website', traderProfile.website || '');
+            
+            // Add services as JSON string
+            formData.append('services', JSON.stringify(traderProfile.services || []));
+            
+            // Add existing portfolio images to maintain them
+            if (traderProfile.projectImages) {
+                traderProfile.projectImages.forEach((imageUrl, index) => {
+                    formData.append('existing_portfolio_images', imageUrl);
+                });
+            }
 
             const response = await fetch(`${apiUrl}/tradesperson/profile`, {
-                method: 'POST',
+                method: 'PUT',
                 body: formData,
             });
 
             const data = await response.json();
             
             if (data.success) {
-                // Update the trader profile with the new image
-                const updatedImages = [...(traderProfile.projectImages || []), data.imageUrl];
-                await saveProfile('projectImages', updatedImages);
+                // Update the trader profile with the response data
+                setTraderProfile(data.project || data.trader);
+                
                 
                 toast({
                     title: "Image Uploaded",
