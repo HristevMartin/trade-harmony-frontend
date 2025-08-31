@@ -150,13 +150,13 @@ const Index = () => {
 
   const recentActivities = [
     { text: "Emma in", location: "Birmingham, UK", action: "posted a", service: "Carpentry job", time: "7 mins ago", icon: "✅" },
-    { text: "Ivan in", location: "Plovdiv, BG", action: "applied for an", service: "Electrical job", time: "3 mins ago", icon: "👷" },
+    { text: "James in", location: "London, UK", action: "applied for an", service: "Electrical job", time: "3 mins ago", icon: "👷" },
     { text: "Sarah in", location: "Leeds, UK", action: "posted a", service: "Plumbing job", time: "5 mins ago", icon: "✅" },
-    { text: "Marc in", location: "Berlin, DE", action: "applied for a", service: "Roofing job", time: "12 mins ago", icon: "👷" },
-    { text: "Anna in", location: "Sofia, BG", action: "posted a", service: "Painting job", time: "8 mins ago", icon: "✅" },
-    { text: "Pierre in", location: "Lyon, FR", action: "applied for a", service: "Gardening job", time: "15 mins ago", icon: "👷" },
-    { text: "Lisa in", location: "Manchester, UK", action: "posted a", service: "Heating job", time: "4 mins ago", icon: "✅" },
-    { text: "Carlos in", location: "Madrid, ES", action: "applied for an", service: "Electrical job", time: "6 mins ago", icon: "👷" }
+    { text: "Mark in", location: "Manchester, UK", action: "applied for a", service: "Roofing job", time: "12 mins ago", icon: "👷" },
+    { text: "Anna in", location: "Liverpool, UK", action: "posted a", service: "Painting job", time: "8 mins ago", icon: "✅" },
+    { text: "Peter in", location: "Bristol, UK", action: "applied for a", service: "Gardening job", time: "15 mins ago", icon: "👷" },
+    { text: "Lisa in", location: "Newcastle, UK", action: "posted a", service: "Heating job", time: "4 mins ago", icon: "✅" },
+    { text: "David in", location: "Sheffield, UK", action: "applied for an", service: "Electrical job", time: "6 mins ago", icon: "👷" }
   ];
 
   // Auto-advance testimonial carousel
@@ -254,15 +254,15 @@ const Index = () => {
               transition={{ duration: 1, delay: 0.5 }}
               className="absolute top-20 left-8 w-20 h-20 xl:w-24 xl:h-24 rounded-full overflow-hidden opacity-25 border-4 border-trust-blue/20"
             >
-              <img 
-                src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=300&h=300&fit=crop&crop=face" 
-                alt="Professional tradesperson with tools"
-                className="w-full h-full object-cover"
-                loading="lazy"
-                width="96"
-                height="96"
-                sizes="96px"
-              />
+               <img 
+                 src="https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=300&h=300&fit=crop&crop=center" 
+                 alt="Professional using job platform on mobile device"
+                 className="w-full h-full object-cover"
+                 loading="lazy"
+                 width="96"
+                 height="96"
+                 sizes="96px"
+               />
             </motion.div>
             
             {/* Far Left Bottom */}
@@ -272,15 +272,15 @@ const Index = () => {
               transition={{ duration: 1, delay: 0.9 }}
               className="absolute bottom-32 left-12 w-24 h-24 xl:w-28 xl:h-28 rounded-full overflow-hidden opacity-25 border-4 border-accent-orange/20"
             >
-              <img 
-                src="https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=300&h=300&fit=crop&crop=face" 
-                alt="Professional tradesperson with tools"
-                className="w-full h-full object-cover"
-                loading="lazy"
-                width="112"
-                height="112"
-                sizes="112px"
-              />
+               <img 
+                 src="https://images.unsplash.com/photo-1551434678-e076c223a692?w=300&h=300&fit=crop&crop=center" 
+                 alt="Digital platform interface on laptop screen"
+                 className="w-full h-full object-cover"
+                 loading="lazy"
+                 width="112"
+                 height="112"
+                 sizes="112px"
+               />
             </motion.div>
           </div>
 
@@ -293,15 +293,15 @@ const Index = () => {
               transition={{ duration: 1, delay: 0.7 }}
               className="absolute top-32 right-8 w-22 h-22 xl:w-26 xl:h-26 rounded-full overflow-hidden opacity-25 border-4 border-trust-green/20"
             >
-              <img 
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face" 
-                alt="Professional tradesperson with tools"
-                className="w-full h-full object-cover"
-                loading="lazy"
-                width="104"
-                height="104"
-                sizes="104px"
-              />
+               <img 
+                 src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=300&h=300&fit=crop&crop=center" 
+                 alt="Job search platform on mobile and tablet devices"
+                 className="w-full h-full object-cover"
+                 loading="lazy"
+                 width="104"
+                 height="104"
+                 sizes="104px"
+               />
             </motion.div>
             
             {/* Far Right Bottom */}
@@ -311,15 +311,15 @@ const Index = () => {
               transition={{ duration: 1, delay: 1.1 }}
               className="absolute bottom-20 right-12 w-20 h-20 xl:w-24 xl:h-24 rounded-full overflow-hidden opacity-25 border-4 border-trust-blue/20"
             >
-              <img 
-                src="https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=300&h=300&fit=crop&crop=face" 
-                alt="Professional tradesperson with tools"
-                className="w-full h-full object-cover"
-                loading="lazy"
-                width="96"
-                height="96"
-                sizes="96px"
-              />
+               <img 
+                 src="https://images.unsplash.com/photo-1515378791036-0648a814c963?w=300&h=300&fit=crop&crop=center" 
+                 alt="Online job application and platform interface"
+                 className="w-full h-full object-cover"
+                 loading="lazy"
+                 width="96"
+                 height="96"
+                 sizes="96px"
+               />
             </motion.div>
           </div>
 
