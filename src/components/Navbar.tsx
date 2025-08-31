@@ -9,7 +9,6 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const isActive = (path: string) => location.pathname === path;
-  const [availableServices, setAvailableServices] = useState<any>([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
 
@@ -139,35 +138,6 @@ const Navbar = () => {
     refetchUserRole();
   }, []);
 
-
-  useEffect(() => {
-    const fetchServices = async () => {
-      try {
-        let url = `${import.meta.env.VITE_TRAVEL_SECURITY}/travel/get-project-services`;
-        const response = await fetch(url);
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Navbar: show me the database data', data);
-
-          // Map database data to frontend services using our mapping
-          const mappedServices = mapDatabaseToFrontend(data);
-          console.log('Navbar: mapped services', mappedServices);
-
-          setAvailableServices(mappedServices);
-        } else {
-          console.error('Failed to fetch services');
-          // Fallback to empty array if API fails
-          setAvailableServices([]);
-        }
-      } catch (error) {
-        console.error('Error fetching services:', error);
-        // Fallback to empty array if API fails
-        setAvailableServices([]);
-      }
-    };
-    fetchServices();
-  }, []);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
