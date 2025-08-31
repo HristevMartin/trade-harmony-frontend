@@ -22,6 +22,7 @@ type ProDraft = {
   radiusKm: number;
   experienceYears?: number;
   certifications?: string;
+  certificationImages: File[];
   bio?: string;
   portfolio: File[];
   marketingConsent: boolean;
@@ -38,6 +39,7 @@ const initialProDraft: ProDraft = {
   radiusKm: 10,
   experienceYears: undefined,
   certifications: '',
+  certificationImages: [],
   bio: '',
   portfolio: [],
   marketingConsent: false
@@ -121,6 +123,7 @@ const TradesPersonOnboarding = () => {
                 radiusKm: typeof parsedDraft.radiusKm === 'number' ? parsedDraft.radiusKm : 10,
                 experienceYears: typeof parsedDraft.experienceYears === 'number' ? parsedDraft.experienceYears : undefined,
                 certifications: parsedDraft.certifications || '',
+                certificationImages: [], // Don't restore File objects
                 bio: parsedDraft.bio || '',
                 portfolio: Array.isArray(parsedDraft.portfolio) ? [] : [], // Don't restore File objects
                 marketingConsent: Boolean(parsedDraft.marketingConsent)
@@ -168,7 +171,8 @@ const TradesPersonOnboarding = () => {
       // Create a safe version of formData without File objects
       const draftToSave = {
         ...formData,
-        portfolio: [] // Don't save File objects - they can't be serialized
+        portfolio: [], // Don't save File objects - they can't be serialized
+        certificationImages: [] // Don't save File objects - they can't be serialized
       };
       localStorage.setItem('pro_onboarding_draft', JSON.stringify(draftToSave));
     } catch (error) {
@@ -243,6 +247,13 @@ const TradesPersonOnboarding = () => {
           delete newErrors.postcode;
         }
         break;
+      case 'certificationImages':
+        if (formData.certificationImages.length === 0) {
+          newErrors.certificationImages = 'At least one certification image is required';
+        } else {
+          delete newErrors.certificationImages;
+        }
+        break;
       case 'marketingConsent':
         if (!formData.marketingConsent) {
           newErrors.marketingConsent = 'Required';
@@ -264,7 +275,7 @@ const TradesPersonOnboarding = () => {
         fieldsToValidate.push('name', 'email');
         break;
       case 2:
-        fieldsToValidate.push('primaryTrade');
+        fieldsToValidate.push('primaryTrade', 'certificationImages');
         break;
       case 3:
         fieldsToValidate.push('city', 'postcode');
@@ -282,7 +293,7 @@ const TradesPersonOnboarding = () => {
       case 1:
         return !!formData.name.trim() && !!formData.email.trim() && /\S+@\S+\.\S+/.test(formData.email);
       case 2:
-        return !!formData.primaryTrade;
+        return !!formData.primaryTrade && formData.certificationImages.length > 0;
       case 3:
         return !!formData.city.trim() && !!formData.postcode.trim();
       case 4:
@@ -361,6 +372,38 @@ const TradesPersonOnboarding = () => {
   const removeImage = (index: number) => {
     const updatedImages = formData.portfolio.filter((_, i) => i !== index);
     updateFormData('portfolio', updatedImages);
+  };
+
+  const handleCertificationImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const validFiles: File[] = [];
+    let errorMessage = '';
+
+    for (const file of files) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        errorMessage = `${file.name} is too large (max 5MB)`;
+        continue;
+      }
+      if (!file.type.startsWith('image/')) {
+        errorMessage = `${file.name} is not an image`;
+        continue;
+      }
+      validFiles.push(file);
+    }
+
+    if (errorMessage) {
+      setErrors(prev => ({ ...prev, certificationImages: errorMessage }));
+    } else {
+      setErrors(prev => ({ ...prev, certificationImages: '' }));
+    }
+
+    const newImages = [...formData.certificationImages, ...validFiles].slice(0, 3);
+    updateFormData('certificationImages', newImages);
+  };
+
+  const removeCertificationImage = (index: number) => {
+    const updatedImages = formData.certificationImages.filter((_, i) => i !== index);
+    updateFormData('certificationImages', updatedImages);
   };
 
   const normalizePostcode = (postcode: string) => {
@@ -493,6 +536,11 @@ const TradesPersonOnboarding = () => {
       // Add portfolio images with the correct field name for the API
       formData.portfolio.forEach((file, index) => {
         formDataToSend.append('projectImages', file); // Use 'projectImages' key as expected by API
+      });
+
+      // Add certification images
+      formData.certificationImages.forEach((file, index) => {
+        formDataToSend.append('certificationImages', file);
       });
 
       // Add userId from auth data exactly like PostJob
@@ -856,6 +904,65 @@ const TradesPersonOnboarding = () => {
                     placeholder="List any relevant certifications, qualifications, or training"
                     rows={3}
                   />
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium">Certification Images *</Label>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Upload images of your certifications, licenses, or qualifications (max 3 images, 5MB each)
+                    </p>
+
+                    {/* Upload Area */}
+                    <div className="border-2 border-dashed border-border rounded-lg p-6 text-center transition-colors hover:border-primary/50">
+                      <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleCertificationImageUpload}
+                        className="hidden"
+                        id="certification-upload"
+                        disabled={formData.certificationImages.length >= 3}
+                      />
+                      <Label
+                        htmlFor="certification-upload"
+                        className={`cursor-pointer text-primary hover:underline text-sm ${
+                          formData.certificationImages.length >= 3 ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                      >
+                        {formData.certificationImages.length >= 3 ? 'Maximum 3 images reached' : 'Click to upload certification images'}
+                      </Label>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        JPG, PNG, WebP up to 5MB each
+                      </p>
+                    </div>
+
+                    {errors.certificationImages && <p className="text-sm text-destructive mt-2">{errors.certificationImages}</p>}
+
+                    {/* Image Previews */}
+                    {formData.certificationImages.length > 0 && (
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
+                        {formData.certificationImages.map((file, index) => (
+                          <div key={index} className="relative group">
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt={`Certification ${index + 1}`}
+                              className="w-full h-24 object-cover rounded-lg border transition-transform group-hover:scale-105"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeCertificationImage(index)}
+                              className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 hover:bg-destructive/80 transition-colors"
+                              aria-label={`Remove certification image ${index + 1}`}
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </>
             )}
