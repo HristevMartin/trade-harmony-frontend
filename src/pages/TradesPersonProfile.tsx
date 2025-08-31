@@ -458,18 +458,19 @@ const TradesPersonProfile = () => {
 
                         <div className="grid grid-cols-3 gap-4 text-center">
                             <div className="bg-background/50 backdrop-blur-sm rounded-xl p-4 border border-border/20">
-                                <div className="text-2xl font-bold text-primary">{traderProfile.experienceYears}</div>
+                                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{traderProfile.experienceYears}</div>
                                 <div className="text-sm text-muted-foreground">Years Experience</div>
                             </div>
                             <div className="bg-background/50 backdrop-blur-sm rounded-xl p-4 border border-border/20">
-                                <div className="text-2xl font-bold text-primary">{traderProfile.radiusKm}km</div>
+                                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{traderProfile.radiusKm}km</div>
                                 <div className="text-sm text-muted-foreground">Service Radius</div>
                             </div>
                             <div className="bg-background/50 backdrop-blur-sm rounded-xl p-4 border border-border/20">
-                                <div className="text-2xl font-bold text-primary flex items-center justify-center">
-                                    <Star className="h-5 w-5 fill-current" />
+                                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center justify-center">
+                                    <Star className="h-5 w-5 fill-current mr-1" />
+                                    Verified Pro
                                 </div>
-                                <div className="text-sm text-muted-foreground">Verified Pro</div>
+                                <div className="text-sm text-muted-foreground">Status</div>
                             </div>
                         </div>
                     </div>
@@ -719,11 +720,11 @@ const TradesPersonProfile = () => {
                                 
                                 <div className="grid grid-cols-2 gap-3">
                                     <div className="text-center p-3 bg-muted/30 rounded-lg">
-                                        <div className="text-2xl font-bold text-primary">{traderProfile.experienceYears}</div>
+                                        <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{traderProfile.experienceYears}</div>
                                         <div className="text-xs text-muted-foreground">Years Experience</div>
                                     </div>
                                     <div className="text-center p-3 bg-muted/30 rounded-lg">
-                                        <div className="text-2xl font-bold text-primary">{traderProfile.radiusKm}km</div>
+                                        <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{traderProfile.radiusKm}km</div>
                                         <div className="text-xs text-muted-foreground">Coverage Area</div>
                                     </div>
                                 </div>
