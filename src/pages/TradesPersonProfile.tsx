@@ -39,48 +39,18 @@ const TradesPersonProfile = () => {
     const [selectedServices, setSelectedServices] = useState<string[]>([]);
     const [saving, setSaving] = useState(false);
 
-    // Service options based on primary trade
+    // Service options - simplified to match popular services
     const getServiceOptions = () => {
-        const primaryTrade = traderProfile?.primaryTrade?.toLowerCase() || '';
-        
-        const commonServices = [
-            'Emergency Call-out', 'Free Quotes', 'Warranty Provided', 'Insurance Work',
-            'Commercial Services', 'Domestic Services', 'Maintenance Contracts'
+        return [
+            'Plumbing',
+            'Electrical', 
+            'Carpentry',
+            'Roofing',
+            'Painting',
+            'Gardening',
+            'Heating & Cooling',
+            'Mechanical Repairs'
         ];
-
-        const tradeSpecificServices = {
-            plumbing: [
-                'Leak Repairs', 'Boiler Installation', 'Bathroom Installation', 'Kitchen Plumbing',
-                'Central Heating', 'Drain Unblocking', 'Pipe Installation', 'Water Heater Repair',
-                'Toilet Installation', 'Shower Installation', 'Radiator Installation'
-            ],
-            electrical: [
-                'Rewiring', 'Consumer Unit Upgrade', 'Socket Installation', 'Lighting Installation',
-                'EICR Testing', 'PAT Testing', 'Electric Vehicle Charging Points', 'Smart Home Installation',
-                'Security Systems', 'Fire Alarm Installation'
-            ],
-            carpentry: [
-                'Kitchen Fitting', 'Wardobe Installation', 'Flooring', 'Doors & Windows',
-                'Shelving', 'Staircase Installation', 'Decking', 'Custom Furniture',
-                'Skirting & Architrave', 'Loft Conversion'
-            ],
-            painting: [
-                'Interior Painting', 'Exterior Painting', 'Wallpaper Hanging', 'Decorating',
-                'Spray Painting', 'Wood Staining', 'Ceiling Painting', 'Commercial Painting'
-            ],
-            building: [
-                'Extensions', 'Loft Conversions', 'Kitchen Extensions', 'Conservatories',
-                'Garden Rooms', 'Garage Conversions', 'Structural Work', 'Foundation Work',
-                'Brickwork', 'Roofing'
-            ],
-            heating: [
-                'Boiler Installation', 'Central Heating', 'Gas Safety Checks', 'Radiator Installation',
-                'Underfloor Heating', 'Heat Pump Installation', 'Thermostat Installation'
-            ]
-        };
-
-        const specificServices = tradeSpecificServices[primaryTrade as keyof typeof tradeSpecificServices] || [];
-        return [...commonServices, ...specificServices];
     };
 
     // Save profile data
@@ -90,6 +60,12 @@ const TradesPersonProfile = () => {
         setSaving(true);
         try {
             const updateData = { [field]: value };
+            
+            // Optimistically update the UI immediately
+            setTraderProfile(prev => ({
+                ...prev,
+                [field]: value
+            }));
             
             const response = await fetch(`${apiUrl}/travel/get-trader-project/${userId}`, {
                 method: 'PUT',
@@ -102,6 +78,7 @@ const TradesPersonProfile = () => {
             const data = await response.json();
             
             if (data.success) {
+                // Update with server response to ensure consistency
                 setTraderProfile(data.project);
                 toast({
                     title: "Profile Updated",
@@ -111,10 +88,23 @@ const TradesPersonProfile = () => {
                 setEditingServices(false);
                 setTempData({});
             } else {
+                // Revert optimistic update on failure
+                setTraderProfile(prev => prev);
                 throw new Error('Failed to update profile');
             }
         } catch (error) {
             console.error('Error saving profile:', error);
+            // Fetch fresh data to ensure UI is in sync
+            try {
+                const response = await fetch(`${apiUrl}/travel/get-trader-project/${userId}`);
+                const data = await response.json();
+                if (data.success) {
+                    setTraderProfile(data.project);
+                }
+            } catch (fetchError) {
+                console.error('Error fetching fresh profile data:', fetchError);
+            }
+            
             toast({
                 title: "Error",
                 description: "Failed to update profile. Please try again.",
@@ -141,9 +131,9 @@ const TradesPersonProfile = () => {
     };
 
     // Save services
-    const saveServices = () => {
+    const saveServices = async () => {
         const servicesJson = JSON.stringify(selectedServices);
-        saveProfile('otherServices', servicesJson);
+        await saveProfile('otherServices', servicesJson);
     };
 
     // Cancel editing
@@ -488,15 +478,10 @@ const TradesPersonProfile = () => {
                                                      <div className="flex gap-2">
                                                          <Button
                                                              size="sm"
-                                                             onClick={() => {
+                                                             onClick={async () => {
                                                                  // Save both city and postcode
-                                                                 const locationData = {
-                                                                     city: tempData.city,
-                                                                     postcode: tempData.postcode
-                                                                 };
-                                                                 saveProfile('city', tempData.city);
-                                                                 // Also save postcode separately since we can only send one field at a time
-                                                                 setTimeout(() => saveProfile('postcode', tempData.postcode), 100);
+                                                                 await saveProfile('city', tempData.city);
+                                                                 await saveProfile('postcode', tempData.postcode);
                                                              }}
                                                              disabled={saving}
                                                              className="h-7 px-3"
