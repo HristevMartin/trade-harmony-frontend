@@ -888,36 +888,36 @@ const TradesPersonProfile = () => {
                                     </div>
 
                                     {traderProfile.certificationImages && traderProfile.certificationImages.length > 0 ? (
-                                        <div className="relative max-w-sm mx-auto">
+                                        <div className="relative max-w-xs mx-auto">
                                             <Carousel className="w-full">
                                                 <CarouselContent>
                                                     {traderProfile.certificationImages.map((image: string, index: number) => (
                                                         <CarouselItem key={index}>
-                                                            <div className="relative group overflow-hidden rounded-xl bg-muted/20 aspect-[3/4]">
+                                                            <div className="relative group overflow-hidden rounded-lg bg-muted/20 aspect-square w-32 h-32 mx-auto">
                                                                 <img 
                                                                     src={image} 
                                                                     alt={`Certification ${index + 1}`}
                                                                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                                                                 />
                                                                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                                                    <div className="absolute bottom-3 left-3 text-white">
-                                                                        <p className="text-sm font-medium">Certificate {index + 1}</p>
+                                                                    <div className="absolute bottom-2 left-2 text-white">
+                                                                        <p className="text-xs font-medium">Certificate {index + 1}</p>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </CarouselItem>
                                                     ))}
                                                 </CarouselContent>
-                                                <CarouselPrevious />
-                                                <CarouselNext />
+                                                <CarouselPrevious className="h-6 w-6" />
+                                                <CarouselNext className="h-6 w-6" />
                                             </Carousel>
                                         </div>
                                     ) : (
-                                        <div className="text-center py-8 bg-muted/20 rounded-xl border-2 border-dashed border-muted/40">
-                                            <Award className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                                        <div className="text-center py-6 bg-muted/20 rounded-lg border-2 border-dashed border-muted/40">
+                                            <Award className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
                                             <h3 className="text-sm font-medium text-foreground mb-1">No Certification Images</h3>
-                                            <p className="text-xs text-muted-foreground mb-4 max-w-xs mx-auto">
-                                                Upload images of your certifications to build client trust
+                                            <p className="text-xs text-muted-foreground mb-3 max-w-xs mx-auto">
+                                                Upload images of your certifications
                                             </p>
                                             <div className="relative inline-block">
                                                 <input
@@ -930,11 +930,11 @@ const TradesPersonProfile = () => {
                                                 <Button 
                                                     variant="outline" 
                                                     size="sm"
-                                                    className="border-primary/20 hover:bg-primary/5"
+                                                    className="border-primary/20 hover:bg-primary/5 text-xs"
                                                     disabled={uploadingImage}
                                                 >
-                                                    <Camera className="h-4 w-4 mr-2" />
-                                                    {uploadingImage ? 'Uploading...' : 'Upload Images'}
+                                                    <Camera className="h-3 w-3 mr-1" />
+                                                    {uploadingImage ? 'Uploading...' : 'Upload'}
                                                 </Button>
                                             </div>
                                         </div>
