@@ -1131,9 +1131,9 @@ const TradesPersonJobs = () => {
                              <div className="flex items-start justify-between mb-4">
                                <div className="flex-1">
                                  <div className="flex items-center gap-3 mb-3">
-                                   <Badge variant="secondary" className="bg-gradient-to-r from-primary/10 to-primary/5 text-primary border-primary/20 text-xs font-semibold px-3 py-1.5 rounded-full shadow-sm ring-1 ring-primary/10">
-                                     {job.additional_data?.serviceCategory || job.service_category}
-                                   </Badge>
+                                    <Badge variant="secondary" className="bg-white text-slate-700 border-2 border-slate-300 text-xs font-bold px-3 py-2 rounded-lg shadow-md">
+                                      {job.additional_data?.serviceCategory || job.service_category}
+                                    </Badge>
                                     <div className="text-xs text-slate-700 font-bold bg-white border-2 border-slate-300 px-3 py-2 rounded-lg shadow-md">
                                       {formatTimeAgo(job.created_at)}
                                     </div>
