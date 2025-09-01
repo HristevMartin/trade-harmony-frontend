@@ -1072,16 +1072,16 @@ const TradesPersonJobs = () => {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
                         transition={{ delay: index * 0.1 }}
-                        whileHover={{ y: -6, scale: 1.02, transition: { duration: 0.3, ease: 'easeOut' } }}
+                        whileHover={{ y: -2, transition: { duration: 0.2, ease: 'easeOut' } }}
                       >
-                        <Card className="overflow-hidden bg-gradient-to-br from-white via-card/95 to-card/90 border border-primary/10 shadow-2xl hover:shadow-[0_25px_60px_-12px_rgba(0,0,0,0.25)] hover:scale-[1.03] transition-all duration-500 group h-full rounded-3xl cursor-pointer backdrop-blur-sm ring-1 ring-border/5 hover:ring-primary/20">
+                        <Card className="overflow-hidden bg-card border border-border shadow-sm hover:shadow-md transition-all duration-300 group h-full rounded-xl cursor-pointer">
                            {/* Card Header with Job Image */}
-                           <div className="relative aspect-[3/2] w-full overflow-hidden rounded-t-3xl bg-gradient-to-br from-primary/5 via-muted/10 to-secondary/5">
+                           <div className="relative aspect-[3/2] w-full overflow-hidden rounded-t-xl bg-gradient-to-br from-muted/20 to-muted/10">
                              {job.image_urls && job.image_urls.length > 0 ? (
                                <img 
                                  src={job.image_urls[0]} 
                                  alt={job.job_title}
-                                 className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-115"
+                                 className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                                  loading="lazy"
                                  onError={(e) => {
                                    const target = e.target as HTMLImageElement;
@@ -1101,25 +1101,25 @@ const TradesPersonJobs = () => {
                                  {getCategoryIcon(job.service_category)}
                                </div>
                              </div>
-                             {/* Enhanced gradient overlay */}
-                             <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/5 to-transparent pointer-events-none group-hover:from-black/40 transition-all duration-500" />
+                              {/* Enhanced gradient overlay */}
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-black/5 to-transparent pointer-events-none group-hover:from-black/25 transition-all duration-300" />
                              
                              {/* Top badges row */}
                              <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
-                               {/* Budget Badge */}
-                               <Badge className="bg-white/95 text-slate-800 text-xs font-bold px-4 py-2 rounded-full shadow-lg backdrop-blur-md border border-white/30 ring-1 ring-primary/10 hover:bg-white hover:scale-105 transition-all duration-300">
-                                 <PoundSterling className="h-3.5 w-3.5 mr-1.5 text-emerald-600" />
-                                 {formatBudget(job.budget)}
-                               </Badge>
+                                {/* Budget Badge */}
+                                <Badge className="bg-white/95 text-slate-800 text-xs font-bold px-4 py-2 rounded-full shadow-sm backdrop-blur-md border border-white/30">
+                                  <PoundSterling className="h-3.5 w-3.5 mr-1.5 text-emerald-600" />
+                                  {formatBudget(job.budget)}
+                                </Badge>
                                
-                               {/* Urgency Badge */}
-                               <Badge className={`text-xs font-bold px-4 py-2 rounded-full shadow-lg backdrop-blur-md border ring-1 hover:scale-105 transition-all duration-300 ${
-                                 formatUrgency(job.urgency) === 'ASAP' 
-                                   ? 'bg-gradient-to-r from-red-500 to-red-600 text-white border-red-400/50 ring-red-300/20' 
-                                   : formatUrgency(job.urgency) === 'This week'
-                                     ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-amber-400/50 ring-amber-300/20'
-                                     : 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-blue-400/50 ring-blue-300/20'
-                               }`}>
+                                {/* Urgency Badge */}
+                                <Badge className={`text-xs font-bold px-4 py-2 rounded-full shadow-sm backdrop-blur-md border transition-all duration-300 ${
+                                  formatUrgency(job.urgency) === 'ASAP' 
+                                    ? 'bg-red-500 text-white border-red-400/50' 
+                                    : formatUrgency(job.urgency) === 'This week'
+                                      ? 'bg-amber-500 text-white border-amber-400/50'
+                                      : 'bg-blue-500 text-white border-blue-400/50'
+                                }`}>
                                  <Clock className="h-3.5 w-3.5 mr-1.5" />
                                  {formatUrgency(job.urgency)}
                                </Badge>
@@ -1138,9 +1138,9 @@ const TradesPersonJobs = () => {
                                      {formatTimeAgo(job.created_at)}
                                    </div>
                                  </div>
-                                 <h3 className="text-xl sm:text-2xl font-bold text-foreground line-clamp-2 leading-tight group-hover:text-primary transition-colors duration-300 mb-2">
-                                   {job.job_title}
-                                 </h3>
+                                  <h3 className="text-xl sm:text-2xl font-bold text-foreground line-clamp-2 leading-tight mb-2">
+                                    {job.job_title}
+                                  </h3>
                                </div>
                              </div>
                              
@@ -1164,21 +1164,21 @@ const TradesPersonJobs = () => {
                              {/* Card Footer - Action Buttons */}
                              <div className="pt-5 mt-auto border-t border-gradient-to-r from-border/20 via-border/40 to-border/20">
                                <div className="flex flex-col sm:flex-row gap-3">
-                                 <Button 
-                                   className="flex-1 bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:via-primary/80 hover:to-primary/70 text-primary-foreground font-bold py-3.5 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] ring-2 ring-transparent hover:ring-primary/20"
-                                   aria-label={`Apply for ${job.job_title}`}
-                                 >
-                                   <Send className="h-4 w-4 mr-2" />
-                                   Apply Now
-                                 </Button>
-                                 <Button 
-                                   variant="outline"
-                                   className="flex-1 border-2 border-border/30 text-foreground hover:bg-gradient-to-br hover:from-muted/30 hover:to-muted/20 hover:border-primary/40 hover:text-primary font-semibold py-3.5 rounded-2xl transition-all duration-300 shadow-sm hover:shadow-lg ring-1 ring-transparent hover:ring-primary/10"
-                                   aria-label={`View details for ${job.job_title}`}
-                                 >
-                                   <Eye className="h-4 w-4 mr-2" />
-                                   Details
-                                 </Button>
+                                  <Button 
+                                    className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+                                    aria-label={`Apply for ${job.job_title}`}
+                                  >
+                                    <Send className="h-4 w-4 mr-2" />
+                                    Apply Now
+                                  </Button>
+                                  <Button 
+                                    variant="outline"
+                                    className="flex-1 border border-border text-foreground hover:bg-muted hover:text-foreground font-semibold py-3 rounded-lg transition-all duration-200"
+                                    aria-label={`View details for ${job.job_title}`}
+                                  >
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    Details
+                                  </Button>
                                </div>
                              </div>
                            </CardContent>
