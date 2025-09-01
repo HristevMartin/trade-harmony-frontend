@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -51,6 +52,7 @@ interface Job {
 }
 
 const TradesPersonJobs = () => {
+  const navigate = useNavigate();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -1171,14 +1173,15 @@ const TradesPersonJobs = () => {
                                     <Send className="h-4 w-4 mr-2" />
                                     Apply Now
                                   </Button>
-                                  <Button 
-                                    variant="outline"
-                                    className="flex-1 border border-border text-foreground hover:bg-muted hover:text-foreground font-semibold py-3 rounded-lg transition-all duration-200"
-                                    aria-label={`View details for ${job.job_title}`}
-                                  >
-                                    <Eye className="h-4 w-4 mr-2" />
-                                    Details
-                                  </Button>
+                                   <Button 
+                                     variant="outline"
+                                     className="flex-1 border border-border text-foreground hover:bg-muted hover:text-foreground font-semibold py-3 rounded-lg transition-all duration-200"
+                                     aria-label={`View details for ${job.job_title}`}
+                                     onClick={() => navigate(`/jobs/${job.project_id}`)}
+                                   >
+                                     <Eye className="h-4 w-4 mr-2" />
+                                     Details
+                                   </Button>
                                </div>
                              </div>
                            </CardContent>
