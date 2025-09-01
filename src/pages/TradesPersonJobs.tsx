@@ -1128,7 +1128,7 @@ const TradesPersonJobs = () => {
                              </div>
                            </div>
                            
-                           <CardContent className="p-6 sm:p-7 flex flex-col h-full">
+                           <CardContent className="p-6 sm:p-7 flex flex-col min-h-[400px]">
                              {/* Header with Category Badge */}
                              <div className="flex items-start justify-between mb-4">
                                <div className="flex-1">
@@ -1163,27 +1163,27 @@ const TradesPersonJobs = () => {
                                </p>
                              </div>
                              
-                              {/* Card Footer - Action Buttons */}
-                              <div className="pt-5 mt-auto border-t border-slate-200">
-                                <div className="flex flex-col sm:flex-row gap-3">
-                                   <Button 
-                                     className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
-                                     aria-label={`Apply for ${job.job_title}`}
-                                   >
-                                     <Send className="h-4 w-4 mr-2" />
-                                     Apply Now
-                                   </Button>
+                               {/* Card Footer - Action Buttons */}
+                               <div className="pt-4 mt-auto">
+                                 <div className="flex flex-col sm:flex-row gap-3 w-full">
                                     <Button 
-                                      variant="outline"
-                                      className="flex-1 bg-white border-2 border-slate-300 text-slate-700 hover:bg-slate-50 hover:text-slate-800 font-semibold py-3 rounded-lg transition-all duration-200 shadow-md"
-                                      aria-label={`View details for ${job.job_title}`}
-                                      onClick={() => navigate(`/jobs/${job.project_id}`)}
+                                      className="w-full sm:flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl text-base"
+                                      aria-label={`Apply for ${job.job_title}`}
                                     >
-                                      <Eye className="h-4 w-4 mr-2" />
-                                      Details
+                                      <Send className="h-5 w-5 mr-2" />
+                                      Apply Now
                                     </Button>
-                                </div>
-                              </div>
+                                     <Button 
+                                       variant="outline"
+                                       className="w-full sm:flex-1 bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-bold py-4 px-6 rounded-lg transition-all duration-200 shadow-lg text-base"
+                                       aria-label={`View details for ${job.job_title}`}
+                                       onClick={() => navigate(`/jobs/${job.project_id}`)}
+                                     >
+                                       <Eye className="h-5 w-5 mr-2" />
+                                       View Details
+                                     </Button>
+                                 </div>
+                               </div>
                            </CardContent>
                          </Card>
                       </motion.div>
