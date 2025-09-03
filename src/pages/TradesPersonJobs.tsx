@@ -1076,7 +1076,7 @@ const TradesPersonJobs = () => {
                         transition={{ delay: index * 0.1 }}
                         whileHover={{ y: -2, transition: { duration: 0.2, ease: 'easeOut' } }}
                       >
-                         <Card className="overflow-visible bg-card border border-border shadow-sm hover:shadow-md transition-all duration-300 group flex flex-col h-[520px] rounded-xl">
+                         <Card className="overflow-visible bg-card border border-border shadow-sm hover:shadow-md transition-all duration-300 group flex flex-col min-h-[520px] rounded-xl">
                             {/* Card Header with Job Image */}
                             <div className="relative aspect-[3/2] w-full overflow-hidden rounded-t-xl bg-gradient-to-br from-muted/20 to-muted/10 flex-shrink-0">
                               {job.image_urls && job.image_urls.length > 0 ? (
