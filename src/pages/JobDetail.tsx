@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import PayToApplyModal from "@/components/PayToApplyModal";
 import {
     HiMapPin,
     HiWrenchScrewdriver,
@@ -60,6 +61,7 @@ const JobDetail = () => {
     const [showEditSuccess, setShowEditSuccess] = useState(false);
     const [showPostSuccess, setShowPostSuccess] = useState(false); // Only show when coming from PostJob page
     const [user, setUser] = useState<any>(null);
+    const [showPayToApplyModal, setShowPayToApplyModal] = useState(false);
 
     // Check if current user is a trader
     const isTrader = Array.isArray(user?.role) 
@@ -333,6 +335,27 @@ const JobDetail = () => {
                         </div>
                     </div>
 
+                    {/* Apply for Job Button - For Traders Only */}
+                    {isTrader && (
+                        <div className="mb-6 md:mb-8">
+                            <Card className="rounded-2xl bg-gradient-to-r from-blue-600 to-blue-700 border-0 p-4 md:p-6 shadow-lg">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div className="text-white">
+                                        <h3 className="text-lg md:text-xl font-bold mb-1">Ready to apply for this job?</h3>
+                                        <p className="text-blue-100 text-sm md:text-base">Get homeowner contact details and submit your quote</p>
+                                    </div>
+                                    <Button
+                                        onClick={() => setShowPayToApplyModal(true)}
+                                        className="bg-white text-blue-600 hover:bg-blue-50 font-semibold px-6 py-3 text-base whitespace-nowrap"
+                                        size="lg"
+                                    >
+                                        Apply for £5
+                                    </Button>
+                                </div>
+                            </Card>
+                        </div>
+                    )}
+
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
                         {/* Main Content */}
                         <div className="lg:col-span-2 space-y-4 md:space-y-6">
@@ -552,9 +575,16 @@ const JobDetail = () => {
                 </div>
             )}
 
-            {/* Mobile Edit Button - Sticky Footer - Only show for non-traders */}
-            {!isTrader && (
-                <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-slate-200 p-4 sm:hidden">
+            {/* Mobile Sticky Footer */}
+            <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-slate-200 p-4 sm:hidden safe-area-pb">
+                {isTrader ? (
+                    <Button
+                        onClick={() => setShowPayToApplyModal(true)}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold flex items-center justify-center gap-2"
+                    >
+                        Apply for £5
+                    </Button>
+                ) : (
                     <Button
                         onClick={() => navigate(`/edit-job/${id}`)}
                         className="w-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center gap-2"
@@ -562,8 +592,21 @@ const JobDetail = () => {
                         <HiPencilSquare className="w-4 h-4" />
                         Edit Job
                     </Button>
-                </div>
-            )}
+                )}
+            </div>
+
+            {/* Pay to Apply Modal */}
+            <PayToApplyModal
+                isOpen={showPayToApplyModal}
+                onClose={() => setShowPayToApplyModal(false)}
+                jobTitle={jobData.job_title}
+                jobId={id || ''}
+                homeownerInfo={{
+                    first_name: jobData.first_name,
+                    email: jobData.email,
+                    phone: jobData.phone
+                }}
+            />
         </>
     );
 };
