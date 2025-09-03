@@ -109,14 +109,22 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
       </Card>
 
       {/* Trust Signals */}
-      <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground border-t border-border pt-4">
-        <div className="flex items-center gap-2">
-          <HiLockClosed className="w-4 h-4 text-green-600" />
-          <span>256-bit SSL encryption</span>
+      <div className="space-y-4">
+        <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground border-t border-border pt-4">
+          <div className="flex items-center gap-2">
+            <HiLockClosed className="w-4 h-4 text-green-600" />
+            <span>256-bit SSL encryption</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <HiShieldCheck className="w-4 h-4 text-green-600" />
+            <span>Money-back guarantee</span>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <HiShieldCheck className="w-4 h-4 text-green-600" />
-          <span>Money-back guarantee</span>
+        
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground font-medium">
+            You will only be charged once. No subscription fees.
+          </p>
         </div>
       </div>
 
@@ -124,16 +132,17 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
       <Button 
         onClick={handlePayment}
         disabled={isLoading}
-        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-4 text-lg rounded-xl min-h-[44px] hover-scale"
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 text-lg rounded-xl min-h-[44px] hover-scale shadow-md hover:shadow-lg transition-all duration-200"
       >
         {isLoading ? (
           <div className="flex items-center gap-2">
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-foreground"></div>
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
             Processing payment...
           </div>
         ) : (
           <>
-            🔒 Pay £5 & Continue
+            <HiLockClosed className="w-5 h-5 mr-2" />
+            Pay £5 & Continue
             <HiArrowRight className="w-5 h-5 ml-2" />
           </>
         )}
@@ -211,7 +220,7 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
       <Button 
         onClick={handleApplicationSubmit}
         disabled={isLoading || !applicationText.trim()}
-        className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 text-lg rounded-xl min-h-[44px] hover-scale"
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 text-lg rounded-xl min-h-[44px] hover-scale shadow-md hover:shadow-lg transition-all duration-200"
       >
         {isLoading ? (
           <div className="flex items-center gap-2">

@@ -21,7 +21,8 @@ import {
     HiInformationCircle,
     HiHome,
     HiPencilSquare,
-    HiXMark
+    HiXMark,
+    HiLockClosed
 } from "react-icons/hi2";
 import { X } from "lucide-react";
 
@@ -338,23 +339,24 @@ const JobDetail = () => {
                     {/* Apply for Job Banner - For Traders Only */}
                     {isTrader && (
                         <div className="mb-6 md:mb-8">
-                            <Card className="rounded-2xl bg-gradient-to-r from-primary to-primary/90 border-0 p-6 md:p-8 shadow-lg hover:shadow-xl transition-all duration-300">
+                            <Card className="rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 border-0 p-6 md:p-8 shadow-lg hover:shadow-xl transition-all duration-300">
                                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                                     <div className="text-white space-y-2">
                                         <h3 className="text-xl md:text-2xl font-bold leading-tight">Ready to apply for this job?</h3>
-                                        <p className="text-primary-foreground/90 text-base md:text-lg leading-relaxed">
+                                        <p className="text-blue-100 text-base md:text-lg leading-relaxed font-medium">
                                             Get homeowner contact details and submit your quote
                                         </p>
                                     </div>
                                     <div className="flex flex-col items-center lg:items-end gap-3">
                                         <Button
                                             onClick={() => setShowPayToApplyModal(true)}
-                                            className="bg-white text-primary hover:bg-white/95 font-semibold px-8 py-4 text-lg rounded-full shadow-md hover:shadow-lg transition-all duration-200 min-h-[44px] whitespace-nowrap"
+                                            className="bg-white text-blue-600 hover:bg-blue-50 font-bold px-8 py-4 text-lg rounded-full shadow-md hover:shadow-lg transition-all duration-200 min-h-[44px] whitespace-nowrap border-2 border-white hover:border-blue-100"
                                             size="lg"
                                         >
-                                            🔒 Apply for £5
+                                            <HiLockClosed className="w-5 h-5 mr-2" />
+                                            Apply for £5
                                         </Button>
-                                        <p className="text-primary-foreground/80 text-sm text-center lg:text-right">
+                                        <p className="text-blue-100 text-sm text-center lg:text-right font-medium">
                                             Secure payment powered by Stripe
                                         </p>
                                     </div>
@@ -399,18 +401,18 @@ const JobDetail = () => {
 
                                 <div className="space-y-3 md:space-y-4">
                                     <div>
-                                        <h3 className="font-medium text-slate-900 mb-1 text-sm md:text-base">Service Category</h3>
+                                        <h3 className="font-semibold text-slate-800 mb-1 text-sm md:text-base">Service Category</h3>
                                         <p className="text-slate-600 text-sm md:text-base">{jobData.additional_data.serviceCategory}</p>
                                     </div>
 
                                     <div>
-                                        <h3 className="font-medium text-slate-900 mb-1 text-sm md:text-base">Description</h3>
+                                        <h3 className="font-semibold text-slate-800 mb-1 text-sm md:text-base">Description</h3>
                                         <p className="text-slate-600 leading-relaxed text-sm md:text-base">{jobData.job_description}</p>
                                     </div>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                                         <div>
-                                            <h3 className="font-medium text-slate-900 mb-1 flex items-center gap-1 text-sm md:text-base">
+                                            <h3 className="font-semibold text-slate-800 mb-1 flex items-center gap-1 text-sm md:text-base">
                                                 <HiCurrencyPound className="w-4 h-4" />
                                                 Budget
                                             </h3>
@@ -418,7 +420,7 @@ const JobDetail = () => {
                                         </div>
 
                                         <div>
-                                            <h3 className="font-medium text-slate-900 mb-1 flex items-center gap-1 text-sm md:text-base">
+                                            <h3 className="font-semibold text-slate-800 mb-1 flex items-center gap-1 text-sm md:text-base">
                                                 <HiClock className="w-4 h-4" />
                                                 Urgency
                                             </h3>
@@ -468,12 +470,12 @@ const JobDetail = () => {
 
                                 <div className="space-y-3 md:space-y-4">
                                     <div>
-                                        <h3 className="font-medium text-slate-900 mb-1 text-sm md:text-base">Name</h3>
+                                        <h3 className="font-semibold text-slate-800 mb-1 text-sm md:text-base">Name</h3>
                                         <p className="text-slate-600 text-sm md:text-base">{jobData.first_name}</p>
                                     </div>
 
                                     <div>
-                                        <h3 className="font-medium text-slate-900 mb-1 flex items-center gap-1 text-sm md:text-base">
+                                        <h3 className="font-semibold text-slate-800 mb-1 flex items-center gap-1 text-sm md:text-base">
                                             <HiEnvelope className="w-4 h-4" />
                                             Email
                                         </h3>
@@ -482,7 +484,7 @@ const JobDetail = () => {
 
                                     {jobData.phone && (
                                         <div>
-                                            <h3 className="font-medium text-slate-900 mb-1 flex items-center gap-1 text-sm md:text-base">
+                                            <h3 className="font-semibold text-slate-800 mb-1 flex items-center gap-1 text-sm md:text-base">
                                                 <HiPhone className="w-4 h-4" />
                                                 Phone
                                             </h3>
@@ -491,7 +493,7 @@ const JobDetail = () => {
                                     )}
 
                                     <div>
-                                        <h3 className="font-medium text-slate-900 mb-1 text-sm md:text-base">Preferred Contact</h3>
+                                        <h3 className="font-semibold text-slate-800 mb-1 text-sm md:text-base">Preferred Contact</h3>
                                         <p className="text-slate-600 capitalize text-sm md:text-base">{jobData.contact_method}</p>
                                     </div>
                                 </div>
@@ -588,20 +590,21 @@ const JobDetail = () => {
                 {isTrader ? (
                     <div className="flex items-center justify-between gap-3">
                         <div className="flex-1">
-                            <p className="text-sm font-medium text-slate-900">Ready to apply?</p>
-                            <p className="text-xs text-slate-600">Get contact details</p>
+                            <p className="text-sm font-semibold text-slate-900">Ready to apply?</p>
+                            <p className="text-xs text-slate-600 font-medium">Get contact details</p>
                         </div>
                         <Button
                             onClick={() => setShowPayToApplyModal(true)}
-                            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-3 rounded-full shadow-md hover:shadow-lg transition-all duration-200 min-h-[44px] hover-scale"
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-full shadow-md hover:shadow-lg transition-all duration-200 min-h-[44px] hover-scale"
                         >
-                            🔒 Apply for £5
+                            <HiLockClosed className="w-4 h-4 mr-1" />
+                            Apply for £5
                         </Button>
                     </div>
                 ) : (
                     <Button
                         onClick={() => navigate(`/edit-job/${id}`)}
-                        className="w-full bg-primary hover:bg-primary/90 flex items-center justify-center gap-2 min-h-[44px]"
+                        className="w-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center gap-2 min-h-[44px]"
                     >
                         <HiPencilSquare className="w-4 h-4" />
                         Edit Job

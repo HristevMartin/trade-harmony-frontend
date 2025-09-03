@@ -57,7 +57,7 @@ const Modal: React.FC<ModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 flex items-center justify-center p-4 sm:p-6 bg-black bg-opacity-50 backdrop-blur-sm"
+      className="fixed inset-0 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm animate-fade-in"
       style={{ zIndex: 9999 }}
       onClick={handleBackdropClick}
       role="dialog"
@@ -65,7 +65,7 @@ const Modal: React.FC<ModalProps> = ({
       aria-labelledby={title ? 'modal-title' : undefined}
     >
       <div 
-        className={`relative w-full ${sizeClasses[size]} bg-white rounded-2xl shadow-xl ring-1 ring-slate-200/50 transform transition-all duration-300 ease-out max-h-[85vh] overflow-y-auto`}
+        className={`relative w-full ${sizeClasses[size]} bg-white rounded-2xl shadow-xl ring-1 ring-slate-200/50 transform transition-all duration-300 ease-out max-h-[85vh] overflow-y-auto animate-scale-in`}
         role="document"
       >
         {/* Header */}
