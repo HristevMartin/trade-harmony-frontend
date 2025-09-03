@@ -1076,118 +1076,116 @@ const TradesPersonJobs = () => {
                         transition={{ delay: index * 0.1 }}
                         whileHover={{ y: -2, transition: { duration: 0.2, ease: 'easeOut' } }}
                       >
-                        <Card className="overflow-hidden bg-card border border-border shadow-sm hover:shadow-md transition-all duration-300 group h-full rounded-xl cursor-pointer">
-                           {/* Card Header with Job Image */}
-                           <div className="relative aspect-[3/2] w-full overflow-hidden rounded-t-xl bg-gradient-to-br from-muted/20 to-muted/10">
-                             {job.image_urls && job.image_urls.length > 0 ? (
-                               <img 
-                                 src={job.image_urls[0]} 
-                                 alt={job.job_title}
-                                 className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                 loading="lazy"
-                                 onError={(e) => {
-                                   const target = e.target as HTMLImageElement;
-                                   target.style.display = 'none';
-                                   const fallback = target.nextElementSibling as HTMLElement;
-                                   if (fallback) fallback.style.display = 'flex';
-                                 }}
-                               />
-                             ) : null}
-                             {/* Enhanced Fallback */}
-                             <div 
-                               className={`absolute inset-0 bg-gradient-to-br from-primary/8 via-muted/15 to-secondary/8 flex items-center justify-center ${
-                                 job.image_urls && job.image_urls.length > 0 ? 'hidden' : 'flex'
-                               }`}
-                             >
-                               <div className="p-8 bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl border border-primary/10 ring-1 ring-white/20">
-                                 {getCategoryIcon(job.service_category)}
+                         <Card className="overflow-visible bg-card border border-border shadow-sm hover:shadow-md transition-all duration-300 group flex flex-col h-[520px] rounded-xl">
+                            {/* Card Header with Job Image */}
+                            <div className="relative aspect-[3/2] w-full overflow-hidden rounded-t-xl bg-gradient-to-br from-muted/20 to-muted/10 flex-shrink-0">
+                              {job.image_urls && job.image_urls.length > 0 ? (
+                                <img 
+                                  src={job.image_urls[0]} 
+                                  alt={job.job_title}
+                                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                  loading="lazy"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = 'none';
+                                    const fallback = target.nextElementSibling as HTMLElement;
+                                    if (fallback) fallback.style.display = 'flex';
+                                  }}
+                                />
+                              ) : null}
+                              {/* Enhanced Fallback */}
+                              <div 
+                                className={`absolute inset-0 bg-gradient-to-br from-primary/8 via-muted/15 to-secondary/8 flex items-center justify-center ${
+                                  job.image_urls && job.image_urls.length > 0 ? 'hidden' : 'flex'
+                                }`}
+                              >
+                                <div className="p-8 bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl border border-primary/10 ring-1 ring-white/20">
+                                  {getCategoryIcon(job.service_category)}
+                                </div>
+                              </div>
+                               {/* Enhanced gradient overlay */}
+                               <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-black/5 to-transparent pointer-events-none group-hover:from-black/25 transition-all duration-300" />
+                              
+                              {/* Top badges row */}
+                              <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
+                                 {/* Budget Badge */}
+                                 <Badge className="bg-white/95 text-slate-800 text-xs font-bold px-4 py-2 rounded-full shadow-sm backdrop-blur-md border border-white/30">
+                                   <PoundSterling className="h-3.5 w-3.5 mr-1.5 text-emerald-600" />
+                                   {formatBudget(job.budget)}
+                                 </Badge>
+                                
+                                 {/* Urgency Badge */}
+                                 <Badge className={`text-xs font-bold px-4 py-2 rounded-full shadow-sm backdrop-blur-md border transition-all duration-300 ${
+                                   formatUrgency(job.urgency) === 'ASAP' 
+                                     ? 'bg-red-500 text-white border-red-400/50' 
+                                     : formatUrgency(job.urgency) === 'This week'
+                                       ? 'bg-amber-500 text-white border-amber-400/50'
+                                       : 'bg-blue-500 text-white border-blue-400/50'
+                                 }`}>
+                                  <Clock className="h-3.5 w-3.5 mr-1.5" />
+                                  {formatUrgency(job.urgency)}
+                                </Badge>
+                              </div>
+                            </div>
+                            
+                             {/* Main Content Area */}
+                             <div className="p-6 flex-1 flex flex-col">
+                               {/* Header with Category Badge */}
+                               <div className="flex items-start justify-between mb-4">
+                                 <div className="flex-1">
+                                   <div className="flex items-center gap-3 mb-3">
+                                      <Badge variant="secondary" className="bg-white text-slate-700 border-2 border-slate-300 text-xs font-bold px-3 py-2 rounded-lg shadow-md">
+                                        {job.additional_data?.serviceCategory || job.service_category}
+                                      </Badge>
+                                      <div className="text-xs text-slate-700 font-bold bg-white border-2 border-slate-300 px-3 py-2 rounded-lg shadow-md">
+                                        {formatTimeAgo(job.created_at)}
+                                      </div>
+                                   </div>
+                                    <h3 className="text-xl sm:text-2xl font-bold text-foreground line-clamp-2 leading-tight mb-2">
+                                      {job.job_title}
+                                    </h3>
+                                 </div>
+                               </div>
+                               
+                                {/* Location */}
+                                <div className="flex items-center gap-3 mb-5">
+                                  <div className="p-2.5 bg-blue-50 border border-blue-200 rounded-xl shadow-sm">
+                                    <MapPin className="h-4 w-4 text-blue-600" />
+                                  </div>
+                                  <span className="text-sm font-semibold text-slate-700 bg-slate-50 border border-slate-200 px-3 py-2 rounded-lg shadow-sm truncate">
+                                    {job.additional_data?.nuts || job.nuts || job.location}
+                                  </span>
+                                </div>
+                               
+                               {/* Description */}
+                               <div className="mb-4 flex-1">
+                                 <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3 font-medium">
+                                   {job.job_description}
+                                 </p>
                                </div>
                              </div>
-                              {/* Enhanced gradient overlay */}
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-black/5 to-transparent pointer-events-none group-hover:from-black/25 transition-all duration-300" />
                              
-                             {/* Top badges row */}
-                             <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
-                                {/* Budget Badge */}
-                                <Badge className="bg-white/95 text-slate-800 text-xs font-bold px-4 py-2 rounded-full shadow-sm backdrop-blur-md border border-white/30">
-                                  <PoundSterling className="h-3.5 w-3.5 mr-1.5 text-emerald-600" />
-                                  {formatBudget(job.budget)}
-                                </Badge>
-                               
-                                {/* Urgency Badge */}
-                                <Badge className={`text-xs font-bold px-4 py-2 rounded-full shadow-sm backdrop-blur-md border transition-all duration-300 ${
-                                  formatUrgency(job.urgency) === 'ASAP' 
-                                    ? 'bg-red-500 text-white border-red-400/50' 
-                                    : formatUrgency(job.urgency) === 'This week'
-                                      ? 'bg-amber-500 text-white border-amber-400/50'
-                                      : 'bg-blue-500 text-white border-blue-400/50'
-                                }`}>
-                                 <Clock className="h-3.5 w-3.5 mr-1.5" />
-                                 {formatUrgency(job.urgency)}
-                               </Badge>
-                             </div>
-                           </div>
-                           
-                            <CardContent className="p-0 flex flex-col h-full">
-                              {/* Main Content Area */}
-                              <div className="p-6 sm:p-7 flex-1">
-                                {/* Header with Category Badge */}
-                                <div className="flex items-start justify-between mb-4">
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-3 mb-3">
-                                       <Badge variant="secondary" className="bg-white text-slate-700 border-2 border-slate-300 text-xs font-bold px-3 py-2 rounded-lg shadow-md">
-                                         {job.additional_data?.serviceCategory || job.service_category}
-                                       </Badge>
-                                       <div className="text-xs text-slate-700 font-bold bg-white border-2 border-slate-300 px-3 py-2 rounded-lg shadow-md">
-                                         {formatTimeAgo(job.created_at)}
-                                       </div>
-                                    </div>
-                                     <h3 className="text-xl sm:text-2xl font-bold text-foreground line-clamp-2 leading-tight mb-2">
-                                       {job.job_title}
-                                     </h3>
-                                  </div>
-                                </div>
-                                
-                                 {/* Location */}
-                                 <div className="flex items-center gap-3 mb-5">
-                                   <div className="p-2.5 bg-blue-50 border border-blue-200 rounded-xl shadow-sm">
-                                     <MapPin className="h-4 w-4 text-blue-600" />
-                                   </div>
-                                   <span className="text-sm font-semibold text-slate-700 bg-slate-50 border border-slate-200 px-3 py-2 rounded-lg shadow-sm truncate">
-                                     {job.additional_data?.nuts || job.nuts || job.location}
-                                   </span>
-                                 </div>
-                                
-                                {/* Description */}
-                                <div className="mb-4">
-                                  <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3 font-medium">
-                                    {job.job_description}
-                                  </p>
-                                </div>
-                              </div>
-                              
-                              {/* Fixed Footer - Action Buttons */}
-                              <div className="p-6 sm:p-7 pt-0 border-t border-gray-100 bg-gray-50/50">
-                                <div className="flex flex-col sm:flex-row gap-3 w-full">
+                             {/* Action Buttons - Always at bottom */}
+                             <div className="p-6 pt-0 border-t border-gray-100 bg-gray-50/50 flex-shrink-0">
+                               <div className="flex flex-col sm:flex-row gap-3 w-full">
+                                  <Button 
+                                    className="w-full sm:flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg text-sm"
+                                    aria-label={`Apply for ${job.job_title}`}
+                                  >
+                                    <Send className="h-4 w-4 mr-2" />
+                                    Apply Now
+                                  </Button>
                                    <Button 
-                                     className="w-full sm:flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-4 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg text-sm"
-                                     aria-label={`Apply for ${job.job_title}`}
+                                     variant="outline"
+                                     className="w-full sm:flex-1 bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg text-sm"
+                                     aria-label={`View details for ${job.job_title}`}
+                                     onClick={() => navigate(`/jobs/${job.project_id}`)}
                                    >
-                                     <Send className="h-4 w-4 mr-2" />
-                                     Apply Now
+                                     <Eye className="h-4 w-4 mr-2" />
+                                     View Details
                                    </Button>
-                                    <Button 
-                                      variant="outline"
-                                      className="w-full sm:flex-1 bg-white border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold py-3 px-4 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg text-sm"
-                                      aria-label={`View details for ${job.job_title}`}
-                                      onClick={() => navigate(`/jobs/${job.project_id}`)}
-                                    >
-                                      <Eye className="h-4 w-4 mr-2" />
-                                      View Details
-                                    </Button>
-                                </div>
-                              </div>
-                           </CardContent>
+                               </div>
+                             </div>
                          </Card>
                       </motion.div>
                     ))}
