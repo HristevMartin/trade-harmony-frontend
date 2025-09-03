@@ -336,36 +336,56 @@ const JobDetail = () => {
                         </div>
                     </div>
 
-                    {/* Apply for Job Banner - For Traders Only */}
+                    {/* Apply for Job Banner - Desktop */}
                     {isTrader && (
-                        <div className="mb-6 md:mb-8">
-                            <Card className="rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 border-0 p-6 md:p-8 shadow-lg hover:shadow-xl transition-all duration-300">
-                                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                                    <div className="text-white space-y-2">
-                                        <h3 className="text-xl md:text-2xl font-bold leading-tight">Ready to apply for this job?</h3>
-                                        <p className="text-blue-100 text-base md:text-lg leading-relaxed font-medium">
-                                            Get homeowner contact details and submit your quote
-                                        </p>
+                        <>
+                            {/* Desktop Banner */}
+                            <div className="hidden md:block mb-6 md:mb-8">
+                                <Card className="rounded-2xl bg-gradient-to-r from-blue-600 to-blue-700 border-0 p-6 md:p-8 shadow-lg hover:shadow-xl transition-all duration-300">
+                                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                                        <div className="text-white space-y-2">
+                                            <h3 className="text-xl md:text-2xl font-bold leading-tight">Ready to apply for this job?</h3>
+                                            <p className="text-blue-100 text-base md:text-lg leading-relaxed font-medium">
+                                                Get homeowner contact details and submit your quote
+                                            </p>
+                                        </div>
+                                        <div className="flex flex-col items-center lg:items-end gap-3">
+                                            <Button
+                                                onClick={() => setShowPayToApplyModal(true)}
+                                                className="bg-white text-blue-600 hover:bg-blue-50 font-bold px-8 py-4 text-lg rounded-full shadow-md hover:shadow-lg transition-all duration-200 min-h-[44px] whitespace-nowrap border-2 border-white hover:border-blue-100 hover-scale"
+                                                size="lg"
+                                            >
+                                                <HiLockClosed className="w-5 h-5 mr-2" />
+                                                Apply for £5
+                                            </Button>
+                                            <p className="text-blue-100 text-sm text-center lg:text-right font-medium">
+                                                Secure payment powered by Stripe
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div className="flex flex-col items-center lg:items-end gap-3">
-                                        <Button
-                                            onClick={() => setShowPayToApplyModal(true)}
-                                            className="bg-white text-blue-600 hover:bg-blue-50 font-bold px-8 py-4 text-lg rounded-full shadow-md hover:shadow-lg transition-all duration-200 min-h-[44px] whitespace-nowrap border-2 border-white hover:border-blue-100"
-                                            size="lg"
-                                        >
-                                            <HiLockClosed className="w-5 h-5 mr-2" />
-                                            Apply for £5
-                                        </Button>
-                                        <p className="text-blue-100 text-sm text-center lg:text-right font-medium">
-                                            Secure payment powered by Stripe
-                                        </p>
+                                </Card>
+                            </div>
+
+                            {/* Mobile Sticky CTA */}
+                            <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 p-4 pb-safe shadow-lg">
+                                <div className="flex items-center justify-between gap-4">
+                                    <div>
+                                        <p className="text-slate-900 font-semibold text-base">Ready to apply?</p>
+                                        <p className="text-slate-600 text-sm">Get contact details</p>
                                     </div>
+                                    <Button
+                                        onClick={() => setShowPayToApplyModal(true)}
+                                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-full shadow-md hover:shadow-lg transition-all duration-200 min-h-[44px] whitespace-nowrap hover-scale"
+                                    >
+                                        <HiLockClosed className="w-4 h-4 mr-2" />
+                                        Apply for £5
+                                    </Button>
                                 </div>
-                            </Card>
-                        </div>
+                            </div>
+                        </>
                     )}
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 pb-24 md:pb-0">
                         {/* Main Content */}
                         <div className="lg:col-span-2 space-y-4 md:space-y-6">
                             {/* What Happens Next Info Card */}
@@ -396,7 +416,7 @@ const JobDetail = () => {
                             <Card className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-4 md:p-6 transition-shadow hover:shadow-md">
                                 <div className="flex items-center gap-2 mb-3 md:mb-4">
                                     <HiWrenchScrewdriver className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
-                                    <h2 className="text-base md:text-lg font-semibold text-slate-900">Job Details</h2>
+                                    <h2 className="text-base md:text-lg font-semibold text-slate-800">Job Details</h2>
                                 </div>
 
                                 <div className="space-y-3 md:space-y-4">
@@ -435,7 +455,7 @@ const JobDetail = () => {
                                 <Card className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-4 md:p-6 transition-shadow hover:shadow-md">
                                     <div className="flex items-center gap-2 mb-3 md:mb-4">
                                         <HiCamera className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
-                                        <h2 className="text-base md:text-lg font-semibold text-slate-900">
+                                        <h2 className="text-base md:text-lg font-semibold text-slate-800">
                                             Photos ({jobData.image_count})
                                         </h2>
                                     </div>
@@ -465,7 +485,7 @@ const JobDetail = () => {
                             <Card className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-4 md:p-6 transition-shadow hover:shadow-md">
                                 <div className="flex items-center gap-2 mb-3 md:mb-4">
                                     <HiUserCircle className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
-                                    <h2 className="text-base md:text-lg font-semibold text-slate-900">Contact Information</h2>
+                                    <h2 className="text-base md:text-lg font-semibold text-slate-800">Contact Information</h2>
                                 </div>
 
                                 <div className="space-y-3 md:space-y-4">
@@ -503,7 +523,7 @@ const JobDetail = () => {
                             <Card className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-4 md:p-6 transition-shadow hover:shadow-md">
                                 <div className="flex items-center gap-2 mb-3 md:mb-4">
                                     <HiMapPin className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
-                                    <h2 className="text-base md:text-lg font-semibold text-slate-900">Location</h2>
+                                    <h2 className="text-base md:text-lg font-semibold text-slate-800">Location</h2>
                                 </div>
 
                                 <div className="space-y-2">
@@ -518,7 +538,7 @@ const JobDetail = () => {
 
                             {/* Job Meta */}
                             <Card className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-4 md:p-6 transition-shadow hover:shadow-md">
-                                <h2 className="text-base md:text-lg font-semibold text-slate-900 mb-3 md:mb-4">Job Information</h2>
+                                <h2 className="text-base md:text-lg font-semibold text-slate-800 mb-3 md:mb-4">Job Information</h2>
 
                                 <div className="space-y-3 text-xs md:text-sm">
                                     <div className="flex justify-between items-start">

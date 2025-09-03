@@ -38,6 +38,7 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
   const [currentStep, setCurrentStep] = useState<ModalStep>('payment');
   const [applicationText, setApplicationText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
 
   const handlePayment = async () => {
     setIsLoading(true);
@@ -45,7 +46,13 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
     // Simulate payment processing
     setTimeout(() => {
       setIsLoading(false);
-      setCurrentStep('application');
+      setShowCelebration(true);
+      
+      // Show celebration for a moment, then move to application
+      setTimeout(() => {
+        setShowCelebration(false);
+        setCurrentStep('application');
+      }, 800);
     }, 2000);
   };
 
@@ -62,6 +69,7 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
   const handleClose = () => {
     setCurrentStep('payment');
     setApplicationText('');
+    setShowCelebration(false);
     onClose();
   };
 
@@ -155,7 +163,7 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
       {/* Header */}
       <div className="text-center pb-6 border-b border-border">
         <div className="flex items-center justify-center gap-2 mb-2">
-          <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+          <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center animate-scale-in">
             <HiCheckCircle className="w-5 h-5 text-green-600" />
           </div>
           <h2 className="text-2xl font-bold text-foreground">Payment Successful!</h2>
@@ -165,31 +173,33 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
 
       {/* Homeowner Contact Info */}
       {homeownerInfo && (
-        <Card className="p-5 bg-green-50 border-green-200 rounded-xl">
-          <h3 className="font-semibold text-green-900 mb-4 flex items-center gap-2 text-lg">
-            <HiPhone className="w-5 h-5" />
-            Homeowner Contact Details
-          </h3>
-          <div className="space-y-3 text-base">
-            <div className="flex items-center gap-3">
-              <span className="text-green-700 font-medium min-w-[60px]">Name:</span>
-              <span className="text-green-800 font-semibold">{homeownerInfo.first_name}</span>
+        <div className="border-b border-border pb-6 mb-6">
+          <Card className="p-5 bg-green-50 border-green-200 rounded-xl">
+            <h3 className="font-semibold text-green-900 mb-4 flex items-center gap-2 text-lg">
+              <HiPhone className="w-5 h-5" />
+              Homeowner Contact Details
+            </h3>
+            <div className="space-y-3 text-base">
+              <div className="flex items-center gap-3">
+                <span className="text-green-700 font-medium min-w-[60px]">Name:</span>
+                <span className="text-green-800 font-semibold">{homeownerInfo.first_name}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <HiEnvelope className="w-5 h-5 text-green-600 flex-shrink-0" />
+                <span className="text-green-800">{homeownerInfo.email}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <HiPhone className="w-5 h-5 text-green-600 flex-shrink-0" />
+                <span className="text-green-800">{homeownerInfo.phone}</span>
+              </div>
             </div>
-            <div className="flex items-center gap-3">
-              <HiEnvelope className="w-5 h-5 text-green-600 flex-shrink-0" />
-              <span className="text-green-800">{homeownerInfo.email}</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <HiPhone className="w-5 h-5 text-green-600 flex-shrink-0" />
-              <span className="text-green-800">{homeownerInfo.phone}</span>
-            </div>
-          </div>
-        </Card>
+          </Card>
+        </div>
       )}
 
       {/* Application Form */}
-      <div className="space-y-3">
-        <label className="block text-base font-semibold text-foreground">
+      <div className="space-y-3 border-b border-border pb-6 mb-6">
+        <label className="block text-base font-semibold text-slate-800">
           Your Application Message
         </label>
         <Textarea
@@ -198,15 +208,21 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
           placeholder="Introduce yourself, explain your experience, and provide a quote for this job..."
           rows={6}
           className="resize-none text-base"
+          maxLength={1000}
         />
-        <p className="text-sm text-muted-foreground">
-          💡 Include your relevant experience, availability, and a competitive quote to stand out.
-        </p>
+        <div className="flex justify-between items-center">
+          <p className="text-sm text-muted-foreground">
+            💡 Include your relevant experience, availability, and a competitive quote to stand out.
+          </p>
+          <span className="text-xs text-muted-foreground">
+            {applicationText.length}/1000
+          </span>
+        </div>
       </div>
 
       {/* Optional File Upload */}
       <div className="space-y-3">
-        <label className="block text-base font-semibold text-foreground">
+        <label className="block text-base font-semibold text-slate-800">
           Attach Portfolio (Optional)
         </label>
         <div className="border-2 border-dashed border-muted-foreground/30 rounded-xl p-6 text-center hover:border-muted-foreground/50 transition-colors cursor-pointer">
@@ -214,6 +230,9 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
           <p className="text-base text-muted-foreground">Click to upload images of your previous work</p>
           <p className="text-sm text-muted-foreground/70 mt-1">JPG, PNG up to 5MB each</p>
         </div>
+        <p className="text-xs text-muted-foreground text-center">
+          📸 Showcasing your past projects can significantly increase your chances of winning this job
+        </p>
       </div>
 
       {/* Submit Button */}
@@ -281,16 +300,33 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
   );
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={handleClose}
-      size="lg"
-      showCloseButton={currentStep !== 'confirmation'}
-    >
-      {currentStep === 'payment' && renderPaymentStep()}
-      {currentStep === 'application' && renderApplicationStep()}
-      {currentStep === 'confirmation' && renderConfirmationStep()}
-    </Modal>
+    <>
+      <Modal
+        isOpen={isOpen}
+        onClose={handleClose}
+        size="lg"
+        showCloseButton={currentStep !== 'confirmation'}
+      >
+        {currentStep === 'payment' && renderPaymentStep()}
+        {currentStep === 'application' && renderApplicationStep()}
+        {currentStep === 'confirmation' && renderConfirmationStep()}
+      </Modal>
+
+      {/* Celebration Overlay */}
+      {showCelebration && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 animate-fade-in">
+          <div className="bg-white rounded-2xl p-8 shadow-2xl animate-scale-in">
+            <div className="text-center">
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                <HiCheckCircle className="w-12 h-12 text-green-600" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900">Payment Complete! 🎉</h3>
+              <p className="text-slate-600 mt-2">Getting your application ready...</p>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
