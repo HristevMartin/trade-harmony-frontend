@@ -1128,62 +1128,65 @@ const TradesPersonJobs = () => {
                              </div>
                            </div>
                            
-                           <CardContent className="p-6 sm:p-7 flex flex-col min-h-[400px]">
-                             {/* Header with Category Badge */}
-                             <div className="flex items-start justify-between mb-4">
-                               <div className="flex-1">
-                                 <div className="flex items-center gap-3 mb-3">
-                                    <Badge variant="secondary" className="bg-white text-slate-700 border-2 border-slate-300 text-xs font-bold px-3 py-2 rounded-lg shadow-md">
-                                      {job.additional_data?.serviceCategory || job.service_category}
-                                    </Badge>
-                                    <div className="text-xs text-slate-700 font-bold bg-white border-2 border-slate-300 px-3 py-2 rounded-lg shadow-md">
-                                      {formatTimeAgo(job.created_at)}
+                            <CardContent className="p-0 flex flex-col h-full">
+                              {/* Main Content Area */}
+                              <div className="p-6 sm:p-7 flex-1">
+                                {/* Header with Category Badge */}
+                                <div className="flex items-start justify-between mb-4">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-3 mb-3">
+                                       <Badge variant="secondary" className="bg-white text-slate-700 border-2 border-slate-300 text-xs font-bold px-3 py-2 rounded-lg shadow-md">
+                                         {job.additional_data?.serviceCategory || job.service_category}
+                                       </Badge>
+                                       <div className="text-xs text-slate-700 font-bold bg-white border-2 border-slate-300 px-3 py-2 rounded-lg shadow-md">
+                                         {formatTimeAgo(job.created_at)}
+                                       </div>
                                     </div>
-                                 </div>
-                                  <h3 className="text-xl sm:text-2xl font-bold text-foreground line-clamp-2 leading-tight mb-2">
-                                    {job.job_title}
-                                  </h3>
-                               </div>
-                             </div>
-                             
-                              {/* Location */}
-                              <div className="flex items-center gap-3 mb-5">
-                                <div className="p-2.5 bg-blue-50 border border-blue-200 rounded-xl shadow-sm">
-                                  <MapPin className="h-4 w-4 text-blue-600" />
+                                     <h3 className="text-xl sm:text-2xl font-bold text-foreground line-clamp-2 leading-tight mb-2">
+                                       {job.job_title}
+                                     </h3>
+                                  </div>
                                 </div>
-                                <span className="text-sm font-semibold text-slate-700 bg-slate-50 border border-slate-200 px-3 py-2 rounded-lg shadow-sm truncate">
-                                  {job.additional_data?.nuts || job.nuts || job.location}
-                                </span>
-                              </div>
-                             
-                             {/* Description */}
-                             <div className="flex-1 mb-6">
-                               <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3 font-medium">
-                                 {job.job_description}
-                               </p>
-                             </div>
-                             
-                               {/* Card Footer - Action Buttons */}
-                               <div className="pt-4 mt-auto">
-                                 <div className="flex flex-col sm:flex-row gap-3 w-full">
-                                    <Button 
-                                      className="w-full sm:flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl text-base"
-                                      aria-label={`Apply for ${job.job_title}`}
-                                    >
-                                      <Send className="h-5 w-5 mr-2" />
-                                      Apply Now
-                                    </Button>
-                                     <Button 
-                                       variant="outline"
-                                       className="w-full sm:flex-1 bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-bold py-4 px-6 rounded-lg transition-all duration-200 shadow-lg text-base"
-                                       aria-label={`View details for ${job.job_title}`}
-                                       onClick={() => navigate(`/jobs/${job.project_id}`)}
-                                     >
-                                       <Eye className="h-5 w-5 mr-2" />
-                                       View Details
-                                     </Button>
+                                
+                                 {/* Location */}
+                                 <div className="flex items-center gap-3 mb-5">
+                                   <div className="p-2.5 bg-blue-50 border border-blue-200 rounded-xl shadow-sm">
+                                     <MapPin className="h-4 w-4 text-blue-600" />
+                                   </div>
+                                   <span className="text-sm font-semibold text-slate-700 bg-slate-50 border border-slate-200 px-3 py-2 rounded-lg shadow-sm truncate">
+                                     {job.additional_data?.nuts || job.nuts || job.location}
+                                   </span>
                                  </div>
-                               </div>
+                                
+                                {/* Description */}
+                                <div className="mb-4">
+                                  <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3 font-medium">
+                                    {job.job_description}
+                                  </p>
+                                </div>
+                              </div>
+                              
+                              {/* Fixed Footer - Action Buttons */}
+                              <div className="p-6 sm:p-7 pt-0 border-t border-gray-100 bg-gray-50/50">
+                                <div className="flex flex-col sm:flex-row gap-3 w-full">
+                                   <Button 
+                                     className="w-full sm:flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-4 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg text-sm"
+                                     aria-label={`Apply for ${job.job_title}`}
+                                   >
+                                     <Send className="h-4 w-4 mr-2" />
+                                     Apply Now
+                                   </Button>
+                                    <Button 
+                                      variant="outline"
+                                      className="w-full sm:flex-1 bg-white border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold py-3 px-4 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg text-sm"
+                                      aria-label={`View details for ${job.job_title}`}
+                                      onClick={() => navigate(`/jobs/${job.project_id}`)}
+                                    >
+                                      <Eye className="h-4 w-4 mr-2" />
+                                      View Details
+                                    </Button>
+                                </div>
+                              </div>
                            </CardContent>
                          </Card>
                       </motion.div>
