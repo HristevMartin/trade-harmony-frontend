@@ -1076,9 +1076,9 @@ const TradesPersonJobs = () => {
                         transition={{ delay: index * 0.1 }}
                         whileHover={{ y: -2, transition: { duration: 0.2, ease: 'easeOut' } }}
                       >
-                         <Card className="overflow-visible bg-card border border-border shadow-sm hover:shadow-md transition-all duration-300 group flex flex-col min-h-[520px] rounded-xl">
-                            {/* Card Header with Job Image */}
-                            <div className="relative aspect-[3/2] w-full overflow-hidden rounded-t-xl bg-gradient-to-br from-muted/20 to-muted/10 flex-shrink-0">
+                         <Card className="bg-white border border-slate-200/60 shadow-sm hover:shadow-lg transition-all duration-300 group flex flex-col h-[440px] rounded-2xl overflow-hidden">
+                            {/* Job Image Section */}
+                            <div className="relative h-48 w-full bg-gradient-to-br from-slate-50 to-slate-100 overflow-hidden">
                               {job.image_urls && job.image_urls.length > 0 ? (
                                 <img 
                                   src={job.image_urls[0]} 
@@ -1093,100 +1093,88 @@ const TradesPersonJobs = () => {
                                   }}
                                 />
                               ) : null}
-                              {/* Enhanced Fallback */}
+                              {/* Placeholder when no image */}
                               <div 
-                                className={`absolute inset-0 bg-gradient-to-br from-primary/8 via-muted/15 to-secondary/8 flex items-center justify-center ${
+                                className={`absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center ${
                                   job.image_urls && job.image_urls.length > 0 ? 'hidden' : 'flex'
                                 }`}
                               >
-                                <div className="p-8 bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl border border-primary/10 ring-1 ring-white/20">
+                                <div className="p-6 bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg">
                                   {getCategoryIcon(job.service_category)}
                                 </div>
                               </div>
-                               {/* Enhanced gradient overlay */}
-                               <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-black/5 to-transparent pointer-events-none group-hover:from-black/25 transition-all duration-300" />
                               
-                              {/* Top badges row */}
-                              <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
-                                 {/* Budget Badge */}
-                                 <Badge className="bg-white/95 text-slate-800 text-xs font-bold px-4 py-2 rounded-full shadow-sm backdrop-blur-md border border-white/30">
-                                   <PoundSterling className="h-3.5 w-3.5 mr-1.5 text-emerald-600" />
-                                   {formatBudget(job.budget)}
-                                 </Badge>
+                              {/* Overlay Badges */}
+                              <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
+                                {/* Budget Badge */}
+                                <div className="bg-white/95 backdrop-blur-sm text-slate-700 text-xs font-semibold px-3 py-1.5 rounded-full shadow-sm border border-white/50">
+                                  £ {formatBudget(job.budget).replace('£', '')}
+                                </div>
                                 
-                                 {/* Urgency Badge */}
-                                 <Badge className={`text-xs font-bold px-4 py-2 rounded-full shadow-sm backdrop-blur-md border transition-all duration-300 ${
-                                   formatUrgency(job.urgency) === 'ASAP' 
-                                     ? 'bg-red-500 text-white border-red-400/50' 
-                                     : formatUrgency(job.urgency) === 'This week'
-                                       ? 'bg-amber-500 text-white border-amber-400/50'
-                                       : 'bg-blue-500 text-white border-blue-400/50'
-                                 }`}>
-                                  <Clock className="h-3.5 w-3.5 mr-1.5" />
+                                {/* Urgency Badge */}
+                                <div className={`text-xs font-semibold px-3 py-1.5 rounded-full shadow-sm backdrop-blur-sm border ${
+                                  formatUrgency(job.urgency) === 'ASAP' 
+                                    ? 'bg-red-500 text-white border-red-400/50' 
+                                    : formatUrgency(job.urgency) === 'This week'
+                                      ? 'bg-amber-500 text-white border-amber-400/50'
+                                      : 'bg-blue-500 text-white border-blue-400/50'
+                                }`}>
                                   {formatUrgency(job.urgency)}
-                                </Badge>
+                                </div>
                               </div>
                             </div>
                             
-                             {/* Main Content Area */}
-                             <div className="p-6 flex-1 flex flex-col">
-                               {/* Header with Category Badge */}
-                               <div className="flex items-start justify-between mb-4">
-                                 <div className="flex-1">
-                                   <div className="flex items-center gap-3 mb-3">
-                                      <Badge variant="secondary" className="bg-white text-slate-700 border-2 border-slate-300 text-xs font-bold px-3 py-2 rounded-lg shadow-md">
-                                        {job.additional_data?.serviceCategory || job.service_category}
-                                      </Badge>
-                                      <div className="text-xs text-slate-700 font-bold bg-white border-2 border-slate-300 px-3 py-2 rounded-lg shadow-md">
-                                        {formatTimeAgo(job.created_at)}
-                                      </div>
-                                   </div>
-                                     <h3 className="text-lg sm:text-xl font-bold text-foreground line-clamp-2 leading-tight mb-3 min-h-[3rem]">
-                                       {job.job_title}
-                                     </h3>
-                                 </div>
-                               </div>
-                               
-                                {/* Location */}
-                                <div className="flex items-center gap-3 mb-5">
-                                  <div className="p-2.5 bg-blue-50 border border-blue-200 rounded-xl shadow-sm">
-                                    <MapPin className="h-4 w-4 text-blue-600" />
-                                  </div>
-                                  <span className="text-sm font-semibold text-slate-700 bg-slate-50 border border-slate-200 px-3 py-2 rounded-lg shadow-sm truncate">
-                                    {job.additional_data?.nuts || job.nuts || job.location}
-                                  </span>
-                                </div>
-                               
-                               {/* Description */}
-                               <div className="mb-4 flex-1">
-                                 <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3 font-medium">
-                                   {job.job_description}
-                                 </p>
-                               </div>
-                             </div>
-                             
-                             {/* Action Buttons - Always at bottom */}
-                             <div className="p-6 pt-0 border-t border-gray-100 bg-gray-50/50 flex-shrink-0">
-                               <div className="flex flex-col sm:flex-row gap-3 w-full">
-                                  <Button 
-                                    className="w-full sm:flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg text-sm"
-                                    aria-label={`Apply for ${job.job_title}`}
-                                  >
-                                    <Send className="h-4 w-4 mr-2" />
-                                    Apply Now
-                                  </Button>
-                                   <Button 
-                                     variant="outline"
-                                     className="w-full sm:flex-1 bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg text-sm"
-                                     aria-label={`View details for ${job.job_title}`}
-                                     onClick={() => navigate(`/jobs/${job.project_id}`)}
-                                   >
-                                     <Eye className="h-4 w-4 mr-2" />
-                                     View Details
-                                   </Button>
-                               </div>
-                             </div>
-                         </Card>
+                            {/* Card Content */}
+                            <div className="flex-1 p-5 flex flex-col">
+                              {/* Header - Category & Time */}
+                              <div className="flex items-center justify-between mb-3">
+                                <span className="bg-slate-100 text-slate-600 text-xs font-medium px-2.5 py-1 rounded-lg">
+                                  {job.additional_data?.serviceCategory || job.service_category}
+                                </span>
+                                <span className="text-xs text-slate-500 font-medium">
+                                  {formatTimeAgo(job.created_at)}
+                                </span>
+                              </div>
+                              
+                              {/* Job Title */}
+                              <h3 className="text-lg font-bold text-slate-900 line-clamp-2 leading-tight mb-3 min-h-[3.5rem]">
+                                {job.job_title}
+                              </h3>
+                              
+                              {/* Location */}
+                              <div className="flex items-center gap-2 mb-3">
+                                <MapPin className="h-4 w-4 text-slate-400 flex-shrink-0" />
+                                <span className="text-sm text-slate-600 font-medium truncate">
+                                  {job.additional_data?.nuts || job.nuts || job.location}
+                                </span>
+                              </div>
+                              
+                              {/* Description */}
+                              <p className="text-sm text-slate-600 line-clamp-2 leading-relaxed mb-4 flex-1">
+                                {job.job_description}
+                              </p>
+                            </div>
+                            
+                            {/* Action Buttons */}
+                            <div className="p-5 pt-0 space-y-2.5">
+                              <Button 
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl transition-colors duration-200 shadow-sm hover:shadow-md"
+                                size="sm"
+                              >
+                                <Send className="h-4 w-4 mr-2" />
+                                Apply Now
+                              </Button>
+                              <Button 
+                                variant="outline"
+                                className="w-full border-slate-200 text-slate-700 hover:bg-slate-50 font-medium py-2.5 rounded-xl transition-colors duration-200"
+                                size="sm"
+                                onClick={() => navigate(`/jobs/${job.project_id}`)}
+                              >
+                                <Eye className="h-4 w-4 mr-2" />
+                                View Details
+                              </Button>
+                            </div>
+                          </Card>
                       </motion.div>
                     ))}
                   </AnimatePresence>
