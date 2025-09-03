@@ -335,22 +335,29 @@ const JobDetail = () => {
                         </div>
                     </div>
 
-                    {/* Apply for Job Button - For Traders Only */}
+                    {/* Apply for Job Banner - For Traders Only */}
                     {isTrader && (
                         <div className="mb-6 md:mb-8">
-                            <Card className="rounded-2xl bg-gradient-to-r from-blue-600 to-blue-700 border-0 p-4 md:p-6 shadow-lg">
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                    <div className="text-white">
-                                        <h3 className="text-lg md:text-xl font-bold mb-1">Ready to apply for this job?</h3>
-                                        <p className="text-blue-100 text-sm md:text-base">Get homeowner contact details and submit your quote</p>
+                            <Card className="rounded-2xl bg-gradient-to-r from-primary to-primary/90 border-0 p-6 md:p-8 shadow-lg hover:shadow-xl transition-all duration-300">
+                                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                                    <div className="text-white space-y-2">
+                                        <h3 className="text-xl md:text-2xl font-bold leading-tight">Ready to apply for this job?</h3>
+                                        <p className="text-primary-foreground/90 text-base md:text-lg leading-relaxed">
+                                            Get homeowner contact details and submit your quote
+                                        </p>
                                     </div>
-                                    <Button
-                                        onClick={() => setShowPayToApplyModal(true)}
-                                        className="bg-white text-blue-600 hover:bg-blue-50 font-semibold px-6 py-3 text-base whitespace-nowrap"
-                                        size="lg"
-                                    >
-                                        Apply for £5
-                                    </Button>
+                                    <div className="flex flex-col items-center lg:items-end gap-3">
+                                        <Button
+                                            onClick={() => setShowPayToApplyModal(true)}
+                                            className="bg-white text-primary hover:bg-white/95 font-semibold px-8 py-4 text-lg rounded-full shadow-md hover:shadow-lg transition-all duration-200 min-h-[44px] whitespace-nowrap"
+                                            size="lg"
+                                        >
+                                            🔒 Apply for £5
+                                        </Button>
+                                        <p className="text-primary-foreground/80 text-sm text-center lg:text-right">
+                                            Secure payment powered by Stripe
+                                        </p>
+                                    </div>
                                 </div>
                             </Card>
                         </div>
@@ -576,18 +583,25 @@ const JobDetail = () => {
             )}
 
             {/* Mobile Sticky Footer */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-slate-200 p-4 sm:hidden safe-area-pb">
+            <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-lg p-3 sm:hidden" 
+                 style={{ paddingBottom: 'env(safe-area-inset-bottom, 12px)' }}>
                 {isTrader ? (
-                    <Button
-                        onClick={() => setShowPayToApplyModal(true)}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold flex items-center justify-center gap-2"
-                    >
-                        Apply for £5
-                    </Button>
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="flex-1">
+                            <p className="text-sm font-medium text-slate-900">Ready to apply?</p>
+                            <p className="text-xs text-slate-600">Get contact details</p>
+                        </div>
+                        <Button
+                            onClick={() => setShowPayToApplyModal(true)}
+                            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-3 rounded-full shadow-md hover:shadow-lg transition-all duration-200 min-h-[44px] hover-scale"
+                        >
+                            🔒 Apply for £5
+                        </Button>
+                    </div>
                 ) : (
                     <Button
                         onClick={() => navigate(`/edit-job/${id}`)}
-                        className="w-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center gap-2"
+                        className="w-full bg-primary hover:bg-primary/90 flex items-center justify-center gap-2 min-h-[44px]"
                     >
                         <HiPencilSquare className="w-4 h-4" />
                         Edit Job
