@@ -59,6 +59,25 @@ const JobDetail = () => {
     const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
     const [showEditSuccess, setShowEditSuccess] = useState(false);
     const [showPostSuccess, setShowPostSuccess] = useState(false); // Only show when coming from PostJob page
+    const [user, setUser] = useState<any>(null);
+
+    // Check if current user is a trader
+    const isTrader = Array.isArray(user?.role) 
+        ? user?.role.includes('trader')
+        : user?.role === 'trader';
+
+    // Load user data from localStorage
+    useEffect(() => {
+        const authUser = localStorage.getItem('auth_user');
+        if (authUser) {
+            try {
+                const userData = JSON.parse(authUser);
+                setUser(userData);
+            } catch (err) {
+                console.error('Error parsing auth user:', err);
+            }
+        }
+    }, []);
 
     useEffect(() => {
         const getJobData = async () => {
@@ -282,15 +301,17 @@ const JobDetail = () => {
                                 </Badge>
                             </div> */}
                             
-                            {/* Edit Button - Desktop */}
-                            <Button
-                                onClick={() => navigate(`/edit-job/${id}`)}
-                                className="hidden sm:flex items-center gap-2 bg-blue-600 hover:bg-blue-700 w-fit"
-                                size="sm"
-                            >
-                                <HiPencilSquare className="w-4 h-4" />
-                                Edit Job
-                            </Button>
+                            {/* Edit Button - Desktop - Only show for non-traders */}
+                            {!isTrader && (
+                                <Button
+                                    onClick={() => navigate(`/edit-job/${id}`)}
+                                    className="hidden sm:flex items-center gap-2 bg-blue-600 hover:bg-blue-700 w-fit"
+                                    size="sm"
+                                >
+                                    <HiPencilSquare className="w-4 h-4" />
+                                    Edit Job
+                                </Button>
+                            )}
                         </div>
 
                         <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-slate-900 mb-3 md:mb-4 leading-tight">
@@ -322,9 +343,19 @@ const JobDetail = () => {
                                     <div>
                                         <h3 className="font-semibold text-blue-900 mb-2 text-sm md:text-base">What happens next?</h3>
                                         <div className="space-y-1 md:space-y-2 text-xs md:text-sm text-blue-800">
-                                            <p>• You'll receive an email when tradespeople apply</p>
-                                            <p>• Save this link to manage your job later</p>
-                                            <p>• We'll keep you updated on all activity</p>
+                                            {isTrader ? (
+                                                <>
+                                                    <p>• Contact the homeowner to discuss the job</p>
+                                                    <p>• Review the job requirements carefully</p>
+                                                    <p>• Submit your application with a competitive quote</p>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <p>• You'll receive an email when tradespeople apply</p>
+                                                    <p>• Save this link to manage your job later</p>
+                                                    <p>• We'll keep you updated on all activity</p>
+                                                </>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -521,16 +552,18 @@ const JobDetail = () => {
                 </div>
             )}
 
-            {/* Mobile Edit Button - Sticky Footer */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-slate-200 p-4 sm:hidden">
-                <Button
-                    onClick={() => navigate(`/edit-job/${id}`)}
-                    className="w-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center gap-2"
-                >
-                    <HiPencilSquare className="w-4 h-4" />
-                    Edit Job
-                </Button>
-            </div>
+            {/* Mobile Edit Button - Sticky Footer - Only show for non-traders */}
+            {!isTrader && (
+                <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-slate-200 p-4 sm:hidden">
+                    <Button
+                        onClick={() => navigate(`/edit-job/${id}`)}
+                        className="w-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center gap-2"
+                    >
+                        <HiPencilSquare className="w-4 h-4" />
+                        Edit Job
+                    </Button>
+                </div>
+            )}
         </>
     );
 };
