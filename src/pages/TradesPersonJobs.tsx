@@ -1141,7 +1141,7 @@ const TradesPersonJobs = () => {
                                         {formatTimeAgo(job.created_at)}
                                       </div>
                                    </div>
-                                     <h3 className="text-xl sm:text-2xl font-bold text-foreground line-clamp-1 leading-tight mb-2 min-h-[2.25rem] sm:min-h-[2.75rem]">
+                                     <h3 className="text-lg sm:text-xl font-bold text-foreground line-clamp-2 leading-tight mb-3 min-h-[3rem]">
                                        {job.job_title}
                                      </h3>
                                  </div>
