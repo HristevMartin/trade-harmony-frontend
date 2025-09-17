@@ -131,4 +131,20 @@
   .pb-safe-bottom {
     padding-bottom: env(safe-area-inset-bottom);
   }
+
+  /* Chat mobile optimizations */
+  @media (max-width: 640px) {
+    .chat-drawer {
+      width: 92vw;
+      max-width: 380px;
+    }
+    
+    .chat-header-height {
+      height: calc(64px + env(safe-area-inset-top));
+    }
+    
+    .chat-content-height {
+      height: calc(100dvh - 64px - env(safe-area-inset-top));
+    }
+  }
 }

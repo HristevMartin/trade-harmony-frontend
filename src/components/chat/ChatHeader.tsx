@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Phone, Video, MoreVertical, PhoneOff, VideoOff, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Phone, Video, PhoneOff, VideoOff, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -34,13 +34,14 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
             <div className="flex items-center gap-2 min-w-0 flex-1">
               {onOpenSidebar && (
                 <Button
-                  variant="ghost"
+                  variant="default"
                   size="sm"
                   onClick={onOpenSidebar}
-                  className="sm:hidden hover:bg-muted flex-shrink-0 min-h-[44px] min-w-[44px]"
+                  className="sm:hidden flex-shrink-0 min-h-[44px] px-3 text-sm font-medium"
                   aria-label="Open conversations"
                 >
-                  <MessageCircle className="w-4 h-4" />
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Conversations
                 </Button>
               )}
               
@@ -122,10 +123,6 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
                   Request contact
                 </Button>
               )}
-              
-              <Button variant="ghost" size="sm" className="min-h-[44px]">
-                <MoreVertical className="w-4 h-4" />
-              </Button>
             </div>
           </div>
         </header>

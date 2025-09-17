@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Phone, Video, User, Mail, PhoneOff, Mail as MailIcon, MessageCircle, Clock } from 'lucide-react';
+import { Phone, Video, User, Mail, PhoneOff, Mail as MailIcon, MessageCircle, Clock, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
@@ -57,12 +57,33 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <div className="w-full bg-card border-r border-border flex flex-col overflow-hidden h-full">
+      {/* Mobile header with close button */}
+      {onClose && (
+        <div className="flex items-center justify-between p-4 border-b sm:hidden">
+          <h3 className="font-semibold text-foreground flex items-center gap-2">
+            <MessageCircle className="w-5 h-5" />
+            Conversations
+          </h3>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="min-h-[44px] min-w-[44px]"
+            aria-label="Close conversations"
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+      )}
+      
       {/* Conversations List */}
-      <div className="p-4 border-b">
-        <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-          <MessageCircle className="w-5 h-5" />
-          Conversations
-        </h3>
+      <div className={`p-4 ${onClose ? 'sm:border-b' : 'border-b'}`}>
+        {!onClose && (
+          <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+            <MessageCircle className="w-5 h-5" />
+            Conversations
+          </h3>
+        )}
         <ScrollArea className="h-64">
           <div className="space-y-3">
             {conversations.map((conv) => {
@@ -78,12 +99,12 @@ const Sidebar: React.FC<SidebarProps> = ({
                   onClick={() => handleConversationSelect(conv.id)}
                   className={`w-full text-left p-4 rounded-xl border transition-all duration-200 min-h-[64px] hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/50 ${
                     isActive 
-                      ? 'bg-primary/5 border-primary shadow-sm' 
-                      : 'bg-background border-border hover:bg-muted/30 hover:border-muted-foreground/20'
+                      ? 'bg-primary/8 border-primary shadow-sm' 
+                      : 'bg-background border-border hover:bg-muted/50 hover:border-muted-foreground/30'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Avatar className="w-12 h-12 flex-shrink-0">
+                    <Avatar className="w-12 h-12 sm:w-11 sm:h-11 flex-shrink-0">
                       {otherParty.avatarUrl ? (
                         <AvatarImage src={otherParty.avatarUrl} alt={otherParty.name} />
                       ) : null}
