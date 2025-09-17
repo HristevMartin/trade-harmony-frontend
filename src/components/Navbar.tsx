@@ -326,7 +326,6 @@ const Navbar = () => {
                       onClick={() => handleNavigation('/tradesperson/profile')} 
                       className={`flex items-center gap-2 w-full text-left py-2 px-4 rounded-lg transition-colors ${isActive('/tradesperson/profile') ? 'bg-trust-blue/10 text-trust-blue' : 'text-foreground hover:bg-muted'}`}
                     >
-                      <User className="h-4 w-4" />
                       My Profile
                     </button>
                   </>
