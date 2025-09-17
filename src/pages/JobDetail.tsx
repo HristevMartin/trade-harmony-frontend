@@ -60,9 +60,11 @@ const JobDetail = () => {
     const [error, setError] = useState<string | null>(null);
     const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
     const [showEditSuccess, setShowEditSuccess] = useState(false);
-    const [showPostSuccess, setShowPostSuccess] = useState(false); // Only show when coming from PostJob page
+    const [showPostSuccess, setShowPostSuccess] = useState(false); 
     const [user, setUser] = useState<any>(null);
     const [showPayToApplyModal, setShowPayToApplyModal] = useState(false);
+
+    
 
     // Check if current user is a trader
     const isTrader = Array.isArray(user?.role) 

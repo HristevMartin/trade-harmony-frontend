@@ -22,7 +22,8 @@ import TradesPersonJobs from "./pages/TradesPersonJobs";
 import HomeownerGetProjects from "./pages/HomeownerGetProjects";
 import Auth from "./pages/Auth";
 import TradesPersonProfile from "./pages/TradesPersonProfile";
-
+import StripeProvider from "@/components/ui/StripeElement";
+import PaymentResult from "./pages/PaymentResult";
 
 const queryClient = new QueryClient();
 
@@ -32,28 +33,31 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/service-providers" element={<ServiceProviders />} />
-          <Route path="/service-provider/:id" element={<ServiceProviderDetail />} />
-          <Route path="/project/:id" element={<ProjectDetail />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/post-job" element={<PostJob />} />
-          <Route path="*" element={<NotFound />} />
-          <Route path="/jobs/:id" element={<JobDetail />} />
-          <Route path="/edit-job/:id" element={<EditJobs />} />
-          <Route path="/tradesperson" element={<TradesPerson />} />
-          <Route path="/tradesperson/onboarding" element={<TradesPersonOnboarding />} />
-          <Route path="/tradesperson/jobs" element={<TradesPersonJobs />} />
-          <Route path="/homeowner/my-projects" element={<HomeownerGetProjects />} />
-          <Route path="/tradesperson/profile" element={<TradesPersonProfile />} />
-        </Routes>
-        <Footer />
-      </BrowserRouter>
+      <StripeProvider>
+        <BrowserRouter>
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/service-providers" element={<ServiceProviders />} />
+            <Route path="/service-provider/:id" element={<ServiceProviderDetail />} />
+            <Route path="/project/:id" element={<ProjectDetail />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/post-job" element={<PostJob />} />
+            <Route path="*" element={<NotFound />} />
+            <Route path="/jobs/:id" element={<JobDetail />} />
+            <Route path="/edit-job/:id" element={<EditJobs />} />
+            <Route path="/tradesperson" element={<TradesPerson />} />
+            <Route path="/tradesperson/onboarding" element={<TradesPersonOnboarding />} />
+            <Route path="/tradesperson/jobs" element={<TradesPersonJobs />} />
+            <Route path="/homeowner/my-projects" element={<HomeownerGetProjects />} />
+            <Route path="/tradesperson/profile" element={<TradesPersonProfile />} />
+            <Route path="/payment-result" element={<PaymentResult />} />
+          </Routes>
+          <Footer />
+        </BrowserRouter>
+      </StripeProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

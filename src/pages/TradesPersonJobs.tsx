@@ -1158,13 +1158,6 @@ const TradesPersonJobs = () => {
                             {/* Action Buttons */}
                             <div className="p-5 pt-0 space-y-2.5">
                               <Button 
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl transition-colors duration-200 shadow-sm hover:shadow-md"
-                                size="sm"
-                              >
-                                <Send className="h-4 w-4 mr-2" />
-                                Apply Now
-                              </Button>
-                              <Button 
                                 variant="outline"
                                 className="w-full border-slate-200 text-slate-700 hover:bg-slate-50 font-medium py-2.5 rounded-xl transition-colors duration-200"
                                 size="sm"
