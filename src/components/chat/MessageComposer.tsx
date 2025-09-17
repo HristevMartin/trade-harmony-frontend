@@ -68,10 +68,10 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
   }
 
   return (
-    <div className="border-t border-border bg-background sticky bottom-0 pb-safe-bottom shadow-lg">
+    <div className="border-t border-border bg-background sticky bottom-0 pb-safe-bottom shadow-xl">
       {/* Error Banner */}
       {error && (
-        <Alert variant="destructive" className="mx-4 mt-4 mb-2">
+        <Alert variant="destructive" className="mx-4 mt-4 mb-2 rounded-2xl">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="flex items-center justify-between">
             {error}
@@ -79,9 +79,9 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
               variant="ghost"
               size="sm"
               onClick={() => setError(null)}
-              className="h-auto p-1 ml-2"
+              className="h-auto p-1 ml-2 min-h-[44px] min-w-[44px]"
             >
-              <X className="h-3 w-3" />
+              <X className="h-4 w-4" />
             </Button>
           </AlertDescription>
         </Alert>
@@ -90,19 +90,19 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
       <div className="p-4 sm:p-6">
         {/* Attachments Preview */}
         {attachments.length > 0 && (
-          <div className="mb-3 flex flex-wrap gap-2">
+          <div className="mb-4 flex flex-wrap gap-2">
             {attachments.map((file, index) => (
               <div 
                 key={index}
-                className="inline-flex items-center gap-2 bg-muted px-3 py-2 rounded-lg text-sm"
+                className="inline-flex items-center gap-2 bg-muted px-3 py-2 rounded-2xl text-sm"
               >
                 <span className="truncate max-w-[120px]">{file.name}</span>
                 <button
                   onClick={() => removeAttachment(index)}
-                  className="text-muted-foreground hover:text-foreground min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  className="text-muted-foreground hover:text-foreground min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full hover:bg-muted-foreground/10"
                   aria-label={`Remove ${file.name}`}
                 >
-                  ×
+                  <X className="w-4 h-4" />
                 </button>
               </div>
             ))}
@@ -110,7 +110,7 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
         )}
 
         {/* Composer */}
-        <div className="flex items-end gap-3">
+        <div className="flex items-end gap-4">
           <div className="flex-1">
             <Textarea
               ref={textareaRef}
@@ -119,12 +119,12 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
               onKeyDown={handleKeyDown}
               placeholder="Type your message... (Enter to send, Shift+Enter for new line)"
               disabled={disabled || isSending}
-              className="min-h-[48px] max-h-[120px] resize-none text-base leading-relaxed"
+              className="min-h-[56px] max-h-[140px] resize-none text-base leading-relaxed rounded-2xl border-2 focus:ring-2 focus:ring-primary/50 transition-all"
               rows={1}
             />
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <AttachmentUploader 
               onFilesSelected={handleFilesSelected}
               disabled={disabled || isSending}
@@ -133,13 +133,13 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
               onClick={handleSend}
               disabled={!canSend}
               size="sm"
-              className="px-4 py-2 min-h-[44px]"
+              className="px-5 py-3 min-h-[56px] min-w-[56px] rounded-2xl shadow-sm"
               aria-label="Send message"
             >
               {isSending ? (
-                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
               ) : (
-                <HiPaperAirplane className="w-4 h-4" />
+                <HiPaperAirplane className="w-5 h-5" />
               )}
             </Button>
           </div>

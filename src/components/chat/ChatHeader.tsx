@@ -28,7 +28,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
     .toUpperCase();
 
   return (
-        <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border shadow-sm pt-safe-top">
+        <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border shadow-md pt-safe-top">
           <div className="flex items-center justify-between h-16 px-4">
             {/* Left: Mobile conversations button, Back button and counterparty info */}
             <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -37,7 +37,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
                   variant="default"
                   size="sm"
                   onClick={onOpenSidebar}
-                  className="sm:hidden flex-shrink-0 min-h-[44px] px-3 text-sm font-medium"
+                  className="sm:hidden flex-shrink-0 min-h-[44px] px-4 text-sm font-semibold shadow-sm"
                   aria-label="Open conversations"
                 >
                   <MessageCircle className="w-4 h-4 mr-2" />

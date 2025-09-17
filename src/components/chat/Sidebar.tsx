@@ -59,19 +59,19 @@ const Sidebar: React.FC<SidebarProps> = ({
     <div className="w-full bg-card border-r border-border flex flex-col overflow-hidden h-full">
       {/* Mobile header with close button */}
       {onClose && (
-        <div className="flex items-center justify-between p-4 border-b sm:hidden">
-          <h3 className="font-semibold text-foreground flex items-center gap-2">
+        <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b sm:hidden bg-background">
+          <h2 className="font-semibold text-lg text-foreground flex items-center gap-2">
             <MessageCircle className="w-5 h-5" />
             Conversations
-          </h3>
+          </h2>
           <Button
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="min-h-[44px] min-w-[44px]"
+            className="min-h-[44px] min-w-[44px] rounded-full"
             aria-label="Close conversations"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </Button>
         </div>
       )}
@@ -84,8 +84,8 @@ const Sidebar: React.FC<SidebarProps> = ({
             Conversations
           </h3>
         )}
-        <ScrollArea className="h-64">
-          <div className="space-y-3">
+        <ScrollArea className={`${onClose ? 'h-[calc(100vh-180px)]' : 'h-64'}`}>
+          <div className="space-y-2">
             {conversations.map((conv) => {
               const otherParty = conv.homeowner.id === currentUserId ? conv.trader : conv.homeowner;
               const lastMessages = listMessages(conv.id);
@@ -97,14 +97,14 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <button
                   key={conv.id}
                   onClick={() => handleConversationSelect(conv.id)}
-                  className={`w-full text-left p-4 rounded-xl border transition-all duration-200 min-h-[64px] hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/50 ${
+                  className={`w-full text-left p-4 rounded-2xl border transition-all duration-200 min-h-[64px] hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/50 ${
                     isActive 
-                      ? 'bg-primary/8 border-primary shadow-sm' 
-                      : 'bg-background border-border hover:bg-muted/50 hover:border-muted-foreground/30'
+                      ? 'bg-primary/10 border-primary shadow-md font-medium' 
+                      : 'bg-background border-border hover:bg-muted/60 hover:border-muted-foreground/40'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Avatar className="w-12 h-12 sm:w-11 sm:h-11 flex-shrink-0">
+                    <Avatar className="w-12 h-12 flex-shrink-0">
                       {otherParty.avatarUrl ? (
                         <AvatarImage src={otherParty.avatarUrl} alt={otherParty.name} />
                       ) : null}

@@ -126,7 +126,7 @@ const Chat = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-[1280px] mx-auto px-6">
+      <div className="max-w-[1320px] mx-auto px-6">
         <ChatHeader 
           conversation={conversation}
           counterparty={counterparty}
@@ -134,9 +134,9 @@ const Chat = () => {
           onOpenSidebar={() => setSidebarOpen(true)}
         />
 
-        <div className="flex h-[calc(100dvh-64px)] relative">
+        <div className="flex h-[calc(100dvh-64px-env(safe-area-inset-top))] relative">
           {/* Desktop Sidebar */}
-          <div className="hidden sm:block w-80 xl:w-[340px] flex-shrink-0">
+          <div className="hidden sm:block w-[340px] flex-shrink-0">
             <Sidebar
               conversation={conversation}
               counterparty={counterparty}
@@ -148,7 +148,7 @@ const Chat = () => {
 
           {/* Mobile Sidebar Drawer */}
           <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-            <SheetContent side="left" className="w-[92vw] max-w-sm p-0 sm:hidden">
+            <SheetContent side="left" className="w-[96vw] min-w-0 max-w-[420px] sm:w-[92vw] p-0 sm:hidden">
               <Sidebar
                 conversation={conversation}
                 counterparty={counterparty}
@@ -161,7 +161,7 @@ const Chat = () => {
           </Sheet>
 
           {/* Chat Content */}
-          <div className="flex-1 flex flex-col min-w-0 bg-background text-base">
+          <div className="flex-1 flex flex-col min-w-0 bg-background text-base text-[16px] leading-relaxed">
             <MessageList
               messages={messages}
               conversation={conversation}
