@@ -1,5 +1,5 @@
 import React, { useState, useRef, KeyboardEvent } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { HiPaperAirplane } from 'react-icons/hi2';
@@ -10,19 +10,28 @@ interface MessageComposerProps {
   onSendMessage: (body: string, attachments?: File[]) => void;
   disabled?: boolean;
   placeholder?: string;
+  conversationId?: string;
+  homeownerName?: string;
+  traderName?: string;
+  currentUserId?: string;
+  jobTitle?: string;
 }
 
 const MessageComposer: React.FC<MessageComposerProps> = ({ 
   onSendMessage, 
   disabled = false,
-  placeholder = "Type your message..."
+  placeholder = "Type your message...",
+  conversationId,
+  homeownerName,
+  traderName,
+  currentUserId,
+  jobTitle
 }) => {
   const [message, setMessage] = useState('');
   const [attachments, setAttachments] = useState<File[]>([]);
   const [isSending, setIsSending] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const location = useLocation();
 
   const handleSend = async () => {
     if (!message.trim() && attachments.length === 0) return;
@@ -114,18 +123,18 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
       </div>
 
       {/* Full Chat Link - only show if not already in full chat */}
-      {window.location.pathname !== '/chat' && (
+      {location.pathname !== '/chat' && (
         <div className="mt-2 text-center">
           <button 
             className="text-xs text-muted-foreground hover:text-foreground underline"
             onClick={() => {
               // Build chat URL with current parameters
               const params = new URLSearchParams();
-              params.set('conversation_id', searchParams.get('conversation_id') || 'conv_123');
-              params.set('homeowner_name', searchParams.get('homeowner_name') || 'Sarah Johnson');
-              params.set('trader_name', searchParams.get('trader_name') || 'Mike Thompson');
-              params.set('current_user_id', searchParams.get('current_user_id') || 'user_123');
-              params.set('job_title', searchParams.get('job_title') || 'Home Renovation Project');
+              params.set('conversation_id', conversationId || 'conv_123');
+              params.set('homeowner_name', homeownerName || 'Sarah Johnson');
+              params.set('trader_name', traderName || 'Mike Thompson');
+              params.set('current_user_id', currentUserId || 'user_123');
+              params.set('job_title', jobTitle || 'Home Renovation Project');
               
               const chatUrl = `/chat?${params.toString()}`;
               window.open(chatUrl, '_blank');

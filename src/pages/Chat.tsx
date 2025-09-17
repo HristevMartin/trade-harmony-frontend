@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Phone, Video, MoreVertical, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { ChatProvider, useChatStore } from '@/components/chat-first';
+import { ChatProvider } from '@/components/chat-first';
 import ChatPanel from '@/components/chat-first/ChatPanel';
 import { Separator } from '@/components/ui/separator';
 
@@ -40,10 +40,10 @@ const Chat = () => {
 
   return (
     <ChatProvider>
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="min-h-screen bg-background">
         {/* Mobile/Desktop Header */}
         <header className="sticky top-0 z-50 bg-background border-b border-border">
-          <div className="flex items-center justify-between p-4 max-w-4xl mx-auto">
+          <div className="flex items-center justify-between p-4">
             {/* Left: Back button and user info */}
             <div className="flex items-center gap-3">
               <Button
@@ -88,21 +88,9 @@ const Chat = () => {
           </div>
         </header>
 
-        {/* Chat Content */}
-        <div className="flex-1 flex flex-col lg:mr-80">
-          <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col">
-            <ChatPanel
-              conversationId={conversationId}
-              currentUserId={currentUserId}
-              homeownerName={homeownerName}
-              traderName={traderName}
-            />
-          </div>
-        </div>
-
-        {/* Contact Info Sidebar - Desktop Only */}
-        <div className="hidden lg:block fixed right-0 top-16 h-[calc(100vh-4rem)] w-80 bg-card border-l border-border">
-          <div className="p-6 space-y-6">
+        <div className="flex h-[calc(100vh-73px)]">
+          {/* Left Sidebar - Contact Info */}
+          <div className="w-72 bg-card border-r border-border p-6 space-y-6 hidden md:block">
             <div className="text-center">
               <Avatar className="w-20 h-20 mx-auto mb-4">
                 <AvatarFallback className="bg-primary text-primary-foreground text-xl">
@@ -146,6 +134,16 @@ const Chat = () => {
                 View Profile
               </Button>
             </div>
+          </div>
+
+          {/* Chat Content */}
+          <div className="flex-1 flex flex-col min-w-0">
+            <ChatPanel
+              conversationId={conversationId}
+              currentUserId={currentUserId}
+              homeownerName={homeownerName}
+              traderName={traderName}
+            />
           </div>
         </div>
       </div>
