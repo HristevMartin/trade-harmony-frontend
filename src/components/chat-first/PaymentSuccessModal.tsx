@@ -115,7 +115,19 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
         body: message,
       });
 
-      setStage('chat_live');
+      // Build chat URL with parameters and open in new tab
+      const params = new URLSearchParams();
+      params.set('conversation_id', conv.id);
+      params.set('homeowner_name', homeowner.name);
+      params.set('trader_name', trader.name);
+      params.set('current_user_id', trader.id);
+      params.set('job_title', `Job #${jobId}`);
+      
+      const chatUrl = `/chat?${params.toString()}`;
+      window.open(chatUrl, '_blank');
+      
+      // Close the modal
+      handleClose();
     } catch (error) {
       console.error('Failed to create conversation or send message:', error);
     } finally {

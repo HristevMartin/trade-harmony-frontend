@@ -79,12 +79,14 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   }
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header with badge */}
-      <div className="flex items-center justify-between p-4 border-b border-border">
-        <h3 className="font-semibold text-foreground">Chat</h3>
-        <ConversationBadge />
-      </div>
+    <div className="flex flex-col h-full min-h-0">
+      {/* Header with badge - only show in modal/compact view */}
+      {window.location.pathname !== '/chat' && (
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <h3 className="font-semibold text-foreground">Chat</h3>
+          <ConversationBadge />
+        </div>
+      )}
 
       {/* Messages */}
       <MessageList

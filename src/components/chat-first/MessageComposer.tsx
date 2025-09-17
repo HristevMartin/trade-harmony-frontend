@@ -1,4 +1,5 @@
 import React, { useState, useRef, KeyboardEvent } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { HiPaperAirplane } from 'react-icons/hi2';
@@ -20,6 +21,8 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
   const [attachments, setAttachments] = useState<File[]>([]);
   const [isSending, setIsSending] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const handleSend = async () => {
     if (!message.trim() && attachments.length === 0) return;
@@ -110,15 +113,28 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
         </div>
       </div>
 
-      {/* Full Chat Link */}
-      <div className="mt-2 text-center">
-        <button 
-          className="text-xs text-muted-foreground hover:text-foreground underline"
-          onClick={() => {/* TODO: Implement full chat navigation */}}
-        >
-          {COPY_STRINGS.OPEN_FULL_CHAT}
-        </button>
-      </div>
+      {/* Full Chat Link - only show if not already in full chat */}
+      {window.location.pathname !== '/chat' && (
+        <div className="mt-2 text-center">
+          <button 
+            className="text-xs text-muted-foreground hover:text-foreground underline"
+            onClick={() => {
+              // Build chat URL with current parameters
+              const params = new URLSearchParams();
+              params.set('conversation_id', searchParams.get('conversation_id') || 'conv_123');
+              params.set('homeowner_name', searchParams.get('homeowner_name') || 'Sarah Johnson');
+              params.set('trader_name', searchParams.get('trader_name') || 'Mike Thompson');
+              params.set('current_user_id', searchParams.get('current_user_id') || 'user_123');
+              params.set('job_title', searchParams.get('job_title') || 'Home Renovation Project');
+              
+              const chatUrl = `/chat?${params.toString()}`;
+              window.open(chatUrl, '_blank');
+            }}
+          >
+            {COPY_STRINGS.OPEN_FULL_CHAT}
+          </button>
+        </div>
+      )}
     </div>
   );
 };
