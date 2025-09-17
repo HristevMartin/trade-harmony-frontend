@@ -101,6 +101,15 @@ const Chat = () => {
     toggleContactSharing(conversationId, type);
   };
 
+  const handleGoBack = () => {
+    // Check if there's history to go back to, otherwise go to home
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <ChatHeader 

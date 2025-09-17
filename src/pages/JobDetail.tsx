@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import PayToApplyModal from "@/components/PayToApplyModal";
+import PaidUserBanner from "@/components/PaidUserBanner";
 import {
     HiMapPin,
     HiWrenchScrewdriver,
@@ -60,14 +61,15 @@ const JobDetail = () => {
     const [error, setError] = useState<string | null>(null);
     const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
     const [showEditSuccess, setShowEditSuccess] = useState(false);
-    const [showPostSuccess, setShowPostSuccess] = useState(false); 
+    const [showPostSuccess, setShowPostSuccess] = useState(false);
     const [user, setUser] = useState<any>(null);
     const [showPayToApplyModal, setShowPayToApplyModal] = useState(false);
+    const [userPaid, setUserPaid] = useState(false);
+    const [paymentStatusLoaded, setPaymentStatusLoaded] = useState(false);
 
-    
 
     // Check if current user is a trader
-    const isTrader = Array.isArray(user?.role) 
+    const isTrader = Array.isArray(user?.role)
         ? user?.role.includes('trader')
         : user?.role === 'trader';
 
@@ -83,6 +85,41 @@ const JobDetail = () => {
             }
         }
     }, []);
+
+    console.log('the userData is', user)
+
+    useEffect(() => {
+        const getCustomerApplication = async () => {
+            if (!user?.id || !id) {
+                setPaymentStatusLoaded(true);
+                return;
+            }
+
+            try {
+                const request = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/check-payment-status/${user.id}/${id}`);
+
+                if (!request.ok) {
+                    console.log('failed the reps')
+                    setPaymentStatusLoaded(true);
+                    return;
+                }
+
+                const response = await request.json();
+                console.log('show me if the user has paid', response);
+
+                if (response.status === 'paid') {
+                    console.log('in here the response is', response);
+                    setUserPaid(true);
+                }
+            } catch (error) {
+                console.error('Error checking payment status:', error);
+            } finally {
+                setPaymentStatusLoaded(true);
+            }
+        }
+
+        getCustomerApplication();
+    }, [user, id]);
 
     useEffect(() => {
         const getJobData = async () => {
@@ -113,10 +150,10 @@ const JobDetail = () => {
     useEffect(() => {
         const urlParams = new URLSearchParams(location.search);
         const postSuccessParam = urlParams.get('postSuccess');
-        
+
         if (location.state?.editSuccess) {
             setShowEditSuccess(true);
-            
+
             // Auto-hide after 5 seconds
             const timer = setTimeout(() => {
                 setShowEditSuccess(false);
@@ -128,7 +165,7 @@ const JobDetail = () => {
             return () => clearTimeout(timer);
         } else if (location.state?.postSuccess || postSuccessParam === 'true') {
             setShowPostSuccess(true);
-            
+
             // Auto-hide after 5 seconds
             const timer = setTimeout(() => {
                 setShowPostSuccess(false);
@@ -227,6 +264,7 @@ const JobDetail = () => {
 
     return (
         <>
+
             <div className="min-h-screen bg-slate-50">
                 {/* Edit Success Banner */}
                 {showEditSuccess && (
@@ -290,6 +328,21 @@ const JobDetail = () => {
                 <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8 py-4 md:py-6 lg:py-10">
                     {/* Header */}
                     <div className="mb-6 md:mb-8">
+                        {/* Mobile Back Button - Above Title */}
+                        {isTrader && userPaid && (
+                            <div className="sm:hidden mb-4">
+                                <Button
+                                    onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/')}
+                                    variant="outline"
+                                    size="sm"
+                                    className="flex items-center gap-2 bg-white/90 backdrop-blur-sm hover:bg-white border-slate-200 shadow-sm"
+                                >
+                                    <HiArrowLeft className="w-4 h-4" />
+                                    Back
+                                </Button>
+                            </div>
+                        )}
+                        
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4">
                             {/* <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                                 <Button
@@ -305,7 +358,7 @@ const JobDetail = () => {
                                     {jobData.status.charAt(0).toUpperCase() + jobData.status.slice(1)}
                                 </Badge>
                             </div> */}
-                            
+
                             {/* Edit Button - Desktop - Only show for non-traders */}
                             {!isTrader && (
                                 <Button
@@ -339,7 +392,7 @@ const JobDetail = () => {
                     </div>
 
                     {/* Apply for Job Banner - Desktop */}
-                    {isTrader && (
+                    {isTrader && !userPaid && paymentStatusLoaded && (
                         <>
                             {/* Desktop Banner */}
                             <div className="hidden md:block mb-6 md:mb-8">
@@ -387,6 +440,24 @@ const JobDetail = () => {
                         </>
                     )}
 
+                    {/* if user has paid already */}
+                    {
+                        userPaid && (
+                            <PaidUserBanner
+                                jobId={id || ''}
+                                jobTitle={jobData.job_title}
+                                homeownerInfo={{
+                                    first_name: jobData.first_name,
+                                    email: jobData.email,
+                                    phone: jobData.phone
+                                }}
+                                onOpenChat={() => {
+                                    // Chat functionality handled by the component
+                                }}
+                            />
+                        )
+                    }
+
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 pb-24 md:pb-0">
                         {/* Main Content */}
                         <div className="lg:col-span-2 space-y-4 md:space-y-6">
@@ -406,7 +477,6 @@ const JobDetail = () => {
                                             ) : (
                                                 <>
                                                     <p>• You'll receive an email when tradespeople apply</p>
-                                                    <p>• Save this link to manage your job later</p>
                                                     <p>• We'll keep you updated on all activity</p>
                                                 </>
                                             )}
@@ -483,8 +553,9 @@ const JobDetail = () => {
 
                         {/* Sidebar */}
                         <div className="space-y-4 md:space-y-6">
-                            {/* Contact Information */}
-                            <Card className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-4 md:p-6 transition-shadow hover:shadow-md">
+                            {/* Contact Information - Hidden for traders */}
+                            {!isTrader && (
+                                <Card className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-4 md:p-6 transition-shadow hover:shadow-md">
                                 <div className="flex items-center gap-2 mb-3 md:mb-4">
                                     <HiUserCircle className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
                                     <h2 className="text-base md:text-lg font-semibold text-slate-800">Contact Information</h2>
@@ -519,7 +590,8 @@ const JobDetail = () => {
                                         <p className="text-slate-600 capitalize text-sm md:text-base">{jobData.contact_method}</p>
                                     </div>
                                 </div>
-                            </Card>
+                                </Card>
+                            )}
 
                             {/* Location */}
                             <Card className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-4 md:p-6 transition-shadow hover:shadow-md">
@@ -532,6 +604,11 @@ const JobDetail = () => {
                                     <p className="text-slate-600 text-sm md:text-base">
                                         {getCountryFlag(jobData.additional_data.country)} {jobData.additional_data.location}
                                     </p>
+                                    {jobData.additional_data.postcode && (
+                                        <p className="text-slate-600 text-sm md:text-base font-medium">
+                                            {jobData.additional_data.postcode}
+                                        </p>
+                                    )}
                                     <p className="text-xs md:text-sm text-slate-500">
                                         Country: {jobData.additional_data.country}
                                     </p>
@@ -607,9 +684,9 @@ const JobDetail = () => {
             )}
 
             {/* Mobile Sticky Footer */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-lg p-3 sm:hidden" 
-                 style={{ paddingBottom: 'env(safe-area-inset-bottom, 12px)' }}>
-                {isTrader ? (
+            <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-lg p-3 sm:hidden"
+                style={{ paddingBottom: 'env(safe-area-inset-bottom, 12px)' }}>
+                {isTrader && !userPaid && paymentStatusLoaded && (
                     <div className="flex items-center justify-between gap-3">
                         <div className="flex-1">
                             <p className="text-sm font-semibold text-slate-900">Ready to apply?</p>
@@ -623,7 +700,10 @@ const JobDetail = () => {
                             Apply for £5
                         </Button>
                     </div>
-                ) : (
+                )}
+
+
+                {!isTrader && (
                     <Button
                         onClick={() => navigate(`/edit-job/${id}`)}
                         className="w-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center gap-2 min-h-[44px]"
