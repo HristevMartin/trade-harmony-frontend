@@ -16,9 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { stripePromise } from '@/components/ui/StripeElement';
 import CheckoutForm from '@/components/ui/CheckoutForm';
-
-
-
+import { PaymentSuccessModal, ChatProvider } from '@/components/chat-first';
 
 interface PayToApplyModalProps {
   isOpen: boolean;
@@ -32,7 +30,7 @@ interface PayToApplyModalProps {
   };
 }
 
-type ModalStep = 'payment' | 'application' | 'confirmation';
+type ModalStep = 'payment' | 'success';
 
 const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
   isOpen,
@@ -42,11 +40,11 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
   homeownerInfo
 }) => {
   const [currentStep, setCurrentStep] = useState<ModalStep>('payment');
-  const [applicationText, setApplicationText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [payError, setPayError] = useState<string | null>(null);
+  const [showPaymentSuccess, setShowPaymentSuccess] = useState(false);
 
   const userObj = JSON.parse(localStorage.getItem('auth_user') || '{}');
   const userId = userObj.id;
@@ -61,7 +59,7 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
       },
       body: JSON.stringify({
         job_id: jobId,
-        application_text: applicationText,
+        application_text: '',
         user_id: userId,
       }),
     });
@@ -77,21 +75,21 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
     }
   };
 
-  const handleApplicationSubmit = async () => {
-    setIsLoading(true);
-
-    // Simulate application submission
-    setTimeout(() => {
-      setIsLoading(false);
-      setCurrentStep('confirmation');
-    }, 1500);
+  const handlePaymentSuccess = () => {
+    setCurrentStep('success');
+    setShowPaymentSuccess(true);
   };
 
   const handleClose = () => {
     setCurrentStep('payment');
-    setApplicationText('');
     setShowCelebration(false);
+    setShowPaymentSuccess(false);
     onClose();
+  };
+
+  const handlePaymentSuccessClose = () => {
+    setShowPaymentSuccess(false);
+    handleClose();
   };
 
   const renderPaymentStep = () => (
@@ -172,7 +170,7 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
             )}
 
             <CheckoutForm
-              onSuccess={() => setCurrentStep('application')}
+              onSuccess={handlePaymentSuccess}
               onError={(msg) => setPayError(msg)}
             />
           </Elements>
@@ -202,102 +200,8 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
     </div>
   );
 
-  const renderApplicationStep = () => (
-    <div className="space-y-4 sm:space-y-6">
-      {/* Header */}
-      <div className="text-center pb-4 sm:pb-6 border-b border-border">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-100 rounded-full flex items-center justify-center animate-scale-in">
-            <HiCheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
-          </div>
-          <h2 className="text-xl sm:text-2xl font-bold text-foreground">Payment Successful!</h2>
-        </div>
-        <p className="text-muted-foreground text-sm sm:text-base px-2">Now submit your application for this job</p>
-      </div>
 
-      {/* Homeowner Contact Info */}
-      {homeownerInfo && (
-        <div className="border-b border-border pb-4 sm:pb-6 mb-4 sm:mb-6">
-          <Card className="p-4 sm:p-5 bg-green-50 border-green-200 rounded-xl">
-            <h3 className="font-semibold text-green-900 mb-3 sm:mb-4 flex items-center gap-2 text-base sm:text-lg">
-              <HiPhone className="w-4 h-4 sm:w-5 sm:h-5" />
-              Homeowner Contact Details
-            </h3>
-            <div className="space-y-2 sm:space-y-3 text-sm sm:text-base">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <span className="text-green-700 font-medium min-w-[50px] sm:min-w-[60px]">Name:</span>
-                <span className="text-green-800 font-semibold">{homeownerInfo.first_name}</span>
-              </div>
-              <div className="flex items-center gap-2 sm:gap-3">
-                <HiEnvelope className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0" />
-                <span className="text-green-800 break-all">{homeownerInfo.email}</span>
-              </div>
-              <div className="flex items-center gap-2 sm:gap-3">
-                <HiPhone className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0" />
-                <span className="text-green-800">{homeownerInfo.phone}</span>
-              </div>
-            </div>
-          </Card>
-        </div>
-      )}
-
-      {/* Application Form */}
-      <div className="space-y-2 sm:space-y-3 border-b border-border pb-4 sm:pb-6 mb-4 sm:mb-6">
-        <label className="block text-sm sm:text-base font-semibold text-slate-800">
-          Your Application Message
-        </label>
-        <Textarea
-          value={applicationText}
-          onChange={(e) => setApplicationText(e.target.value)}
-          placeholder="Introduce yourself, explain your experience, and provide a quote for this job..."
-          rows={5}
-          className="resize-none text-sm sm:text-base"
-          maxLength={1000}
-        />
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-0">
-          <p className="text-xs sm:text-sm text-muted-foreground">
-            💡 Include your relevant experience, availability, and a competitive quote to stand out.
-          </p>
-          <span className="text-xs text-muted-foreground">
-            {applicationText.length}/1000
-          </span>
-        </div>
-      </div>
-
-      {/* Optional File Upload */}
-      <div className="space-y-2 sm:space-y-3">
-        <label className="block text-sm sm:text-base font-semibold text-slate-800">
-          Attach Portfolio (Optional)
-        </label>
-        <div className="border-2 border-dashed border-muted-foreground/30 rounded-xl p-4 sm:p-6 text-center hover:border-muted-foreground/50 transition-colors cursor-pointer">
-          <HiDocumentArrowUp className="w-8 h-8 sm:w-10 sm:h-10 text-muted-foreground mx-auto mb-2 sm:mb-3" />
-          <p className="text-sm sm:text-base text-muted-foreground">Click to upload images of your previous work</p>
-          <p className="text-xs sm:text-sm text-muted-foreground/70 mt-1">JPG, PNG up to 5MB each</p>
-        </div>
-        <p className="text-xs text-muted-foreground text-center px-2">
-          📸 Showcasing your past projects can significantly increase your chances of winning this job
-        </p>
-      </div>
-
-      {/* Submit Button */}
-      <Button
-        onClick={handleApplicationSubmit}
-        disabled={isLoading || !applicationText.trim()}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 sm:py-4 text-base sm:text-lg rounded-xl min-h-[48px] sm:min-h-[52px] hover-scale shadow-md hover:shadow-lg transition-all duration-200"
-      >
-        {isLoading ? (
-          <div className="flex items-center justify-center gap-2">
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-            Submitting application...
-          </div>
-        ) : (
-          'Send Application'
-        )}
-      </Button>
-    </div>
-  );
-
-  const renderConfirmationStep = () => (
+  const renderSuccessStep = () => (
     <div className="space-y-4 sm:space-y-6 text-center">
       {/* Success Icon */}
       <div className="flex justify-center animate-scale-in">
@@ -308,37 +212,10 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
 
       {/* Success Message */}
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2 sm:mb-3">Application Sent!</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2 sm:mb-3">Payment Complete!</h2>
         <p className="text-muted-foreground text-sm sm:text-base leading-relaxed px-2">
-          Your application has been sent to the homeowner. They will review it and contact you directly if interested.
+          Your application is being processed. The chat experience will open shortly.
         </p>
-      </div>
-
-      {/* Next Steps */}
-      <Card className="p-4 sm:p-5 bg-blue-50 border-blue-200 text-left rounded-xl">
-        <h3 className="font-semibold text-blue-900 mb-2 sm:mb-3 text-base sm:text-lg">What happens next:</h3>
-        <div className="space-y-1 sm:space-y-2 text-sm sm:text-base text-blue-800">
-          <p>• The homeowner will review your application</p>
-          <p>• They may contact you for more details</p>
-          <p>• Check your phone and email regularly</p>
-        </div>
-      </Card>
-
-      {/* Action Buttons */}
-      <div className="space-y-2 sm:space-y-3">
-        <Button
-          onClick={handleClose}
-          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 sm:py-4 text-base sm:text-lg rounded-xl min-h-[48px] sm:min-h-[52px] hover-scale"
-        >
-          View More Jobs
-        </Button>
-        <Button
-          variant="outline"
-          onClick={handleClose}
-          className="w-full py-2 sm:py-3 text-sm sm:text-base rounded-xl min-h-[44px] sm:min-h-[48px] hover-scale"
-        >
-          Close
-        </Button>
       </div>
     </div>
   );
@@ -349,11 +226,10 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
         isOpen={isOpen}
         onClose={handleClose}
         size="lg"
-        showCloseButton={currentStep !== 'confirmation'}
+        showCloseButton={currentStep !== 'success'}
       >
         {currentStep === 'payment' && renderPaymentStep()}
-        {currentStep === 'application' && renderApplicationStep()}
-        {currentStep === 'confirmation' && renderConfirmationStep()}
+        {currentStep === 'success' && renderSuccessStep()}
       </Modal>
 
       {/* Celebration Overlay */}
@@ -370,6 +246,23 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
           </div>
         </div>
       )}
+
+      {/* New Chat-First Payment Success Modal */}
+      <ChatProvider>
+        <PaymentSuccessModal
+          isOpen={showPaymentSuccess}
+          onClose={handlePaymentSuccessClose}
+          jobId={jobId}
+          homeowner={{
+            id: homeownerInfo?.first_name || 'homeowner_id',
+            name: homeownerInfo?.first_name || 'Homeowner'
+          }}
+          trader={{
+            id: userId || 'trader_id',
+            name: 'You'
+          }}
+        />
+      </ChatProvider>
     </>
   );
 };

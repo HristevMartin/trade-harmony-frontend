@@ -24,6 +24,7 @@ import Auth from "./pages/Auth";
 import TradesPersonProfile from "./pages/TradesPersonProfile";
 import StripeProvider from "@/components/ui/StripeElement";
 import PaymentResult from "./pages/PaymentResult";
+import TestChatModal from "./pages/TestChatModal";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,7 @@ const App = () => (
             <Route path="/homeowner/my-projects" element={<HomeownerGetProjects />} />
             <Route path="/tradesperson/profile" element={<TradesPersonProfile />} />
             <Route path="/payment-result" element={<PaymentResult />} />
+            <Route path="/test-chat" element={<TestChatModal />} />
           </Routes>
           <Footer />
         </BrowserRouter>
