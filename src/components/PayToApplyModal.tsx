@@ -64,7 +64,6 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
       }),
     });
     const data = await backndRequest.json();
-    console.log('the data in here is ', data);
     setClientSecret(data.clientSecret);
     setIsLoading(false);
 
@@ -75,9 +74,44 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
     }
   };
 
-  const handlePaymentSuccess = () => {
+  const handlePaymentSuccess = async () => {
+    const confirmPaidApplication = async () => {
+      try {
+        const request = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/create-intent`, 
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              job_id: jobId,
+              application_text: '',
+              user_id: userId,
+            }),
+          }
+        );
+
+        if (!request.ok){
+          const errorData = await request.json().catch(() => ({}));
+          console.error('Payment confirmation failed:', errorData);
+          // Continue with success flow even if confirmation fails
+          // The payment was processed successfully by Stripe
+        }
+        
+        const data = await request.json().catch(() => null);
+        console.log('Payment confirmation data:', data);
+      } catch (error) {
+        console.error('Payment confirmation error:', error);
+        // Continue with success flow - payment was processed by Stripe
+      }
+    };
+
+    // Always proceed to success after Stripe payment completes
     setCurrentStep('success');
     setShowPaymentSuccess(true);
+    
+    // Run confirmation in background - don't block success flow
+    confirmPaidApplication();
   };
 
   const handleClose = () => {
