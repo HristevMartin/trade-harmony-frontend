@@ -68,7 +68,7 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
   }
 
   return (
-    <div className="border-t border-border bg-background sticky bottom-0 pb-safe-bottom shadow-xl">
+    <div className="border-t border-border bg-background sticky bottom-0 z-40 shadow-xl" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
       {/* Error Banner */}
       {error && (
         <Alert variant="destructive" className="mx-4 mt-4 mb-2 rounded-2xl">
@@ -79,7 +79,7 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
               variant="ghost"
               size="sm"
               onClick={() => setError(null)}
-              className="h-auto p-1 ml-2 min-h-[44px] min-w-[44px]"
+              className="h-auto p-1 ml-2 min-h-[44px] min-w-[44px] focus:ring-2 focus:ring-primary/50"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -99,7 +99,7 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
                 <span className="truncate max-w-[120px]">{file.name}</span>
                 <button
                   onClick={() => removeAttachment(index)}
-                  className="text-muted-foreground hover:text-foreground min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full hover:bg-muted-foreground/10"
+                  className="text-muted-foreground hover:text-foreground min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full hover:bg-muted-foreground/10 focus:ring-2 focus:ring-primary/50"
                   aria-label={`Remove ${file.name}`}
                 >
                   <X className="w-4 h-4" />
@@ -119,8 +119,9 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
               onKeyDown={handleKeyDown}
               placeholder="Type your message... (Enter to send, Shift+Enter for new line)"
               disabled={disabled || isSending}
-              className="min-h-[56px] max-h-[140px] resize-none text-base leading-relaxed rounded-2xl border-2 focus:ring-2 focus:ring-primary/50 transition-all"
+              className="min-h-[56px] max-h-[140px] resize-none text-base leading-relaxed rounded-2xl border-2 focus:ring-2 focus:ring-primary/50 transition-all focus-visible:ring-2 focus-visible:ring-primary/50"
               rows={1}
+              style={{ maxHeight: '5lh' }} // 5 lines max
             />
           </div>
           
@@ -133,7 +134,7 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
               onClick={handleSend}
               disabled={!canSend}
               size="sm"
-              className="px-5 py-3 min-h-[56px] min-w-[56px] rounded-2xl shadow-sm"
+              className="px-5 py-3 min-h-[56px] min-w-[56px] rounded-2xl shadow-sm focus:ring-2 focus:ring-primary/50"
               aria-label="Send message"
             >
               {isSending ? (

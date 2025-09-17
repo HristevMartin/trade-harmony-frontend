@@ -29,7 +29,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 
   return (
         <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border shadow-md pt-safe-top">
-          <div className="flex items-center justify-between h-16 px-4">
+          <div className="flex items-center justify-between h-[60px] px-4">
             {/* Left: Mobile conversations button, Back button and counterparty info */}
             <div className="flex items-center gap-2 min-w-0 flex-1">
               {onOpenSidebar && (

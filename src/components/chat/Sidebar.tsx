@@ -52,7 +52,15 @@ const Sidebar: React.FC<SidebarProps> = ({
     const params = new URLSearchParams(searchParams);
     params.set('conversation_id', convId);
     navigate(`/chat?${params.toString()}`);
-    onClose?.(); // Close mobile drawer
+    
+    // Close mobile drawer and return focus to trigger
+    if (onClose) {
+      onClose();
+      setTimeout(() => {
+        const conversationsTrigger = document.querySelector('[aria-label="Open conversations"]') as HTMLElement;
+        conversationsTrigger?.focus();
+      }, 100);
+    }
   };
 
   return (
@@ -67,8 +75,14 @@ const Sidebar: React.FC<SidebarProps> = ({
           <Button
             variant="ghost"
             size="sm"
-            onClick={onClose}
-            className="min-h-[44px] min-w-[44px] rounded-full"
+            onClick={() => {
+              onClose();
+              setTimeout(() => {
+                const conversationsTrigger = document.querySelector('[aria-label="Open conversations"]') as HTMLElement;
+                conversationsTrigger?.focus();
+              }, 100);
+            }}
+            className="min-h-[44px] min-w-[44px] rounded-full focus:ring-2 focus:ring-primary/50"
             aria-label="Close conversations"
           >
             <X className="w-5 h-5" />

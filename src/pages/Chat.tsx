@@ -134,7 +134,7 @@ const Chat = () => {
           onOpenSidebar={() => setSidebarOpen(true)}
         />
 
-        <div className="flex h-[calc(100dvh-64px-env(safe-area-inset-top))] relative">
+        <div className="flex h-[calc(100dvh-60px-env(safe-area-inset-top))] relative">
           {/* Desktop Sidebar */}
           <div className="hidden sm:block w-[340px] flex-shrink-0">
             <Sidebar
@@ -148,15 +148,23 @@ const Chat = () => {
 
           {/* Mobile Sidebar Drawer */}
           <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-            <SheetContent side="left" className="w-[96vw] min-w-0 max-w-[420px] sm:w-[92vw] p-0 sm:hidden">
-              <Sidebar
-                conversation={conversation}
-                counterparty={counterparty}
-                currentUserId={currentUserId}
-                onRequestContact={handleRequestContact}  
-                onToggleContactDemo={handleToggleContactDemo}
-                onClose={() => setSidebarOpen(false)}
-              />
+            <SheetContent 
+              side="left" 
+              className="w-[96vw] min-w-0 max-w-[420px] p-0 sm:hidden backdrop-blur-sm"
+              onOpenAutoFocus={(e) => e.preventDefault()}
+              onCloseAutoFocus={(e) => e.preventDefault()}
+            >
+              <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
+              <div className="relative bg-background h-full">
+                <Sidebar
+                  conversation={conversation}
+                  counterparty={counterparty}
+                  currentUserId={currentUserId}
+                  onRequestContact={handleRequestContact}  
+                  onToggleContactDemo={handleToggleContactDemo}
+                  onClose={() => setSidebarOpen(false)}
+                />
+              </div>
             </SheetContent>
           </Sheet>
 
