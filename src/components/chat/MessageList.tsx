@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MessageCircle } from 'lucide-react';
 import type { Message, Conversation, UserRef } from './useChatStore';
 
@@ -66,6 +66,9 @@ const MessageList: React.FC<MessageListProps> = ({
           >
             {!senderInfo.isMe && (
               <Avatar className="w-8 h-8 flex-shrink-0">
+                {counterparty.avatarUrl && (
+                  <AvatarImage src={counterparty.avatarUrl} alt={counterparty.name} />
+                )}
                 <AvatarFallback className="bg-muted text-muted-foreground text-xs">
                   {senderInitials}
                 </AvatarFallback>

@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Phone, Video, MoreVertical, PhoneOff, VideoOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { Conversation, UserRef } from './useChatStore';
 
@@ -41,6 +41,9 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
               
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 <Avatar className="w-10 h-10 flex-shrink-0">
+                  {counterparty.avatarUrl && (
+                    <AvatarImage src={counterparty.avatarUrl} alt={counterparty.name} />
+                  )}
                   <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
                     {counterpartyInitials}
                   </AvatarFallback>

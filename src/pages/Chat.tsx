@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 const Chat = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { getConversation, createOrGetConversation, listMessages, sendMessage, toggleContactSharing } = useChatStore();
+  const { getConversation, createOrGetConversation, listMessages, listConversations, sendMessage, toggleContactSharing } = useChatStore();
   
   // Get parameters from URL - but derive names from conversation data
   const conversationId = searchParams.get('conversation_id') || '';
@@ -27,7 +27,7 @@ const Chat = () => {
     jobTitle
   });
 
-  // Try to get existing conversation, or create it if it doesn't exist
+  // Try to get existing conversation, create one, or use default
   let conversation = getConversation(conversationId);
   
   if (!conversation && conversationId) {
@@ -44,6 +44,18 @@ const Chat = () => {
         name: traderName
       }
     });
+  }
+
+  // If no conversation ID provided or conversation not found, use the first available conversation
+  if (!conversation) {
+    const allConversations = listConversations();
+    if (allConversations.length > 0) {
+      conversation = allConversations[0];
+      // Update URL to reflect the selected conversation
+      const newParams = new URLSearchParams(searchParams);
+      newParams.set('conversation_id', conversation.id);
+      navigate(`/chat?${newParams.toString()}`, { replace: true });
+    }
   }
 
   const messages = listMessages(conversationId);
@@ -122,7 +134,8 @@ const Chat = () => {
         <Sidebar
           conversation={conversation}
           counterparty={counterparty}
-          onRequestContact={handleRequestContact}
+          currentUserId={currentUserId}
+          onRequestContact={handleRequestContact}  
           onToggleContactDemo={handleToggleContactDemo}
         />
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-// Types
+// Types  
 export type UserRef = { 
   id: string; 
   name: string; 
@@ -36,12 +36,75 @@ class ChatStore {
   private subscribers = new Set<() => void>();
 
   constructor() {
-    // Seed with mock data based on common URL patterns
+    // Seed with mock data
     this.seedMockData();
   }
 
   private seedMockData() {
-    // This will be called after we potentially create conversations dynamically
+    // Create some demo conversations with varied participants
+    const conversations = [
+      {
+        id: 'conv_123',
+        jobId: 'job_kitchen_remodel',
+        jobTitle: 'Kitchen Remodel - Modern Upgrade',
+        homeowner: {
+          id: 'homeowner_sarah_456',
+          name: 'Sarah Johnson',  
+          avatarUrl: '/lovable-uploads/50d7664d-cb5a-4d65-be0b-95cdbb52e68f.png',
+          role: 'homeowner' as const
+        },
+        trader: {
+          id: '68ac564b8ee4f90af6a56a108',
+          name: 'You',
+          role: 'trader' as const
+        },
+        createdAt: Date.now() - 86400000, // 1 day ago
+        status: 'open' as const,
+        canViewPhone: true,
+        canViewEmail: false
+      },
+      {
+        id: 'conv_456', 
+        jobId: 'job_bathroom_repair',
+        jobTitle: 'Bathroom Plumbing Repair',
+        homeowner: {
+          id: 'homeowner_martin_789',
+          name: 'Martin Smith',
+          role: 'homeowner' as const
+        },
+        trader: {
+          id: '68ac564b8ee4f90af6a56a108', 
+          name: 'You',
+          role: 'trader' as const
+        },
+        createdAt: Date.now() - 172800000, // 2 days ago
+        status: 'open' as const,
+        canViewPhone: false,
+        canViewEmail: true
+      }
+    ];
+
+    conversations.forEach(conv => {
+      this.conversations.set(conv.id, conv);
+      // Add some demo messages
+      const messages: Message[] = [
+        {
+          id: `msg_${conv.id}_1`,
+          conversationId: conv.id,
+          senderId: conv.homeowner.id,
+          body: `Hi! I'm interested in discussing the ${conv.jobTitle.toLowerCase()}. When would be a good time to talk?`,
+          createdAt: conv.createdAt + 3600000 // 1 hour after conversation created
+        },
+        {
+          id: `msg_${conv.id}_2`, 
+          conversationId: conv.id,
+          senderId: conv.trader.id,
+          body: 'Thanks for reaching out! I have availability this week. What\'s your budget range for this project?',
+          createdAt: conv.createdAt + 7200000 // 2 hours after  
+        }
+      ];
+      this.messages.set(conv.id, messages);
+    });
   }
 
   createOrGetConversation(params: {
@@ -163,6 +226,12 @@ class ChatStore {
     });
   }
 
+  // List all conversations
+  listConversations(): Conversation[] {
+    return Array.from(this.conversations.values())
+      .sort((a, b) => b.createdAt - a.createdAt); // Most recent first
+  }
+
   // For demo purposes - toggle contact sharing
   toggleContactSharing(conversationId: string, type: 'phone' | 'email') {
     const conv = this.conversations.get(conversationId);
@@ -193,6 +262,7 @@ export const useChatStore = () => {
     getConversation: (id: string) => chatStore.getConversation(id),
     createOrGetConversation: (params: any) => chatStore.createOrGetConversation(params),
     listMessages: (conversationId: string) => chatStore.listMessages(conversationId),
+    listConversations: () => chatStore.listConversations(),
     sendMessage: (input: { conversationId: string; senderId: string; body: string }) => 
       chatStore.sendMessage(input),
     toggleContactSharing: (conversationId: string, type: 'phone' | 'email') => 
