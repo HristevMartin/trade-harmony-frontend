@@ -15,6 +15,7 @@ interface SidebarProps {
   currentUserId: string;
   onRequestContact: () => void;
   onToggleContactDemo: (type: 'phone' | 'email') => void;
+  onClose?: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ 
@@ -22,7 +23,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   counterparty,
   currentUserId,
   onRequestContact,
-  onToggleContactDemo
+  onToggleContactDemo,
+  onClose
 }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -50,56 +52,62 @@ const Sidebar: React.FC<SidebarProps> = ({
     const params = new URLSearchParams(searchParams);
     params.set('conversation_id', convId);
     navigate(`/chat?${params.toString()}`);
+    onClose?.(); // Close mobile drawer
   };
 
   return (
-    <div className="w-80 bg-card border-r border-border hidden lg:flex flex-col overflow-hidden">
+    <div className="w-full bg-card border-r border-border flex flex-col overflow-hidden h-full">
       {/* Conversations List */}
       <div className="p-4 border-b">
-        <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-          <MessageCircle className="w-4 h-4" />
+        <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+          <MessageCircle className="w-5 h-5" />
           Conversations
         </h3>
-        <ScrollArea className="h-48">
-          <div className="space-y-2">
+        <ScrollArea className="h-64">
+          <div className="space-y-3">
             {conversations.map((conv) => {
               const otherParty = conv.homeowner.id === currentUserId ? conv.trader : conv.homeowner;
               const lastMessages = listMessages(conv.id);
               const lastMessage = lastMessages[lastMessages.length - 1];
               const otherInitials = otherParty.name.split(' ').map(n => n[0]).join('').toUpperCase();
+              const isActive = conv.id === conversation.id;
               
               return (
                 <button
                   key={conv.id}
                   onClick={() => handleConversationSelect(conv.id)}
-                  className={`w-full text-left p-3 rounded-lg border transition-colors hover:bg-muted/50 ${
-                    conv.id === conversation.id ? 'bg-muted border-primary' : 'bg-background border-border'
+                  className={`w-full text-left p-4 rounded-xl border transition-all duration-200 min-h-[64px] hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/50 ${
+                    isActive 
+                      ? 'bg-primary/5 border-primary shadow-sm' 
+                      : 'bg-background border-border hover:bg-muted/30 hover:border-muted-foreground/20'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Avatar className="w-10 h-10 flex-shrink-0">
-                      {otherParty.avatarUrl && (
+                    <Avatar className="w-12 h-12 flex-shrink-0">
+                      {otherParty.avatarUrl ? (
                         <AvatarImage src={otherParty.avatarUrl} alt={otherParty.name} />
-                      )}
-                      <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                      ) : null}
+                      <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
                         {otherInitials}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
-                        <p className="font-medium text-sm text-foreground truncate">
+                        <p className={`text-sm truncate ${isActive ? 'font-semibold text-foreground' : 'font-medium text-foreground'}`}>
                           {otherParty.name}
                         </p>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Clock className="w-3 h-3" />
-                          {formatRelativeTime(lastMessage?.createdAt || conv.createdAt)}
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground ml-2">
+                          <Clock className="w-3 h-3 flex-shrink-0" />
+                          <span className="whitespace-nowrap">
+                            {formatRelativeTime(lastMessage?.createdAt || conv.createdAt)}
+                          </span>
                         </div>
                       </div>
-                      <p className="text-xs text-muted-foreground truncate">
+                      <p className="text-xs text-muted-foreground truncate mb-1">
                         {conv.jobTitle}
                       </p>
                       {lastMessage && (
-                        <p className="text-xs text-muted-foreground truncate mt-1">
+                        <p className="text-xs text-muted-foreground truncate">
                           {lastMessage.body}
                         </p>
                       )}
@@ -113,12 +121,12 @@ const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Current Contact Info */}
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-4 flex-1">
         <div className="text-center">
           <Avatar className="w-16 h-16 mx-auto mb-3 shadow-lg">
-            {counterparty.avatarUrl && (
+            {counterparty.avatarUrl ? (
               <AvatarImage src={counterparty.avatarUrl} alt={counterparty.name} />
-            )}
+            ) : null}
             <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground text-lg font-semibold">
               {counterpartyInitials}
             </AvatarFallback>
@@ -130,26 +138,26 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Contact Actions */}
-        <div className="space-y-2">
+        <div className="space-y-3">
           {conversation.canViewPhone ? (
-            <Button variant="outline" className="w-full justify-start text-sm">
+            <Button variant="outline" className="w-full justify-start text-sm min-h-[44px]">
               <Phone className="w-4 h-4 mr-2" />
               Call
             </Button>
           ) : (
-            <Button variant="ghost" size="sm" className="w-full justify-start text-xs opacity-50" disabled>
+            <Button variant="ghost" size="sm" className="w-full justify-start text-xs opacity-50 min-h-[44px]" disabled>
               <PhoneOff className="w-4 h-4 mr-2" />
               Phone Hidden
             </Button>
           )}
           
           {conversation.canViewEmail ? (
-            <Button variant="outline" className="w-full justify-start text-sm">
+            <Button variant="outline" className="w-full justify-start text-sm min-h-[44px]">
               <Video className="w-4 h-4 mr-2" />
               Video Call
             </Button>
           ) : (
-            <Button variant="ghost" size="sm" className="w-full justify-start text-xs opacity-50" disabled>
+            <Button variant="ghost" size="sm" className="w-full justify-start text-xs opacity-50 min-h-[44px]" disabled>
               <MailIcon className="w-4 h-4 mr-2" />
               Email Hidden
             </Button>
@@ -159,7 +167,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             <Button 
               onClick={onRequestContact}
               variant="default"
-              className="w-full text-sm"
+              className="w-full text-sm min-h-[44px]"
             >
               Request Contact Details
             </Button>
@@ -172,7 +180,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           <Button 
             variant="ghost" 
             size="sm" 
-            className="w-full text-xs justify-start"
+            className="w-full text-xs justify-start min-h-[44px]"
             onClick={() => onToggleContactDemo('phone')}
           >
             Toggle Phone Access
@@ -180,7 +188,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           <Button 
             variant="ghost" 
             size="sm" 
-            className="w-full text-xs justify-start"
+            className="w-full text-xs justify-start min-h-[44px]"
             onClick={() => onToggleContactDemo('email')}
           >
             Toggle Email Access

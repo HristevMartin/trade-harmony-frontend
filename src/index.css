@@ -122,4 +122,13 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  /* Safe area support for mobile devices */
+  .pt-safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .pb-safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }

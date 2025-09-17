@@ -68,7 +68,7 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
   }
 
   return (
-    <div className="border-t border-border bg-background">
+    <div className="border-t border-border bg-background sticky bottom-0 pb-safe-bottom shadow-lg">
       {/* Error Banner */}
       {error && (
         <Alert variant="destructive" className="mx-4 mt-4 mb-2">
@@ -87,19 +87,19 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
         </Alert>
       )}
 
-      <div className="p-4">
+      <div className="p-4 sm:p-6">
         {/* Attachments Preview */}
         {attachments.length > 0 && (
           <div className="mb-3 flex flex-wrap gap-2">
             {attachments.map((file, index) => (
               <div 
                 key={index}
-                className="inline-flex items-center gap-2 bg-muted px-2 py-1 rounded text-sm"
+                className="inline-flex items-center gap-2 bg-muted px-3 py-2 rounded-lg text-sm"
               >
                 <span className="truncate max-w-[120px]">{file.name}</span>
                 <button
                   onClick={() => removeAttachment(index)}
-                  className="text-muted-foreground hover:text-foreground"
+                  className="text-muted-foreground hover:text-foreground min-h-[44px] min-w-[44px] flex items-center justify-center"
                   aria-label={`Remove ${file.name}`}
                 >
                   ×
@@ -110,7 +110,7 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
         )}
 
         {/* Composer */}
-        <div className="flex items-end gap-2">
+        <div className="flex items-end gap-3">
           <div className="flex-1">
             <Textarea
               ref={textareaRef}
@@ -119,12 +119,12 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
               onKeyDown={handleKeyDown}
               placeholder="Type your message... (Enter to send, Shift+Enter for new line)"
               disabled={disabled || isSending}
-              className="min-h-[40px] max-h-[120px] resize-none"
+              className="min-h-[48px] max-h-[120px] resize-none text-base leading-relaxed"
               rows={1}
             />
           </div>
           
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <AttachmentUploader 
               onFilesSelected={handleFilesSelected}
               disabled={disabled || isSending}
@@ -133,7 +133,7 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
               onClick={handleSend}
               disabled={!canSend}
               size="sm"
-              className="px-3"
+              className="px-4 py-2 min-h-[44px]"
               aria-label="Send message"
             >
               {isSending ? (

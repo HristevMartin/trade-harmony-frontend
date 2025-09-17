@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import ChatHeader from '@/components/chat/ChatHeader';
 import MessageList from '@/components/chat/MessageList';
@@ -6,10 +6,12 @@ import MessageComposer from '@/components/chat/MessageComposer';
 import Sidebar from '@/components/chat/Sidebar';
 import { useChatStore } from '@/components/chat/useChatStore';
 import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const Chat = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { getConversation, createOrGetConversation, listMessages, listConversations, sendMessage, toggleContactSharing } = useChatStore();
   
   // Get parameters from URL - but derive names from conversation data
@@ -124,42 +126,55 @@ const Chat = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <ChatHeader 
-        conversation={conversation}
-        counterparty={counterparty}
-        onRequestContact={handleRequestContact}
-      />
-
-      <div className="flex h-[calc(100vh-73px)] relative">
-        <Sidebar
+      <div className="max-w-7xl mx-auto px-6">
+        <ChatHeader 
           conversation={conversation}
           counterparty={counterparty}
-          currentUserId={currentUserId}
-          onRequestContact={handleRequestContact}  
-          onToggleContactDemo={handleToggleContactDemo}
+          onRequestContact={handleRequestContact}
+          onOpenSidebar={() => setSidebarOpen(true)}
         />
 
-        {/* Chat Content */}
-        <div className="flex-1 flex flex-col min-w-0 bg-background">
-          <MessageList
-            messages={messages}
-            conversation={conversation}
-            currentUserId={currentUserId}
-            counterparty={counterparty}
-          />
+        <div className="flex h-[calc(100vh-64px)] relative">
+          {/* Desktop Sidebar */}
+          <div className="hidden sm:block w-80 xl:w-96 flex-shrink-0">
+            <Sidebar
+              conversation={conversation}
+              counterparty={counterparty}
+              currentUserId={currentUserId}
+              onRequestContact={handleRequestContact}  
+              onToggleContactDemo={handleToggleContactDemo}
+            />
+          </div>
 
-          <MessageComposer
-            onSendMessage={handleSendMessage}
-            conversationStatus={conversation.status}
-          />
+          {/* Mobile Sidebar Drawer */}
+          <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+            <SheetContent side="left" className="w-80 p-0 sm:hidden">
+              <Sidebar
+                conversation={conversation}
+                counterparty={counterparty}
+                currentUserId={currentUserId}
+                onRequestContact={handleRequestContact}  
+                onToggleContactDemo={handleToggleContactDemo}
+                onClose={() => setSidebarOpen(false)}
+              />
+            </SheetContent>
+          </Sheet>
+
+          {/* Chat Content */}
+          <div className="flex-1 flex flex-col min-w-0 bg-background text-base">
+            <MessageList
+              messages={messages}
+              conversation={conversation}
+              currentUserId={currentUserId}
+              counterparty={counterparty}
+            />
+
+            <MessageComposer
+              onSendMessage={handleSendMessage}
+              conversationStatus={conversation.status}
+            />
+          </div>
         </div>
-
-        {/* Mobile sidebar toggle - could be added later */}
-        {/* <div className="lg:hidden fixed bottom-4 right-4 z-50">
-          <Button size="sm" variant="outline" className="rounded-full shadow-lg">
-            <User className="w-4 h-4" />
-          </Button>
-        </div> */}
       </div>
     </div>
   );
