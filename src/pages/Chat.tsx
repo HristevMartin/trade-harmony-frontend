@@ -10,14 +10,42 @@ import { Button } from '@/components/ui/button';
 const Chat = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { getConversation, listMessages, sendMessage, toggleContactSharing } = useChatStore();
+  const { getConversation, createOrGetConversation, listMessages, sendMessage, toggleContactSharing } = useChatStore();
   
   // Get parameters from URL - but derive names from conversation data
   const conversationId = searchParams.get('conversation_id') || '';
-  const currentUserId = searchParams.get('current_user_id') || 'trader_mike_456';
+  const currentUserId = searchParams.get('current_user_id') || '68ac564b8ee4f90af6a56a108';
+  const homeownerName = searchParams.get('homeowner_name') || 'Martin';
+  const traderName = searchParams.get('trader_name') || 'You';
+  const jobTitle = searchParams.get('job_title') || 'Project Discussion';
 
-  // Get conversation data from store
-  const conversation = getConversation(conversationId);
+  console.log('Chat component - URL params:', {
+    conversationId,
+    currentUserId,
+    homeownerName,  
+    traderName,
+    jobTitle
+  });
+
+  // Try to get existing conversation, or create it if it doesn't exist
+  let conversation = getConversation(conversationId);
+  
+  if (!conversation && conversationId) {
+    console.log('Conversation not found, creating new one');
+    conversation = createOrGetConversation({
+      conversationId,
+      jobTitle,
+      homeowner: {
+        id: 'homeowner_martin_789',
+        name: homeownerName
+      },
+      trader: {
+        id: currentUserId,
+        name: traderName
+      }
+    });
+  }
+
   const messages = listMessages(conversationId);
 
   if (!conversation) {

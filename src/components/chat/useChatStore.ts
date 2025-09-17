@@ -41,51 +41,55 @@ class ChatStore {
   }
 
   private seedMockData() {
-    const mockConversations: Conversation[] = [
-      {
-        id: 'conv_175819613200_lnzrl80k',
-        jobId: 'job_16d5dda3-3cf2-4d1c-9988-79492e05ee4e',
-        jobTitle: 'Kitchen Renovation Project',
-        homeowner: {
-          id: 'homeowner_sarah_123',
-          name: 'Sarah Johnson',
-          role: 'homeowner'
-        },
-        trader: {
-          id: 'trader_mike_456',
-          name: 'Mike Thompson', 
-          role: 'trader'
-        },
-        createdAt: Date.now() - 1000 * 60 * 30, // 30 minutes ago
-        status: 'open',
-        canViewPhone: false,
-        canViewEmail: false
-      },
-      {
-        id: 'conv_175819613201_test123',
-        jobId: 'job_test_456',
-        jobTitle: 'Bathroom Remodel',
-        homeowner: {
-          id: 'homeowner_martin_789',
-          name: 'Martin',
-          role: 'homeowner'
-        },
-        trader: {
-          id: 'trader_you_123',
-          name: 'You',
-          role: 'trader'
-        },
-        createdAt: Date.now() - 1000 * 60 * 60, // 1 hour ago
-        status: 'open',
-        canViewPhone: false,
-        canViewEmail: false
-      }
-    ];
+    // This will be called after we potentially create conversations dynamically
+  }
 
-    mockConversations.forEach(conv => {
-      this.conversations.set(conv.id, conv);
-      this.messages.set(conv.id, []);
-    });
+  createOrGetConversation(params: {
+    conversationId: string;
+    jobId?: string;
+    jobTitle?: string;
+    homeowner?: { id: string; name: string };
+    trader?: { id: string; name: string };
+  }): Conversation {
+    const existing = this.conversations.get(params.conversationId);
+    if (existing) {
+      console.log('Found existing conversation:', existing);
+      return existing;
+    }
+
+    // Create new conversation with provided or default data
+    const newConversation: Conversation = {
+      id: params.conversationId,
+      jobId: params.jobId || `job_${Date.now()}`,
+      jobTitle: params.jobTitle || 'Project Discussion',
+      homeowner: params.homeowner ? {
+        ...params.homeowner,
+        role: 'homeowner' as const
+      } : {
+        id: 'homeowner_martin_789',
+        name: 'Martin',
+        role: 'homeowner' as const
+      },
+      trader: params.trader ? {
+        ...params.trader,
+        role: 'trader' as const
+      } : {
+        id: '68ac564b8ee4f90af6a56a108',
+        name: 'You',
+        role: 'trader' as const
+      },
+      createdAt: Date.now(),
+      status: 'open',
+      canViewPhone: false,
+      canViewEmail: false
+    };
+
+    console.log('Creating new conversation:', newConversation);
+    this.conversations.set(params.conversationId, newConversation);
+    this.messages.set(params.conversationId, []);
+    this.notifySubscribers();
+    
+    return newConversation;
   }
 
   subscribe(callback: () => void) {
@@ -100,6 +104,8 @@ class ChatStore {
   }
 
   getConversation(id: string): Conversation | undefined {
+    console.log('Looking for conversation:', id);
+    console.log('Available conversations:', Array.from(this.conversations.keys()));
     return this.conversations.get(id);
   }
 
@@ -185,6 +191,7 @@ export const useChatStore = () => {
 
   return {
     getConversation: (id: string) => chatStore.getConversation(id),
+    createOrGetConversation: (params: any) => chatStore.createOrGetConversation(params),
     listMessages: (conversationId: string) => chatStore.listMessages(conversationId),
     sendMessage: (input: { conversationId: string; senderId: string; body: string }) => 
       chatStore.sendMessage(input),
