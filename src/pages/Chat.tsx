@@ -109,7 +109,7 @@ const Chat = () => {
         onRequestContact={handleRequestContact}
       />
 
-      <div className="flex h-[calc(100vh-73px)]">
+      <div className="flex h-[calc(100vh-73px)] relative">
         <Sidebar
           conversation={conversation}
           counterparty={counterparty}
@@ -118,7 +118,7 @@ const Chat = () => {
         />
 
         {/* Chat Content */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 bg-background">
           <MessageList
             messages={messages}
             conversation={conversation}
@@ -131,6 +131,13 @@ const Chat = () => {
             conversationStatus={conversation.status}
           />
         </div>
+
+        {/* Mobile sidebar toggle - could be added later */}
+        {/* <div className="lg:hidden fixed bottom-4 right-4 z-50">
+          <Button size="sm" variant="outline" className="rounded-full shadow-lg">
+            <User className="w-4 h-4" />
+          </Button>
+        </div> */}
       </div>
     </div>
   );

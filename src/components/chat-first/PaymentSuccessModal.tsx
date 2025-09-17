@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Modal from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
-import { HiCheckCircle, HiXMark } from 'react-icons/hi2';
+import { HiCheckCircle } from 'react-icons/hi2';
 import { PaymentSuccessModalProps, ChatStage, Conversation } from './types';
 import { COPY_STRINGS } from './constants';
 import { useChatStore } from './ChatStore';
@@ -20,8 +20,6 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const { store } = useChatStore();
-  const modalRef = useRef<HTMLDivElement>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   // Initialize stage based on existing conversation
   useEffect(() => {
@@ -42,52 +40,6 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
       }
     }
   }, [isOpen, existingConversationId, jobId, homeowner.id, trader.id]);
-
-  // Focus management
-  useEffect(() => {
-    if (isOpen && closeButtonRef.current) {
-      closeButtonRef.current.focus();
-    }
-  }, [isOpen]);
-
-  // Keyboard event handling
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (!isOpen) return;
-
-      if (event.key === 'Escape') {
-        onClose();
-        return;
-      }
-
-      // Focus trap
-      if (event.key === 'Tab') {
-        const modal = modalRef.current;
-        if (!modal) return;
-
-        const focusableElements = modal.querySelectorAll(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        );
-        const firstElement = focusableElements[0] as HTMLElement;
-        const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
-
-        if (event.shiftKey) {
-          if (document.activeElement === firstElement) {
-            event.preventDefault();
-            lastElement?.focus();
-          }
-        } else {
-          if (document.activeElement === lastElement) {
-            event.preventDefault();
-            firstElement?.focus();
-          }
-        }
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
 
   const handleContinueToChat = () => {
     setStage('chat_intro');
@@ -142,25 +94,56 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
   };
 
   const renderSuccessStage = () => (
-    <div className="space-y-6">
+    <div className="space-y-6 text-center animate-fade-up">
       {/* Success Header */}
-      <div className="text-center pb-6 border-b border-border">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-          <HiCheckCircle className="w-8 h-8 text-green-600" />
+      <div className="space-y-4">
+        <div className="flex justify-center">
+          <div className="relative">
+            <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-2xl animate-bounce">
+              <HiCheckCircle className="w-10 h-10 md:w-12 md:h-12 text-white" />
+            </div>
+            {/* Celebration rings */}
+            <div className="absolute inset-0 rounded-full border-4 border-green-400/30 animate-ping"></div>
+            <div className="absolute inset-[-8px] rounded-full border-2 border-green-300/20 animate-pulse"></div>
+          </div>
         </div>
-        <h2 className="text-2xl font-bold text-foreground mb-2">
-          {COPY_STRINGS.TITLE}
-        </h2>
-        <p className="text-muted-foreground">
-          {COPY_STRINGS.SUBTITLE}
-        </p>
+        
+        <div className="space-y-2">
+          <h2 className="text-xl md:text-2xl font-bold text-foreground">
+            {COPY_STRINGS.TITLE}
+          </h2>
+          <p className="text-muted-foreground text-sm md:text-base leading-relaxed px-2">
+            {COPY_STRINGS.SUBTITLE}
+          </p>
+        </div>
       </div>
 
-      {/* Action */}
-      <div className="flex gap-3">
+      {/* Benefits reminder */}
+      <div className="p-4 md:p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200/50">
+        <div className="space-y-3">
+          <h3 className="font-semibold text-blue-900 text-sm md:text-base">What happens next?</h3>
+          <div className="space-y-2 text-left">
+            <div className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+              <p className="text-xs md:text-sm text-blue-800">Start a conversation to introduce yourself</p>
+            </div>
+            <div className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+              <p className="text-xs md:text-sm text-blue-800">Share your availability and competitive quote</p>
+            </div>
+            <div className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+              <p className="text-xs md:text-sm text-blue-800">Get access to homeowner's contact details</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex flex-col sm:flex-row gap-3 pt-2">
         <Button
           onClick={handleContinueToChat}
-          className="flex-1"
+          className="flex-1 bg-gradient-to-r from-trust-blue to-blue-600 hover:from-trust-blue/90 hover:to-blue-600/90 text-white font-semibold py-3 md:py-4 text-sm md:text-base rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02]"
           aria-label="Continue to chat"
         >
           Continue to Chat
@@ -168,6 +151,7 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
         <Button
           variant="outline"
           onClick={handleClose}
+          className="sm:w-auto border-2 py-3 md:py-4 font-medium"
           aria-label="Close modal"
         >
           {COPY_STRINGS.CLOSE}
@@ -175,6 +159,19 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
       </div>
     </div>
   );
+
+  const renderChatLiveStage = () => {
+    return conversation ? (
+      <div className="h-[60vh] md:h-[70vh] flex flex-col">
+        <ChatPanel
+          conversationId={conversation.id}
+          currentUserId={trader.id}
+          homeownerName={homeowner.name}
+          traderName={trader.name}
+        />
+      </div>
+    ) : null;
+  };
 
   const renderContent = () => {
     switch (stage) {
@@ -190,52 +187,28 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
           />
         );
       case 'chat_live':
-        return conversation ? (
-          <div className="h-[500px]">
-            <ChatPanel
-              conversationId={conversation.id}
-              currentUserId={trader.id}
-              homeownerName={homeowner.name}
-              traderName={trader.name}
-            />
-          </div>
-        ) : null;
+        return renderChatLiveStage();
       default:
         return null;
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose}>
-      <div
-        ref={modalRef}
-        className="relative bg-background rounded-lg shadow-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="payment-success-title"
-        aria-describedby="payment-success-description"
-      >
-        {/* Close Button */}
-        <button
-          ref={closeButtonRef}
-          onClick={handleClose}
-          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground z-10"
-          aria-label="Close modal"
-        >
-          <HiXMark className="w-5 h-5" />
-        </button>
+    <Modal 
+      isOpen={isOpen} 
+      onClose={handleClose}
+      size="xl"
+      showCloseButton={stage !== 'chat_live'}
+    >
+      <div className="max-h-[85vh] overflow-y-auto scrollbar-hide">
+        {renderContent()}
+      </div>
 
-        {/* Content */}
-        <div className="p-6">
-          {renderContent()}
-        </div>
-
-        {/* Screen reader announcements */}
-        <div className="sr-only" aria-live="polite" aria-atomic="true">
-          {stage === 'success' && 'Payment successful'}
-          {stage === 'chat_intro' && 'Chat introduction'}
-          {stage === 'chat_live' && 'Chat live'}
-        </div>
+      {/* Screen reader announcements */}
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {stage === 'success' && 'Payment successful'}
+        {stage === 'chat_intro' && 'Chat introduction'}
+        {stage === 'chat_live' && 'Chat live'}
       </div>
     </Modal>
   );

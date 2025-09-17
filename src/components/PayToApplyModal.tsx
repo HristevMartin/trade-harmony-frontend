@@ -93,128 +93,160 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
   };
 
   const renderPaymentStep = () => (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="text-center pb-4 sm:pb-6 border-b border-border">
-        <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">Apply for this job</h2>
-        <p className="text-muted-foreground text-sm sm:text-base mb-3 sm:mb-4 px-2">{jobTitle}</p>
+      <div className="text-center pb-4 md:pb-6 border-b border-border">
+        <h2 className="text-xl md:text-2xl font-bold text-foreground mb-2">Apply for this job</h2>
+        <p className="text-muted-foreground text-sm md:text-base mb-3 md:mb-4 px-2 leading-relaxed">{jobTitle}</p>
         <div className="inline-flex items-center justify-center">
-          <Badge variant="secondary" className="text-sm sm:text-base px-3 py-1">
+          <Badge variant="secondary" className="text-sm md:text-base px-3 py-1 font-semibold">
             Application Fee: £5
           </Badge>
         </div>
       </div>
 
       {/* Benefits */}
-      <div className="space-y-3 sm:space-y-4">
-        <h3 className="font-semibold text-foreground text-base sm:text-lg">What you get:</h3>
-        <div className="space-y-2 sm:space-y-3">
-          <div className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg bg-green-50 border border-green-200">
-            <HiCheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0 mt-0.5" />
-            <span className="text-green-800 font-medium text-sm sm:text-base">Gain homeowner's contact details</span>
+      <div className="space-y-3 md:space-y-4">
+        <h3 className="font-semibold text-foreground text-base md:text-lg">What you get:</h3>
+        <div className="grid gap-2 md:gap-3">
+          <div className="flex items-start gap-3 p-3 md:p-4 rounded-xl bg-gradient-to-r from-green-50 to-green-100 border border-green-200/80 shadow-sm">
+            <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+              <HiCheckCircle className="w-3 h-3 text-white" />
+            </div>
+            <span className="text-green-800 font-medium text-sm md:text-base">Gain homeowner's contact details</span>
           </div>
-          <div className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg bg-blue-50 border border-blue-200">
-            <HiCheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <span className="text-blue-800 font-medium text-sm sm:text-base">Submit a competitive quote</span>
+          <div className="flex items-start gap-3 p-3 md:p-4 rounded-xl bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200/80 shadow-sm">
+            <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+              <HiCheckCircle className="w-3 h-3 text-white" />
+            </div>
+            <span className="text-blue-800 font-medium text-sm md:text-base">Submit a competitive quote</span>
           </div>
-          <div className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg bg-purple-50 border border-purple-200">
-            <HiCheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 flex-shrink-0 mt-0.5" />
-            <span className="text-purple-800 font-medium text-sm sm:text-base">Increase chances of winning the job</span>
+          <div className="flex items-start gap-3 p-3 md:p-4 rounded-xl bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200/80 shadow-sm">
+            <div className="w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+              <HiCheckCircle className="w-3 h-3 text-white" />
+            </div>
+            <span className="text-purple-800 font-medium text-sm md:text-base">Increase chances of winning the job</span>
           </div>
         </div>
       </div>
 
-      {/* Payment Form Placeholder */}
-      <Card className="p-4 sm:p-6 bg-muted/30 border-dashed border-muted-foreground/30 rounded-xl">
-        <div className="text-center space-y-3 sm:space-y-4">
-          <HiShieldCheck className="w-10 h-10 sm:w-12 sm:h-12 text-green-600 mx-auto" />
+      {/* Payment Form Container */}
+      <Card className="p-4 md:p-6 bg-gradient-to-br from-background to-muted/30 border-2 border-dashed border-muted-foreground/20 rounded-xl">
+        <div className="text-center space-y-3 md:space-y-4">
+          <div className="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto shadow-lg">
+            <HiShieldCheck className="w-6 h-6 md:w-8 md:h-8 text-white" />
+          </div>
           <div>
-            <p className="font-semibold text-foreground text-base sm:text-lg">Secure Payment</p>
-            <p className="text-muted-foreground text-sm sm:text-base">Payment processed securely via Stripe</p>
+            <p className="font-semibold text-foreground text-base md:text-lg">Secure Payment</p>
+            <p className="text-muted-foreground text-sm md:text-base">Payment processed securely via Stripe</p>
           </div>
         </div>
       </Card>
 
       {/* Trust Signals */}
-      <div className="space-y-3 sm:space-y-4">
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm text-muted-foreground border-t border-border pt-3 sm:pt-4">
+      <div className="space-y-3 md:space-y-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-6 text-xs md:text-sm text-muted-foreground border-t border-border pt-3 md:pt-4">
           <div className="flex items-center gap-2">
-            <HiLockClosed className="w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
+            <HiLockClosed className="w-3 h-3 md:w-4 md:h-4 text-green-600" />
             <span>256-bit SSL encryption</span>
           </div>
           <div className="flex items-center gap-2">
-            <HiShieldCheck className="w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
+            <HiShieldCheck className="w-3 h-3 md:w-4 md:h-4 text-green-600" />
             <span>Money-back guarantee</span>
           </div>
         </div>
 
         <div className="text-center">
-          <p className="text-xs sm:text-sm text-muted-foreground font-medium px-2">
+          <p className="text-xs md:text-sm text-muted-foreground font-medium px-2">
             You will only be charged once. No subscription fees.
           </p>
         </div>
       </div>
 
-      {
-        clientSecret && (
-          <Elements stripe={stripePromise}
+      {/* Stripe Payment Element */}
+      {clientSecret && (
+        <div className="space-y-4">
+          <Elements 
+            stripe={stripePromise}
             options={{
               clientSecret,
-              appearance: { theme: 'stripe' }
+              appearance: { 
+                theme: 'stripe',
+                variables: {
+                  colorPrimary: 'hsl(var(--primary))',
+                  colorBackground: 'hsl(var(--background))',
+                  colorText: 'hsl(var(--foreground))',
+                  borderRadius: '8px'
+                }
+              }
             }}
             key={clientSecret}
           >
-            {/* <PaymentElement /> */}
             {payError && (
-              <p className="text-red-600 text-sm mb-2">{payError}</p>
+              <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                <p className="text-destructive text-sm font-medium">{payError}</p>
+              </div>
             )}
-
             <CheckoutForm
               onSuccess={handlePaymentSuccess}
               onError={(msg) => setPayError(msg)}
             />
           </Elements>
-        )
-      }
+        </div>
+      )}
 
       {/* Action Button - Only show when clientSecret is not available */}
       {!clientSecret && (
-        <Button
-          onClick={handlePayment}
-          disabled={isLoading}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 sm:py-4 text-base sm:text-lg rounded-xl min-h-[48px] sm:min-h-[52px] hover-scale shadow-md hover:shadow-lg transition-all duration-200"
-        >
-          {isLoading ? (
-            <div className="flex items-center justify-center gap-2">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              payment loading...
-            </div>
-          ) : (
-            <div className="flex items-center justify-center gap-2">
-              <HiLockClosed className="w-5 h-5" />
-              Continue to payment
-            </div>
-          )}
-        </Button>
+        <div className="sticky bottom-0 bg-background border-t border-border pt-4 -mb-6 -mx-4 md:-mx-6 px-4 md:px-6 pb-4 md:pb-6">
+          <Button
+            onClick={handlePayment}
+            disabled={isLoading}
+            className="w-full bg-gradient-to-r from-trust-blue to-blue-600 hover:from-trust-blue/90 hover:to-blue-600/90 text-white font-semibold py-3 md:py-4 text-base md:text-lg rounded-xl min-h-[48px] md:min-h-[52px] shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02]"
+          >
+            {isLoading ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                <span>Processing...</span>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center gap-2">
+                <HiLockClosed className="w-5 h-5" />
+                <span>Continue to payment</span>
+              </div>
+            )}
+          </Button>
+        </div>
       )}
     </div>
   );
 
 
   const renderSuccessStep = () => (
-    <div className="space-y-4 sm:space-y-6 text-center">
-      {/* Success Icon */}
-      <div className="flex justify-center animate-scale-in">
-        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full flex items-center justify-center shadow-lg">
-          <HiCheckCircle className="w-10 h-10 sm:w-12 sm:h-12 text-green-600" />
+    <div className="space-y-6 text-center animate-fade-up">
+      {/* Success Icon with celebration animation */}
+      <div className="flex justify-center">
+        <div className="relative">
+          <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-2xl animate-bounce">
+            <HiCheckCircle className="w-10 h-10 md:w-12 md:h-12 text-white" />
+          </div>
+          {/* Celebration rings */}
+          <div className="absolute inset-0 rounded-full border-4 border-green-400/30 animate-ping"></div>
+          <div className="absolute inset-[-8px] rounded-full border-2 border-green-300/20 animate-pulse"></div>
         </div>
       </div>
 
       {/* Success Message */}
-      <div>
-        <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2 sm:mb-3">Payment Complete!</h2>
-        <p className="text-muted-foreground text-sm sm:text-base leading-relaxed px-2">
+      <div className="space-y-2">
+        <h2 className="text-xl md:text-2xl font-bold text-foreground">Payment Complete! 🎉</h2>
+        <p className="text-muted-foreground text-sm md:text-base leading-relaxed px-2">
           Your application is being processed. The chat experience will open shortly.
+        </p>
+      </div>
+
+      {/* Quick tip */}
+      <div className="p-4 bg-muted/50 rounded-xl border border-border">
+        <p className="text-xs md:text-sm text-muted-foreground">
+          💡 <strong>Pro tip:</strong> You'll be able to chat directly with the homeowner and share your quote
         </p>
       </div>
     </div>
@@ -225,11 +257,13 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
       <Modal
         isOpen={isOpen}
         onClose={handleClose}
-        size="lg"
+        size="xl"
         showCloseButton={currentStep !== 'success'}
       >
-        {currentStep === 'payment' && renderPaymentStep()}
-        {currentStep === 'success' && renderSuccessStep()}
+        <div className="max-h-[80vh] overflow-y-auto scrollbar-hide">
+          {currentStep === 'payment' && renderPaymentStep()}
+          {currentStep === 'success' && renderSuccessStep()}
+        </div>
       </Modal>
 
       {/* Celebration Overlay */}
