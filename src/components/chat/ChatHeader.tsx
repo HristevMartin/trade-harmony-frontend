@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Phone, Video, PhoneOff, VideoOff, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Phone, Video, PhoneOff, VideoOff, MessageCircle, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import type { Conversation, UserRef } from './useChatStore';
 
 interface ChatHeaderProps {
@@ -20,6 +21,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   onOpenSidebar
 }) => {
   const navigate = useNavigate();
+  const [showJobDetails, setShowJobDetails] = useState(false);
   
   const counterpartyInitials = counterparty.name
     .split(' ')
@@ -28,7 +30,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
     .toUpperCase();
 
   return (
-        <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border shadow-md pt-safe-top">
+        <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border shadow-md pt-safe-top" style={{ marginTop: 'env(safe-area-inset-top, 0px)' }}>
           <div className="flex items-center justify-between h-[60px] px-4">
             {/* Left: Mobile conversations button, Back button and counterparty info */}
             <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -65,9 +67,44 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
                 </Avatar>
                 
                 <div className="flex flex-col min-w-0 flex-1">
-                  <h1 className="font-semibold text-foreground leading-none truncate text-base">
-                    {counterparty.name}
-                  </h1>
+                  <div className="flex items-center gap-2">
+                    <h1 className="font-semibold text-foreground leading-none truncate text-base">
+                      {counterparty.name}
+                    </h1>
+                    {counterparty.role === 'homeowner' && (
+                      <Dialog open={showJobDetails} onOpenChange={setShowJobDetails}>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="ghost" 
+                            size="sm"
+                            className="flex-shrink-0 p-1 h-6 w-6 rounded-full hover:bg-muted/80"
+                            aria-label="View job details"
+                          >
+                            <HelpCircle className="w-4 h-4 text-orange-500" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-md">
+                          <DialogHeader>
+                            <DialogTitle>Job Details</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div>
+                              <h3 className="font-medium text-sm text-muted-foreground mb-1">Project Title</h3>
+                              <p className="text-sm">{conversation.jobTitle}</p>
+                            </div>
+                            <div>
+                              <h3 className="font-medium text-sm text-muted-foreground mb-1">Homeowner</h3>
+                              <p className="text-sm">{counterparty.name}</p>
+                            </div>
+                            <div>
+                              <h3 className="font-medium text-sm text-muted-foreground mb-1">Status</h3>
+                              <p className="text-sm capitalize">{conversation.status}</p>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    )}
+                  </div>
                   <p className="text-sm text-muted-foreground leading-none mt-1 truncate">
                     {conversation.jobTitle}
                   </p>
