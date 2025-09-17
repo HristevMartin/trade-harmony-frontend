@@ -117,7 +117,7 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Type your message... (Enter to send, Shift+Enter for new line)"
+              placeholder="Type your message..."
               disabled={disabled || isSending}
               className="min-h-[56px] max-h-[140px] resize-none text-base leading-relaxed rounded-2xl border-2 focus:ring-2 focus:ring-primary/50 transition-all focus-visible:ring-2 focus-visible:ring-primary/50"
               rows={1}
