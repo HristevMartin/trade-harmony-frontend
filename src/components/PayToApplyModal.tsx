@@ -85,7 +85,7 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
             },
             body: JSON.stringify({
               job_id: jobId,
-              application_text: '',
+              application_text: 'paid',
               user_id: userId,
             }),
           }

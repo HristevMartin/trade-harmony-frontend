@@ -21,7 +21,6 @@ const PaymentResult = () => {
     };
 
     useEffect(() => {
-        // Show modal automatically when payment is successful
         const paymentStatus = searchParams.get('payment_status');
         if (paymentStatus === 'success') {
             setShowModal(true);

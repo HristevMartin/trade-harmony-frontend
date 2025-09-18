@@ -63,9 +63,9 @@ const PaidUserBanner: React.FC<PaidUserBannerProps> = ({
   };
 
   return (
-    <div style={{border: '2px solid red'}} className="space-y-4 md:space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Success Banner */}
-      <Card className="rounded-2xl bg-gradient-to-r from-green-50 to-emerald-50 border-green-200/50 p-6 md:p-8 shadow-lg">
+      <Card className="rounded-2xl bg-gradient-to-r from-green-50 to-emerald-50 border-green-200/50 p-6 md:p-8 shadow-lg mb-2">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-4">
             {/* Success Header */}

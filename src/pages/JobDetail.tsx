@@ -97,6 +97,7 @@ const JobDetail = () => {
 
             try {
                 const request = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/check-payment-status/${user.id}/${id}`);
+                console.log('show me the request', request);
 
                 if (!request.ok) {
                     console.log('failed the reps')
