@@ -4,6 +4,7 @@ import { MessageCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import type { Conversation, UserRef } from './useChatStore';
+import { useEffect, useState } from 'react';
 
 interface SidebarProps {
   conversation: Conversation;
@@ -18,9 +19,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   currentUserId,
   onClose
 }) => {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  
   const counterpartyInitials = counterparty?.name
     ? counterparty.name
         .split(' ')
@@ -28,6 +26,15 @@ const Sidebar: React.FC<SidebarProps> = ({
         .join('')
         .toUpperCase()
     : '??';
+
+  //  useEffect(() =>{
+  //     const request = async () => {
+  //       const response = await fetch(`/api/conversations/${conversation.id}`);
+  //       const data = await response.json();
+  //       console.log(data);
+  //     }
+  //     request();
+  // }, [])
 
   const handleConversationClick = () => {
     // If this is already the current conversation, just close mobile drawer
@@ -41,8 +48,10 @@ const Sidebar: React.FC<SidebarProps> = ({
     window.location.reload();
   };
 
+
+
   return (
-    <div className="w-full bg-card border-r border-border flex flex-col overflow-hidden h-full">
+    <div style={{border: '2px solid blue'}} className="w-full bg-card border-r border-border flex flex-col overflow-hidden h-full">
       {/* Mobile header with close button */}
       {onClose && (
         <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b sm:hidden bg-background">

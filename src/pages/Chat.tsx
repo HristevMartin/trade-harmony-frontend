@@ -95,6 +95,7 @@ const Chat = () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
           },
           body: JSON.stringify({
             job_id: jobId,
@@ -208,7 +209,7 @@ const Chat = () => {
     <div className="min-h-screen bg-background">
       <div className="max-w-[1320px] mx-auto">
         {/* Header */}
-        <header className="sticky top-0 z-40 bg-background border-b border-border">
+        <header  className="sticky top-0 z-40 bg-background border-b border-border">
           <div className="flex items-center justify-between h-16 px-4">
             <div className="flex items-center gap-3">
               <Button
@@ -237,7 +238,7 @@ const Chat = () => {
           </div>
         </header>
 
-        <div className="flex h-[calc(100vh-4rem)] relative">
+        <div style={{border: '2px solid red'}} className="flex h-[calc(100vh-4rem)] relative">
           {/* Desktop Sidebar */}
           <div className="hidden sm:block w-[340px] flex-shrink-0">
             <Sidebar

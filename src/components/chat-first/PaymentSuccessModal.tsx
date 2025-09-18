@@ -74,6 +74,7 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
           },
           body: JSON.stringify({
             job_id: jobId,
