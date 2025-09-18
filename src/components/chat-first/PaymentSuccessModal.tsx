@@ -53,18 +53,21 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
     setIsCreatingConversation(true);
     
     try {
-
-      let conv = conversation;
       const authToken = localStorage.getItem('access_token');
       const authUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
       const currentUserId = authUser.id || trader.id;
       const apiUrl = import.meta.env.VITE_API_URL;
       
-      if (!conv) {
-        // Create conversation using real API
-        const createUrl = `${apiUrl}/travel/chat-component/create-chat`;
-        
-        const createResponse = await fetch(createUrl, {
+      console.log('🔧 API URL:', apiUrl);
+      console.log('👤 Auth User:', authUser);
+      console.log('🔑 Auth Token:', authToken ? 'Present' : 'Missing');
+      
+      let conversationId = conversation?.id;
+      
+      // Create conversation if it doesn't exist
+      if (!conversationId) {
+        console.log('📞 Creating conversation with API...');
+        const createResponse = await fetch(`${apiUrl}/travel/chat-component/create-chat`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -75,77 +78,59 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
           }),
         });
         
-        if (createResponse.ok) {
-          const createData = await createResponse.json();
-          conv = {
-            id: createData.conversation.conversation_id,
-            jobId,
-            homeownerId: homeowner.id,
-            traderId: currentUserId,
-            createdAt: Date.now(),
-            status: 'open'
-          };
-          setConversation(conv);
-        } else {
+        console.log('📞 Create conversation response:', createResponse.status, createResponse.statusText);
+        
+        if (!createResponse.ok) {
+          const errorData = await createResponse.json().catch(() => ({}));
+          console.error('❌ Failed to create conversation:', errorData);
           throw new Error('Failed to create conversation');
         }
+        
+        const createData = await createResponse.json();
+        console.log('✅ Conversation created:', createData);
+        conversationId = createData.conversation?.conversation_id;
+        
+        if (!conversationId) {
+          throw new Error('No conversation ID returned');
+        }
+        
+        // Update local conversation state
+        setConversation({
+          id: conversationId,
+          jobId,
+          homeownerId: homeowner.id,
+          traderId: currentUserId,
+          createdAt: Date.now(),
+          status: 'open'
+        });
       }
 
       // Send the first message using real API
-      if (conv && authToken) {
-        const sendUrl = `${apiUrl}/travel/chat-component`;
-        const sendResponse = await fetch(sendUrl, {
+      if (conversationId && authToken) {
+        console.log('💬 Sending message...');
+        const sendResponse = await fetch(`${apiUrl}/travel/chat-component`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${authToken}`
           },
           body: JSON.stringify({
-            conversationId: conv.id,
+            conversationId: conversationId,
             body: message,
             action: "send_message"
           })
         });
         
+        console.log('💬 Send message response:', sendResponse.status, sendResponse.statusText);
+        
         if (!sendResponse.ok) {
-          console.error('Failed to send message:', sendResponse.status);
+          console.error('Failed to send message, but continuing to chat');
+        } else {
+          console.log('✅ Message sent successfully');
         }
       }
-      console.log('📞 Create conversation response:', createConvResponse.status, createConvResponse.statusText);
 
-      if (!createConvResponse.ok) {
-        const errorData = await createConvResponse.json().catch(() => ({}));
-        console.error('❌ Failed to create conversation:', errorData);
-        throw new Error('Failed to create conversation');
-      }
-
-      const convData = await createConvResponse.json();
-      console.log('✅ Conversation created:', convData);
-      const conversationId = convData.conversation?.conversation_id;
-
-      if (!conversationId) {
-        throw new Error('No conversation ID returned');
-      }
-
-      // Send the first message using real API
-      const sendMessageResponse = await fetch(`${apiUrl}/travel/chat-component`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`
-        },
-        body: JSON.stringify({
-          conversationId: conversationId,
-          body: message,
-          action: "send_message"
-        })
-      });
-
-      if (!sendMessageResponse.ok) {
-        console.error('Failed to send initial message, but continuing to chat');
-      }
-
-      // Build chat URL with parameters and navigate in same tab
+      // Build chat URL with parameters and navigate
       const params = new URLSearchParams();
       params.set('job_id', jobId);
       params.set('homeowner_name', homeowner.name);
@@ -162,12 +147,12 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
         job_title: `Job #${jobId}`
       });
       
-      // Navigate in same tab instead of opening new tab
+      // Navigate to chat
       window.location.href = chatUrl;
       
     } catch (error) {
-      console.error('Failed to create conversation or send message:', error);
-      // Even if message sending fails, still navigate to chat
+      console.error('❌ Error in handleSendAndOpenChat:', error);
+      // Even if there's an error, still try to navigate to chat
       const params = new URLSearchParams();
       params.set('job_id', jobId);
       params.set('homeowner_name', homeowner.name);
@@ -175,6 +160,7 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
       params.set('job_title', `Job #${jobId}`);
       
       const chatUrl = `/chat?${params.toString()}`;
+      console.log('🔄 Fallback navigation to:', chatUrl);
       window.location.href = chatUrl;
     } finally {
       setIsCreatingConversation(false);
