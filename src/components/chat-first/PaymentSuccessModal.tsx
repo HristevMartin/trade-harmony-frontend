@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { HiCheckCircle } from 'react-icons/hi2';
 import { PaymentSuccessModalProps, ChatStage, Conversation } from './types';
 import { COPY_STRINGS } from './constants';
-import { useChatStore } from './ChatStore';
+// Removed mock ChatStore - using real API instead
 import ChatIntro from './ChatIntro';
 import ChatPanel from './ChatPanel';
 
@@ -19,7 +19,6 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
   const [stage, setStage] = useState<ChatStage>('success');
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
-  const { store } = useChatStore();
 
   // Initialize stage based on existing conversation
   useEffect(() => {
@@ -50,29 +49,68 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
     
     try {
       let conv = conversation;
+      const authToken = localStorage.getItem('access_token');
+      const authUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
+      const currentUserId = authUser.id || trader.id;
+      const apiUrl = import.meta.env.VITE_API_URL;
       
       if (!conv) {
-        conv = await store.createOrGetConversation({
-          jobId,
-          homeownerId: homeowner.id,
-          traderId: trader.id,
+        // Create conversation using real API
+        const createUrl = `${apiUrl}/travel/chat-component/create-chat`;
+        
+        const createResponse = await fetch(createUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            job_id: jobId,
+            trader_id: currentUserId,
+          }),
         });
-        setConversation(conv);
+        
+        if (createResponse.ok) {
+          const createData = await createResponse.json();
+          conv = {
+            id: createData.conversation.conversation_id,
+            jobId,
+            homeownerId: homeowner.id,
+            traderId: currentUserId,
+            createdAt: Date.now(),
+            status: 'open'
+          };
+          setConversation(conv);
+        } else {
+          throw new Error('Failed to create conversation');
+        }
       }
 
-      // Send the first message
-      await store.sendMessage({
-        conversationId: conv.id,
-        senderId: trader.id,
-        body: message,
-      });
+      // Send the first message using real API
+      if (conv && authToken) {
+        const sendUrl = `${apiUrl}/travel/chat-component`;
+        const sendResponse = await fetch(sendUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: JSON.stringify({
+            conversationId: conv.id,
+            body: message,
+            action: "send_message"
+          })
+        });
+        
+        if (!sendResponse.ok) {
+          console.error('Failed to send message:', sendResponse.status);
+        }
+      }
 
       // Build chat URL with parameters and open in new tab
       const params = new URLSearchParams();
-      params.set('conversation_id', conv.id);
+      params.set('job_id', jobId);
       params.set('homeowner_name', homeowner.name);
       params.set('trader_name', trader.name);
-      params.set('current_user_id', trader.id);
       params.set('job_title', `Job #${jobId}`);
       
       const chatUrl = `/chat?${params.toString()}`;

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { PaymentSuccessModal, ChatProvider } from '@/components/chat-first';
+import { PaymentSuccessModal } from '@/components/chat-first';
 
 const ChatDemo = () => {
     const [showModal, setShowModal] = useState(false);
@@ -25,8 +25,7 @@ const ChatDemo = () => {
     };
 
     return (
-        <ChatProvider>
-            <div className="min-h-screen bg-background p-8">
+        <div className="min-h-screen bg-background p-8">
                 <div className="max-w-4xl mx-auto">
                     <div className="text-center mb-8">
                         <h1 className="text-3xl font-bold mb-4">Chat-First Payment Success Demo</h1>
@@ -105,7 +104,6 @@ const ChatDemo = () => {
                     />
                 </div>
             </div>
-        </ChatProvider>
     );
 };
 

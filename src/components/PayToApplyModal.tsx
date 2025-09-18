@@ -16,7 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { stripePromise } from '@/components/ui/StripeElement';
 import CheckoutForm from '@/components/ui/CheckoutForm';
-import { PaymentSuccessModal, ChatProvider } from '@/components/chat-first';
+import { PaymentSuccessModal } from '@/components/chat-first';
 
 interface PayToApplyModalProps {
   isOpen: boolean;
@@ -316,21 +316,19 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
       )}
 
       {/* New Chat-First Payment Success Modal */}
-      <ChatProvider>
-        <PaymentSuccessModal
-          isOpen={showPaymentSuccess}
-          onClose={handlePaymentSuccessClose}
-          jobId={jobId}
-          homeowner={{
-            id: homeownerInfo?.first_name || 'homeowner_id',
-            name: homeownerInfo?.first_name || 'Homeowner'
-          }}
-          trader={{
-            id: userId || 'trader_id',
-            name: 'You'
-          }}
-        />
-      </ChatProvider>
+      <PaymentSuccessModal
+        isOpen={showPaymentSuccess}
+        onClose={handlePaymentSuccessClose}
+        jobId={jobId}
+        homeowner={{
+          id: homeownerInfo?.first_name || 'homeowner_id',
+          name: homeownerInfo?.first_name || 'Homeowner'
+        }}
+        trader={{
+          id: userId || 'trader_id',
+          name: 'You'
+        }}
+      />
     </>
   );
 };
