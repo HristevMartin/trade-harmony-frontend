@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { HiCheckCircle } from 'react-icons/hi2';
 import { PaymentSuccessModalProps, ChatStage, Conversation } from './types';
 import { COPY_STRINGS } from './constants';
-import { useChatStore } from './ChatStore';
+// Removed mock ChatStore - using real API instead
 import ChatIntro from './ChatIntro';
 import ChatPanel from './ChatPanel';
 
@@ -19,7 +19,6 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
   const [stage, setStage] = useState<ChatStage>('success');
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
-  const { store } = useChatStore();
 
   // Initialize stage based on existing conversation
   useEffect(() => {
@@ -54,27 +53,65 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
     setIsCreatingConversation(true);
     
     try {
-      // Use real API to create conversation instead of mock store
-      const apiUrl = import.meta.env.VITE_API_URL;
+
+      let conv = conversation;
       const authToken = localStorage.getItem('access_token');
       const authUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
+      const currentUserId = authUser.id || trader.id;
+      const apiUrl = import.meta.env.VITE_API_URL;
       
-      console.log('🔧 API URL:', apiUrl);
-      console.log('👤 Auth User:', authUser);
-      console.log('🔑 Auth Token:', authToken ? 'Present' : 'Missing');
-      
-      // Create conversation using real API
-      console.log('📞 Creating conversation with API...');
-      const createConvResponse = await fetch(`${apiUrl}/travel/chat-component/create-chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          job_id: jobId,
-          trader_id: authUser.id,
-        }),
-      });
+      if (!conv) {
+        // Create conversation using real API
+        const createUrl = `${apiUrl}/travel/chat-component/create-chat`;
+        
+        const createResponse = await fetch(createUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            job_id: jobId,
+            trader_id: currentUserId,
+          }),
+        });
+        
+        if (createResponse.ok) {
+          const createData = await createResponse.json();
+          conv = {
+            id: createData.conversation.conversation_id,
+            jobId,
+            homeownerId: homeowner.id,
+            traderId: currentUserId,
+            createdAt: Date.now(),
+            status: 'open'
+          };
+          setConversation(conv);
+        } else {
+          throw new Error('Failed to create conversation');
+        }
+      }
+
+      // Send the first message using real API
+      if (conv && authToken) {
+        const sendUrl = `${apiUrl}/travel/chat-component`;
+        const sendResponse = await fetch(sendUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: JSON.stringify({
+            conversationId: conv.id,
+            body: message,
+            action: "send_message"
+          })
+        });
+        
+        if (!sendResponse.ok) {
+          console.error('Failed to send message:', sendResponse.status);
+        }
+      }
+>>>>>>> c0a93b0b911d6b810a69b71219f0b616c3df139c
 
       console.log('📞 Create conversation response:', createConvResponse.status, createConvResponse.statusText);
 

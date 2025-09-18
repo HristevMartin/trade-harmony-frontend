@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { PaymentSuccessModal, ChatProvider } from '@/components/chat-first';
+import { PaymentSuccessModal } from '@/components/chat-first';
 
 const PaymentResult = () => {
     const [searchParams] = useSearchParams();
@@ -28,25 +28,23 @@ const PaymentResult = () => {
     }, [searchParams]);
 
     return (
-        <ChatProvider>
-            <div className="min-h-screen bg-background flex items-center justify-center p-4">
-                <div className="text-center">
-                    <h1 className="text-2xl font-bold mb-4">Payment Processing</h1>
-                    <p className="text-muted-foreground">
-                        {showModal ? 'Payment successful!' : 'Processing your payment...'}
-                    </p>
-                </div>
-
-                <PaymentSuccessModal
-                    isOpen={showModal}
-                    onClose={() => setShowModal(false)}
-                    jobId={mockData.jobId}
-                    homeowner={mockData.homeowner}
-                    trader={mockData.trader}
-                    existingConversationId={mockData.existingConversationId}
-                />
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+            <div className="text-center">
+                <h1 className="text-2xl font-bold mb-4">Payment Processing</h1>
+                <p className="text-muted-foreground">
+                    {showModal ? 'Payment successful!' : 'Processing your payment...'}
+                </p>
             </div>
-        </ChatProvider>
+
+            <PaymentSuccessModal
+                isOpen={showModal}
+                onClose={() => setShowModal(false)}
+                jobId={mockData.jobId}
+                homeowner={mockData.homeowner}
+                trader={mockData.trader}
+                existingConversationId={mockData.existingConversationId}
+            />
+        </div>
     );
 };
 
