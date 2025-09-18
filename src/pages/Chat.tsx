@@ -155,7 +155,7 @@ const Chat = () => {
 
     try {
       const apiUrl = import.meta.env.VITE_API_URL;
-      const url = `${apiUrl}/travel/chat-component`;
+      const url = `${apiUrl}/travel/chat-component/${conversationId}`;
       const response = await fetch(url, {
         method: 'POST',
         headers: {

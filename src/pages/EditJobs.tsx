@@ -126,6 +126,8 @@ const EditJob = () => {
                 const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/get-client-project/${id}`);
                 const data = await response.json();
 
+                console.log('show me the data', data);
+                
                 if (data.success && data.project) {
                     const job = data.project;
                     setJobData(job);

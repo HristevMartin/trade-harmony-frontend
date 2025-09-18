@@ -80,7 +80,10 @@ const Sidebar: React.FC<SidebarProps> = ({
         {counterparty ? (
           <button 
             className="w-full bg-primary/10 border-primary border rounded-2xl p-4 hover:bg-primary/20 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50"
-            onClick={handleConversationClick}
+            onClick={() => {
+              // You can add navigation logic here if needed
+              console.log('Clicked on conversation with:', counterparty.name);
+            }}
           >
             <div className="flex items-center gap-3">
               <Avatar className="w-12 h-12 flex-shrink-0">
