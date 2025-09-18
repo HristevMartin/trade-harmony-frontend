@@ -39,7 +39,10 @@ const PaidUserBanner: React.FC<PaidUserBannerProps> = ({
       params.set('trader_name', 'You');
       params.set('current_user_id', userId);
       params.set('job_title', jobTitle);
-      
+      params.set('job_id', jobId);
+
+
+      console.log('show me the jobId', jobId);
       const chatUrl = `/chat?${params.toString()}`;
       console.log('Opening chat with URL:', chatUrl);
       console.log('Chat parameters:', {
@@ -60,7 +63,7 @@ const PaidUserBanner: React.FC<PaidUserBannerProps> = ({
   };
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div style={{border: '2px solid red'}} className="space-y-4 md:space-y-6">
       {/* Success Banner */}
       <Card className="rounded-2xl bg-gradient-to-r from-green-50 to-emerald-50 border-green-200/50 p-6 md:p-8 shadow-lg">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
