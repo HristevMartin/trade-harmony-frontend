@@ -111,8 +111,6 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
           console.error('Failed to send message:', sendResponse.status);
         }
       }
->>>>>>> c0a93b0b911d6b810a69b71219f0b616c3df139c
-
       console.log('📞 Create conversation response:', createConvResponse.status, createConvResponse.statusText);
 
       if (!createConvResponse.ok) {
