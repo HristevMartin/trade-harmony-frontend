@@ -53,11 +53,13 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
     setIsCreatingConversation(true);
     
     try {
+
       const authToken = localStorage.getItem('access_token');
       const authUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
       const currentUserId = authUser.id || trader.id;
       const apiUrl = import.meta.env.VITE_API_URL;
       
+
       console.log('🔧 API URL:', apiUrl);
       console.log('👤 Auth User:', authUser);
       console.log('🔑 Auth Token:', authToken ? 'Present' : 'Missing');
@@ -68,6 +70,7 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
       if (!conversationId) {
         console.log('📞 Creating conversation with API...');
         const createResponse = await fetch(`${apiUrl}/travel/chat-component/create-chat`, {
+
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -109,6 +112,7 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
       if (conversationId && authToken) {
         console.log('💬 Sending message...');
         const sendResponse = await fetch(`${apiUrl}/travel/chat-component`, {
+
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
