@@ -14,9 +14,9 @@ interface MessageListProps {
 const MessageList: React.FC<MessageListProps> = ({ 
   messages, 
   conversation,
-  currentUserId, 
-  counterparty 
-}) => {
+  currentUserId,
+  counterparty
+  }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
@@ -37,17 +37,7 @@ const MessageList: React.FC<MessageListProps> = ({
     setShowScrollToBottom(!isAtBottom && messages.length > 0);
   };
 
-  useEffect(() => {
-    if (!isUserScrolled) {
-      scrollToBottom(false); // Instant scroll on mount and conversation change
-    }
-  }, [conversation.id]);
-
-  useEffect(() => {
-    if (!isUserScrolled) {
-      scrollToBottom(true); // Smooth scroll on new messages
-    }
-  }, [messages.length]);
+  // Removed auto-scroll on new messages
 
   const formatTime = (timestamp: number) => {
     return new Date(timestamp).toLocaleTimeString('en-US', {
@@ -61,7 +51,7 @@ const MessageList: React.FC<MessageListProps> = ({
     if (senderId === currentUserId) {
       return { name: '', isMe: true }; // Remove "You" label
     }
-    return { name: counterparty.name, isMe: false };
+    return { name: counterparty?.name || 'Other User', isMe: false };
   };
 
   if (messages.length === 0) {
@@ -86,7 +76,9 @@ const MessageList: React.FC<MessageListProps> = ({
       >
         {messages.map((message, index) => {
           const senderInfo = getSenderInfo(message.senderId);
-          const senderInitials = senderInfo.name ? senderInfo.name.split(' ').map(n => n[0]).join('').toUpperCase() : counterparty.name.split(' ').map(n => n[0]).join('').toUpperCase();
+          const senderInitials = senderInfo.name 
+            ? senderInfo.name.split(' ').map(n => n[0]).join('').toUpperCase() 
+            : (counterparty?.name || 'OU').split(' ').map(n => n[0]).join('').toUpperCase();
           const prevMessage = messages[index - 1];
           const showAvatar = !prevMessage || prevMessage.senderId !== message.senderId;
           const isLastInGroup = !messages[index + 1] || messages[index + 1].senderId !== message.senderId;
@@ -100,8 +92,8 @@ const MessageList: React.FC<MessageListProps> = ({
                 <div className="w-7 flex-shrink-0">
                   {showAvatar ? (
                     <Avatar className="w-7 h-7">
-                      {counterparty.avatarUrl ? (
-                        <AvatarImage src={counterparty.avatarUrl} alt={counterparty.name} />
+                      {counterparty?.avatarUrl ? (
+                        <AvatarImage src={counterparty.avatarUrl} alt={counterparty.name || 'User'} />
                       ) : null}
                       <AvatarFallback className="bg-muted text-muted-foreground text-xs">
                         {senderInitials}

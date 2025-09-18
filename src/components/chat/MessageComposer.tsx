@@ -30,6 +30,7 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
     setError(null);
     
     try {
+      console.log('show mee the message', message.trim());
       await onSendMessage(message.trim());
       setMessage('');
       setAttachments([]);
@@ -110,7 +111,7 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
         )}
 
         {/* Composer */}
-        <div className="flex items-end gap-4">
+        <div  className="flex items-end gap-4">
           <div className="flex-1">
             <Textarea
               ref={textareaRef}

@@ -10,30 +10,39 @@ import type { Conversation, UserRef } from './useChatStore';
 interface ChatHeaderProps {
   conversation: Conversation;
   counterparty: UserRef;
-  onRequestContact: () => void;
   onOpenSidebar?: () => void;
 }
 
 const ChatHeader: React.FC<ChatHeaderProps> = ({ 
   conversation, 
-  counterparty, 
-  onRequestContact,
+  counterparty,
   onOpenSidebar
 }) => {
   const navigate = useNavigate();
   const [showJobDetails, setShowJobDetails] = useState(false);
   
-  const counterpartyInitials = counterparty.name
-    .split(' ')
-    .map(n => n[0])
-    .join('')
-    .toUpperCase();
+  const counterpartyInitials = counterparty?.name
+    ? counterparty.name
+        .split(' ')
+        .map(n => n[0])
+        .join('')
+        .toUpperCase()
+    : '??';
 
   return (
         <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border shadow-md pt-safe-top" style={{ marginTop: 'env(safe-area-inset-top, 0px)' }}>
           <div className="flex items-center justify-between h-[60px] px-4">
             {/* Left: Mobile conversations button, Back button and counterparty info */}
             <div className="flex items-center gap-2 min-w-0 flex-1">
+            <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate(-1)}
+                className="hover:bg-muted flex-shrink-0 min-h-[44px]"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </Button>
+              
               {onOpenSidebar && (
                 <Button
                   variant="default"
@@ -47,14 +56,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
                 </Button>
               )}
               
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate(-1)}
-                className="hover:bg-muted flex-shrink-0 min-h-[44px]"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </Button>
+        
               
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 <Avatar className="w-11 h-11 flex-shrink-0">
@@ -110,56 +112,6 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
                   </p>
                 </div>
               </div>
-            </div>
-
-            {/* Right: Action buttons */}
-            <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
-              <TooltipProvider>
-                {conversation.canViewPhone ? (
-                  <Button variant="ghost" size="sm" className="hidden sm:flex min-h-[44px]">
-                    <Phone className="w-4 h-4" />
-                  </Button>
-                ) : (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="ghost" size="sm" className="hidden sm:flex min-h-[44px]" disabled>
-                        <PhoneOff className="w-4 h-4 opacity-50" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Phone hidden</p>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-                
-                {conversation.canViewEmail ? (
-                  <Button variant="ghost" size="sm" className="hidden sm:flex min-h-[44px]">
-                    <Video className="w-4 h-4" />
-                  </Button>
-                ) : (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="ghost" size="sm" className="hidden sm:flex min-h-[44px]" disabled>
-                        <VideoOff className="w-4 h-4 opacity-50" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Email hidden</p>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-              </TooltipProvider>
-              
-              {!conversation.canViewPhone && !conversation.canViewEmail && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={onRequestContact}
-                  className="hidden md:flex text-xs px-3 min-h-[44px]"
-                >
-                  Request contact
-                </Button>
-              )}
             </div>
           </div>
         </header>
