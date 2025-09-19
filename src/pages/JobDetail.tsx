@@ -122,6 +122,11 @@ const JobDetail = () => {
         getCustomerApplication();
     }, [user, id]);
 
+    // Scroll to top when component mounts
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     useEffect(() => {
         const getJobData = async () => {
             try {
@@ -326,7 +331,7 @@ const JobDetail = () => {
                     </div>
                 )}
 
-                <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8 py-4 md:py-6 lg:py-10">
+                <div  className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8 py-4 md:py-6 lg:py-10">
                     {/* Header */}
                     <div className="mb-6 md:mb-8">
                         {/* Mobile Back Button - Above Title */}
@@ -453,7 +458,7 @@ const JobDetail = () => {
                                     phone: jobData.phone
                                 }}
                                 onOpenChat={() => {
-                                    // Chat functionality handled by the component
+                                    
                                 }}
                             />
                         )

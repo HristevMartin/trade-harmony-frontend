@@ -10,6 +10,7 @@ import {
   HiSparkles,
   HiArrowTopRightOnSquare
 } from 'react-icons/hi2';
+import { useNavigate } from 'react-router-dom';
 
 interface PaidUserBannerProps {
   jobId: string;
@@ -28,37 +29,29 @@ const PaidUserBanner: React.FC<PaidUserBannerProps> = ({
   homeownerInfo,
   onOpenChat
 }) => {
-  const handleOpenFullChat = () => {
+
+  const navigate = useNavigate();
+  const authToken = localStorage.getItem('access_token'); 
+  console.log('show me the authToken', authToken);
+
+  const handleOpenFullChat = async () => {
     try {
-      const userObj = JSON.parse(localStorage.getItem('auth_user') || '{}');
-      const userId = userObj.id || 'trader_id';
-      
-      const params = new URLSearchParams();
-      params.set('conversation_id', `conv_${jobId}`);
-      params.set('homeowner_name', homeownerInfo?.first_name || 'Homeowner');
-      params.set('trader_name', 'You');
-      params.set('current_user_id', userId);
-      params.set('job_title', jobTitle);
-      params.set('job_id', jobId);
-
-
       console.log('show me the jobId', jobId);
-      const chatUrl = `/chat?${params.toString()}`;
-      console.log('Opening chat with URL:', chatUrl);
-      console.log('Chat parameters:', {
-        conversation_id: `conv_${jobId}`,
-        homeowner_name: homeownerInfo?.first_name || 'Homeowner',
-        trader_name: 'You',
-        current_user_id: userId,
-        job_title: jobTitle
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/chat-component/get-conversation-by-id/${jobId}`, {
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        }
       });
-      
-      // Try opening in same tab first for debugging
-      window.location.href = chatUrl;
+      if (!response.ok) {
+        throw new Error('Failed to fetch conversation');
+      }
+      const data = await response.json();
+      console.log('show me the data', data);
+      navigate(`/chat/${data.conversation.conversation_id}`);
     } catch (error) {
       console.error('Error opening chat:', error);
       // Fallback to simple navigation
-      window.location.href = '/chat';
+      // window.location.href = '/chat';
     }
   };
 

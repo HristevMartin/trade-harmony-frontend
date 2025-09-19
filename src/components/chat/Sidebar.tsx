@@ -151,19 +151,32 @@ const Sidebar: React.FC<SidebarProps> = ({
                   onClick={() => handleChatClick(chat)}
                   className={`relative w-full p-4 rounded-lg text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 ${
                     isActive 
-                      ? 'bg-primary/15 border-l-4 border-l-primary border-r border-t border-b border-primary/20 shadow-sm' 
-                      : 'hover:bg-muted/50 border border-transparent hover:border-border/50'
+                      ? 'bg-gradient-to-r from-primary/20 to-primary/10 border-2 border-primary/40 shadow-lg ring-2 ring-primary/20 transform scale-[1.02]' 
+                      : 'hover:bg-muted/50 border border-transparent hover:border-border/50 hover:shadow-sm'
                   }`}
                 >
+                  {/* Active indicator */}
+                  {isActive && (
+                    <div className="absolute -left-1 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-primary rounded-r-full"></div>
+                  )}
+                  
                   <div className="flex items-start gap-3">
-                    <Avatar className="w-11 h-11 flex-shrink-0">
-                      {chat.counterparty?.avatar_url ? (
-                        <AvatarImage src={chat.counterparty.avatar_url} alt={chat.counterparty?.name || 'Unknown'} />
-                      ) : null}
-                      <AvatarFallback className={`${getAvatarColor(chat.counterparty?.id || '')} text-white text-sm font-semibold`}>
-                        {initials}
-                      </AvatarFallback>
-                    </Avatar>
+                    <div className="relative">
+                      <Avatar className="w-11 h-11 flex-shrink-0">
+                        {chat.counterparty?.avatar_url ? (
+                          <AvatarImage src={chat.counterparty.avatar_url} alt={chat.counterparty?.name || 'Unknown'} />
+                        ) : null}
+                        <AvatarFallback className={`${getAvatarColor(chat.counterparty?.id || '')} text-white text-sm font-semibold`}>
+                          {initials}
+                        </AvatarFallback>
+                      </Avatar>
+                      {/* Active dot indicator */}
+                      {isActive && (
+                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full border-2 border-white flex items-center justify-center">
+                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        </div>
+                      )}
+                    </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between mb-1">
                         <div className="flex-1 min-w-0 mr-2">

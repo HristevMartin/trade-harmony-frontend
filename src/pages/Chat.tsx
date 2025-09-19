@@ -15,11 +15,22 @@ const Chat = () => {
   // Support both URL params and search params for backward compatibility
   const conversationId = paramConversationId || searchParams.get('conversation_id');
   
+  // Payment flow parameters
+  const jobId = searchParams.get('job_id');
+  const homeownerName = searchParams.get('homeowner_name');
+  const traderName = searchParams.get('trader_name');
+  const jobTitle = searchParams.get('job_title');
+  
+  // Check if this is coming from payment flow
+  const isPaymentFlow = !conversationId && jobId && homeownerName;
+  
   // Debug logging
   console.log('Chat Component Debug:', {
     paramConversationId,
     searchParamsConversationId: searchParams.get('conversation_id'),
     finalConversationId: conversationId,
+    isPaymentFlow,
+    paymentFlowParams: { jobId, homeownerName, traderName, jobTitle },
     currentUrl: window.location.href
   });
   const [message, setMessage] = useState('');
@@ -37,6 +48,19 @@ const Chat = () => {
 
   // Find current chat from the chats list to get counterparty info
   const currentChat = chats.find(chat => chat.conversation_id === conversationId);
+
+  // Handle payment flow - create counterparty from URL parameters
+  useEffect(() => {
+    if (isPaymentFlow && homeownerName) {
+      console.log('Setting counterparty from payment flow parameters');
+      const paymentFlowCounterparty: Counterparty = {
+        id: 'homeowner_' + jobId, // Generate a temporary ID
+        name: homeownerName,
+        job_title: jobTitle || `Job #${jobId}`
+      };
+      setCounterparty(paymentFlowCounterparty);
+    }
+  }, [isPaymentFlow, homeownerName, jobId, jobTitle]);
 
   // Set counterparty from current chat data
   useEffect(() => {
@@ -60,6 +84,27 @@ const Chat = () => {
     }
   }, [authToken]);
 
+  // Handle payment flow - find existing conversation for this job
+  useEffect(() => {
+    if (isPaymentFlow && chats.length > 0 && jobId && authToken) {
+      console.log('Payment flow: Looking for existing conversation for job:', jobId);
+      
+      // Look for existing conversation with this job_id
+      const existingChat = chats.find(chat => chat.job_id === jobId);
+      
+      if (existingChat) {
+        console.log('Found existing conversation for job:', existingChat);
+        // Redirect to the existing conversation
+        const newUrl = `/chat/${existingChat.conversation_id}`;
+        console.log('Redirecting to existing conversation:', newUrl);
+        navigate(newUrl, { replace: true });
+      } else {
+        console.log('No existing conversation found for job:', jobId);
+        // We'll handle conversation creation in the message fetch effect
+      }
+    }
+  }, [isPaymentFlow, chats, jobId, authToken, navigate]);
+
   // Reset messages when conversation changes
   useEffect(() => {
     setMessages([]);
@@ -71,6 +116,48 @@ const Chat = () => {
   // Fetch messages for the current conversation
   useEffect(() => {
     const fetchMessages = async () => {
+      // Handle payment flow - create conversation if needed
+      if (isPaymentFlow && !conversationId && jobId && authToken) {
+        console.log('Payment flow: Creating new conversation for job:', jobId);
+        setIsLoadingMessages(true);
+        
+        try {
+          const apiUrl = import.meta.env.VITE_API_URL;
+          const createResponse = await fetch(`${apiUrl}/travel/chat-component/create-chat`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({
+              job_id: jobId,
+              trader_id: currentUserId,
+            }),
+          });
+          
+          if (createResponse.ok) {
+            const createData = await createResponse.json();
+            console.log('Created conversation:', createData);
+            const newConversationId = createData.conversation?.conversation_id;
+            
+            if (newConversationId) {
+              // Redirect to the new conversation
+              const newUrl = `/chat/${newConversationId}`;
+              console.log('Redirecting to new conversation:', newUrl);
+              navigate(newUrl, { replace: true });
+              return;
+            }
+          } else {
+            console.error('Failed to create conversation:', createResponse.status);
+          }
+        } catch (error) {
+          console.error('Error creating conversation:', error);
+        } finally {
+          setIsLoadingMessages(false);
+        }
+        return;
+      }
+      
       if (!conversationId || !authToken) {
         console.log('No conversationId or authToken, skipping message fetch', { conversationId, authToken: !!authToken });
         setIsLoadingMessages(false);
@@ -130,7 +217,7 @@ const Chat = () => {
     };
     
     fetchMessages();
-  }, [conversationId, authToken]);
+  }, [conversationId, authToken, isPaymentFlow, jobId, currentUserId, navigate]);
 
   // Create a UserRef-compatible counterparty for legacy components with defensive checks
   const legacyCounterparty = counterparty ? {
@@ -217,12 +304,13 @@ const Chat = () => {
   };
 
   return (
-    <div className="h-screen bg-background overflow-hidden">
+    <div  className="h-screen bg-background overflow-hidden">
       <div className="max-w-[1320px] mx-auto h-full flex flex-col">
         {/* Header */}
         <header className="flex-shrink-0 bg-background border-b border-border">
           <div className="flex items-center justify-between h-16 px-4">
-            <div className="flex items-center gap-3">
+            {/* Left side - Back button */}
+            <div className="flex items-center">
               <Button
                 variant="ghost"
                 size="sm"
@@ -231,8 +319,17 @@ const Chat = () => {
               >
                 <ArrowLeft className="w-4 h-4" />
               </Button>
-              
-              {/* Mobile Conversations Button */}
+            </div>
+            
+            {/* Center - Title */}
+            <div className="flex-1 flex justify-center">
+              <h1 className="font-semibold text-lg">
+                {counterparty?.name || (isPaymentFlow ? homeownerName : 'Chat')}
+              </h1>
+            </div>
+            
+            {/* Right side - Mobile Conversations Button */}
+            <div className="flex items-center">
               <Button
                 variant="default"
                 size="sm"
@@ -243,10 +340,6 @@ const Chat = () => {
                 <MessageCircle className="w-4 h-4 mr-2" />
                 Conversations
               </Button>
-              
-              <h1 className="font-semibold text-lg">
-                {counterparty?.name || 'Chat'}
-              </h1>
             </div>
           </div>
         </header>
@@ -284,10 +377,10 @@ const Chat = () => {
           </Sheet>
 
           {/* Chat Content */}
-          <div className="flex-1 flex flex-col min-w-0 bg-background overflow-hidden">
+          <div  className="flex-1 flex flex-col min-w-0 bg-background overflow-hidden">
             {/* Messages Area */}
             <div className="flex-1 overflow-hidden">
-              {!conversationId ? (
+              {!conversationId && !isPaymentFlow ? (
                 <div className="h-full flex items-center justify-center">
                   <div className="text-center">
                     <div className="w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center mx-auto mb-4">
