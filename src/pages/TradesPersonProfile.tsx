@@ -86,7 +86,7 @@ const TradesPersonProfile = () => {
                 setTraderProfile(data.project);
                 toast({
                     title: "Profile Updated",
-                    description: "Your profile has been successfully updated.",
+                    description: "",
                 });
                 setEditingField(null);
                 setEditingServices(false);
@@ -295,7 +295,7 @@ const TradesPersonProfile = () => {
                 
                 toast({
                     title: "Certification Image Uploaded",
-                    description: "Your certification image has been successfully uploaded.",
+                    description: "",
                 });
             } else {
                 throw new Error(data.error || 'Failed to upload certification image');
@@ -447,9 +447,6 @@ const TradesPersonProfile = () => {
                                 <Badge variant="default" className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground border-0 px-4 py-2 text-base font-medium">
                                     {traderProfile.primaryTrade} Specialist
                                 </Badge>
-                                <Badge variant="outline" className="border-primary/30 text-primary px-3 py-1">
-                                    {traderProfile.experienceYears} years exp.
-                                </Badge>
                             </div>
                             <p className="text-muted-foreground text-lg max-w-2xl">
                                 Professional {traderProfile.primaryTrade.toLowerCase()} services in {traderProfile.city} and surrounding areas
@@ -465,19 +462,19 @@ const TradesPersonProfile = () => {
                                 <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{traderProfile.radiusKm}km</div>
                                 <div className="text-sm text-muted-foreground">Service Radius</div>
                             </div>
-                            <div className="bg-background/50 backdrop-blur-sm rounded-xl p-4 border border-border/20">
+                            {/* <div className="bg-background/50 backdrop-blur-sm rounded-xl p-4 border border-border/20">
                                 <div className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center justify-center">
                                     <Star className="h-5 w-5 fill-current mr-1" />
                                     Verified Pro
                                 </div>
                                 <div className="text-sm text-muted-foreground">Status</div>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="container mx-auto px-4 py-8 max-w-6xl">
+            <div  className="container mx-auto px-4 py-8 max-w-6xl">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Left Sidebar - Contact & Quick Info */}
                     <div className="lg:col-span-1 space-y-6">
@@ -698,38 +695,7 @@ const TradesPersonProfile = () => {
                             </CardContent>
                         </Card>
 
-                        {/* Professional Status */}
-                        <Card className="shadow-xl bg-gradient-to-br from-card to-card/80 border-0">
-                            <CardHeader className="pb-4">
-                                <CardTitle className="text-xl flex items-center">
-                                    <Award className="h-5 w-5 mr-2 text-primary" />
-                                    Professional Status
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                {hasVerifiedProfessionalStatus() && (
-                                    <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-950/20 dark:to-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
-                                        <div className="flex items-center space-x-3">
-                                            <div className="bg-green-500 p-1.5 rounded-full">
-                                                <CheckCircle className="h-4 w-4 text-white" />
-                                            </div>
-                                            <span className="font-medium text-green-800 dark:text-green-200">Verified Professional</span>
-                                        </div>
-                                    </div>
-                                )}
-                                
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div className="text-center p-3 bg-muted/30 rounded-lg">
-                                        <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{traderProfile.experienceYears}</div>
-                                        <div className="text-xs text-muted-foreground">Years Experience</div>
-                                    </div>
-                                    <div className="text-center p-3 bg-muted/30 rounded-lg">
-                                        <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{traderProfile.radiusKm}km</div>
-                                        <div className="text-xs text-muted-foreground">Coverage Area</div>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
+                    
                     </div>
 
                     {/* Right Column - Detailed Information */}
