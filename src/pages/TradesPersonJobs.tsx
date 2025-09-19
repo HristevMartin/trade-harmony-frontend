@@ -997,7 +997,6 @@ const TradesPersonJobs = () => {
                     {[
                       { key: 'newest', label: 'Newest' },
                       { key: 'budget', label: 'Highest Budget' },
-                      { key: 'nearest', label: 'Nearest' }
                     ].map(({ key, label }) => (
                       <button
                         key={key}
