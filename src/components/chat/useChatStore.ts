@@ -1,6 +1,25 @@
 import { useState, useEffect } from 'react';
 
-// Types  
+// Types matching new API response structure
+export type Counterparty = {
+  id: string;
+  name: string;
+  avatar_url?: string;
+  job_title?: string;
+};
+
+export type ChatItem = {
+  conversation_id: string;
+  job_id: string;
+  user_role: 'homeowner' | 'trader';
+  status: string;
+  last_message_at: string;
+  message_count: number;
+  created_at: string;
+  counterparty: Counterparty;
+};
+
+// Legacy types for backward compatibility
 export type UserRef = { 
   id: string; 
   name: string; 
@@ -247,6 +266,59 @@ class ChatStore {
 }
 
 const chatStore = new ChatStore();
+
+// New hook for fetching chats from API
+export const useChats = () => {
+  const [chats, setChats] = useState<ChatItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchChats = async (authToken: string) => {
+    if (!authToken) {
+      setError('No auth token provided');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const response = await fetch(`${apiUrl}/travel/chat-component/get-all-chats`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch chats: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('Fetched chats:', data);
+      
+      // Map the API response directly to our ChatItem type
+      const chatItems: ChatItem[] = data.chats || data || [];
+      setChats(chatItems);
+    } catch (err) {
+      console.error('Error fetching chats:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch chats');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    chats,
+    isLoading,
+    error,
+    fetchChats,
+    refetch: (authToken: string) => fetchChats(authToken)
+  };
+};
 
 export const useChatStore = () => {
   const [, forceUpdate] = useState({});

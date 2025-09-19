@@ -1,38 +1,78 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Send, MessageCircle } from 'lucide-react';
 import MessageList from '@/components/chat/MessageList';
 import Sidebar from '@/components/chat/Sidebar';
-import { useChatStore } from '@/components/chat/useChatStore';
+import { useChats, type Counterparty } from '@/components/chat/useChatStore';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 
 const Chat = () => {
   const navigate = useNavigate();
+  const { conversation_id: paramConversationId } = useParams();
   const [searchParams] = useSearchParams();
-  const [conversationId, setConversationId] = useState('');
+  
+  // Support both URL params and search params for backward compatibility
+  const conversationId = paramConversationId || searchParams.get('conversation_id');
+  
+  // Debug logging
+  console.log('Chat Component Debug:', {
+    paramConversationId,
+    searchParamsConversationId: searchParams.get('conversation_id'),
+    finalConversationId: conversationId,
+    currentUrl: window.location.href
+  });
   const [message, setMessage] = useState('');
   const [conversation, setConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [isLoadingMessages, setIsLoadingMessages] = useState(true);
+  const [counterparty, setCounterparty] = useState<Counterparty | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { listMessages } = useChatStore();
-  
-  // Get parameters from URL
-  const jobId = searchParams.get('job_id');
-  const homeownerName = searchParams.get('homeowner_name');
-  const traderName = searchParams.get('trader_name');
-  const jobTitle = searchParams.get('job_title');
+  const { chats, fetchChats } = useChats();
   
   // Get current user from localStorage
   const authUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
   const currentUserId = authUser.id;
   const authToken = localStorage.getItem('access_token');
 
+  // Find current chat from the chats list to get counterparty info
+  const currentChat = chats.find(chat => chat.conversation_id === conversationId);
+
+  // Set counterparty from current chat data
   useEffect(() => {
-    const request = async () => {
-      if (!conversationId) {
-        console.log('No conversationId yet, skipping message fetch');
+    if (currentChat) {
+      console.log('Setting counterparty from currentChat:', currentChat);
+      setCounterparty(currentChat.counterparty);
+    } else if (chats.length > 0 && conversationId) {
+      console.log('Looking for conversation in chats:', { conversationId, chats });
+      const foundChat = chats.find(chat => chat.conversation_id === conversationId);
+      if (foundChat) {
+        console.log('Found chat, setting counterparty:', foundChat);
+        setCounterparty(foundChat.counterparty);
+      }
+    }
+  }, [currentChat, chats, conversationId]);
+
+  // Fetch all chats when component mounts
+  useEffect(() => {
+    if (authToken) {
+      fetchChats(authToken);
+    }
+  }, [authToken]);
+
+  // Reset messages when conversation changes
+  useEffect(() => {
+    setMessages([]);
+    setConversation(null);
+    setCounterparty(null);
+    setIsLoadingMessages(true);
+  }, [conversationId]);
+
+  // Fetch messages for the current conversation
+  useEffect(() => {
+    const fetchMessages = async () => {
+      if (!conversationId || !authToken) {
+        console.log('No conversationId or authToken, skipping message fetch', { conversationId, authToken: !!authToken });
         setIsLoadingMessages(false);
         return;
       }
@@ -53,9 +93,8 @@ const Chat = () => {
         
         if (response.ok) {
           const data = await response.json();
-          console.log('Messages API response:', data);
+          console.log('Messages API response for conversation', conversationId, ':', data);
           
-          // Transform API messages to match the expected format
           const transformedMessages = data.messages?.map(msg => ({
             id: msg.id,
             conversationId: msg.conversation_id,
@@ -63,68 +102,42 @@ const Chat = () => {
             body: msg.body,
             createdAt: new Date(msg.created_at).getTime(),
             attachments: msg.attachments_json ? JSON.parse(msg.attachments_json) : []
-          })) || [];
+          })).sort((a, b) => a.createdAt - b.createdAt) || []; // Sort in ascending order
           
-          console.log('Transformed messages:', transformedMessages);
+          console.log('Transformed messages count:', transformedMessages.length, transformedMessages);
           setMessages(transformedMessages);
-          setConversation(data.conversation || { 
-            id: data.conversation_id,
-            jobTitle: jobTitle || 'Chat Conversation'
-          });
+          
+          // Store conversation data if available
+          if (data.conversation) {
+            console.log('Setting conversation data:', data.conversation);
+            setConversation(data.conversation);
+          }
         } else {
-          console.error('Failed to fetch messages:', response.status, response.statusText);
+          const errorText = await response.text();
+          console.error('Failed to fetch messages:', {
+            status: response.status,
+            statusText: response.statusText,
+            conversationId,
+            url,
+            errorText
+          });
         }
       } catch (error) {
         console.error('Error fetching messages:', error);
       } finally {
         setIsLoadingMessages(false);
       }
-    }
-    request();
-  }, [conversationId, authToken, jobTitle])
-
-  useEffect(() => {
-    const fetchConversation = async () => {
-      if (!jobId || !currentUserId) return;
-      
-      const apiUrl = import.meta.env.VITE_API_URL;
-      const url = `${apiUrl}/travel/chat-component/create-chat`;
-      
-      try {
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authToken}`
-          },
-          body: JSON.stringify({
-            job_id: jobId,
-            trader_id: currentUserId,
-          }),
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          if (data?.conversation?.conversation_id) {
-            setConversationId(data.conversation.conversation_id);
-            setConversation(data.conversation);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching conversation:', error);
-      }
     };
     
-    fetchConversation();
-  }, [jobId, currentUserId]);
+    fetchMessages();
+  }, [conversationId, authToken]);
 
-  // Create counterparty object for display using URL parameters
-  // Always create counterparty if we have URL parameters, even without conversation
-  const counterparty = (homeownerName || traderName || conversationId) ? {
-    id: 'other-user',
-    name: homeownerName || traderName || 'Chat Partner',
-    role: 'homeowner' as const,
-    avatarUrl: null
+  // Create a UserRef-compatible counterparty for legacy components with defensive checks
+  const legacyCounterparty = counterparty ? {
+    id: counterparty.id || '',
+    name: counterparty.name || 'Unknown',
+    avatarUrl: counterparty.avatar_url || undefined,
+    role: 'homeowner' as const // Default role since we don't have this in new API
   } : null;
 
   // Debug logging
@@ -132,9 +145,7 @@ const Chat = () => {
     conversationId,
     conversation,
     counterparty,
-    homeownerName,
-    traderName,
-    jobTitle,
+    currentChat,
     messagesLength: messages.length,
     isLoadingMessages
   });
@@ -193,7 +204,7 @@ const Chat = () => {
             body: msg.body,
             createdAt: new Date(msg.created_at).getTime(),
             attachments: msg.attachments_json ? JSON.parse(msg.attachments_json) : []
-          })) || [];
+          })).sort((a, b) => a.createdAt - b.createdAt) || []; // Sort in ascending order
           setMessages(transformedMessages);
         }
       } else {
@@ -206,10 +217,10 @@ const Chat = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-[1320px] mx-auto">
+    <div className="h-screen bg-background overflow-hidden">
+      <div className="max-w-[1320px] mx-auto h-full flex flex-col">
         {/* Header */}
-        <header  className="sticky top-0 z-40 bg-background border-b border-border">
+        <header className="flex-shrink-0 bg-background border-b border-border">
           <div className="flex items-center justify-between h-16 px-4">
             <div className="flex items-center gap-3">
               <Button
@@ -233,18 +244,21 @@ const Chat = () => {
                 Conversations
               </Button>
               
-              <h1 className="font-semibold text-lg">Chat</h1>
+              <h1 className="font-semibold text-lg">
+                {counterparty?.name || 'Chat'}
+              </h1>
             </div>
           </div>
         </header>
 
-        <div style={{border: '2px solid red'}} className="flex h-[calc(100vh-4rem)] relative">
+        <div className="flex flex-1 relative overflow-hidden">
           {/* Desktop Sidebar */}
           <div className="hidden sm:block w-[340px] flex-shrink-0">
             <Sidebar
               conversation={conversation}
-              counterparty={counterparty}
-              currentUserId={currentUserId}
+              counterparty={legacyCounterparty}
+              authToken={authToken}
+              currentConversationId={conversationId}
             />
           </div>
 
@@ -259,9 +273,10 @@ const Chat = () => {
               <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
               <div className="relative bg-background h-full">
                 <Sidebar
-                  conversation={conversation}
-                  counterparty={counterparty}
-                  currentUserId={currentUserId}
+                  conversation={conversation} 
+                  counterparty={legacyCounterparty}
+                  authToken={authToken}
+                  currentConversationId={conversationId}
                   onClose={() => setSidebarOpen(false)}
                 />
               </div>
@@ -269,44 +284,83 @@ const Chat = () => {
           </Sheet>
 
           {/* Chat Content */}
-          <div className="flex-1 flex flex-col min-w-0 bg-background">
-          {/* Messages Area */}
-          {isLoadingMessages ? (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center">
-                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                <p className="text-muted-foreground">Loading messages...</p>
+          <div className="flex-1 flex flex-col min-w-0 bg-background overflow-hidden">
+            {/* Messages Area */}
+            <div className="flex-1 overflow-hidden">
+              {!conversationId ? (
+                <div className="h-full flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <MessageCircle className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                    <h3 className="font-semibold text-lg mb-2">Select a conversation</h3>
+                    <p className="text-muted-foreground">Choose a conversation from the sidebar to start chatting</p>
+                  </div>
+                </div>
+              ) : isLoadingMessages ? (
+                <div className="h-full flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-muted-foreground">Loading messages...</p>
+                  </div>
+                </div>
+              ) : messages.length === 0 ? (
+                <div className="h-full flex items-center justify-center p-8">
+                  <div className="text-center max-w-sm">
+                    <div className="w-20 h-20 bg-gradient-to-br from-primary/10 to-primary/5 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <MessageCircle className="w-10 h-10 text-primary/60" />
+                    </div>
+                    <h3 className="font-semibold text-lg text-foreground mb-2">No messages yet</h3>
+                    <p className="text-muted-foreground text-sm mb-6">
+                      {counterparty?.name 
+                        ? `Say hello to start the conversation with ${counterparty.name}.`
+                        : 'Say hello to start the conversation with your contact.'
+                      }
+                    </p>
+                    {counterparty?.job_title && (
+                      <p className="text-xs text-muted-foreground mb-4">
+                        About: {counterparty.job_title}
+                      </p>
+                    )}
+                    <div className="inline-flex items-center px-4 py-2 bg-primary/5 border border-primary/20 rounded-full text-sm text-primary">
+                      <MessageCircle className="w-4 h-4 mr-2" />
+                      Ready to chat
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="h-full overflow-y-auto">
+                  <MessageList
+                    messages={messages}
+                    conversation={conversation}
+                    currentUserId={currentUserId}
+                    counterparty={counterparty}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Message Input - Fixed at bottom */}
+            <div className="flex-shrink-0 border-t border-border p-4">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && conversationId && handleSendMessage()}
+                  placeholder={conversationId ? "Type your message..." : "Select a conversation to start chatting"}
+                  disabled={!conversationId}
+                  className="flex-1 px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-muted/50 disabled:text-muted-foreground disabled:cursor-not-allowed"
+                />
+                <Button 
+                  onClick={handleSendMessage}
+                  disabled={!message.trim() || !conversationId}
+                  className="px-4"
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
               </div>
             </div>
-          ) : (
-            <MessageList
-              messages={messages}
-              conversation={conversation}
-              currentUserId={currentUserId}
-              counterparty={counterparty}
-            />
-          )}
-
-          {/* Message Input */}
-          <div className="border-t border-border p-4">
-            <div  className="flex gap-2">
-              <input
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                placeholder="Type your message..."
-                className="flex-1 px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-              <Button 
-                onClick={handleSendMessage}
-                disabled={!message.trim()}
-                className="px-4"
-              >
-                <Send className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
           </div>
         </div>
       </div>
