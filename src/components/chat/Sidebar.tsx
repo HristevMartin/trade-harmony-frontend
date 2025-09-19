@@ -199,9 +199,17 @@ const Sidebar: React.FC<SidebarProps> = ({
                           )}
                         </div>
                         <div className="flex flex-col items-end flex-shrink-0">
-                          <span className="text-xs text-muted-foreground font-medium">
-                            {formatLastMessageTime(chat.last_message_at)}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-muted-foreground font-medium">
+                              {formatLastMessageTime(chat.last_message_at)}
+                            </span>
+                            {/* Unread count badge */}
+                            {chat.unread_count && chat.unread_count > 0 && (
+                              <span className="ml-2 inline-flex items-center justify-center min-w-[16px] h-[16px] px-1 rounded-full text-[10px] leading-[16px] text-white bg-red-500">
+                                {chat.unread_count > 99 ? '99' : chat.unread_count}
+                              </span>
+                            )}
+                          </div>
                           {chat.status && (
                             <span className={`text-xs px-1.5 py-0.5 rounded-full mt-1 ${
                               chat.status === 'active' 

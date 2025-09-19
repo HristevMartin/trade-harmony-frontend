@@ -41,10 +41,77 @@ const Chat = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { chats, fetchChats } = useChats();
   
+  // const [userInfo, setUserInfo] = useState(() => {
+  //   const authUser = localStorage.getItem('auth_user')
+  //   if (authUser) {
+  //     const userData = JSON.parse(authUser);
+  //     return userData;
+  //   }
+  //   return null;
+  // })
+
+  // parse sideBarOpen query param and auto-select latest conversation
+  const sideBarOpen = searchParams.get('sideBarOpen');
+  useEffect(() => {
+    if (sideBarOpen && !conversationId) {
+      // On mobile, open the sidebar sheet
+      setSidebarOpen(true);
+      
+      if (chats.length > 0) {
+        // Find the most recent conversation and navigate to it
+        const latestConversation = chats
+          .slice()
+          .sort((a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime())[0];
+        
+        if (latestConversation?.conversation_id) {
+          // Navigate to the latest conversation, removing the sideBarOpen param
+          navigate(`/chat/${latestConversation.conversation_id}`, { replace: true });
+        }
+      }
+      // If no chats, just keep the sidebar open to show "No conversations yet"
+    }
+  }, [sideBarOpen, chats, conversationId, navigate])
+  
   // Get current user from localStorage
   const authUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
   const currentUserId = authUser.id;
   const authToken = localStorage.getItem('access_token');
+
+  // Function to mark conversation as read
+  const markConversationAsRead = async (conversationId: string, authToken: string) => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const readResponse = await fetch(`${apiUrl}/travel/chat-component/${conversationId}/read`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        }
+      });
+      
+      if (readResponse.ok) {
+        console.log('Marked conversation as read:', conversationId);
+        
+        // Find the current chat to get its unread count
+        const currentChat = chats.find(chat => chat.conversation_id === conversationId);
+        const unreadCount = currentChat?.unread_count || 0;
+        
+        // Optimistically update navbar unread count
+        if (unreadCount > 0 && (window as any).updateNavbarUnreadCount) {
+          (window as any).updateNavbarUnreadCount(-unreadCount);
+        }
+        
+        // Trigger a refetch of chats to get updated data
+        if (authToken) {
+          fetchChats(authToken);
+        }
+      } else {
+        console.warn('Failed to mark conversation as read:', readResponse.status);
+      }
+    } catch (readError) {
+      console.error('Error marking conversation as read:', readError);
+    }
+  };
 
   // Find current chat from the chats list to get counterparty info
   const currentChat = chats.find(chat => chat.conversation_id === conversationId);
@@ -201,23 +268,7 @@ const Chat = () => {
           }
 
           // Mark conversation as read after messages are loaded
-          try {
-            const readResponse = await fetch(`${apiUrl}/travel/chat-component/${conversationId}/read`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-              }
-            });
-            
-            if (readResponse.ok) {
-              console.log('Marked conversation as read:', conversationId);
-            } else {
-              console.warn('Failed to mark conversation as read:', readResponse.status);
-            }
-          } catch (readError) {
-            console.error('Error marking conversation as read:', readError);
-          }
+          markConversationAsRead(conversationId, authToken);
         } else {
           const errorText = await response.text();
           console.error('Failed to fetch messages:', {
@@ -237,6 +288,20 @@ const Chat = () => {
     
     fetchMessages();
   }, [conversationId, authToken, isPaymentFlow, jobId, currentUserId, navigate]);
+
+  // Mark conversation as read when window gains focus
+  useEffect(() => {
+    const handleWindowFocus = () => {
+      if (conversationId && authToken) {
+        markConversationAsRead(conversationId, authToken);
+      }
+    };
+
+    window.addEventListener('focus', handleWindowFocus);
+    return () => {
+      window.removeEventListener('focus', handleWindowFocus);
+    };
+  }, [conversationId, authToken]);
 
   // Create a UserRef-compatible counterparty for legacy components with defensive checks
   const legacyCounterparty = counterparty ? {
@@ -374,26 +439,27 @@ const Chat = () => {
             />
           </div>
 
-          {/* Mobile Sidebar Drawer */}
-          <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-            <SheetContent 
-              side="left" 
-              className="w-[96vw] min-w-0 max-w-[420px] p-0 sm:hidden backdrop-blur-sm"
-              onOpenAutoFocus={(e) => e.preventDefault()}
-              onCloseAutoFocus={(e) => e.preventDefault()}
-            >
-              <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
-              <div className="relative bg-background h-full">
-                <Sidebar
-                  conversation={conversation} 
-                  counterparty={legacyCounterparty}
-                  authToken={authToken}
-                  currentConversationId={conversationId}
-                  onClose={() => setSidebarOpen(false)}
-                />
-              </div>
-            </SheetContent>
-          </Sheet>
+          {/* Mobile Sidebar Drawer - Only show on small screens */}
+          <div className="sm:hidden">
+            <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+              <SheetContent 
+                side="left" 
+                className="w-[96vw] min-w-0 max-w-[420px] p-0 backdrop-blur-sm"
+                onOpenAutoFocus={(e) => e.preventDefault()}
+                onCloseAutoFocus={(e) => e.preventDefault()}
+              >
+                <div className="relative bg-background h-full">
+                  <Sidebar
+                    conversation={conversation} 
+                    counterparty={legacyCounterparty}
+                    authToken={authToken}
+                    currentConversationId={conversationId}
+                    onClose={() => setSidebarOpen(false)}
+                  />
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
 
           {/* Chat Content */}
           <div  className="flex-1 flex flex-col min-w-0 bg-background overflow-hidden">

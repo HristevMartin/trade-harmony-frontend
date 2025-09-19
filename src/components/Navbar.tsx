@@ -11,12 +11,25 @@ const Navbar = () => {
   const isActive = (path: string) => location.pathname === path;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
-  
+
   // Chat state
   const [hasChats, setHasChats] = useState(false);
   const [unreadTotal, setUnreadTotal] = useState(0);
   const [loadingSummary, setLoadingSummary] = useState(false);
-  const [latestConversationId, setLatestConversationId] = useState<string | null>(null);
+  const [conversationsFromSummary, setConversationsFromSummary] = useState([]);
+
+  // Function to optimistically update unread count (can be called from other components)
+  const updateUnreadCount = (delta: number) => {
+    setUnreadTotal(prev => Math.max(0, prev + delta));
+  };
+
+  // Expose updateUnreadCount globally for other components to use
+  useEffect(() => {
+    (window as any).updateNavbarUnreadCount = updateUnreadCount;
+    return () => {
+      delete (window as any).updateNavbarUnreadCount;
+    };
+  }, []);
 
 
   useEffect(() => {
@@ -106,21 +119,22 @@ const Navbar = () => {
             'Authorization': `Bearer ${localStorage.getItem('access_token')}`
           }
         });
-        
+
         if (response.ok) {
           const data = await response.json();
           console.log('Chat summary data:', data);
-          
+
           // Update state based on API response
           const hasConversations = data.conversations && data.conversations.length > 0;
           setHasChats(hasConversations);
           setUnreadTotal(data.unread_total || 0);
-          
-          // Set latest conversation ID for navigation
-          if (hasConversations) {
-            const latestConversation = data.conversations[0]; // Assuming first is most recent
-            setLatestConversationId(latestConversation.conversation_id);
-          }
+          setConversationsFromSummary(data.conversations || []);
+        } else {
+          // If chat summary fails, reset chat state
+          console.warn('Failed to fetch chat summary:', response.status);
+          setHasChats(false);
+          setUnreadTotal(0);
+          setConversationsFromSummary([]);
         }
       } catch (error) {
         console.error('Error fetching chat summary:', error);
@@ -152,11 +166,7 @@ const Navbar = () => {
   };
 
   const handleChatNavigation = () => {
-    if (latestConversationId) {
-      navigate(`/chat/${latestConversationId}`);
-    } else {
-      navigate('/chat');
-    }
+    navigate(`/chat?sideBarOpen=true`);
     setIsMobileMenuOpen(false);
   };
 
@@ -188,6 +198,12 @@ const Navbar = () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('auth_user');
     setUser(null);
+
+    // Reset chat state on logout
+    setHasChats(false);
+    setUnreadTotal(0);
+    setConversationsFromSummary([]);
+    setLoadingSummary(false);
 
     // Dispatch custom event to notify other components of auth change
     window.dispatchEvent(new Event('authChange'));
@@ -249,11 +265,13 @@ const Navbar = () => {
             )}
 
             {/* Chat Button - Show if user has chats */}
-            {hasChats && (
+            {hasChats && !loadingSummary && (
               <button
                 onClick={handleChatNavigation}
                 className={`relative text-foreground hover:text-trust-blue transition-colors font-medium flex items-center gap-2 ${location.pathname.startsWith('/chat') ? 'text-trust-blue' : ''}`}
+                aria-label={unreadTotal > 0 ? `Open chat, ${unreadTotal} unread messages` : 'Open chat'}
               >
+                <MessageCircle className="w-5 h-5" />
                 Chat
                 {unreadTotal > 0 && (
                   <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
@@ -359,12 +377,14 @@ const Navbar = () => {
                 )}
 
                 {/* Chat Button - Show if user has chats */}
-                {hasChats && (
+                {hasChats && !loadingSummary && (
                   <button
                     onClick={handleChatNavigation}
                     className={`flex items-center justify-between w-full text-left py-2 px-4 rounded-lg transition-colors ${location.pathname.startsWith('/chat') ? 'bg-trust-blue/10 text-trust-blue' : 'text-foreground hover:bg-muted'}`}
+                    aria-label={unreadTotal > 0 ? `Open chat, ${unreadTotal} unread messages` : 'Open chat'}
                   >
                     <div className="flex items-center gap-2">
+                      <MessageCircle className="w-5 h-5" />
                       Chat
                     </div>
                     {unreadTotal > 0 && (

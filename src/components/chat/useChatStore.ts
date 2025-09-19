@@ -17,6 +17,7 @@ export type ChatItem = {
   message_count: number;
   created_at: string;
   counterparty: Counterparty;
+  unread_count?: number; // Added for unread message count
 };
 
 // Legacy types for backward compatibility
@@ -285,23 +286,54 @@ export const useChats = () => {
       setError(null);
       
       const apiUrl = import.meta.env.VITE_API_URL;
-      const response = await fetch(`${apiUrl}/travel/chat-component/get-all-chats`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`
-        }
-      });
+      
+      // Fetch both chats and chat summary in parallel
+      const [chatsResponse, summaryResponse] = await Promise.all([
+        fetch(`${apiUrl}/travel/chat-component/get-all-chats`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          }
+        }),
+        fetch(`${apiUrl}/travel/chat-component/chat-summary`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          }
+        })
+      ]);
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch chats: ${response.status} ${response.statusText}`);
+      if (!chatsResponse.ok) {
+        throw new Error(`Failed to fetch chats: ${chatsResponse.status} ${chatsResponse.statusText}`);
       }
 
-      const data = await response.json();
-      console.log('Fetched chats:', data);
+      const chatsData = await chatsResponse.json();
+      console.log('Fetched chats:', chatsData);
       
-      // Map the API response directly to our ChatItem type
-      const chatItems: ChatItem[] = data.chats || data || [];
+      let chatItems: ChatItem[] = chatsData.chats || chatsData || [];
+
+      // If summary response is successful, merge unread counts
+      if (summaryResponse.ok) {
+        const summaryData = await summaryResponse.json();
+        console.log('Fetched chat summary:', summaryData);
+        
+        const summaryConversations = summaryData.conversations || [];
+        
+        // Create a map of conversation_id to unread_count for quick lookup
+        const unreadCountMap = new Map();
+        summaryConversations.forEach((conv: any) => {
+          unreadCountMap.set(conv.conversation_id, conv.unread_count || 0);
+        });
+        
+        // Merge unread counts into chat items
+        chatItems = chatItems.map(chat => ({
+          ...chat,
+          unread_count: unreadCountMap.get(chat.conversation_id) || 0
+        }));
+      }
+      
       setChats(chatItems);
     } catch (err) {
       console.error('Error fetching chats:', err);
