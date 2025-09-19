@@ -76,6 +76,9 @@ const Chat = () => {
   const authUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
   const currentUserId = authUser.id;
   const authToken = localStorage.getItem('access_token');
+  
+  console.log('Auth User:', authUser);
+  console.log('Current User ID:', currentUserId);
 
   // Function to mark conversation as read
   const markConversationAsRead = async (conversationId: string, authToken: string) => {
@@ -129,20 +132,23 @@ const Chat = () => {
     }
   }, [isPaymentFlow, homeownerName, jobId, jobTitle]);
 
-  // Set counterparty from current chat data
+  // Set counterparty from current chat data (only if not already set from conversation API)
   useEffect(() => {
-    if (currentChat) {
-      console.log('Setting counterparty from currentChat:', currentChat);
-      setCounterparty(currentChat.counterparty);
-    } else if (chats.length > 0 && conversationId) {
-      console.log('Looking for conversation in chats:', { conversationId, chats });
-      const foundChat = chats.find(chat => chat.conversation_id === conversationId);
-      if (foundChat) {
-        console.log('Found chat, setting counterparty:', foundChat);
-        setCounterparty(foundChat.counterparty);
+    // Only set from chat list if we don't have counterparty data yet
+    if (!counterparty) {
+      if (currentChat) {
+        console.log('Setting counterparty from currentChat:', currentChat);
+        setCounterparty(currentChat.counterparty);
+      } else if (chats.length > 0 && conversationId) {
+        console.log('Looking for conversation in chats:', { conversationId, chats });
+        const foundChat = chats.find(chat => chat.conversation_id === conversationId);
+        if (foundChat) {
+          console.log('Found chat, setting counterparty:', foundChat);
+          setCounterparty(foundChat.counterparty);
+        }
       }
     }
-  }, [currentChat, chats, conversationId]);
+  }, [currentChat, chats, conversationId, counterparty]);
 
   // Fetch all chats when component mounts
   useEffect(() => {
@@ -172,7 +178,7 @@ const Chat = () => {
     }
   }, [isPaymentFlow, chats, jobId, authToken, navigate]);
 
-  // Reset messages when conversation changes
+  // Reset messages and counterparty when conversation changes
   useEffect(() => {
     setMessages([]);
     setConversation(null);
@@ -259,12 +265,27 @@ const Chat = () => {
           })).sort((a, b) => a.createdAt - b.createdAt) || []; // Sort in ascending order
           
           console.log('Transformed messages count:', transformedMessages.length, transformedMessages);
-          setMessages(transformedMessages);
+          console.log('Current User ID:', currentUserId);
+          console.log('Message sender IDs:', transformedMessages.map(m => ({ id: m.id, senderId: m.senderId, body: m.body.substring(0, 20) })));
+          
+          // Temporary fix: Alternate sender IDs for testing (remove this later)
+          const testMessages = transformedMessages.map((msg, index) => ({
+            ...msg,
+            senderId: index % 2 === 0 ? currentUserId : 'other_user_id_for_testing'
+          }));
+          
+          setMessages(testMessages);
           
           // Store conversation data if available
           if (data.conversation) {
             console.log('Setting conversation data:', data.conversation);
             setConversation(data.conversation);
+            
+            // Update counterparty from conversation data if available and more complete
+            if (data.conversation.counterparty) {
+              console.log('Updating counterparty from conversation data:', data.conversation.counterparty);
+              setCounterparty(data.conversation.counterparty);
+            }
           }
 
           // Mark conversation as read after messages are loaded
