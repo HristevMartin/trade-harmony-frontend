@@ -199,6 +199,25 @@ const Chat = () => {
             console.log('Setting conversation data:', data.conversation);
             setConversation(data.conversation);
           }
+
+          // Mark conversation as read after messages are loaded
+          try {
+            const readResponse = await fetch(`${apiUrl}/travel/chat-component/${conversationId}/read`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+              }
+            });
+            
+            if (readResponse.ok) {
+              console.log('Marked conversation as read:', conversationId);
+            } else {
+              console.warn('Failed to mark conversation as read:', readResponse.status);
+            }
+          } catch (readError) {
+            console.error('Error marking conversation as read:', readError);
+          }
         } else {
           const errorText = await response.text();
           console.error('Failed to fetch messages:', {
@@ -427,7 +446,7 @@ const Chat = () => {
                     messages={messages}
                     conversation={conversation}
                     currentUserId={currentUserId}
-                    counterparty={counterparty}
+                    counterparty={legacyCounterparty}
                   />
                 </div>
               )}

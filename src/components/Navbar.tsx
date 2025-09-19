@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Building, Wrench, Zap, Menu, X, User, FolderOpen, LogIn, LogOut } from "lucide-react";
+import { Building, Wrench, Zap, Menu, X, User, FolderOpen, LogIn, LogOut, MessageCircle } from "lucide-react";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -11,61 +11,14 @@ const Navbar = () => {
   const isActive = (path: string) => location.pathname === path;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
+  
+  // Chat state
+  const [hasChats, setHasChats] = useState(false);
+  const [unreadTotal, setUnreadTotal] = useState(0);
+  const [loadingSummary, setLoadingSummary] = useState(false);
+  const [latestConversationId, setLatestConversationId] = useState<string | null>(null);
 
-  // Define the same services mapping as in Index page
-  const services = [
-    {
-      title: "Building & Construction",
-      description: "Complete building services for residential and commercial projects",
-      icon: <Building className="h-4 w-4" />,
-      dbField: "building"
-    },
-    {
-      title: "Electrical Services",
-      description: "Licensed electrical installation & repairs",
-      icon: <Zap className="h-4 w-4" />,
-      dbField: "electrical"
-    },
-    {
-      title: "Mechanical Repairs",
-      description: "Expert diagnosis & repair solutions",
-      icon: <Wrench className="h-4 w-4" />,
-      dbField: "mechanic"
-    },
-  ];
 
-  const mapDatabaseToFrontend = (dbServices: any[]) => {
-    // Filter and map only services that exist in the database
-    return services
-      .map(frontendService => {
-        // Find matching database service by dbField
-        const dbService = dbServices.find(db =>
-          db.trade === frontendService.dbField ||
-          db.type === frontendService.dbField ||
-          db.service_type === frontendService.dbField ||
-          db.name?.toLowerCase() === frontendService.dbField
-        );
-
-        if (dbService) {
-          // Merge database data with frontend configuration
-          return {
-            ...frontendService,
-            // Override with database values if they exist
-            title: dbService.title || dbService.name || frontendService.title,
-            description: dbService.description || frontendService.description,
-            icon: frontendService.icon,
-            // Add any additional database fields
-            ...dbService
-          };
-        }
-
-        // Return null if no database match found
-        return null;
-      })
-      .filter(service => service !== null); // Remove null entries (services not in database)
-  };
-
-  // Check user authentication and role
   useEffect(() => {
     const checkAuthState = () => {
       const authUser = localStorage.getItem('auth_user');
@@ -82,7 +35,6 @@ const Navbar = () => {
       }
     };
 
-
     // Check auth state on mount
     checkAuthState();
 
@@ -98,7 +50,6 @@ const Navbar = () => {
     };
   }, []);
 
-
   useEffect(() => {
     const refetchUserRole = async () => {
       const authUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
@@ -108,7 +59,7 @@ const Navbar = () => {
           const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/get-user-role?userId=${userId}`);
           const data = await response.json();
           console.log('show me the user role', data);
-          
+
           // Handle the case where API returns an array of roles
           if (Array.isArray(data)) {
             // Update user with the array of roles from API
@@ -139,6 +90,58 @@ const Navbar = () => {
   }, []);
 
 
+  // Chat summary fetching with polling
+  useEffect(() => {
+    const getChatSummary = async () => {
+      if (!user || !localStorage.getItem('access_token')) {
+        return;
+      }
+
+      try {
+        setLoadingSummary(true);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/chat-component/chat-summary`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Chat summary data:', data);
+          
+          // Update state based on API response
+          const hasConversations = data.conversations && data.conversations.length > 0;
+          setHasChats(hasConversations);
+          setUnreadTotal(data.unread_total || 0);
+          
+          // Set latest conversation ID for navigation
+          if (hasConversations) {
+            const latestConversation = data.conversations[0]; // Assuming first is most recent
+            setLatestConversationId(latestConversation.conversation_id);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching chat summary:', error);
+      } finally {
+        setLoadingSummary(false);
+      }
+    };
+
+    // Initial fetch
+    getChatSummary();
+
+    // Set up polling every 30 seconds
+    const pollInterval = setInterval(getChatSummary, 30000);
+
+    return () => {
+      clearInterval(pollInterval);
+    };
+  }, [user]);
+
+
+
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
@@ -148,18 +151,27 @@ const Navbar = () => {
     setIsMobileMenuOpen(false);
   };
 
+  const handleChatNavigation = () => {
+    if (latestConversationId) {
+      navigate(`/chat/${latestConversationId}`);
+    } else {
+      navigate('/chat');
+    }
+    setIsMobileMenuOpen(false);
+  };
+
   // check if user?.role is array or string properly
   const isCustomer = Array.isArray(user?.role) ? user?.role.includes('customer') : user?.role === 'customer' || user?.role === 'USER';
   console.log('show me the isCustomer', isCustomer);
   const isLoggedIn = !!user;
 
   // Show "View Jobs" for users with trader role
-  const isTrader = Array.isArray(user?.role) 
+  const isTrader = Array.isArray(user?.role)
     ? user?.role.includes('trader') // Show View Jobs if user has trader role
     : user?.role === 'trader'; // Fallback for string role
 
   // Check if user already has trader role (hide join button)
-  const hasTraderRole = Array.isArray(user?.role) 
+  const hasTraderRole = Array.isArray(user?.role)
     ? user?.role.includes('trader')
     : user?.role === 'trader';
   console.log('show me the isTrader', isTrader);
@@ -176,10 +188,10 @@ const Navbar = () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('auth_user');
     setUser(null);
-    
+
     // Dispatch custom event to notify other components of auth change
     window.dispatchEvent(new Event('authChange'));
-    
+
     navigate('/');
     setIsMobileMenuOpen(false);
   };
@@ -202,17 +214,17 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <button 
-              onClick={() => handleNavigation('/')} 
+            <button
+              onClick={() => handleNavigation('/')}
               className={`text-foreground hover:text-trust-blue transition-colors font-medium ${isActive('/') ? 'text-trust-blue' : ''}`}
             >
               Home
             </button>
-            
+
             {/* My Projects - Only show for customers */}
             {isCustomer && (
-              <button 
-                onClick={() => handleNavigation('/homeowner/my-projects')} 
+              <button
+                onClick={() => handleNavigation('/homeowner/my-projects')}
                 className={`text-foreground hover:text-trust-blue transition-colors font-medium flex items-center gap-2 ${isActive('/homeowner/my-projects') ? 'text-trust-blue' : ''}`}
               >
                 My Projects
@@ -221,21 +233,36 @@ const Navbar = () => {
 
             {isTrader && (
               <>
-                <button 
-                  onClick={() => handleNavigation('/tradesperson/jobs')} 
+                <button
+                  onClick={() => handleNavigation('/tradesperson/jobs')}
                   className={`text-foreground hover:text-trust-blue transition-colors font-medium flex items-center gap-2 ${isActive('/tradesperson/jobs') ? 'text-trust-blue' : ''}`}
                 >
                   View Jobs
                 </button>
-                <button 
-                  onClick={() => handleNavigation('/tradesperson/profile')} 
+                <button
+                  onClick={() => handleNavigation('/tradesperson/profile')}
                   className={`text-foreground hover:text-trust-blue transition-colors font-medium flex items-center gap-2 ${isActive('/tradesperson/profile') ? 'text-trust-blue' : ''}`}
                 >
                   My Profile
                 </button>
               </>
             )}
-            
+
+            {/* Chat Button - Show if user has chats */}
+            {hasChats && (
+              <button
+                onClick={handleChatNavigation}
+                className={`relative text-foreground hover:text-trust-blue transition-colors font-medium flex items-center gap-2 ${location.pathname.startsWith('/chat') ? 'text-trust-blue' : ''}`}
+              >
+                Chat
+                {unreadTotal > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                    {unreadTotal > 99 ? '99' : unreadTotal}
+                  </span>
+                )}
+              </button>
+            )}
+
           </nav>
 
           {/* Desktop Auth & CTA Buttons */}
@@ -258,7 +285,7 @@ const Navbar = () => {
                 Login
               </button>
             )}
-            
+
             {/* CTA Button - Only show if user doesn't have trader role */}
             {!hasTraderRole && (
               <Button
@@ -296,17 +323,17 @@ const Navbar = () => {
               className="md:hidden overflow-hidden"
             >
               <nav className="py-4 space-y-4 border-t border-border/10 mt-4">
-                <button 
-                  onClick={() => handleNavigation('/')} 
+                <button
+                  onClick={() => handleNavigation('/')}
                   className={`block w-full text-left py-2 px-4 rounded-lg transition-colors ${isActive('/') ? 'bg-trust-blue/10 text-trust-blue' : 'text-foreground hover:bg-muted'}`}
                 >
                   Home
                 </button>
-                
+
                 {/* My Projects - Only show for customers */}
                 {isCustomer && (
-                  <button 
-                    onClick={() => handleNavigation('/homeowner/my-projects')} 
+                  <button
+                    onClick={() => handleNavigation('/homeowner/my-projects')}
                     className={`flex items-center gap-2 w-full text-left py-2 px-4 rounded-lg transition-colors ${isActive('/homeowner/my-projects') ? 'bg-trust-blue/10 text-trust-blue' : 'text-foreground hover:bg-muted'}`}
                   >
                     My Projects
@@ -316,21 +343,38 @@ const Navbar = () => {
                 {/* View Jobs & Profile - Only show for verified traders (master role) */}
                 {isTrader && (
                   <>
-                    <button 
-                      onClick={() => handleNavigation('/tradesperson/jobs')} 
+                    <button
+                      onClick={() => handleNavigation('/tradesperson/jobs')}
                       className={`flex items-center gap-2 w-full text-left py-2 px-4 rounded-lg transition-colors ${isActive('/tradesperson/jobs') ? 'bg-trust-blue/10 text-trust-blue' : 'text-foreground hover:bg-muted'}`}
                     >
                       View Jobs
                     </button>
-                    <button 
-                      onClick={() => handleNavigation('/tradesperson/profile')} 
+                    <button
+                      onClick={() => handleNavigation('/tradesperson/profile')}
                       className={`flex items-center gap-2 w-full text-left py-2 px-4 rounded-lg transition-colors ${isActive('/tradesperson/profile') ? 'bg-trust-blue/10 text-trust-blue' : 'text-foreground hover:bg-muted'}`}
                     >
                       My Profile
                     </button>
                   </>
                 )}
-                
+
+                {/* Chat Button - Show if user has chats */}
+                {hasChats && (
+                  <button
+                    onClick={handleChatNavigation}
+                    className={`flex items-center justify-between w-full text-left py-2 px-4 rounded-lg transition-colors ${location.pathname.startsWith('/chat') ? 'bg-trust-blue/10 text-trust-blue' : 'text-foreground hover:bg-muted'}`}
+                  >
+                    <div className="flex items-center gap-2">
+                      Chat
+                    </div>
+                    {unreadTotal > 0 && (
+                      <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                        {unreadTotal > 99 ? '99' : unreadTotal}
+                      </span>
+                    )}
+                  </button>
+                )}
+
                 {/* Mobile Auth & CTA Buttons */}
                 <div className="pt-2 border-t border-border/10 space-y-3">
                   {/* Login/Logout Button */}
@@ -350,7 +394,7 @@ const Navbar = () => {
                       Login
                     </button>
                   )}
-                  
+
                   {/* CTA Button - Only show if user doesn't have trader role */}
                   {!hasTraderRole && (
                     <Button

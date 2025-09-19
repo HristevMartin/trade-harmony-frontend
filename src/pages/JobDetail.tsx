@@ -238,13 +238,16 @@ const JobDetail = () => {
         return flags[country] || '🌍';
     };
 
-    if (loading) {
+    // Show loading if either job data or payment status is still loading
+    if (loading || (isTrader && !paymentStatusLoaded)) {
         return (
             <>
                 <div className="min-h-screen bg-slate-50 flex items-center justify-center">
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                        <p className="text-slate-600">Loading job details...</p>
+                        <p className="text-slate-600">
+                            {loading ? 'Loading job details...' : 'Checking application status...'}
+                        </p>
                     </div>
                 </div>
             </>

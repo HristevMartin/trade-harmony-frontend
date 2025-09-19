@@ -102,11 +102,9 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
         console.log('Payment confirmation data:', data);
       } catch (error) {
         console.error('Payment confirmation error:', error);
-        // Continue with success flow - payment was processed by Stripe
       }
     };
 
-    // Always proceed to success after Stripe payment completes
     setCurrentStep('success');
     setShowPaymentSuccess(true);
     

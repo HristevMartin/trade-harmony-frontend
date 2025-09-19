@@ -71,42 +71,6 @@ const ChatIntro: React.FC<ChatIntroProps> = ({
         </div>
       </Card>
 
-      {/* Message Template */}
-      <div className="space-y-3">
-        <label 
-          htmlFor="intro-message" 
-          className="block text-sm md:text-base font-semibold text-foreground"
-        >
-          Your first message:
-        </label>
-        <div className="relative">
-          <Textarea
-            id="intro-message"
-            value={message}
-            onChange={(e) => {
-              if (e.target.value.length <= maxChars) {
-                setMessage(e.target.value);
-              }
-            }}
-            placeholder="Introduce yourself and your interest in the job..."
-            className={`min-h-[120px] md:min-h-[140px] resize-none text-sm md:text-base leading-relaxed pr-16 ${
-              charsRemaining < 50 ? 'border-orange-300 focus:border-orange-500' : ''
-            } ${charsRemaining < 0 ? 'border-destructive focus:border-destructive' : ''}`}
-            disabled={isLoading}
-          />
-          <div className={`absolute bottom-3 right-3 text-xs font-medium px-2 py-1 rounded-full ${
-            charsRemaining < 50 ? 'text-orange-600 bg-orange-100' : 'text-muted-foreground bg-muted'
-          } ${charsRemaining < 0 ? 'text-destructive bg-destructive/10' : ''}`}>
-            {charsRemaining < 0 ? 'Too long!' : `${charsRemaining} left`}
-          </div>
-        </div>
-        
-        {/* Character counter helper */}
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>💡 Tip: Be specific about your experience and availability</span>
-          <span>{message.length}/{maxChars}</span>
-        </div>
-      </div>
 
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-3 pt-2">

@@ -8,7 +8,7 @@ export const COPY_STRINGS = {
     "Share availability & quote", 
     "Attach portfolio photos"
   ],
-  SEND_AND_OPEN_CHAT: "Send & Open Chat",
+  SEND_AND_OPEN_CHAT: "Open Chat",
   CLOSE: "Close",
   SEND: "Send",
   OPEN_FULL_CHAT: "Open full chat",
