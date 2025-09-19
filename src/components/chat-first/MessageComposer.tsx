@@ -88,7 +88,7 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
 
       {/* Composer */}
       <div className="flex items-end gap-2">
-        <div className="flex-1">
+        <div  className="flex-1">
           <Textarea
             ref={textareaRef}
             value={message}

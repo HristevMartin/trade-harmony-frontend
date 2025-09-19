@@ -76,16 +76,13 @@ const Chat = () => {
   const authUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
   const currentUserId = authUser.id;
   const authToken = localStorage.getItem('access_token');
-  
-  console.log('Auth User:', authUser);
-  console.log('Current User ID:', currentUserId);
 
   // Function to mark conversation as read
   const markConversationAsRead = async (conversationId: string, authToken: string) => {
     try {
       const apiUrl = import.meta.env.VITE_API_URL;
-      const readResponse = await fetch(`${apiUrl}/travel/chat-component/${conversationId}/read`, {
-        method: 'POST',
+      const readResponse = await fetch(`${apiUrl}/travel/chat-component/mark-as-read/${conversationId}`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${authToken}`
@@ -115,6 +112,7 @@ const Chat = () => {
       console.error('Error marking conversation as read:', readError);
     }
   };
+
 
   // Find current chat from the chats list to get counterparty info
   const currentChat = chats.find(chat => chat.conversation_id === conversationId);
@@ -264,17 +262,9 @@ const Chat = () => {
             attachments: msg.attachments_json ? JSON.parse(msg.attachments_json) : []
           })).sort((a, b) => a.createdAt - b.createdAt) || []; // Sort in ascending order
           
-          console.log('Transformed messages count:', transformedMessages.length, transformedMessages);
-          console.log('Current User ID:', currentUserId);
-          console.log('Message sender IDs:', transformedMessages.map(m => ({ id: m.id, senderId: m.senderId, body: m.body.substring(0, 20) })));
+          console.log('Loaded', transformedMessages.length, 'messages for conversation:', conversationId);
           
-          // Temporary fix: Alternate sender IDs for testing (remove this later)
-          const testMessages = transformedMessages.map((msg, index) => ({
-            ...msg,
-            senderId: index % 2 === 0 ? currentUserId : 'other_user_id_for_testing'
-          }));
-          
-          setMessages(testMessages);
+          setMessages(transformedMessages);
           
           // Store conversation data if available
           if (data.conversation) {
@@ -351,6 +341,7 @@ const Chat = () => {
     // Use conversationId directly instead of trying to modify it
     const chatObj = {
       conversationId: conversationId,
+      senderId: currentUserId, // Add sender ID to identify who is sending
       body: message.trim(),
       action: "send_message"
     };
