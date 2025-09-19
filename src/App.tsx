@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ServiceProviders from "./pages/ServiceProviders";
@@ -28,6 +28,13 @@ import TestChatModal from "./pages/TestChatModal";
 import Chat from "./pages/Chat";
 
 const queryClient = new QueryClient();
+
+const ConditionalFooter = () => {
+  const location = useLocation();
+  const isChatPage = location.pathname.startsWith('/chat');
+  
+  return !isChatPage ? <Footer /> : null;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -58,8 +65,9 @@ const App = () => (
             <Route path="/payment-result" element={<PaymentResult />} />
             <Route path="/test-chat" element={<TestChatModal />} />
             <Route path="/chat" element={<Chat />} />
+            <Route path="/chat/:conversation_id" element={<Chat />} />
           </Routes>
-          <Footer />
+          <ConditionalFooter />
         </BrowserRouter>
       </StripeProvider>
     </TooltipProvider>
