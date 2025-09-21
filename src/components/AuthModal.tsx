@@ -107,6 +107,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess, role = 'customer' }: AuthModalP
 
             const response = await fetch(`${import.meta.env.VITE_API_URL}${endpoint}`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -117,11 +118,9 @@ const AuthModal = ({ isOpen, onClose, onSuccess, role = 'customer' }: AuthModalP
 
             if (response.ok) {
                 // Save auth data to localStorage
-                localStorage.setItem("access_token", data.token);
                 localStorage.setItem("auth_user", JSON.stringify({
                     id: data.id,
                     role: data.role,
-                    email: formData.email
                 }));
 
                 // Dispatch custom event to notify other components of auth change
@@ -131,8 +130,6 @@ const AuthModal = ({ isOpen, onClose, onSuccess, role = 'customer' }: AuthModalP
                 onSuccess({
                     id: data.id,
                     role: data.role,
-                    token: data.token,
-                    email: formData.email
                 });
 
                 // Reset form and close modal

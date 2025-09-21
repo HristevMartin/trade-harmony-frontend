@@ -577,6 +577,7 @@ const TradesPersonOnboarding = () => {
       
       const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/save-trader-project`, {
         method: 'POST',
+        credentials: 'include',
         headers,
         body: formDataToSend
       });

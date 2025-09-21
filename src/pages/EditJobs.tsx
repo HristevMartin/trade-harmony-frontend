@@ -123,7 +123,12 @@ const EditJob = () => {
         const getJobData = async () => {
             try {
                 setLoading(true);
-                const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/get-client-project/${id}`);
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/get-client-project/${id}`, {
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
                 const data = await response.json();
 
                 console.log('show me the data', data);
@@ -258,6 +263,7 @@ const EditJob = () => {
 
             const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/edit-client-project/${id}`, {
                 method: 'PUT',
+                credentials: 'include',
                 body: formDataToSend
             });
 

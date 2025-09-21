@@ -492,6 +492,7 @@ const PostJob = () => {
             
             const submitDataRequest = await fetch(`${API_URL}/travel/save-client-project`, {
                 method: 'POST',
+                credentials: 'include',
                 headers,
                 body: formDataToSend,
             });

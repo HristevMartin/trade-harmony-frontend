@@ -131,7 +131,12 @@ const JobDetail = () => {
         const getJobData = async () => {
             try {
                 setLoading(true);
-                const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/get-client-project/${id}`);
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/get-client-project/${id}`, {
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
                 const data = await response.json();
 
                 if (data.success && data.project) {

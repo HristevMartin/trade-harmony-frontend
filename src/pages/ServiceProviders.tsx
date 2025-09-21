@@ -101,7 +101,12 @@ const ServiceProviders = () => {
     const fetchAllServices = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`${import.meta.env.VITE_TRAVEL_SECURITY}/travel/get-all-profiles`);
+        const response = await fetch(`${import.meta.env.VITE_TRAVEL_SECURITY}/travel/get-all-profiles`, {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
         if (response.ok) {
           const data = await response.json(); 
           let dataProfiles = data.profiles
@@ -129,7 +134,12 @@ const ServiceProviders = () => {
     const fetchServices = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`${import.meta.env.VITE_TRAVEL_SECURITY}/travel/get-specific-services/${mappedServiceType}`);
+        const response = await fetch(`${import.meta.env.VITE_TRAVEL_SECURITY}/travel/get-specific-services/${mappedServiceType}`, {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
         if (response.ok) {
           const data = await response.json();
           console.log('show me the database data', data);

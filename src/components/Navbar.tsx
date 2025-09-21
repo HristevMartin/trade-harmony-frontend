@@ -69,7 +69,12 @@ const Navbar = () => {
       const userId = authUser?.id;
       if (userId) {
         try {
-          const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/get-user-role?userId=${userId}`);
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/get-user-role?userId=${userId}`, {
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
           const data = await response.json();
           console.log('show me the user role', data);
 

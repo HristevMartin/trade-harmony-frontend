@@ -86,7 +86,12 @@ const HomeownerGetProjects = () => {
       try {
         setLoading(true);
         // Use the correct endpoint that expects user_id as query param
-        const response = await fetch(`${apiUrl}/travel/save-client-project?user_id=${userId}`);
+        const response = await fetch(`${apiUrl}/travel/save-client-project?user_id=${userId}`, {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -208,6 +213,7 @@ const HomeownerGetProjects = () => {
 
           const response = await fetch(`${apiUrl}/travel/edit-client-project/${project.project_id}`, {
             method: 'PUT',
+            credentials: 'include',
             body: formDataToSend
           });
 
@@ -253,6 +259,7 @@ const HomeownerGetProjects = () => {
           
           const response = await fetch(`${apiUrl}/travel/edit-client-project/${project.project_id}`, {
             method: 'DELETE',
+            credentials: 'include',
             headers: {
               'Content-Type': 'application/json',
             },

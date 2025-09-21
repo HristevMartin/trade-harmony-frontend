@@ -73,6 +73,7 @@ const TradesPersonProfile = () => {
             
             const response = await fetch(`${apiUrl}/travel/get-trader-project/${userId}`, {
                 method: 'PUT',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -100,7 +101,12 @@ const TradesPersonProfile = () => {
             console.error('Error saving profile:', error);
             // Fetch fresh data to ensure UI is in sync
             try {
-                const response = await fetch(`${apiUrl}/travel/get-trader-project/${userId}`);
+                const response = await fetch(`${apiUrl}/travel/get-trader-project/${userId}`, {
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
                 const data = await response.json();
                 if (data.success) {
                     setTraderProfile(data.project);
@@ -171,6 +177,7 @@ const TradesPersonProfile = () => {
 
             const response = await fetch(`${apiUrl}/travel/get-trader-project/${userId}`, {
                 method: 'PUT',
+                credentials: 'include',
                 body: formData,
             });
 
@@ -275,6 +282,7 @@ const TradesPersonProfile = () => {
 
             const response = await fetch(`${apiUrl}/travel/get-trader-project/${userId}`, {
                 method: 'PUT',
+                credentials: 'include',
                 body: formData,
             });
 
@@ -352,7 +360,12 @@ const TradesPersonProfile = () => {
 
             try {
                 setLoading(true);
-                const response = await fetch(`${apiUrl}/travel/get-trader-project/${userId}`);
+                const response = await fetch(`${apiUrl}/travel/get-trader-project/${userId}`, {
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
                 const data = await response.json();
                 
                 if (data.success) {

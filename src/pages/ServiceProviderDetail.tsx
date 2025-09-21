@@ -65,7 +65,12 @@ const ServiceProviderDetail = () => {
   useEffect(() => {
     const callTheApi = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_TRAVEL_SECURITY}/travel/get-profile-by-id/${id}`);
+        const response = await fetch(`${import.meta.env.VITE_TRAVEL_SECURITY}/travel/get-profile-by-id/${id}`, {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
         const data = await response.json();
         setPersonProfile(data);
       } catch (error) {
@@ -81,7 +86,12 @@ const ServiceProviderDetail = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_TRAVEL_SECURITY}/travel/get-project-by-id/${id}`);
+        const response = await fetch(`${import.meta.env.VITE_TRAVEL_SECURITY}/travel/get-project-by-id/${id}`, {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
         const data = await response.json();
         console.log('show me the projects', data)
         let tmp = data.projectImages.map((image: string) => image)[0]

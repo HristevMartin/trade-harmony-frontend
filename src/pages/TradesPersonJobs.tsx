@@ -238,12 +238,11 @@ const TradesPersonJobs = () => {
     const fetchJobs = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem('access_token');
         
         const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/get-all-client-projects`, {
           credentials: 'include',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
           },
         });
         
