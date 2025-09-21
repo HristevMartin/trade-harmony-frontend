@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import SuccessModal from "@/components/SuccessModal";
 import ErrorModal from "@/components/ErrorModal";
 import AuthModal from "@/components/AuthModal";
+import MobileHeader from "@/components/MobileHeader";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -545,10 +546,14 @@ const PostJob = () => {
 
     return (
         <>
+            <MobileHeader 
+                title="Post Your Job"
+                subtitle="Free to post - Connect with verified tradespeople"
+            />
             <div className="min-h-screen bg-slate-50">
                 <div className="max-w-3xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-10">
                     {/* Header */}
-                    <div className="text-center mb-8">
+                    <div className="text-center mb-8 sm:block hidden">
                         <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 mb-4">Post Your Job</h1>
                         <p className="text-slate-600 mb-4">
                             It's free to post. Upload photos, add details, and connect with verified tradespeople.

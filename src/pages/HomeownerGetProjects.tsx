@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import MobileHeader from "@/components/MobileHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -369,8 +370,23 @@ const HomeownerGetProjects = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
-      {/* Success Toast */}
+    <>
+      <MobileHeader 
+        title="My Projects"
+        subtitle={`${projects.length} job${projects.length !== 1 ? 's' : ''} posted`}
+        rightContent={
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => navigate('/post-job')}
+            className="text-xs"
+          >
+            + New Job
+          </Button>
+        }
+      />
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
+        {/* Success Toast */}
       {showSuccess && (
         <div className="fixed top-6 right-6 z-50 bg-trust-green/10 border border-trust-green/20 rounded-xl p-4 shadow-lg backdrop-blur-sm">
           <div className="flex items-center gap-3">
@@ -615,6 +631,7 @@ const HomeownerGetProjects = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 

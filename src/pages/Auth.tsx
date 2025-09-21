@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { Eye, EyeOff, Loader2, Mail, Lock, User, ArrowLeft } from "lucide-react"
 
 const Auth = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<'login' | 'register' | 'forgot-password'>('login');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -151,8 +152,9 @@ const Auth = () => {
           // Dispatch custom event to notify other components of auth change
           window.dispatchEvent(new Event('authChange'));
           
-          // Redirect to home page
-          navigate('/');
+          // Redirect to next page if specified, otherwise home page
+          const nextPath = searchParams.get('next') || '/';
+          navigate(nextPath);
         }
       } else {
         setErrors({ general: data.message || (activeTab === 'forgot-password' ? 'Failed to send reset email' : 'Authentication failed') });

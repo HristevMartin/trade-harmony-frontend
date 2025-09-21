@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import MobileHeader from '@/components/MobileHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -499,13 +500,28 @@ const TradesPersonJobs = () => {
 
   return (
     <TooltipProvider>
+      <MobileHeader 
+        title="Available Jobs"
+        subtitle={`${visibleJobs.length} opportunities waiting`}
+        rightContent={
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowMobileFilters(true)}
+            className="text-xs"
+          >
+            <Filter className="w-4 h-4 mr-1" />
+            Filter
+          </Button>
+        }
+      />
       <div className="min-h-screen bg-gradient-to-br from-background via-muted/5 to-background">
         <div className="container mx-auto px-4 max-w-6xl py-8">
           {/* Hero Section */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-12"
+            className="text-center mb-12 sm:block hidden"
           >
             <div className="relative bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 rounded-3xl p-8 mb-8 border border-border/5">
               <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-3xl blur-3xl scale-110 -z-10"></div>
