@@ -26,6 +26,7 @@ import StripeProvider from "@/components/ui/StripeElement";
 import PaymentResult from "./pages/PaymentResult";
 import TestChatModal from "./pages/TestChatModal";
 import Chat from "./pages/Chat";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +67,7 @@ const App = () => (
             <Route path="/test-chat" element={<TestChatModal />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/chat/:conversation_id" element={<Chat />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
           </Routes>
           <ConditionalFooter />
         </BrowserRouter>

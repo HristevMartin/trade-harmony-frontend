@@ -252,16 +252,16 @@ const Index = () => {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 1, delay: 0.5 }}
-              className="absolute top-20 left-8 w-20 h-20 xl:w-24 xl:h-24 rounded-full overflow-hidden opacity-25 border-4 border-trust-blue/20"
+              className="absolute top-20 left-8 w-24 h-24 xl:w-28 xl:h-28 rounded-full overflow-hidden opacity-25 border-4 border-trust-blue/20"
             >
                <img 
                  src="https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=300&h=300&fit=crop&crop=center" 
                  alt="Professional using job platform on mobile device"
                  className="w-full h-full object-cover"
                  loading="lazy"
-                 width="96"
-                 height="96"
-                 sizes="96px"
+                 width="112"
+                 height="112"
+                 sizes="112px"
                />
             </motion.div>
             
@@ -270,16 +270,16 @@ const Index = () => {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 1, delay: 0.9 }}
-              className="absolute bottom-32 left-12 w-24 h-24 xl:w-28 xl:h-28 rounded-full overflow-hidden opacity-25 border-4 border-accent-orange/20"
+              className="absolute bottom-32 left-12 w-28 h-28 xl:w-32 xl:h-32 rounded-full overflow-hidden opacity-25 border-4 border-accent-orange/20"
             >
                <img 
-                 src="https://images.unsplash.com/photo-1551434678-e076c223a692?w=300&h=300&fit=crop&crop=center" 
+                 src="https://www.truro-penwith.ac.uk/app/uploads/2022/12/Basic-car-mechanics.jpg" 
                  alt="Digital platform interface on laptop screen"
                  className="w-full h-full object-cover"
                  loading="lazy"
-                 width="112"
-                 height="112"
-                 sizes="112px"
+                 width="128"
+                 height="128"
+                 sizes="128px"
                />
             </motion.div>
           </div>
@@ -291,16 +291,16 @@ const Index = () => {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 1, delay: 0.7 }}
-              className="absolute top-32 right-8 w-22 h-22 xl:w-26 xl:h-26 rounded-full overflow-hidden opacity-25 border-4 border-trust-green/20"
+              className="absolute top-32 right-8 w-20 h-20 xl:w-24 xl:h-24 rounded-full overflow-hidden opacity-25 border-4 border-trust-green/20"
             >
                <img 
-                 src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=300&h=300&fit=crop&crop=center" 
+                 src="https://www.southernliving.com/thmb/WFDNaUu60QnIwoz882hzNJpBdrc=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/GettyImages-1433923860-23d578ea089f409c8cc41475118fb2fa.jpg" 
                  alt="Job search platform on mobile and tablet devices"
                  className="w-full h-full object-cover"
                  loading="lazy"
-                 width="104"
-                 height="104"
-                 sizes="104px"
+                 width="96"
+                 height="96"
+                 sizes="96px"
                />
             </motion.div>
             
@@ -309,16 +309,16 @@ const Index = () => {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 1, delay: 1.1 }}
-              className="absolute bottom-20 right-12 w-20 h-20 xl:w-24 xl:h-24 rounded-full overflow-hidden opacity-25 border-4 border-trust-blue/20"
+              className="absolute bottom-20 right-12 w-24 h-24 xl:w-28 xl:h-28 rounded-full overflow-hidden opacity-25 border-4 border-trust-blue/20"
             >
                <img 
-                 src="https://images.unsplash.com/photo-1515378791036-0648a814c963?w=300&h=300&fit=crop&crop=center" 
+                 src="https://www.goconstruct.org/media/osbb4dmj/plumber-ss2447578937.jpg?width=510&height=332&format=WebP&quality=75&v=1db893e1b5ba490" 
                  alt="Online job application and platform interface"
                  className="w-full h-full object-cover"
                  loading="lazy"
-                 width="96"
-                 height="96"
-                 sizes="96px"
+                 width="112"
+                 height="112"
+                 sizes="112px"
                />
             </motion.div>
           </div>
