@@ -9,7 +9,7 @@ import { Eye, EyeOff, Loader2, Mail, Lock, User, ArrowLeft } from "lucide-react"
 
 const Auth = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
+  const [activeTab, setActiveTab] = useState<'login' | 'register' | 'forgot-password'>('login');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -20,6 +20,8 @@ const Auth = () => {
     password: '',
     confirmPassword: ''
   });
+  
+  const [forgotPasswordSent, setForgotPasswordSent] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -62,11 +64,13 @@ const Auth = () => {
       newErrors.email = 'Please enter a valid email address';
     }
 
-    // Password validation
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+    // Password validation (not needed for forgot password)
+    if (activeTab !== 'forgot-password') {
+      if (!formData.password) {
+        newErrors.password = 'Password is required';
+      } else if (formData.password.length < 6) {
+        newErrors.password = 'Password must be at least 6 characters';
+      }
     }
 
     if (activeTab === 'register') {
@@ -94,47 +98,64 @@ const Auth = () => {
 
     try {
       const apiUrl = import.meta.env.VITE_API_URL;
-      const endpoint = activeTab === 'login' ? '/travel/login' : '/travel/register';
-      
-      const payload = activeTab === 'login' 
-        ? { 
-            email: formData.email, 
-            password: formData.password 
-          }
-        : { 
-            email: formData.email, 
-            password: formData.password 
-          };
+      let endpoint, payload;
+      let headers;
+      if (activeTab === 'forgot-password') {
+        endpoint = '/travel/forgot-password';
+        payload = { email: formData.email };
+        headers = {
+          "Content-Type": "application/json",
+        }
+        console.log('the payload is', payload);
+        console.log('the header in here is', headers);
+      } else {
+        endpoint = activeTab === 'login' ? '/travel/login' : '/travel/register';
+        payload = activeTab === 'login' 
+          ? { 
+              email: formData.email, 
+              password: formData.password 
+            }
+          : { 
+              email: formData.email, 
+              password: formData.password 
+            };
+        headers = {
+          "Content-Type": "application/json",
+        }
+      }
 
       const fullUrl = `${apiUrl}${endpoint}`;
       console.log('the full url is', fullUrl);
 
       const response = await fetch(fullUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: JSON.stringify(payload),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        // Store authentication data
-        localStorage.setItem('access_token', data.token);
-        localStorage.setItem('auth_user', JSON.stringify({ 
-          id: data.id, 
-          role: data.role, 
-          email: formData.email
-        }));
-        
-        // Dispatch custom event to notify other components of auth change
-        window.dispatchEvent(new Event('authChange'));
-        
-        // Redirect to home page
-        navigate('/');
+        if (activeTab === 'forgot-password') {
+          // Handle forgot password success
+          setForgotPasswordSent(true);
+        } else {
+          // Store authentication data
+          localStorage.setItem('access_token', data.token);
+          localStorage.setItem('auth_user', JSON.stringify({ 
+            id: data.id, 
+            role: data.role, 
+            email: formData.email
+          }));
+          
+          // Dispatch custom event to notify other components of auth change
+          window.dispatchEvent(new Event('authChange'));
+          
+          // Redirect to home page
+          navigate('/');
+        }
       } else {
-        setErrors({ general: data.message || 'Authentication failed' });
+        setErrors({ general: data.message || (activeTab === 'forgot-password' ? 'Failed to send reset email' : 'Authentication failed') });
       }
     } catch (error) {
       setErrors({ general: 'Network error. Please try again.' });
@@ -143,9 +164,10 @@ const Auth = () => {
     }
   };
 
-  const switchTab = (tab: 'login' | 'register') => {
+  const switchTab = (tab: 'login' | 'register' | 'forgot-password') => {
     setActiveTab(tab);
     setErrors({});
+    setForgotPasswordSent(false);
     setFormData({
       email: '',
       password: '',
@@ -178,34 +200,38 @@ const Auth = () => {
                 <CardDescription className="text-muted-foreground mt-2">
                   {activeTab === 'login' 
                     ? 'Sign in to your account to continue' 
-                    : 'Create your account to get started'
+                    : activeTab === 'register'
+                    ? 'Create your account to get started'
+                    : 'Enter your email to reset your password'
                   }
                 </CardDescription>
               </div>
 
-              {/* Tab Switcher */}
-              <div className="flex rounded-lg bg-muted p-1">
-                <button
-                  onClick={() => switchTab('login')}
-                  className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 ${
-                    activeTab === 'login'
-                      ? 'bg-white text-trust-blue shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  Login
-                </button>
-                <button
-                  onClick={() => switchTab('register')}
-                  className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 ${
-                    activeTab === 'register'
-                      ? 'bg-white text-trust-blue shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  Register
-                </button>
-              </div>
+              {/* Tab Switcher - Hide for forgot password */}
+              {activeTab !== 'forgot-password' && (
+                <div className="flex rounded-lg bg-muted p-1">
+                  <button
+                    onClick={() => switchTab('login')}
+                    className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 ${
+                      activeTab === 'login'
+                        ? 'bg-white text-trust-blue shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    Login
+                  </button>
+                  <button
+                    onClick={() => switchTab('register')}
+                    className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 ${
+                      activeTab === 'register'
+                        ? 'bg-white text-trust-blue shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    Register
+                  </button>
+                </div>
+              )}
             </CardHeader>
 
             <CardContent className="space-y-6 flex-1 flex flex-col md:block">
@@ -293,6 +319,87 @@ const Auth = () => {
                     </Button>
                   </div>
                 </form>
+              ) : activeTab === 'forgot-password' ? (
+                /* Forgot Password Form */
+                <div className="space-y-6">
+                  {forgotPasswordSent ? (
+                    /* Success State */
+                    <div className="text-center space-y-4">
+                      <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                        <Mail className="h-8 w-8 text-green-600" />
+                      </div>
+                      <div className="space-y-2">
+                        <h3 className="text-lg font-semibold text-foreground">
+                          Check your email
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          We've sent a password reset link to <strong>{formData.email}</strong>
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          If you don't see the email, check your spam folder.
+                        </p>
+                      </div>
+                      <Button
+                        onClick={() => switchTab('login')}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        Back to Login
+                      </Button>
+                    </div>
+                  ) : (
+                    /* Forgot Password Form */
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="forgot-email" className="text-sm font-medium text-foreground">
+                          Email Address
+                        </Label>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            id="forgot-email"
+                            name="email"
+                            type="email"
+                            placeholder="Enter your email address"
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            className={`pl-10 h-12 min-h-[48px] rounded-lg border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 ${errors.email ? 'border-red-300 bg-red-50' : ''}`}
+                            disabled={isLoading}
+                            aria-invalid={!!errors.email}
+                          />
+                        </div>
+                        {errors.email && (
+                          <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                        )}
+                      </div>
+
+                      <Button
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full h-12 bg-accent-orange hover:bg-accent-orange/90 text-white font-semibold transition-all duration-300"
+                      >
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Sending reset link...
+                          </>
+                        ) : (
+                          'Send Reset Link'
+                        )}
+                      </Button>
+
+                      <div className="text-center pt-4">
+                        <button
+                          type="button"
+                          onClick={() => switchTab('login')}
+                          className="text-sm text-trust-blue hover:underline"
+                        >
+                          Back to Login
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </div>
               ) : (
                 /* Register Tab - Call to Action Content */
                 <div className="flex-1 flex flex-col md:block space-y-6">
@@ -344,7 +451,10 @@ const Auth = () => {
               {activeTab === 'login' && (
                 <div className="text-center space-y-3 pt-4 border-t border-border/50">
                   <div className="space-y-2">
-                    <button className="text-sm text-trust-blue hover:underline">
+                    <button 
+                      onClick={() => switchTab('forgot-password')}
+                      className="text-sm text-trust-blue hover:underline"
+                    >
                       Forgot your password?
                     </button>
                     <p className="text-sm text-muted-foreground">
