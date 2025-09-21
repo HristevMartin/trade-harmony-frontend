@@ -106,18 +106,20 @@ const Navbar = () => {
   // Chat summary fetching with polling
   useEffect(() => {
     const getChatSummary = async () => {
-      if (!user || !localStorage.getItem('access_token')) {
+      if (!user) {
         return;
       }
+
+      // console.log('show me the user in here', user);
 
       try {
         setLoadingSummary(true);
         const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/chat-component/chat-summary`, {
           method: 'GET',
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-          }
+          },
         });
 
         if (response.ok) {
@@ -194,22 +196,33 @@ const Navbar = () => {
     equalsMaster: user?.role === 'master'
   });
 
-  const handleLogout = () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('auth_user');
-    setUser(null);
-
-    // Reset chat state on logout
-    setHasChats(false);
-    setUnreadTotal(0);
-    setConversationsFromSummary([]);
-    setLoadingSummary(false);
-
-    // Dispatch custom event to notify other components of auth change
-    window.dispatchEvent(new Event('authChange'));
-
-    navigate('/');
-    setIsMobileMenuOpen(false);
+  const handleLogout = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/travel/logout`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!res.ok) console.warn('Logout API returned', res.status);
+    } catch (err) {
+      console.error('Error logging out:', err);
+    } finally {
+      // Clear all authentication data from localStorage
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('auth_user');
+      
+      // Reset component state
+      setUser(null);
+      setHasChats(false);
+      setUnreadTotal(0);
+      setConversationsFromSummary([]);
+      setLoadingSummary(false);
+      
+      // Notify other components of auth change
+      window.dispatchEvent(new Event('authChange'));
+      setIsMobileMenuOpen(false);
+      navigate('/');
+    }
   };
 
   return (

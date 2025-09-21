@@ -38,8 +38,9 @@ const PaidUserBanner: React.FC<PaidUserBannerProps> = ({
     try {
       console.log('show me the jobId', jobId);
       const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/chat-component/get-conversation-by-id/${jobId}`, {
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${authToken}`
+          'Content-Type': 'application/json',
         }
       });
       if (!response.ok) {

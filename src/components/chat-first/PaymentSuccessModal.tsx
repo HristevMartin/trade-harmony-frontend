@@ -72,9 +72,9 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
         const createResponse = await fetch(`${apiUrl}/travel/chat-component/create-chat`, {
 
           method: 'POST',
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authToken}`
           },
           body: JSON.stringify({
             job_id: jobId,
@@ -115,9 +115,9 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
         const sendResponse = await fetch(`${apiUrl}/travel/chat-component`, {
 
           method: 'POST',
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authToken}`
           },
           body: JSON.stringify({
             conversationId: conversationId,

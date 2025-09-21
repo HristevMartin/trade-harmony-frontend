@@ -130,6 +130,7 @@ const Auth = () => {
       const response = await fetch(fullUrl, {
         method: 'POST',
         headers: headers,
+        credentials: 'include', 
         body: JSON.stringify(payload),
       });
 
@@ -141,11 +142,10 @@ const Auth = () => {
           setForgotPasswordSent(true);
         } else {
           // Store authentication data
-          localStorage.setItem('access_token', data.token);
+          // localStorage.setItem('access_token', data.token);
           localStorage.setItem('auth_user', JSON.stringify({ 
             id: data.id, 
             role: data.role, 
-            email: formData.email
           }));
           
           // Dispatch custom event to notify other components of auth change

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 // Types matching new API response structure
 export type Counterparty = {
@@ -273,15 +273,39 @@ export const useChats = () => {
   const [chats, setChats] = useState<ChatItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const isFetchingRef = useRef(false);
 
-  const fetchChats = async (authToken: string) => {
+  // Set up a timeout to prevent infinite loading if no fetchChats is called
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (isLoading && !isFetchingRef.current) {
+        console.log('No fetchChats called within 2 seconds, setting loading to false');
+        setIsLoading(false);
+      }
+    }, 2000); // 2 second timeout
+
+    return () => clearTimeout(timeout);
+  }, [isLoading]);
+
+  const fetchChats = useCallback(async (authToken: string) => {
+    console.log('fetchChats called with authToken:', !!authToken);
+    
+    // Prevent multiple simultaneous fetches
+    if (isFetchingRef.current) {
+      console.log('fetchChats already in progress, skipping');
+      return;
+    }
+    
+    // For session-based auth, we still need some indicator that user is authenticated
     if (!authToken) {
+      console.warn('No auth token provided to fetchChats');
       setError('No auth token provided');
       setIsLoading(false);
       return;
     }
 
     try {
+      isFetchingRef.current = true;
       setIsLoading(true);
       setError(null);
       
@@ -291,28 +315,37 @@ export const useChats = () => {
       const [chatsResponse, summaryResponse] = await Promise.all([
         fetch(`${apiUrl}/travel/chat-component/get-all-chats`, {
           method: 'GET',
+          credentials: 'include',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authToken}`
+            'Content-Type': 'application/json'
           }
         }),
         fetch(`${apiUrl}/travel/chat-component/chat-summary`, {
           method: 'GET',
+          credentials: 'include',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authToken}`
+            'Content-Type': 'application/json'
           }
         })
       ]);
 
       if (!chatsResponse.ok) {
+        console.error('Chats API error:', {
+          status: chatsResponse.status,
+          statusText: chatsResponse.statusText,
+          url: `${apiUrl}/travel/chat-component/get-all-chats`
+        });
         throw new Error(`Failed to fetch chats: ${chatsResponse.status} ${chatsResponse.statusText}`);
       }
 
       const chatsData = await chatsResponse.json();
-      console.log('Fetched chats:', chatsData);
+      console.log('Fetched chats data:', chatsData);
+      console.log('Number of chats:', chatsData?.chats?.length || 0);
+      console.log('Raw chats array:', chatsData?.chats);
+      console.log('Data keys:', Object.keys(chatsData || {}));
       
       let chatItems: ChatItem[] = chatsData.chats || chatsData || [];
+      console.log('Processed chatItems:', chatItems);
 
       // If summary response is successful, merge unread counts
       if (summaryResponse.ok) {
@@ -335,13 +368,16 @@ export const useChats = () => {
       }
       
       setChats(chatItems);
+      console.log('Successfully set chats:', chatItems.length);
     } catch (err) {
       console.error('Error fetching chats:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch chats');
     } finally {
+      console.log('Setting isLoading to false');
+      isFetchingRef.current = false;
       setIsLoading(false);
     }
-  };
+  }, []); // Empty dependency array - function doesn't depend on any state
 
   return {
     chats,

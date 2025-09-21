@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 interface SidebarProps {
   conversation?: Conversation;
   counterparty?: UserRef;
-  authToken: string;
+  authToken: string | null;
   onClose?: () => void;
   currentConversationId?: string;
 }
@@ -25,12 +25,19 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const navigate = useNavigate();
   const { chats, isLoading, error, fetchChats } = useChats();
+  
+  // Debug logging
+  console.log('Sidebar render - chats:', chats.length, 'isLoading:', isLoading, 'error:', error);
 
   useEffect(() => {
+    console.log('Sidebar useEffect triggered, authToken:', !!authToken, 'authToken value:', authToken);
     if (authToken) {
+      console.log('Calling fetchChats from Sidebar');
       fetchChats(authToken);
+    } else {
+      console.log('No authToken, not calling fetchChats');
     }
-  }, [authToken]);
+  }, [authToken]); // Remove fetchChats since it's now stable with useCallback
 
   const getInitials = (name: string) => {
     return name
@@ -75,17 +82,13 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
-  console.log('Sidebar chats:', chats);
-  console.log('Current conversation ID:', currentConversationId);
-
-
   return (
-    <div className="w-full bg-card border-r border-border flex flex-col overflow-hidden h-full">
+    <div className="w-full bg-background flex flex-col overflow-hidden h-full">
       {/* Mobile header with close button */}
       {onClose && (
-        <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b sm:hidden bg-background">
+        <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b bg-background/95 backdrop-blur-sm">
           <h2 className="font-semibold text-lg text-foreground flex items-center gap-2">
-            <MessageCircle className="w-5 h-5" />
+            <MessageCircle className="w-5 h-5 text-primary" />
             Conversations
           </h2>
           <Button
@@ -98,7 +101,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 conversationsTrigger?.focus();
               }, 100);
             }}
-            className="min-h-[44px] min-w-[44px] rounded-full focus:ring-2 focus:ring-primary/50"
+            className="min-h-[40px] min-w-[40px] rounded-lg hover:bg-muted/50 transition-colors"
             aria-label="Close conversations"
           >
             <X className="w-5 h-5" />
@@ -109,38 +112,49 @@ const Sidebar: React.FC<SidebarProps> = ({
       {/* Chat List */}
       <div className="flex-1 overflow-y-auto">
         {!onClose && (
-          <div className="p-4 border-b">
-            <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-              <MessageCircle className="w-5 h-5" />
+          <div className="p-4 lg:p-6 border-b bg-muted/20">
+            <h3 className="font-semibold text-foreground text-lg flex items-center gap-2">
+              <MessageCircle className="w-5 h-5 text-primary" />
               Conversations
             </h3>
           </div>
         )}
         
         {isLoading ? (
-          <div className="flex items-center justify-center py-8">
-            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+              <p className="text-sm text-muted-foreground">Loading conversations...</p>
+            </div>
           </div>
         ) : error ? (
-          <div className="text-center py-8 px-4">
-            <p className="text-red-500 text-sm mb-2">Failed to load conversations</p>
+          <div className="text-center py-12 px-6">
+            <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <MessageCircle className="w-6 h-6 text-red-500" />
+            </div>
+            <p className="text-red-600 text-sm font-medium mb-3">Failed to load conversations</p>
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={() => fetchChats(authToken)}
+              onClick={() => authToken && fetchChats(authToken)}
+              disabled={!authToken}
+              className="text-xs"
             >
-              Retry
+              Try Again
             </Button>
           </div>
         ) : chats.length === 0 ? (
-          <div className="text-center py-8 px-4">
-            <div className="w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="text-center py-12 px-6">
+            <div className="w-16 h-16 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-4">
               <MessageCircle className="w-8 h-8 text-muted-foreground" />
             </div>
-            <p className="text-muted-foreground">No conversations yet</p>
+            <h4 className="font-medium text-foreground mb-2">No conversations yet</h4>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              Your conversations will appear here when you start chatting with contacts.
+            </p>
           </div>
         ) : (
-          <div className="space-y-1 p-3">
+          <div className="space-y-1 p-2 lg:p-3">
             {chats.map((chat) => {
               const isActive = currentConversationId === chat.conversation_id;
               const initials = getInitials(chat.counterparty?.name || 'Unknown');
@@ -149,10 +163,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <button
                   key={chat.conversation_id}
                   onClick={() => handleChatClick(chat)}
-                  className={`relative w-full p-4 rounded-lg text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 ${
+                  className={`relative w-full p-3 lg:p-4 rounded-xl text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 group ${
                     isActive 
-                      ? 'bg-gradient-to-r from-primary/20 to-primary/10 border-2 border-primary/40 shadow-lg ring-2 ring-primary/20 transform scale-[1.02]' 
-                      : 'hover:bg-muted/50 border border-transparent hover:border-border/50 hover:shadow-sm'
+                      ? 'bg-gradient-to-r from-primary/15 to-primary/10 border border-primary/30 shadow-md' 
+                      : 'hover:bg-muted/80 border border-transparent hover:border-border/30 hover:shadow-sm'
                   }`}
                 >
                   {/* Active indicator */}
@@ -161,21 +175,17 @@ const Sidebar: React.FC<SidebarProps> = ({
                   )}
                   
                   <div className="flex items-start gap-3">
-                    <div className="relative">
-                      <Avatar className="w-11 h-11 flex-shrink-0">
+                    <div className="relative flex-shrink-0">
+                      <Avatar className="w-12 h-12 ring-2 ring-background shadow-sm">
                         {chat.counterparty?.avatar_url ? (
                           <AvatarImage src={chat.counterparty.avatar_url} alt={chat.counterparty?.name || 'Unknown'} />
                         ) : null}
-                        <AvatarFallback className={`${getAvatarColor(chat.counterparty?.id || '')} text-white text-sm font-semibold`}>
+                        <AvatarFallback className={`${getAvatarColor(chat.counterparty?.id || '')} text-white text-sm font-bold`}>
                           {initials}
                         </AvatarFallback>
                       </Avatar>
-                      {/* Active dot indicator */}
-                      {isActive && (
-                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full border-2 border-white flex items-center justify-center">
-                          <div className="w-2 h-2 bg-white rounded-full"></div>
-                        </div>
-                      )}
+                      {/* Online indicator */}
+                      <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-background"></div>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between mb-1">
