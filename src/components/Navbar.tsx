@@ -4,6 +4,7 @@ import { Building, Wrench, Zap, Menu, X, User, FolderOpen, LogIn, LogOut, Messag
 
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import InstallAppButton from "./InstallAppButton";
 
 const Navbar = () => {
   const location = useLocation();
@@ -303,6 +304,9 @@ const Navbar = () => {
 
           {/* Desktop Auth & CTA Buttons */}
           <div className="hidden md:flex items-center space-x-4">
+            {/* PWA Install Button */}
+            <InstallAppButton variant="ghost" size="sm" />
+            
             {/* Login/Logout Button */}
             {isLoggedIn ? (
               <button
@@ -415,6 +419,11 @@ const Navbar = () => {
 
                 {/* Mobile Auth & CTA Buttons */}
                 <div className="pt-2 border-t border-border/10 space-y-3">
+                  {/* PWA Install Button */}
+                  <div className="px-4">
+                    <InstallAppButton variant="outline" size="sm" className="w-full" />
+                  </div>
+                  
                   {/* Login/Logout Button */}
                   {isLoggedIn ? (
                     <button

@@ -31,6 +31,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import InstallAppButtonTest from "@/components/InstallAppButtonTest";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -491,6 +492,15 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* PWA Install Test Section - Only for development */}
+      {import.meta.env.DEV && (
+        <section className="py-6 bg-background">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6">
+            <InstallAppButtonTest />
+          </div>
+        </section>
+      )}
 
       {/* Service Categories Grid */}
       {showPopularServices && (

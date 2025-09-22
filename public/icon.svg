@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="#2563eb"/>
+  
+  <!-- Hammer tool -->
+  <g fill="#ffffff">
+    <!-- Hammer handle -->
+    <rect x="200" y="280" width="8" height="80" rx="4" transform="rotate(-45 200 280)"/>
+    
+    <!-- Hammer head -->
+    <rect x="180" y="200" width="40" height="20" rx="4" transform="rotate(-45 180 200)"/>
+    
+    <!-- Wrench -->
+    <g transform="translate(280, 180) rotate(30)">
+      <!-- Wrench body -->
+      <rect x="0" y="8" width="80" height="8" rx="4"/>
+      
+      <!-- Wrench head -->
+      <circle cx="80" cy="12" r="12" stroke="#2563eb" stroke-width="4" fill="#ffffff"/>
+      <circle cx="80" cy="12" r="6" fill="#2563eb"/>
+      
+      <!-- Wrench grip -->
+      <circle cx="8" cy="12" r="8"/>
+    </g>
+  </g>
+  
+  <!-- Text "JH" for JobHub -->
+  <text x="256" y="380" font-family="Arial, sans-serif" font-size="80" font-weight="bold" text-anchor="middle" fill="#ffffff">JH</text>
+</svg>
+
