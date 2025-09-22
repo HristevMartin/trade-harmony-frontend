@@ -28,6 +28,7 @@ import PaymentResult from "./pages/PaymentResult";
 import TestChatModal from "./pages/TestChatModal";
 import Chat from "./pages/Chat";
 import ResetPassword from "./pages/ResetPassword";
+import PWAUpdateNotification from "./components/PWAUpdateNotification";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <PWAUpdateNotification />
       <StripeProvider>
         <BrowserRouter>
           <Navbar />
