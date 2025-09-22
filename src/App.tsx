@@ -29,6 +29,8 @@ import TestChatModal from "./pages/TestChatModal";
 import Chat from "./pages/Chat";
 import ResetPassword from "./pages/ResetPassword";
 import PWAUpdateNotification from "./components/PWAUpdateNotification";
+import PWAInstallPopup from "./components/PWAInstallPopup";
+import usePWAInstallPopup from "./hooks/usePWAInstallPopup";
 
 const queryClient = new QueryClient();
 
@@ -39,14 +41,22 @@ const ConditionalFooter = () => {
   return !isChatPage ? <Footer /> : null;
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
+const App = () => {
+  const { isPopupOpen, canInstall, hidePopup, triggerInstall } = usePWAInstallPopup();
 
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <PWAUpdateNotification />
-      <StripeProvider>
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <PWAUpdateNotification />
+        <PWAInstallPopup
+          isOpen={isPopupOpen}
+          onClose={hidePopup}
+          onInstall={triggerInstall}
+          canInstall={canInstall}
+        />
+        <StripeProvider>
         <BrowserRouter>
           <Navbar />
           <Routes>
@@ -77,6 +87,7 @@ const App = () => (
       </StripeProvider>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;
