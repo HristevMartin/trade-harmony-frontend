@@ -58,6 +58,7 @@ const TradesPersonJobs = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [displayedJobsCount, setDisplayedJobsCount] = useState(6);
   const [filters, setFilters] = useState<{
     categories: string[];
     locations: string[];
@@ -69,6 +70,7 @@ const TradesPersonJobs = () => {
     category: false,
     location: false
   });
+  const [showStickyFilter, setShowStickyFilter] = useState(false);
   const { toast } = useToast();
 
   // Close popovers when clicking outside
@@ -132,6 +134,26 @@ const TradesPersonJobs = () => {
     }
   }, [showMobileFilters]);
 
+  // Handle scroll to show/hide sticky filter
+  useEffect(() => {
+    const handleScroll = () => {
+      // Find the desktop filter element
+      const desktopFilter = document.querySelector('.desktop-filter-bar');
+      if (desktopFilter) {
+        const rect = desktopFilter.getBoundingClientRect();
+        // Show sticky filter when the desktop filter is completely out of view
+        setShowStickyFilter(rect.bottom < 0);
+      } else {
+        // Fallback: show after scrolling down significantly
+        const scrollY = window.scrollY;
+        setShowStickyFilter(scrollY > 400);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   // Initialize filters from URL on mount
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -163,6 +185,11 @@ const TradesPersonJobs = () => {
     window.history.replaceState({}, '', newUrl);
   }, [filters, sortBy]);
 
+  // Reset pagination when filters or sort changes
+  useEffect(() => {
+    setDisplayedJobsCount(6);
+  }, [filters, sortBy]);
+
   const formatBudget = (budget: string) => {
     const budgetMap: { [key: string]: string } = {
       'under-200': 'Under £200',
@@ -185,7 +212,7 @@ const TradesPersonJobs = () => {
   };
 
   // Filter and sort jobs
-  const visibleJobs = useMemo(() => {
+  const allFilteredJobs = useMemo(() => {
     let filtered = jobs.filter(job => {
       // Exclude completed jobs from being displayed
       if (job.status && job.status.toLowerCase() === 'completed') return false;
@@ -218,6 +245,11 @@ const TradesPersonJobs = () => {
 
     return filtered;
   }, [jobs, filters, sortBy]);
+
+  // Get currently displayed jobs based on pagination
+  const visibleJobs = useMemo(() => {
+    return allFilteredJobs.slice(0, displayedJobsCount);
+  }, [allFilteredJobs, displayedJobsCount]);
 
   // Get unique values for filter options (excluding completed jobs)
   const filterOptions = useMemo(() => {
@@ -296,10 +328,11 @@ const TradesPersonJobs = () => {
 
   const handleLoadMore = () => {
     setLoadingMore(true);
-    // Simulate loading more - in real app this would fetch next page
+    // Simulate loading delay for better UX
     setTimeout(() => {
+      setDisplayedJobsCount(prev => prev + 6);
       setLoadingMore(false);
-    }, 1000);
+    }, 800);
   };
 
   const getCategoryIcon = (category: string) => {
@@ -502,7 +535,7 @@ const TradesPersonJobs = () => {
     <TooltipProvider>
       <MobileHeader 
         title="Available Jobs"
-        subtitle={`${visibleJobs.length} opportunities waiting`}
+        subtitle={`${allFilteredJobs.length} opportunities waiting`}
         rightContent={
           <Button
             variant="outline"
@@ -515,6 +548,49 @@ const TradesPersonJobs = () => {
           </Button>
         }
       />
+
+      {/* Sticky Filter Bar - Shows on Scroll */}
+      <AnimatePresence>
+        {showStickyFilter && (
+          <motion.div
+            initial={{ opacity: 0, y: -60 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -60 }}
+            transition={{ duration: 0.2 }}
+            className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200/60 shadow-lg"
+          >
+            <div className="container mx-auto px-4 py-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <h2 className="font-semibold text-slate-900">Filter Jobs</h2>
+                  <div className="flex items-center gap-2">
+                    {filters.categories.length > 0 && (
+                      <Badge variant="secondary" className="text-xs">
+                        {filters.categories.length} Categories
+                      </Badge>
+                    )}
+                    {filters.locations.length > 0 && (
+                      <Badge variant="secondary" className="text-xs">
+                        {filters.locations.length} Locations
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowMobileFilters(true)}
+                  className="text-xs"
+                >
+                  <Filter className="w-4 h-4 mr-1" />
+                  Filter
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="min-h-screen bg-gradient-to-br from-background via-muted/5 to-background">
         <div className="container mx-auto px-4 max-w-6xl py-8">
           {/* Hero Section */}
@@ -546,7 +622,7 @@ const TradesPersonJobs = () => {
                     <Briefcase className="h-6 w-6 text-primary-foreground" />
                   </div>
                 </div>
-                <div className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-1">{visibleJobs.length}</div>
+                <div className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-1">{allFilteredJobs.length}</div>
                 <div className="text-sm text-muted-foreground font-medium">Active Jobs</div>
               </motion.div>
               
@@ -583,7 +659,7 @@ const TradesPersonJobs = () => {
           </motion.div>
 
           {/* Enhanced Desktop Sticky Filter Bar */}
-          <div className="sticky top-14 z-40 mb-8">
+          <div className="desktop-filter-bar sticky top-14 z-40 mb-8">
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -1188,21 +1264,48 @@ const TradesPersonJobs = () => {
                   </AnimatePresence>
                 </div>
 
-                <div className="flex justify-center mt-12">
-                  <Button 
-                    onClick={handleLoadMore} 
-                    disabled={loadingMore}
-                    variant="outline"
-                    className="border-slate-300 text-slate-700 hover:bg-slate-50 px-8 py-3 rounded-lg font-medium transition-colors flex items-center gap-2"
-                  >
-                    {loadingMore ? (
-                      <RefreshCw className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <ArrowRight className="h-4 w-4" />
-                    )}
-                    {loadingMore ? 'Loading...' : 'Load More Jobs'}
-                  </Button>
-                </div>
+                {/* Load More Button - Only show if there are more jobs to load */}
+                {displayedJobsCount < allFilteredJobs.length && (
+                  <div className="flex flex-col items-center mt-12 space-y-4">
+                    <div className="text-center">
+                      <p className="text-sm text-slate-600 mb-2">
+                        Showing {visibleJobs.length} of {allFilteredJobs.length} jobs
+                      </p>
+                      <div className="w-full bg-slate-200 rounded-full h-2 max-w-xs mx-auto">
+                        <div 
+                          className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${(visibleJobs.length / allFilteredJobs.length) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    <Button 
+                      onClick={handleLoadMore} 
+                      disabled={loadingMore}
+                      variant="outline"
+                      className="border-slate-300 text-slate-700 hover:bg-slate-50 px-8 py-3 rounded-lg font-medium transition-colors flex items-center gap-2"
+                    >
+                      {loadingMore ? (
+                        <RefreshCw className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <ArrowRight className="h-4 w-4" />
+                      )}
+                      {loadingMore ? 'Loading...' : 'Load More Jobs'}
+                    </Button>
+                  </div>
+                )}
+
+                {/* Show completion message when all jobs are loaded */}
+                {displayedJobsCount >= allFilteredJobs.length && allFilteredJobs.length > 6 && (
+                  <div className="flex justify-center mt-12">
+                    <div className="text-center py-6 px-8 bg-slate-50 rounded-xl border border-slate-200">
+                      <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-3" />
+                      <p className="text-slate-700 font-medium">You've seen all available jobs!</p>
+                      <p className="text-sm text-slate-500 mt-1">
+                        {allFilteredJobs.length} jobs total
+                      </p>
+                    </div>
+                  </div>
+                )}
               </>
             )}
           </motion.div>
