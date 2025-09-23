@@ -18,7 +18,10 @@ import {
   Quote,
   ChevronLeft,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  Sparkle,
+  Truck,
+  Settings
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -95,6 +98,9 @@ const Index = () => {
     { name: "Gardening", icon: <Trees className="h-8 w-8" />, color: "text-trust-green", slug: "gardening" },
     { name: "Heating & Cooling", icon: <Thermometer className="h-8 w-8" />, color: "text-red-500", slug: "heating-cooling" },
     { name: "Mechanical Repairs", icon: <Wrench className="h-8 w-8" />, color: "text-gray-600", slug: "mechanical-repairs" },
+    { name: "Cleaning", icon: <Sparkle className="h-8 w-8" />, color: "text-blue-500", slug: "cleaning" },
+    { name: "Removals", icon: <Truck className="h-8 w-8" />, color: "text-orange-500", slug: "removals" },
+    { name: "Handyman", icon: <Settings className="h-8 w-8" />, color: "text-indigo-500", slug: "handyman" },
   ];
 
   const testimonials = [
@@ -231,6 +237,8 @@ const Index = () => {
           }
         }
       `}</style>
+      
+      
       <div className="max-w-6xl lg:max-w-7xl mx-auto px-4 sm:px-6">
 
       {/* Hero Section */}
@@ -432,7 +440,7 @@ const Index = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
-              className="mt-4 md:hidden"
+              className="mt-4 md:hidden space-y-3"
             >
               <Button 
                 size="lg" 
@@ -444,6 +452,20 @@ const Index = () => {
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </span>
               </Button>
+              
+              {/* Join as Tradesperson Button - Mobile Only */}
+              {!isTrader && (
+                <Button 
+                  size="lg" 
+                  onClick={() => navigate('/tradesperson/onboarding')}
+                  className="bg-trust-blue hover:bg-trust-blue/90 text-white w-full min-h-[48px] px-6 py-3 text-base font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl group"
+                >
+                  <span className="flex items-center justify-center">
+                    Join as Tradesperson
+                    <UserPlus className="ml-2 h-5 w-5 group-hover:scale-110 transition-transform" />
+                  </span>
+                </Button>
+              )}
             </motion.div>
 
             {/* Trustpilot Social Proof */}
@@ -508,14 +530,13 @@ const Index = () => {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
                   <Card 
-                    className="rounded-2xl p-4 sm:p-6 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group border-2 border-primary/10 hover:border-primary/30 bg-gradient-to-br from-card via-card/95 to-card/80 hover:scale-105 backdrop-blur-sm"
+                    className="rounded-2xl p-4 sm:p-6 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group border-2 border-primary/10 hover:border-primary/30 bg-gradient-to-br from-card via-card/95 to-card/80 backdrop-blur-sm"
                     onClick={() => handleServiceClick(service.slug)}
                     onKeyPress={(e) => handleServiceKeyPress(e, service.slug)}
                     role="button"
                     tabIndex={0}
                   >
                     <CardContent className="p-0 text-center relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-br from-trust-blue/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       <div className={`${service.color} mb-3 transition-all duration-300 relative z-10 flex justify-center`}>
                         <div className="w-8 h-8" aria-hidden="true">
                       {service.icon}
@@ -571,9 +592,9 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.2 }}
-                className="rounded-2xl p-6 sm:p-8 bg-gradient-to-br from-card via-card/95 to-card/90 ring-2 ring-primary/10 text-center group flex-1 shadow-xl hover:shadow-2xl transition-all duration-300 border border-primary/5 hover:ring-primary/20"
+                className="rounded-2xl p-6 sm:p-8 bg-gradient-to-br from-card via-card/95 to-card/90 ring-2 ring-primary/10 text-center group flex-1 shadow-xl hover:shadow-2xl transition-all duration-300 border border-primary/5"
               >
-                <div className="bg-trust-blue/10 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 group-hover:bg-trust-blue/20 transition-all duration-300">
+                <div className="bg-trust-blue/10 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 transition-all duration-300">
                   <div className="text-trust-blue transition-transform duration-300" aria-hidden="true">{step.icon}</div>
                 </div>
                 <div className="bg-trust-blue text-trust-blue-foreground rounded-full w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center mx-auto mb-4 text-lg font-bold shadow-lg group-hover:shadow-xl transition-all duration-300">
@@ -711,15 +732,15 @@ const Index = () => {
             className="flex justify-center"
           >
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-              <div className="group cursor-default bg-gradient-to-br from-card/80 to-card/60 p-6 rounded-2xl border border-primary/10 shadow-lg hover:shadow-xl transition-all duration-300">
+              <div className="group cursor-default bg-gradient-to-br from-card/80 to-card/60 p-6 rounded-2xl border border-primary/10 shadow-lg transition-all duration-300">
                 <div className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-200 mb-2 transition-transform group-hover:scale-110">30,000+</div>
                 <div className="text-muted-foreground font-medium">Happy Customers</div>
               </div>
-              <div className="group cursor-default bg-gradient-to-br from-card/80 to-card/60 p-6 rounded-2xl border border-secondary/10 shadow-lg hover:shadow-xl transition-all duration-300">
+              <div className="group cursor-default bg-gradient-to-br from-card/80 to-card/60 p-6 rounded-2xl border border-secondary/10 shadow-lg transition-all duration-300">
                 <div className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-200 mb-2 transition-transform group-hover:scale-110">50,000+</div>
                 <div className="text-muted-foreground font-medium">Verified Tradespeople</div>
               </div>
-              <div className="group cursor-default bg-gradient-to-br from-card/80 to-card/60 p-6 rounded-2xl border border-accent/10 shadow-lg hover:shadow-xl transition-all duration-300">
+              <div className="group cursor-default bg-gradient-to-br from-card/80 to-card/60 p-6 rounded-2xl border border-accent/10 shadow-lg transition-all duration-300">
                 <div className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-200 mb-2 transition-transform group-hover:scale-110">99%</div>
                 <div className="text-muted-foreground font-medium">Customer Satisfaction</div>
               </div>

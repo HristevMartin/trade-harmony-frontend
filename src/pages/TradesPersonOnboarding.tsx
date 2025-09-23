@@ -249,11 +249,8 @@ const TradesPersonOnboarding = () => {
         }
         break;
       case 'certificationImages':
-        if (formData.certificationImages.length === 0) {
-          newErrors.certificationImages = 'At least one certification image is required';
-        } else {
-          delete newErrors.certificationImages;
-        }
+        // Certification images are now optional
+        delete newErrors.certificationImages;
         break;
       case 'marketingConsent':
         if (!formData.marketingConsent) {
@@ -276,7 +273,7 @@ const TradesPersonOnboarding = () => {
         fieldsToValidate.push('name', 'email');
         break;
       case 2:
-        fieldsToValidate.push('primaryTrade', 'certificationImages');
+        fieldsToValidate.push('primaryTrade');
         break;
       case 3:
         fieldsToValidate.push('city', 'postcode');
@@ -294,7 +291,7 @@ const TradesPersonOnboarding = () => {
       case 1:
         return !!formData.name.trim() && !!formData.email.trim() && /\S+@\S+\.\S+/.test(formData.email);
       case 2:
-        return !!formData.primaryTrade && formData.certificationImages.length > 0;
+        return !!formData.primaryTrade;
       case 3:
         return !!formData.city.trim() && !!formData.postcode.trim();
       case 4:
@@ -454,37 +451,8 @@ const TradesPersonOnboarding = () => {
     }
   };
 
-  // Handle authentication success
-  const handleAuthSuccess = useCallback((authData: { id: string; role: string; token: string; email?: string }) => {
-    console.log('Authentication successful:', authData);
-    
-    // Clear any previous errors
-    setErrors(prev => ({ ...prev, general: '' }));
-    
-    setShowAuthModal(false);
-    
-    // Check if the authenticated user has the correct role
-    const authUserRole = Array.isArray(authData.role) ? authData.role : [authData.role];
-    if (authUserRole.includes('customer') || authUserRole.includes('CUSTOMER')) {
-      setErrors(prev => ({ 
-        ...prev, 
-        general: 'Customer accounts cannot register as tradespeople. Please create a new trader account or switch to a trader account to complete registration.' 
-      }));
-      setPendingRegistration(false);
-      // Scroll to top to make the error message visible
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
-    
-    if (pendingRegistration) {
-      setPendingRegistration(false);
-      // Use a ref or state to prevent double execution
-      submitRegistration();
-    }
-  }, [pendingRegistration, isSubmitting, hasSubmitted]);
-
   // Complete registration after auth success
-  const submitRegistration = async () => {
+  const submitRegistration = useCallback(async () => {
     // Prevent double submission
     if (isSubmitting || hasSubmitted) {
       console.log('Submission already in progress or completed, skipping...');
@@ -493,15 +461,23 @@ const TradesPersonOnboarding = () => {
 
     console.log('Saving tradesperson data after authentication...');
     
-    // Check authentication status
+    // Check authentication status with detailed logging
     const token = localStorage.getItem('access_token');
     const authUser = localStorage.getItem('auth_user');
     
+    console.log('Auth check in submitRegistration - Token:', token ? 'EXISTS' : 'MISSING', 'AuthUser:', authUser ? 'EXISTS' : 'MISSING');
+    
     if (!token || !authUser) {
-      console.error('No authentication data found');
+      console.error('No authentication data found in submitRegistration');
+      console.error('Token:', token);
+      console.error('AuthUser:', authUser);
       setErrors({ general: 'Authentication required. Please try again.' });
+      setIsSubmitting(false);
+      setHasSubmitted(false);
       return;
     }
+    
+    console.log('Authentication data confirmed, proceeding with API call');
 
     setIsSubmitting(true);
     setHasSubmitted(true);
@@ -593,9 +569,9 @@ const TradesPersonOnboarding = () => {
         localStorage.removeItem('pro_onboarding_draft');
         console.log('Tradesperson registration flow completed');
         
-        // Redirect after showing success
+        // Redirect after showing success to the jobs page
         setTimeout(() => {
-          navigate('/');
+          navigate('/tradesperson/jobs');
         }, 2000);
       } else {
         const errorText = await response.text();
@@ -632,7 +608,163 @@ const TradesPersonOnboarding = () => {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [formData, isSubmitting, hasSubmitted, navigate]);
+
+  // Handle authentication success
+  const handleAuthSuccess = useCallback((authData: { id: string; role: string; token: string; email?: string }) => {
+    console.log('Authentication successful:', authData);
+    
+    // Clear any previous errors
+    setErrors(prev => ({ ...prev, general: '' }));
+    
+    setShowAuthModal(false);
+    
+    // Check if the authenticated user has the correct role
+    const authUserRole = Array.isArray(authData.role) ? authData.role : [authData.role];
+    if (authUserRole.includes('customer') || authUserRole.includes('CUSTOMER')) {
+      setErrors(prev => ({ 
+        ...prev, 
+        general: 'Customer accounts cannot register as tradespeople. Please create a new trader account or switch to a trader account to complete registration.' 
+      }));
+      setPendingRegistration(false);
+      // Scroll to top to make the error message visible
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    
+    // Always proceed with registration after successful auth
+    setPendingRegistration(false);
+    
+    // Directly call submitRegistration with the auth data we received
+    console.log('Auth success - calling submitRegistration directly with provided auth data');
+    submitRegistrationWithAuthData(authData);
+  }, []);
+
+  // Submit registration with auth data directly (bypassing localStorage timing issues)
+  const submitRegistrationWithAuthData = useCallback(async (authData: { id: string; role: string; token: string; email?: string }) => {
+    // Prevent double submission
+    if (isSubmitting || hasSubmitted) {
+      console.log('Submission already in progress or completed, skipping...');
+      return;
+    }
+
+    console.log('Saving tradesperson data with provided auth data...');
+    
+    setIsSubmitting(true);
+    setHasSubmitted(true);
+    
+    try {
+      // Create FormData for file upload
+      const formDataToSend = new FormData();
+      
+      // Add basic tradesperson information
+      const tradespersonData = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || '',
+        primaryTrade: formData.primaryTrade,
+        otherServices: JSON.stringify(formData.otherServices),
+        city: formData.city,
+        postcode: formData.postcode,
+        radiusKm: formData.radiusKm.toString(),
+        experienceYears: (formData.experienceYears || 0).toString(),
+        certifications: formData.certifications || '',
+        bio: formData.bio || '',
+        marketingConsent: formData.marketingConsent.toString()
+      };
+
+      // Add form fields exactly like PostJob
+      Object.keys(tradespersonData).forEach(key => {
+        const value = tradespersonData[key as keyof typeof tradespersonData];
+        if (value !== null && value !== undefined) {
+          formDataToSend.append(key, value.toString());
+        }
+      });
+
+      // Add portfolio images with the correct field name for the API
+      formData.portfolio.forEach((file, index) => {
+        formDataToSend.append('projectImages', file); // Use 'projectImages' key as expected by API
+      });
+
+      // Add certification images
+      formData.certificationImages.forEach((file, index) => {
+        formDataToSend.append('certificationImages', file);
+      });
+
+      // Add userId from provided auth data exactly like PostJob
+      formDataToSend.append('userId', authData.id);
+
+      // Add auth token to headers exactly like PostJob
+      const headers: HeadersInit = {};
+      if (authData.token) {
+        headers['Authorization'] = `Bearer ${authData.token}`;
+      }
+
+      console.log('Sending tradesperson data with auth data to:', `${import.meta.env.VITE_API_URL}/travel/save-trader-project`);
+      console.log('Form data includes:', {
+        name: formData.name,
+        email: formData.email,
+        primaryTrade: formData.primaryTrade,
+        portfolioCount: formData.portfolio.length,
+        certificationImagesCount: formData.certificationImages.length,
+        hasToken: !!authData.token,
+        userId: authData.id
+      });
+      
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/save-trader-project`, {
+        method: 'POST',
+        credentials: 'include',
+        headers,
+        body: formDataToSend
+      });
+
+      console.log('Tradesperson data save response status:', response.status);
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Tradesperson data saved successfully:', data);
+        
+        setIsCompleted(true);
+        localStorage.removeItem('pro_onboarding_draft');
+        console.log('Tradesperson registration flow completed');
+        
+        // Redirect after showing success to the jobs page
+        setTimeout(() => {
+          navigate('/tradesperson-jobs');
+        }, 2000);
+      } else {
+        const errorText = await response.text();
+        console.error('Failed to save tradesperson data:', response.status, 'Response:', errorText);
+        
+        // Try to parse error response
+        try {
+          const errorJson = JSON.parse(errorText);
+          if (errorJson.message) {
+            setErrors({ general: errorJson.message });
+          } else {
+            setErrors({ general: 'Failed to save your information. Please try again.' });
+          }
+        } catch {
+          setErrors({ general: 'Server error occurred. Please try again later.' });
+        }
+        setHasSubmitted(false);
+      }
+    } catch (error) {
+      console.error('Error saving tradesperson data:', error);
+      
+      // More specific error messages
+      if (error.message.includes('NetworkError') || error.message.includes('fetch')) {
+        setErrors({ general: 'Network error. Please check your internet connection and try again.' });
+      } else if (error.message.includes('Server error: 401')) {
+        setErrors({ general: 'Authentication expired. Please log in again.' });
+      } else {
+        setErrors({ general: error.message || 'Failed to save your information. Please try again.' });
+      }
+      setHasSubmitted(false);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [formData, isSubmitting, hasSubmitted, navigate]);
 
   const completeRegistration = () => {
     if (!validateStep(4)) {
@@ -664,6 +796,13 @@ const TradesPersonOnboarding = () => {
   const progressPercentage = (currentStep / 4) * 100;
   const selectedServicesCount = (formData.primaryTrade ? 1 : 0) + formData.otherServices.length;
   const isEmailFromAuth = localStorage.getItem('auth_user');
+
+  const stepTitles = {
+    1: 'Personal Details',
+    2: 'Services & Experience', 
+    3: 'Location & Service Area',
+    4: 'Portfolio & Consent'
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -721,42 +860,44 @@ const TradesPersonOnboarding = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background py-4 md:py-8" onKeyDown={handleKeyDown}>
-      <div className="container mx-auto px-4 max-w-2xl">
+    <div className="min-h-screen bg-background" onKeyDown={handleKeyDown}>
+      <div className="container mx-auto px-4 py-6 md:py-8" style={{maxWidth: '640px'}}>
         {/* Progress Header */}
-        <div className="mb-6 md:mb-8">
-          <div className="flex items-center justify-between mb-2">
-            <h1 className="text-xl md:text-2xl font-bold text-foreground">Join as a Tradesperson</h1>
-            <span className="text-sm text-muted-foreground">Step {currentStep} of 4</span>
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">Join as a Tradesperson</h1>
+            <div className="text-right">
+              <div className="text-sm font-medium text-foreground">Step {currentStep} of 4</div>
+              <div className="text-sm text-slate-600">— {stepTitles[currentStep as keyof typeof stepTitles]}</div>
+            </div>
           </div>
-          <Progress value={progressPercentage} className="h-2 mb-2" />
-          <div className="text-xs text-muted-foreground text-center">
-            {Math.round(progressPercentage)}% complete
+          <div className="space-y-2">
+            <Progress value={progressPercentage} className="h-2 bg-slate-200" style={{height: '8px'}} />
+            <div className="flex justify-center text-sm">
+              <span className="font-medium text-foreground">{Math.round(progressPercentage)}% complete</span>
+            </div>
           </div>
         </div>
 
         {/* Step Content */}
-        <Card className="mb-20 md:mb-6 animate-fade-in">
-          <CardHeader>
-            <CardTitle className="text-lg md:text-xl">
-              {currentStep === 1 && 'Personal Details'}
-              {currentStep === 2 && 'Services & Experience'}
-              {currentStep === 3 && 'Location & Service Area'}
-              {currentStep === 4 && 'Portfolio & Consent'}
+        <Card className="mb-24 md:mb-8 border border-slate-200 shadow-sm" style={{borderRadius: '12px'}}>
+          <CardHeader className="pb-6">
+            <CardTitle className="text-xl font-semibold text-foreground" style={{marginBottom: '8px'}}>
+              {stepTitles[currentStep as keyof typeof stepTitles]}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 md:space-y-6">
+          <CardContent style={{gap: '24px'}} className="space-y-6">
             {/* General Error Display - Show on all steps */}
             {errors.general && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
                 <div className="flex items-start">
                   <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
                     </svg>
                   </div>
                   <div className="ml-3 flex-1">
-                    <p className="text-sm font-medium text-red-800 mb-3">
+                    <p className="text-sm font-medium text-red-900 mb-3">
                       {errors.general}
                     </p>
                     {errors.general.includes('Customer accounts cannot register') && (
@@ -791,22 +932,28 @@ const TradesPersonOnboarding = () => {
             {/* Step 1: Personal Details */}
             {currentStep === 1 && (
               <>
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name *</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="name" className="text-base font-medium text-slate-900">Full Name *</Label>
                   <Input
                     id="name"
                     value={formData.name}
                     onChange={(e) => updateFormData('name', e.target.value)}
                     onBlur={() => handleFieldBlur('name')}
                     placeholder="Enter your full name"
-                    className={errors.name ? 'border-destructive' : ''}
+                    className={`h-12 text-base px-4 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:ring-offset-0 ${errors.name ? 'border-red-500 bg-red-50' : ''}`}
+                    style={{borderRadius: '12px', fontSize: '16px'}}
                     aria-invalid={!!errors.name}
+                    aria-describedby={errors.name ? 'name-error' : 'name-help'}
                   />
-                  {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
+                  {errors.name ? (
+                    <p id="name-error" className="text-sm text-red-600 font-medium">{errors.name}</p>
+                  ) : (
+                    <p id="name-help" className="text-sm text-slate-500">Required for your professional profile</p>
+                  )}
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address *</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="email" className="text-base font-medium text-slate-900">Email Address *</Label>
                   <Input
                     id="email"
                     type="email"
@@ -814,24 +961,34 @@ const TradesPersonOnboarding = () => {
                     onChange={(e) => updateFormData('email', e.target.value)}
                     onBlur={() => handleFieldBlur('email')}
                     placeholder="Enter your email address"
-                    className={errors.email ? 'border-destructive' : ''}
+                    className={`h-12 text-base px-4 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:ring-offset-0 ${errors.email ? 'border-red-500 bg-red-50' : ''} ${isEmailFromAuth ? 'bg-slate-50' : ''}`}
+                    style={{borderRadius: '12px', fontSize: '16px'}}
                     readOnly={!!isEmailFromAuth}
                     aria-invalid={!!errors.email}
+                    aria-describedby={errors.email ? 'email-error' : 'email-help'}
                   />
-                  {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-                  {isEmailFromAuth && (
-                    <p className="text-xs text-muted-foreground">Email from your account</p>
+                  {errors.email ? (
+                    <p id="email-error" className="text-sm text-red-600 font-medium">{errors.email}</p>
+                  ) : isEmailFromAuth ? (
+                    <p id="email-help" className="text-sm text-slate-500">Email from your account</p>
+                  ) : (
+                    <p id="email-help" className="text-sm text-slate-500">Required for job notifications and account access</p>
                   )}
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="phone" className="text-base font-medium text-slate-900">Phone Number</Label>
                   <Input
                     id="phone"
+                    type="tel"
                     value={formData.phone || ''}
                     onChange={(e) => updateFormData('phone', e.target.value)}
                     placeholder="Enter your phone number"
+                    className="h-12 text-base px-4 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:ring-offset-0"
+                    style={{borderRadius: '12px', fontSize: '16px'}}
+                    aria-describedby="phone-help"
                   />
+                  <p id="phone-help" className="text-sm text-slate-500">Optional — for direct client contact</p>
                 </div>
               </>
             )}
@@ -839,11 +996,11 @@ const TradesPersonOnboarding = () => {
             {/* Step 2: Services & Experience */}
             {currentStep === 2 && (
               <>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <Label>Services Offered *</Label>
+                    <Label className="text-base font-medium text-slate-900">Services Offered *</Label>
                     {selectedServicesCount > 0 && (
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1 text-sm text-slate-600">
                         <Badge className="h-4 w-4" />
                         {selectedServicesCount} selected
                       </div>
@@ -859,33 +1016,37 @@ const TradesPersonOnboarding = () => {
                           key={service}
                           type="button"
                           onClick={() => handleServiceToggle(service)}
-                          className={`p-2 text-xs rounded-md border transition-all duration-200 relative ${
+                          className={`min-h-[44px] px-4 py-3 text-sm font-medium rounded-xl border-2 transition-all duration-200 relative focus:ring-2 focus:ring-blue-100 focus:ring-offset-0 ${
                             isPrimary
-                              ? 'bg-primary text-primary-foreground border-primary ring-2 ring-primary/20'
+                              ? 'bg-blue-600 text-white border-blue-600 shadow-md'
                               : isSelected
-                              ? 'bg-accent text-accent-foreground border-accent'
-                              : 'bg-background text-foreground border-input hover:bg-accent hover:text-accent-foreground'
+                              ? 'bg-blue-50 text-blue-700 border-blue-200'
+                              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300'
                           }`}
+                          style={{minHeight: '44px'}}
                         >
                           {service}
                           {isPrimary && (
-                            <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs px-1 rounded-full">
-                              1°
+                            <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full font-semibold shadow-sm">
+                              PRIMARY
                             </span>
                           )}
                         </button>
                       );
                     })}
                   </div>
-                  {errors.primaryTrade && <p className="text-sm text-destructive">{errors.primaryTrade}</p>}
-                  <p className="text-xs text-muted-foreground">
-                    Select your primary trade first, then add additional services
-                  </p>
+                  {errors.primaryTrade ? (
+                    <p className="text-sm text-red-600 font-medium">{errors.primaryTrade}</p>
+                  ) : (
+                    <p className="text-sm text-slate-500">
+                      Select your primary trade first, then add additional services
+                    </p>
+                  )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="experience">Years of Experience</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <Label htmlFor="experience" className="text-base font-medium text-slate-900">Years of Experience</Label>
                     <Input
                       id="experience"
                       type="number"
@@ -894,31 +1055,41 @@ const TradesPersonOnboarding = () => {
                       value={formData.experienceYears || ''}
                       onChange={(e) => updateFormData('experienceYears', e.target.value ? parseInt(e.target.value) : undefined)}
                       placeholder="e.g., 5"
+                      className="h-12 text-base px-4 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:ring-offset-0"
+                      style={{borderRadius: '12px', fontSize: '16px', textAlign: 'right'}}
+                      aria-describedby="experience-help"
                     />
+                    <p id="experience-help" className="text-sm text-slate-500">0-50 years (optional)</p>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="certifications">Certifications & Qualifications</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="certifications" className="text-base font-medium text-slate-900">Certifications & Qualifications</Label>
                   <Textarea
                     id="certifications"
                     value={formData.certifications || ''}
                     onChange={(e) => updateFormData('certifications', e.target.value)}
                     placeholder="List any relevant certifications, qualifications, or training"
                     rows={3}
+                    className="text-base px-4 py-3 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:ring-offset-0"
+                    style={{borderRadius: '12px', fontSize: '16px'}}
+                    aria-describedby="certifications-help"
                   />
+                  <p id="certifications-help" className="text-sm text-slate-500">
+                    Example: Gas Safe registered, City & Guilds Level 3, NVQ Level 2
+                  </p>
                 </div>
 
                 <div className="space-y-4">
                   <div>
-                    <Label className="text-sm font-medium">Certification Images *</Label>
-                    <p className="text-sm text-muted-foreground mb-3">
+                    <Label className="text-base font-medium text-slate-900">Certification Images (Optional)</Label>
+                    <p className="text-sm text-slate-500 mb-4">
                       Upload images of your certifications, licenses, or qualifications (max 3 images, 5MB each)
                     </p>
 
                     {/* Upload Area */}
-                    <div className="border-2 border-dashed border-border rounded-lg p-6 text-center transition-colors hover:border-primary/50">
-                      <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
+                    <div className="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center transition-all duration-200 hover:border-blue-400 hover:bg-blue-50/50 active:bg-blue-100/50">
+                      <Upload className="mx-auto h-12 w-12 text-slate-400 mb-4" />
                       <input
                         type="file"
                         multiple
@@ -930,22 +1101,22 @@ const TradesPersonOnboarding = () => {
                       />
                       <Label
                         htmlFor="certification-upload"
-                        className={`cursor-pointer text-primary hover:underline text-sm ${
+                        className={`cursor-pointer text-blue-600 hover:text-blue-700 font-medium ${
                           formData.certificationImages.length >= 3 ? 'opacity-50 cursor-not-allowed' : ''
                         }`}
                       >
                         {formData.certificationImages.length >= 3 ? 'Maximum 3 images reached' : 'Click to upload certification images'}
                       </Label>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-sm text-slate-500 mt-2">
                         JPG, PNG, WebP up to 5MB each
                       </p>
                     </div>
 
-                    {errors.certificationImages && <p className="text-sm text-destructive mt-2">{errors.certificationImages}</p>}
+                    {errors.certificationImages && <p className="text-sm text-red-600 font-medium mt-2">{errors.certificationImages}</p>}
 
                     {/* Image Previews */}
                     {formData.certificationImages.length > 0 && (
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
                         {formData.certificationImages.map((file, index) => (
                           <div key={index} className="relative group">
                             <img
@@ -956,13 +1127,21 @@ const TradesPersonOnboarding = () => {
                             <button
                               type="button"
                               onClick={() => removeCertificationImage(index)}
-                              className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 hover:bg-destructive/80 transition-colors"
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center"
                               aria-label={`Remove certification image ${index + 1}`}
                             >
-                              <X className="h-3 w-3" />
+                              <X className="h-4 w-4" />
                             </button>
                           </div>
                         ))}
+                      </div>
+                    )}
+                    
+                    {formData.certificationImages.length === 0 && (
+                      <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <p className="text-sm text-blue-700 text-center">
+                          <strong>No certification images uploaded.</strong> While optional, adding certification images helps build trust with potential clients.
+                        </p>
                       </div>
                     )}
                   </div>
@@ -970,47 +1149,58 @@ const TradesPersonOnboarding = () => {
               </>
             )}
 
-            {/* Step 3: Location */}
+            {/* Step 3: Location & Service Area */}
             {currentStep === 3 && (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="city">City *</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <Label htmlFor="city" className="text-base font-medium text-slate-900">City *</Label>
                     <Input
                       id="city"
                       value={formData.city}
                       onChange={(e) => updateFormData('city', e.target.value)}
                       onBlur={() => handleFieldBlur('city')}
                       placeholder="Enter your city"
-                      className={errors.city ? 'border-destructive' : ''}
+                      className={`h-12 text-base px-4 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:ring-offset-0 ${errors.city ? 'border-red-500 bg-red-50' : ''}`}
+                      style={{borderRadius: '12px', fontSize: '16px'}}
                       aria-invalid={!!errors.city}
+                      aria-describedby={errors.city ? 'city-error' : 'city-help'}
                     />
-                    {errors.city && <p className="text-sm text-destructive">{errors.city}</p>}
+                    {errors.city ? (
+                      <p id="city-error" className="text-sm text-red-600 font-medium">{errors.city}</p>
+                    ) : (
+                      <p id="city-help" className="text-sm text-slate-500">Required for job matching</p>
+                    )}
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="postcode">Postcode *</Label>
+                  <div className="space-y-3">
+                    <Label htmlFor="postcode" className="text-base font-medium text-slate-900">Postcode *</Label>
                     <Input
                       id="postcode"
                       value={formData.postcode}
                       onChange={(e) => handlePostcodeChange(e.target.value)}
                       onBlur={() => handleFieldBlur('postcode')}
                       placeholder="e.g., SW20 9NP"
-                      className={errors.postcode ? 'border-destructive' : ''}
+                      className={`h-12 text-base px-4 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:ring-offset-0 ${errors.postcode ? 'border-red-500 bg-red-50' : ''}`}
+                      style={{borderRadius: '12px', fontSize: '16px'}}
                       aria-invalid={!!errors.postcode}
+                      aria-describedby={errors.postcode ? 'postcode-error' : 'postcode-help'}
                     />
-                    {errors.postcode && <p className="text-sm text-destructive">{errors.postcode}</p>}
-                    <p className="text-xs text-muted-foreground">UK postcode format</p>
+                    {errors.postcode ? (
+                      <p id="postcode-error" className="text-sm text-red-600 font-medium">{errors.postcode}</p>
+                    ) : (
+                      <p id="postcode-help" className="text-sm text-slate-500">UK postcode format</p>
+                    )}
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="serviceRadius">Service Radius</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="serviceRadius" className="text-base font-medium text-slate-900">Service Radius</Label>
                   <Select
                     value={formData.radiusKm.toString()}
                     onValueChange={(value) => updateFormData('radiusKm', parseInt(value))}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-12 text-base border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:ring-offset-0" style={{borderRadius: '12px', fontSize: '16px'}}>
                       <SelectValue placeholder="Select service radius" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1021,12 +1211,13 @@ const TradesPersonOnboarding = () => {
                       ))}
                     </SelectContent>
                   </Select>
+                  <p className="text-sm text-slate-500">How far are you willing to travel for jobs?</p>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="bio">
+                <div className="space-y-3">
+                  <Label htmlFor="bio" className="text-base font-medium text-slate-900">
                     Brief Bio 
-                    <span className="text-xs text-muted-foreground ml-2">
+                    <span className="text-sm text-slate-500 ml-2 font-normal">
                       {(formData.bio || '').length}/400
                     </span>
                   </Label>
@@ -1035,11 +1226,13 @@ const TradesPersonOnboarding = () => {
                     value={formData.bio || ''}
                     onChange={(e) => handleBioChange(e.target.value)}
                     placeholder="Tell potential clients about yourself and your work..."
-                    rows={3}
-                    className={(formData.bio || '').length >= 400 ? 'border-warning' : ''}
+                    rows={4}
+                    className={`text-base px-4 py-3 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:ring-offset-0 ${(formData.bio || '').length >= 400 ? 'border-orange-300 bg-orange-50' : ''}`}
+                    style={{borderRadius: '12px', fontSize: '16px'}}
+                    aria-describedby="bio-help"
                   />
-                  <p className="text-xs text-muted-foreground">
-                    Describe your experience, specializations, and approach to work
+                  <p id="bio-help" className="text-sm text-slate-500">
+                    Describe your experience, specializations, and approach to work (optional)
                   </p>
                 </div>
               </>
@@ -1048,87 +1241,103 @@ const TradesPersonOnboarding = () => {
             {/* Step 4: Portfolio & Consent */}
             {currentStep === 4 && (
               <>
-                <div className="space-y-4">
-                  <Label>Portfolio Images (Optional)</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Upload up to 5 images showcasing your work (max 5MB each)
-                  </p>
-
-                  {/* Upload Area */}
-                  <div className="border-2 border-dashed border-border rounded-lg p-6 text-center transition-colors hover:border-primary/50">
-                    <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                    <input
-                      type="file"
-                      multiple
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                      id="portfolio-upload"
-                      disabled={formData.portfolio.length >= 5}
-                    />
-                    <Label
-                      htmlFor="portfolio-upload"
-                      className={`cursor-pointer text-primary hover:underline ${
-                        formData.portfolio.length >= 5 ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
-                    >
-                      {formData.portfolio.length >= 5 ? 'Maximum 5 images reached' : 'Click to upload images'}
-                    </Label>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      JPG, PNG, WebP up to 5MB each
+                <div className="space-y-6">
+                  <div>
+                    <Label className="text-base font-medium text-slate-900">Portfolio Images (Optional)</Label>
+                    <p className="text-sm text-slate-500 mt-1 mb-4">
+                      Upload up to 5 images showcasing your work (max 5MB each)
                     </p>
-                  </div>
 
-                  {errors.portfolio && <p className="text-sm text-destructive">{errors.portfolio}</p>}
-
-                  {/* Image Previews */}
-                  {formData.portfolio.length > 0 && (
-                    <div className="grid grid-cols-3 gap-3">
-                      {formData.portfolio.map((file, index) => (
-                        <div key={index} className="relative group">
-                          <img
-                            src={URL.createObjectURL(file)}
-                            alt={`Portfolio ${index + 1}`}
-                            className="w-full h-20 object-cover rounded-lg border transition-transform group-hover:scale-105"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeImage(index)}
-                            className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 hover:bg-destructive/80 transition-colors"
-                            aria-label={`Remove image ${index + 1}`}
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ))}
+                    {/* Upload Area */}
+                    <div className="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center transition-all duration-200 hover:border-blue-400 hover:bg-blue-50/50 active:bg-blue-100/50">
+                      <Upload className="mx-auto h-12 w-12 text-slate-400 mb-4" />
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        id="portfolio-upload"
+                        disabled={formData.portfolio.length >= 5}
+                      />
+                      <Label
+                        htmlFor="portfolio-upload"
+                        className={`cursor-pointer text-blue-600 hover:text-blue-700 font-medium ${
+                          formData.portfolio.length >= 5 ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                      >
+                        {formData.portfolio.length >= 5 ? 'Maximum 5 images reached' : 'Click to upload portfolio images'}
+                      </Label>
+                      <p className="text-sm text-slate-500 mt-2">
+                        JPG, PNG, WebP up to 5MB each
+                      </p>
                     </div>
-                  )}
+
+                    {errors.portfolio && <p className="text-sm text-red-600 font-medium mt-2">{errors.portfolio}</p>}
+
+                    {/* Image Previews */}
+                    {formData.portfolio.length > 0 && (
+                      <div className="grid grid-cols-3 gap-4 mt-4">
+                        {formData.portfolio.map((file, index) => (
+                          <div key={index} className="relative group">
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt={`Portfolio ${index + 1}`}
+                              className="w-full h-24 object-cover rounded-lg border transition-transform group-hover:scale-105"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeImage(index)}
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center"
+                              aria-label={`Remove image ${index + 1}`}
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                            <div className="absolute bottom-1 left-1 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                              {index + 1}/{formData.portfolio.length}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {formData.portfolio.length === 0 && (
+                      <div className="mt-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                        <p className="text-sm text-slate-500 text-center">
+                          <strong>No portfolio images yet.</strong> Adding photos of your work helps clients see your quality and style.
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <div className="space-y-4 pt-4 border-t">
-                  <div className="flex items-start space-x-2">
+                <div className="space-y-4 pt-6 border-t border-slate-200">
+                  <div className="flex items-start space-x-3">
                     <Checkbox
                       id="consent"
                       checked={formData.marketingConsent}
                       onCheckedChange={(checked) => updateFormData('marketingConsent', checked)}
                       onBlur={() => handleFieldBlur('marketingConsent')}
                       aria-invalid={!!errors.marketingConsent}
+                      className="mt-1"
+                      style={{minWidth: '20px', minHeight: '20px'}}
                     />
-                    <div className="space-y-1">
+                    <div className="space-y-2">
                       <Label
                         htmlFor="consent"
-                        className="text-sm font-normal leading-tight cursor-pointer"
+                        className="text-base font-medium text-slate-900 leading-tight cursor-pointer"
                       >
                         I agree to be contacted about matching jobs *
                       </Label>
-                      {errors.marketingConsent && (
-                        <p className="text-sm text-destructive">{errors.marketingConsent}</p>
+                      {errors.marketingConsent ? (
+                        <p className="text-sm text-red-600 font-medium">{errors.marketingConsent}</p>
+                      ) : (
+                        <p className="text-sm text-slate-500">
+                          We'll only contact you about relevant job opportunities in your area
+                        </p>
                       )}
                     </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    We'll only contact you about relevant job opportunities in your area
-                  </p>
                 </div>
               </>
             )}
@@ -1136,13 +1345,14 @@ const TradesPersonOnboarding = () => {
         </Card>
 
         {/* Mobile Sticky Navigation */}
-        <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-4 md:hidden">
-          <div className="flex justify-between items-center max-w-2xl mx-auto">
+        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-slate-200 p-4 md:hidden" style={{paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))'}}>
+          <div className="flex justify-between items-center gap-4" style={{maxWidth: '640px', margin: '0 auto'}}>
             <Button
               variant="outline"
               onClick={prevStep}
               disabled={currentStep === 1 || (errors.general && errors.general.includes('Customer accounts cannot register'))}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 h-12 px-6 border-slate-300 text-slate-700 hover:bg-slate-50"
+              style={{borderRadius: '12px', minHeight: '48px'}}
             >
               <ChevronLeft className="h-4 w-4" />
               Back
@@ -1152,7 +1362,8 @@ const TradesPersonOnboarding = () => {
               <Button
                 onClick={nextStep}
                 disabled={!isStepValid(currentStep) || (errors.general && errors.general.includes('Customer accounts cannot register'))}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 h-12 px-6 bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+                style={{borderRadius: '12px', minHeight: '48px'}}
               >
                 Next
                 <ChevronRight className="h-4 w-4" />
@@ -1161,7 +1372,8 @@ const TradesPersonOnboarding = () => {
               <Button
                 onClick={completeRegistration}
                 disabled={!isStepValid(currentStep) || isSubmitting || (errors.general && errors.general.includes('Customer accounts cannot register'))}
-                className="bg-success hover:bg-success/90 text-success-foreground"
+                className="h-12 px-6 bg-green-600 hover:bg-green-700 text-white shadow-sm"
+                style={{borderRadius: '12px', minHeight: '48px'}}
               >
                 {isSubmitting ? (
                   <div className="flex items-center gap-2">
@@ -1169,7 +1381,7 @@ const TradesPersonOnboarding = () => {
                     Submitting...
                   </div>
                 ) : (
-                  isAuthenticated() ? 'Complete Registration' : 'Login to Complete Registration'
+                  'Complete Registration'
                 )}
               </Button>
             )}
@@ -1177,12 +1389,13 @@ const TradesPersonOnboarding = () => {
         </div>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex justify-between items-center">
+        <div className="hidden md:flex justify-between items-center mt-8">
           <Button
             variant="outline"
             onClick={prevStep}
             disabled={currentStep === 1 || (errors.general && errors.general.includes('Customer accounts cannot register'))}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 h-12 px-6 border-slate-300 text-slate-700 hover:bg-slate-50"
+            style={{borderRadius: '12px'}}
           >
             <ChevronLeft className="h-4 w-4" />
             Back
@@ -1192,7 +1405,8 @@ const TradesPersonOnboarding = () => {
             <Button
               onClick={nextStep}
               disabled={!isStepValid(currentStep) || (errors.general && errors.general.includes('Customer accounts cannot register'))}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 h-12 px-6 bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+              style={{borderRadius: '12px'}}
             >
               Next
               <ChevronRight className="h-4 w-4" />
@@ -1201,7 +1415,8 @@ const TradesPersonOnboarding = () => {
             <Button
               onClick={completeRegistration}
               disabled={!isStepValid(currentStep) || isSubmitting || (errors.general && errors.general.includes('Customer accounts cannot register'))}
-              className="bg-success hover:bg-success/90 text-success-foreground"
+              className="h-12 px-6 bg-green-600 hover:bg-green-700 text-white shadow-sm"
+              style={{borderRadius: '12px'}}
             >
               {isSubmitting ? (
                 <div className="flex items-center gap-2">
@@ -1209,7 +1424,7 @@ const TradesPersonOnboarding = () => {
                   Submitting...
                 </div>
               ) : (
-                isAuthenticated() ? 'Complete Registration' : 'Login to Complete Registration'
+                'Complete Registration'
               )}
             </Button>
           )}
