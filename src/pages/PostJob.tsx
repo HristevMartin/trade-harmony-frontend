@@ -41,7 +41,7 @@ const PostJob = () => {
     // Service categories array
     const serviceCategories = [
         'Plumbing', 'Electrical', 'Carpentry', 'Roofing', 'Painting', 
-        'Gardening', 'Heating & Cooling', 'Flooring', 'Cleaning'
+        'Gardening', 'Heating & Cooling', 'Flooring', 'Cleaning', 'Removals', 'Handyman'
     ];
     
     // Use the country if it exists in our mapping, otherwise default to GB
@@ -56,7 +56,30 @@ const PostJob = () => {
         ? serviceCategories.find(cat => cat.toLowerCase() === categoryParam.toLowerCase()) || ''
         : '';
     
-    console.log('Query params:', { country: countryParam, postcode: initialPostcode, mappedCountry: initialCountry, category: categoryParam, matchedCategory: initialCategory });
+    // Generate initial job title based on category
+    const generateJobTitleFromCategory = (category: string) => {
+        if (!category) return '';
+        
+        const categoryTitles: Record<string, string> = {
+            'plumbing': 'Plumbing repair needed',
+            'electrical': 'Electrical work required',
+            'carpentry': 'Carpentry work needed',
+            'roofing': 'Roofing repair required',
+            'painting': 'Painting work needed',
+            'gardening': 'Garden maintenance required',
+            'heating & cooling': 'Heating and cooling repair needed',
+            'flooring': 'Flooring installation needed',
+            'cleaning': 'Cleaning service required',
+            'removals': 'Moving and removal service needed',
+            'handyman': 'Handyman services required'
+        };
+        
+        return categoryTitles[category.toLowerCase()] || `${category} work needed`;
+    };
+    
+    const initialJobTitle = initialCategory ? generateJobTitleFromCategory(initialCategory) : '';
+    
+    console.log('Query params:', { country: countryParam, postcode: initialPostcode, mappedCountry: initialCountry, category: categoryParam, matchedCategory: initialCategory, generatedTitle: initialJobTitle });
     
     // Extract city/town from postcode parameter if available
     const extractCityFromPostcode = (postcode: string, country: string) => {
@@ -107,12 +130,14 @@ const PostJob = () => {
     
     const [formData, setFormData] = useState({
         country: initialCountry,
-        location: extractCityFromPostcode(initialPostcode, initialCountry),
-        postcode: '',
+        postcode: initialPostcode,
+        area: '',
+        location: '',
         serviceCategory: initialCategory,
-        jobTitle: '',
+        jobTitle: initialJobTitle,
         jobDescription: '',
         budget: '',
+        customBudget: '',
         urgency: '',
         firstName: '',
         email: '',
@@ -134,7 +159,7 @@ const PostJob = () => {
     // Calculate completion progress for each step
     const getStepCompletion = () => {
         const locationComplete = formData.country === 'GB' 
-            ? (formData.location && formData.location.trim() !== '' && formData.postcode && formData.postcode.trim() !== '')
+            ? (formData.postcode && formData.postcode.trim() !== '' && formData.area && formData.area.trim() !== '')
             : (formData.location && formData.location.trim() !== '');
             
         const steps = {
@@ -156,11 +181,14 @@ const PostJob = () => {
     }, [formData, uploadedImages]);
 
     useEffect(() => {
+        const newJobTitle = initialCategory ? generateJobTitleFromCategory(initialCategory) : '';
         setFormData(prev => ({ 
             ...prev, 
             country: initialCountry, 
-            location: extractCityFromPostcode(initialPostcode, initialCountry),
-            serviceCategory: initialCategory
+            postcode: initialPostcode,
+            area: '',
+            serviceCategory: initialCategory,
+            jobTitle: newJobTitle
         }));
     }, [initialCountry, initialPostcode, initialCategory]);
 
@@ -263,7 +291,7 @@ const PostJob = () => {
         };
     }, [uploadedImages]);
 
-    const validateField = (field: string, value: string | boolean) => {
+    const validateField = (field: string, value: string | boolean, returnError: boolean = false): boolean | string => {
         const errors: Record<string, string> = {};
         
         switch (field) {
@@ -288,10 +316,36 @@ const PostJob = () => {
                 if (!value || value === '') {
                     errors[field] = 'Budget range is required';
                 }
+                // Don't validate custom budget here - it will be validated separately in customBudget case
+                break;
+            case 'customBudget':
+                if (formData.budget === 'custom') {
+                    const stringValue = value as string;
+                    if (!stringValue || stringValue.trim() === '') {
+                        errors[field] = 'Custom budget amount is required';
+                    } else {
+                        // Validate that it's a valid number
+                        const numValue = parseFloat(stringValue.replace(/[^\d.]/g, ''));
+                        if (isNaN(numValue) || numValue <= 0) {
+                            errors[field] = 'Please enter a valid budget amount';
+                        } else if (numValue > 100000) {
+                            errors[field] = 'Budget amount seems too high. Please contact us for large projects.';
+                        }
+                    }
+                }
+                break;
+            case 'area':
+                if (formData.country === 'GB') {
+                    if (!value || (value as string).trim() === '') {
+                        errors[field] = 'Area/Town is required';
+                    }
+                }
                 break;
             case 'location':
-                if (!value || (value as string).trim() === '') {
-                    errors[field] = 'Location is required';
+                if (formData.country !== 'GB') {
+                    if (!value || (value as string).trim() === '') {
+                        errors[field] = 'Location is required';
+                    }
                 }
                 break;
             case 'postcode':
@@ -332,6 +386,10 @@ const PostJob = () => {
                     errors[field] = 'You must agree to the privacy policy to continue';
                 }
                 break;
+        }
+        
+        if (returnError) {
+            return errors[field] || '';
         }
         
         setFormErrors(prev => ({ ...prev, ...errors }));
@@ -378,6 +436,41 @@ const PostJob = () => {
         }
     };
 
+    // Scroll to the first error field
+    const scrollToFirstError = (errors: Record<string, string> = formErrors) => {
+        // Use setTimeout to ensure the errors are set in the DOM first
+        setTimeout(() => {
+            // Define the order of fields to check (in the order they appear on the form)
+            const fieldOrder = [
+                'postcode', 'area', 'location', 'serviceCategory', 'jobTitle', 'jobDescription', 
+                'budget', 'customBudget', 'urgency', 'firstName', 'email', 'phone', 'gdprConsent'
+            ];
+            
+            // Find the first field with an error
+            for (const field of fieldOrder) {
+                if (errors[field]) {
+                    const element = document.getElementById(field);
+                    
+                    if (element) {
+                        // Scroll to the element with some offset for better visibility
+                        const elementRect = element.getBoundingClientRect();
+                        const absoluteElementTop = elementRect.top + window.pageYOffset;
+                        const offset = 100; // Offset from top of viewport
+                        
+                        window.scrollTo({
+                            top: absoluteElementTop - offset,
+                            behavior: 'smooth'
+                        });
+                        
+                        // Focus the element for better accessibility
+                        element.focus();
+                        break;
+                    }
+                }
+            }
+        }, 100);
+    };
+
     // Handle authentication success
     const handleAuthSuccess = (authData: { id: string; role: string; token: string; email?: string }) => {
         console.log('Authentication successful:', authData);
@@ -412,21 +505,40 @@ const PostJob = () => {
         
         // Validate all fields
         const fieldsToValidate = formData.country === 'GB' 
-            ? ['postcode', 'area', 'serviceCategory', 'jobTitle', 'jobDescription', 'budget', 'email', 'firstName', 'phone', 'urgency', 'gdprConsent']
-            : ['location', 'serviceCategory', 'jobTitle', 'jobDescription', 'budget', 'email', 'firstName', 'phone', 'urgency', 'gdprConsent'];
+            ? ['postcode', 'area', 'serviceCategory', 'jobTitle', 'jobDescription', 'budget', 'customBudget', 'email', 'firstName', 'phone', 'urgency', 'gdprConsent']
+            : ['location', 'serviceCategory', 'jobTitle', 'jobDescription', 'budget', 'customBudget', 'email', 'firstName', 'phone', 'urgency', 'gdprConsent'];
         let isValid = true;
+        
+        const currentErrors: Record<string, string> = {};
         
         fieldsToValidate.forEach(field => {
             const value = field === 'gdprConsent' ? formData.gdprConsent : formData[field as keyof typeof formData];
-            if (!validateField(field, value)) {
+            
+            const errorMessage = validateField(field, value, true) as string;
+            if (errorMessage) {
                 isValid = false;
+                currentErrors[field] = errorMessage;
             }
+            // Also run normal validation to set form errors
+            validateField(field, value);
         });
         
+        // Special validation for custom budget
+        if (formData.budget === 'custom' && (!formData.customBudget || formData.customBudget.trim() === '')) {
+            setFormErrors(prev => ({ ...prev, budget: 'Please enter your custom budget amount' }));
+            currentErrors.budget = 'Please enter your custom budget amount';
+            isValid = false;
+        }
         
         if (!isValid) {
+            console.log('VALIDATION FAILED - Current errors:', currentErrors);
+            console.log('Form data at time of validation:', formData);
+            // Scroll to the first error field using current errors
+            setTimeout(() => scrollToFirstError(currentErrors), 50);
             return;
         }
+        
+        console.log('VALIDATION PASSED - Form is valid, proceeding...');
 
         // Check user role first (for authenticated users)
         const roleCheck = checkUserRole();
@@ -455,11 +567,29 @@ const PostJob = () => {
             // Create FormData for file upload
             const formDataToSend = new FormData();
             
-            // Add form fields
+            // Add form fields with special handling for budget
             Object.keys(formData).forEach(key => {
                 const value = formData[key as keyof typeof formData];
                 if (value !== null && value !== undefined) {
-                    formDataToSend.append(key, value.toString());
+                    // Handle budget field specially
+                    if (key === 'budget') {
+                        if (value === 'custom' && formData.customBudget) {
+                            // Send the custom budget amount as the budget value
+                            formDataToSend.append('budget', `Custom: £${formData.customBudget}`);
+                            formDataToSend.append('budgetType', 'custom');
+                            formDataToSend.append('budgetAmount', formData.customBudget);
+                        } else {
+                            formDataToSend.append(key, value.toString());
+                            formDataToSend.append('budgetType', 'range');
+                        }
+                    } else if (key === 'customBudget') {
+                        // Only send customBudget if budget is set to custom
+                        if (formData.budget === 'custom') {
+                            formDataToSend.append(key, value.toString());
+                        }
+                    } else {
+                        formDataToSend.append(key, value.toString());
+                    }
                 }
             });
             
@@ -693,18 +823,34 @@ const PostJob = () => {
                                         <UKLocationInput
                                             value={{
                                                 country: formData.country,
-                                                location: formData.location,
+                                                location: formData.area, // Use area field for UK
                                                 postcode: formData.postcode
                                             }}
                                             onChange={(locationData) => {
                                                 setFormData(prev => ({
                                                     ...prev,
-                                                    location: locationData.location,
+                                                    area: locationData.location, // Set area field for UK
                                                     postcode: locationData.postcode
                                                 }));
+                                                
+                                                // Clear errors when fields are updated
+                                                if (locationData.location && formErrors.area) {
+                                                    setFormErrors(prev => {
+                                                        const newErrors = { ...prev };
+                                                        delete newErrors.area;
+                                                        return newErrors;
+                                                    });
+                                                }
+                                                if (locationData.postcode && formErrors.postcode) {
+                                                    setFormErrors(prev => {
+                                                        const newErrors = { ...prev };
+                                                        delete newErrors.postcode;
+                                                        return newErrors;
+                                                    });
+                                                }
                                             }}
                                             errors={{
-                                                location: formErrors.location,
+                                                location: formErrors.area, // Use area errors for UK
                                                 postcode: formErrors.postcode
                                             }}
                                         />
@@ -781,7 +927,17 @@ const PostJob = () => {
                                     <Input
                                         id="jobTitle"
                                         value={formData.jobTitle}
-                                        onChange={(e) => handleInputChange('jobTitle', e.target.value)}
+                                        onChange={(e) => {
+                                            handleInputChange('jobTitle', e.target.value);
+                                            // Clear error if title becomes valid
+                                            if (e.target.value.length >= 5 && formErrors.jobTitle) {
+                                                setFormErrors(prev => {
+                                                    const newErrors = { ...prev };
+                                                    delete newErrors.jobTitle;
+                                                    return newErrors;
+                                                });
+                                            }
+                                        }}
                                         onBlur={(e) => handleBlur('jobTitle', e.target.value)}
                                         placeholder="e.g., Fix leaking pipe"
                                         maxLength={120}
@@ -934,6 +1090,18 @@ const PostJob = () => {
                                     <Label htmlFor="budget" className="text-sm font-medium text-slate-700">Budget Range <span className="text-red-500">*</span></Label>
                                     <Select value={formData.budget} onValueChange={(value) => {
                                         handleInputChange('budget', value);
+                                        // Clear custom budget if switching away from custom
+                                        if (value !== 'custom' && formData.customBudget) {
+                                            handleInputChange('customBudget', '');
+                                        }
+                                        // Clear any existing budget errors when selection changes
+                                        if (formErrors.budget) {
+                                            setFormErrors(prev => {
+                                                const newErrors = { ...prev };
+                                                delete newErrors.budget;
+                                                return newErrors;
+                                            });
+                                        }
                                         handleBlur('budget', value);
                                     }}>
                                         <SelectTrigger 
@@ -951,8 +1119,55 @@ const PostJob = () => {
                                             <SelectItem value="under-200">Under £200</SelectItem>
                                             <SelectItem value="200-500">£200 - £500</SelectItem>
                                             <SelectItem value="over-500">£500+</SelectItem>
+                                            <SelectItem value="custom">Custom Amount</SelectItem>
                                         </SelectContent>
                                     </Select>
+                                    
+                                    {/* Custom Budget Input - Show when 'Custom Amount' is selected */}
+                                    {formData.budget === 'custom' && (
+                                        <div className="mt-3">
+                                            <Label htmlFor="customBudget" className="text-sm font-medium text-slate-700">Enter your budget amount <span className="text-red-500">*</span></Label>
+                                            <div className="relative mt-1">
+                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-medium">£</span>
+                                                <Input
+                                                    id="customBudget"
+                                                    type="text"
+                                                    placeholder="e.g. 750"
+                                                    value={formData.customBudget}
+                                                    onChange={(e) => {
+                                                        // Allow only numbers and decimal point
+                                                        const value = e.target.value.replace(/[^\d.]/g, '');
+                                                        // Prevent multiple decimal points
+                                                        const parts = value.split('.');
+                                                        const cleanValue = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : value;
+                                                        handleInputChange('customBudget', cleanValue);
+                                                        
+                                                        // Clear budget errors when user starts typing
+                                                        if (formErrors.budget || formErrors.customBudget) {
+                                                            setFormErrors(prev => {
+                                                                const newErrors = { ...prev };
+                                                                delete newErrors.budget;
+                                                                delete newErrors.customBudget;
+                                                                return newErrors;
+                                                            });
+                                                        }
+                                                    }}
+                                                    onBlur={(e) => handleBlur('customBudget', e.target.value)}
+                                                    className={`pl-8 rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${
+                                                        formErrors.customBudget ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
+                                                    }`}
+                                                    aria-invalid={!!formErrors.customBudget}
+                                                    aria-describedby={formErrors.customBudget ? 'custom-budget-error' : 'custom-budget-help'}
+                                                />
+                                            </div>
+                                            {formErrors.customBudget ? (
+                                                <p id="custom-budget-error" className="text-xs text-red-600 mt-1">{formErrors.customBudget}</p>
+                                            ) : (
+                                                <p id="custom-budget-help" className="text-xs text-slate-500 mt-1">Enter the amount you're willing to spend on this project</p>
+                                            )}
+                                        </div>
+                                    )}
+                                    
                                     {formErrors.budget ? (
                                         <p id="budget-error" className="text-xs text-red-600 mt-1">{formErrors.budget}</p>
                                     ) : (
@@ -1017,7 +1232,17 @@ const PostJob = () => {
                                         <Input
                                             id="firstName"
                                             value={formData.firstName}
-                                            onChange={(e) => handleInputChange('firstName', e.target.value)}
+                                            onChange={(e) => {
+                                                handleInputChange('firstName', e.target.value);
+                                                // Clear error if name becomes valid
+                                                if (e.target.value.length >= 2 && formErrors.firstName) {
+                                                    setFormErrors(prev => {
+                                                        const newErrors = { ...prev };
+                                                        delete newErrors.firstName;
+                                                        return newErrors;
+                                                    });
+                                                }
+                                            }}
                                             onBlur={(e) => handleBlur('firstName', e.target.value)}
                                             placeholder="Your first name"
                                             className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${
@@ -1038,7 +1263,18 @@ const PostJob = () => {
                                             id="email"
                                             type="email"
                                             value={formData.email}
-                                            onChange={(e) => handleInputChange('email', e.target.value)}
+                                            onChange={(e) => {
+                                                handleInputChange('email', e.target.value);
+                                                // Clear error if email becomes valid
+                                                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                                                if (emailRegex.test(e.target.value) && formErrors.email) {
+                                                    setFormErrors(prev => {
+                                                        const newErrors = { ...prev };
+                                                        delete newErrors.email;
+                                                        return newErrors;
+                                                    });
+                                                }
+                                            }}
                                             onBlur={(e) => handleBlur('email', e.target.value)}
                                             placeholder="your@email.com"
                                             className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${
@@ -1060,7 +1296,17 @@ const PostJob = () => {
                                         id="phone"
                                         type="tel"
                                         value={formData.phone}
-                                        onChange={(e) => handleInputChange('phone', e.target.value)}
+                                        onChange={(e) => {
+                                            handleInputChange('phone', e.target.value);
+                                            // Clear error if phone becomes valid
+                                            if (e.target.value.length >= 10 && formErrors.phone) {
+                                                setFormErrors(prev => {
+                                                    const newErrors = { ...prev };
+                                                    delete newErrors.phone;
+                                                    return newErrors;
+                                                });
+                                            }
+                                        }}
                                         onBlur={(e) => handleBlur('phone', e.target.value)}
                                         placeholder="Your phone number"
                                         className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${
@@ -1191,6 +1437,7 @@ const PostJob = () => {
                             <div className="space-y-4">
                                 <label className="flex items-start gap-3 cursor-pointer">
                                     <input
+                                        id="gdprConsent"
                                         type="checkbox"
                                         checked={formData.gdprConsent}
                                         onChange={(e) => {
