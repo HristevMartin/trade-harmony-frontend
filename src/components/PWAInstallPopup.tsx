@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Download, Smartphone } from 'lucide-react';
+import { X, Download, Smartphone, Share, Plus } from 'lucide-react';
 
 interface PWAInstallPopupProps {
   isOpen: boolean;
@@ -15,6 +15,10 @@ const PWAInstallPopup: React.FC<PWAInstallPopupProps> = ({
   canInstall
 }) => {
   const [isVisible, setIsVisible] = useState(false);
+  
+  // Detect iOS
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
   useEffect(() => {
     if (isOpen) {
@@ -99,9 +103,10 @@ const PWAInstallPopup: React.FC<PWAInstallPopupProps> = ({
             </li>
           </ul>
 
-          {/* Buttons */}
+          {/* Install Instructions */}
           <div className="space-y-3">
-            {canInstall ? (
+            {canInstall && !isIOS ? (
+              // Chrome/Edge Install Button
               <button
                 onClick={handleInstall}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center"
@@ -109,10 +114,43 @@ const PWAInstallPopup: React.FC<PWAInstallPopupProps> = ({
                 <Download className="w-4 h-4 mr-2" />
                 Install App
               </button>
+            ) : isIOS ? (
+              // iOS Installation Steps
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+                <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-3 text-center">
+                  Install on iPhone/iPad
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-center text-sm text-blue-800 dark:text-blue-200">
+                    <div className="flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-full text-xs font-bold mr-3 flex-shrink-0">
+                      1
+                    </div>
+                    <span className="mr-2">Tap the</span>
+                    <Share className="w-4 h-4 mx-1 flex-shrink-0" />
+                    <span className="font-medium">Share button</span>
+                    <span className="ml-1">below</span>
+                  </div>
+                  <div className="flex items-center text-sm text-blue-800 dark:text-blue-200">
+                    <div className="flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-full text-xs font-bold mr-3 flex-shrink-0">
+                      2
+                    </div>
+                    <span className="mr-2">Select</span>
+                    <Plus className="w-4 h-4 mx-1 flex-shrink-0" />
+                    <span className="font-medium">"Add to Home Screen"</span>
+                  </div>
+                  <div className="flex items-center text-sm text-blue-800 dark:text-blue-200">
+                    <div className="flex items-center justify-center w-6 h-6 bg-blue-600 text-white rounded-full text-xs font-bold mr-3 flex-shrink-0">
+                      3
+                    </div>
+                    <span>Tap <span className="font-medium">"Add"</span> to install</span>
+                  </div>
+                </div>
+              </div>
             ) : (
-              <div className="text-center">
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                  To install on iOS: Tap Share → Add to Home Screen
+              // Fallback for other browsers
+              <div className="text-center bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  To install this app, use Chrome or Safari browser
                 </p>
               </div>
             )}

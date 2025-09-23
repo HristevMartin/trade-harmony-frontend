@@ -1,34 +1,25 @@
 
 import { 
-  HardHat, 
   Wrench, 
   Zap, 
   ArrowRight, 
   Building, 
-  Search, 
-  CheckCircle, 
   Star, 
-  Users, 
   Shield, 
-  Clock,
   Droplets,
   PaintBucket,
   Trees,
   Thermometer,
   Hammer,
   ClipboardList,
-  MessageSquareQuote,
   Handshake,
   UserPlus,
   MapPin,
   Quote,
   ChevronLeft,
   ChevronRight,
-  Play,
   Sparkles
 } from "lucide-react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,10 +27,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import usePageTracking from "@/hooks/usePageTracking";
 
 const Index = () => {
   const [postcode, setPostcode] = useState("");
-  const [selectedService, setSelectedService] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("");
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
@@ -48,6 +39,7 @@ const Index = () => {
   const [user, setUser] = useState<any>(null);
 
   const navigate = useNavigate();
+  usePageTracking('home');
 
   // Check user authentication and role on mount
   useEffect(() => {
