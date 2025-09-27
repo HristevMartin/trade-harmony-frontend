@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import PayToApplyModal from "@/components/PayToApplyModal";
 import PaidUserBanner from "@/components/PaidUserBanner";
+import CompetitionIndicator from "@/components/CompetitionIndicator";
 import {
     HiMapPin,
     HiWrenchScrewdriver,
@@ -67,7 +68,6 @@ const JobDetail = () => {
     const [showPayToApplyModal, setShowPayToApplyModal] = useState(false);
     const [userPaid, setUserPaid] = useState(false);
     const [paymentStatusLoaded, setPaymentStatusLoaded] = useState(false);
-    const [jobApplicationCount, setJobApplicationCount] = useState(0);
 
 
     // Check if current user is a trader
@@ -191,24 +191,6 @@ const JobDetail = () => {
         }
     }, [location, navigate]);
 
-    useEffect(() => {
-        console.log('show me the id', id)
-        const makeRequest = async () => {
-            const request = await fetch(`${import.meta.env.VITE_API_URL}/travel/job-application-counter/${id}`);
-
-            if (!request.ok) {
-                throw new Error('Failed to increase job application count');
-            }
-
-            let response = await request.json();
-            setJobApplicationCount(response.count);
-        }
-
-        makeRequest();
-    }, []);
-
-
-    console.log('show me the job application count', jobApplicationCount)
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('en-GB', {
@@ -422,6 +404,13 @@ const JobDetail = () => {
                                 <span className="truncate">Job #{jobData.project_id.split('-')[0]}</span>
                             </div>
                         </div>
+                        
+                        {/* Competition Indicator */}
+                        {isTrader && !userPaid && paymentStatusLoaded && (
+                            <div className="mt-3">
+                                <CompetitionIndicator id={id || ''} />
+                            </div>
+                        )}
                     </div>
 
                     {/* Apply for Job Banner - Desktop */}
