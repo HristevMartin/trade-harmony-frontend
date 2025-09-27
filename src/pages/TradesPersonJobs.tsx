@@ -86,6 +86,24 @@ const TradesPersonJobs = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    const apiRequest = async () => {
+      const request = await fetch(`${import.meta.env.VITE_API_URL}/travel/get-user-data`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        credentials: 'include'
+      });
+
+      const response = await request.json();
+      console.log('the response is following in here', response);
+    }
+
+    apiRequest();
+  }, []);
+
   // Handle ESC key and focus trap for mobile sheet
   useEffect(() => {
     if (!showMobileFilters) return;
