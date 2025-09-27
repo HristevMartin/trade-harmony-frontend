@@ -67,6 +67,7 @@ const JobDetail = () => {
     const [showPayToApplyModal, setShowPayToApplyModal] = useState(false);
     const [userPaid, setUserPaid] = useState(false);
     const [paymentStatusLoaded, setPaymentStatusLoaded] = useState(false);
+    const [jobApplicationCount, setJobApplicationCount] = useState(0);
 
 
     // Check if current user is a trader
@@ -190,7 +191,24 @@ const JobDetail = () => {
         }
     }, [location, navigate]);
 
+    useEffect(() => {
+        console.log('show me the id', id)
+        const makeRequest = async () => {
+            const request = await fetch(`${import.meta.env.VITE_API_URL}/travel/job-application-counter/${id}`);
 
+            if (!request.ok) {
+                throw new Error('Failed to increase job application count');
+            }
+
+            let response = await request.json();
+            setJobApplicationCount(response.count);
+        }
+
+        makeRequest();
+    }, []);
+
+
+    console.log('show me the job application count', jobApplicationCount)
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('en-GB', {

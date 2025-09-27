@@ -730,7 +730,7 @@ const TradesPersonOnboarding = () => {
         
         // Redirect after showing success to the jobs page
         setTimeout(() => {
-          navigate('/tradesperson-jobs');
+          navigate('/tradesperson/jobs');
         }, 2000);
       } else {
         const errorText = await response.text();
@@ -1441,6 +1441,7 @@ const TradesPersonOnboarding = () => {
             setPendingRegistration(false);
           }}
           onSuccess={handleAuthSuccess}
+          initialEmail={formData.email}
           role="trader"
         />
       </div>

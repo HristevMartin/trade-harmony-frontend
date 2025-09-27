@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,18 +18,26 @@ interface AuthModalProps {
     onClose: () => void;
     onSuccess: (authData: AuthData) => void;
     role?: string; // Optional role to specify user type (e.g., 'trader', 'customer')
+    initialEmail?: string; // Optional initial email to prefill the form
 }
 
-const AuthModal = ({ isOpen, onClose, onSuccess, role = 'customer' }: AuthModalProps) => {
+const AuthModal = ({ isOpen, onClose, onSuccess, role = 'customer', initialEmail }: AuthModalProps) => {
     const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
-        email: '',
+        email: initialEmail || '',
         password: '',
         confirmPassword: ''
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
+
+    // Update email when initialEmail prop changes
+    useEffect(() => {
+        if (initialEmail && initialEmail !== formData.email) {
+            setFormData(prev => ({ ...prev, email: initialEmail }));
+        }
+    }, [initialEmail]);
 
     const handleInputChange = (field: string, value: string) => {
         setFormData(prev => {
@@ -130,6 +138,8 @@ const AuthModal = ({ isOpen, onClose, onSuccess, role = 'customer' }: AuthModalP
                 onSuccess({
                     id: data.id,
                     role: data.role,
+                    token: data.token || '', // Add token field
+                    email: data.email,
                 });
 
                 // Reset form and close modal
