@@ -7,13 +7,8 @@ import {
   HiLockClosed,
   HiShieldCheck,
   HiCheckCircle,
-  HiPhone,
-  HiEnvelope,
-  HiArrowRight,
-  HiDocumentArrowUp
 } from 'react-icons/hi2';
-import { Textarea } from '@/components/ui/textarea';
-import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
 import { stripePromise } from '@/components/ui/StripeElement';
 import CheckoutForm from '@/components/ui/CheckoutForm';
 import { PaymentSuccessModal } from '@/components/chat-first';
@@ -105,11 +100,24 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
       }
     };
 
+    const increaseJobApplicationCount = async () => {
+      const request = await fetch(`${import.meta.env.VITE_API_URL}/travel/job-application-counter/${jobId}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: userId }) });
+
+      if (!request.ok) {
+        throw new Error('Failed to increase job application count');
+      }
+
+      let response = await request.json();
+      console.log('Increase job application count response:', response);
+      return response;
+    }
+
     setCurrentStep('success');
     setShowPaymentSuccess(true);
     
     // Run confirmation in background - don't block success flow
     confirmPaidApplication();
+    increaseJobApplicationCount();
   };
 
   const handleClose = () => {

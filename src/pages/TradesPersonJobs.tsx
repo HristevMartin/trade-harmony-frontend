@@ -201,6 +201,13 @@ const TradesPersonJobs = () => {
     return budgetMap[budget] || budget;
   };
 
+  const extractPriceOnly = (budget: string) => {
+    const formatted = formatBudget(budget);
+    // Extract only the price part, removing "Custom" or other non-price text
+    const priceMatch = formatted.match(/£[\d,.-]+(?:\s*-\s*£[\d,.-]+)?|Under £[\d,.-]+|Over £[\d,.-]+|Flexible/);
+    return priceMatch ? priceMatch[0] : formatted.replace(/^Custom\s*/i, '').trim();
+  };
+
   const formatUrgency = (urgency: string) => {
     const urgencyMap: { [key: string]: string } = {
       'asap': 'ASAP',
@@ -602,10 +609,8 @@ const TradesPersonJobs = () => {
             <div className="relative bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 rounded-3xl p-8 mb-8 border border-border/5">
               <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-3xl blur-3xl scale-110 -z-10"></div>
               <div className="relative">
-                <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-4">
-                  Available Jobs
-                </h1>
-                <p className="text-xl text-muted-foreground max-w-2xl mx-auto">Find your next opportunity with trusted clients</p>
+               
+                <h3 className="text-xl text-muted-foreground max-w-2xl mx-auto">Find your next opportunity with trusted clients</h3>
               </div>
             </div>
             
@@ -1199,7 +1204,7 @@ const TradesPersonJobs = () => {
                               <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
                                 {/* Budget Badge */}
                                 <div className="bg-white/95 backdrop-blur-sm text-slate-700 text-xs font-semibold px-3 py-1.5 rounded-full shadow-sm border border-white/50">
-                                  £ {formatBudget(job.budget).replace('£', '')}
+                                  {extractPriceOnly(job.budget)}
                                 </div>
                                 
                                 {/* Urgency Badge */}
