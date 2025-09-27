@@ -218,7 +218,7 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
                   colorText: 'hsl(var(--foreground))',
                   borderRadius: '8px'
                 }
-              }
+              },
             }}
             key={clientSecret}
           >
@@ -246,7 +246,7 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
             {isLoading ? (
               <div className="flex items-center justify-center gap-2">
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                <span>Processing...</span>
+                <span>Loading...</span>
               </div>
             ) : (
               <div className="flex items-center justify-center gap-2">

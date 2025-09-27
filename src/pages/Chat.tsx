@@ -567,9 +567,9 @@ const Chat = () => {
           </div>
 
           {/* Message Input - Fixed at bottom */}
-          <div className="flex-shrink-0 border-t border-border bg-background/95 backdrop-blur-sm">
-            <div className="p-4 sm:p-6">
-              <div className="flex gap-3 max-w-4xl mx-auto">
+          <div className="flex-shrink-0 border-t border-gray-200 bg-white shadow-lg">
+            <div className="p-3 sm:p-4 md:p-6">
+              <div className="flex gap-2 sm:gap-3 max-w-4xl mx-auto">
                 <input
                   type="text"
                   value={message}
@@ -577,12 +577,12 @@ const Chat = () => {
                   onKeyPress={(e) => e.key === 'Enter' && conversationId && handleSendMessage()}
                   placeholder={conversationId ? "Type your message..." : "Select a conversation to start chatting"}
                   disabled={!conversationId}
-                  className="flex-1 px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-muted/50 disabled:text-muted-foreground disabled:cursor-not-allowed text-sm sm:text-base transition-all"
+                  className="flex-1 px-3 py-2.5 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed text-sm sm:text-base transition-all min-h-[44px]"
                 />
                 <Button 
                   onClick={handleSendMessage}
                   disabled={!message.trim() || !conversationId}
-                  className="px-4 py-3 rounded-xl transition-all hover:scale-105"
+                  className="px-3 py-2.5 sm:px-4 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all min-h-[44px] min-w-[44px] flex items-center justify-center"
                   size="default"
                 >
                   <Send className="w-4 h-4 sm:w-5 sm:h-5" />

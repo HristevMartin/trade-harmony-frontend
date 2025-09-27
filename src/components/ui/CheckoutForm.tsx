@@ -3,12 +3,6 @@ import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js'
 import { Button } from '@/components/ui/button';
 import {
   HiLockClosed,
-  HiShieldCheck,
-  HiCheckCircle,
-  HiPhone,
-  HiEnvelope,
-  HiArrowRight,
-  HiDocumentArrowUp
 } from 'react-icons/hi2';
 
 interface CheckoutFormProps {
@@ -33,6 +27,21 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSuccess, onError }) => {
       redirect: 'if_required',
       confirmParams: {
         return_url: `${window.location.origin}/payment-result`,
+        payment_method_data: {
+          billing_details: {
+            name: 'Customer', // Required when billingDetails is set to 'never'
+            email: null,
+            phone: null,
+            address: {
+              line1: null,
+              line2: null,
+              city: null,
+              state: null,
+              postal_code: null,
+              country: null,
+            }
+          }
+        }
       },
     });
 
@@ -56,20 +65,29 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSuccess, onError }) => {
 
   return (
     <form onSubmit={submit} className="space-y-4">
-      <PaymentElement />
+      <PaymentElement 
+        options={{
+          fields: {
+            billingDetails: 'never'
+          }
+        }}
+      />
       <Button
         type="submit"
         disabled={!stripe || submitting}
         className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl min-h-[44px]"
       >
-        {submitting ? 'Processing…' :
-          <label>
-            
-            <HiLockClosed className="w-5 h-5 mr-2" />
-            Pay £5
-          </label>
-
-        }
+        {submitting ? (
+          <div className="flex items-center justify-center gap-2">
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+            <span>Loading checkout...</span>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center gap-2">
+            <HiLockClosed className="w-5 h-5" />
+            <span>Pay £5</span>
+          </div>
+        )}
       </Button>
     </form>
   );
