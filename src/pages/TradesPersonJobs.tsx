@@ -75,6 +75,9 @@ const TradesPersonJobs = () => {
   const [showStickyFilter, setShowStickyFilter] = useState(false);
   const [userPostcode, setUserPostcode] = useState<string>('');
   const [loadingPostcode, setLoadingPostcode] = useState(false);
+  const [effectiveRadius, setEffectiveRadius] = useState<number | null>(null);
+  const [requestedRadius, setRequestedRadius] = useState<number | null>(null);
+  const [radiusAttempts, setRadiusAttempts] = useState(0);
   const { toast } = useToast();
 
   // Convert km to the nearest supported miles option used by the dropdown
@@ -156,8 +159,20 @@ const TradesPersonJobs = () => {
     apiRequest();
   }, []);
 
+  // Calculate progressive radius increments based on attempts
+  const getProgressiveRadiusIncrements = (currentRadius: number, attempts: number) => {
+    const baseIncrements = [
+      [5, 10, 20],    // First attempt: +5, +10, +20
+      [10, 20, 30],   // Second attempt: +10, +20, +30  
+      [25, 50, 100]   // Third+ attempt: +25, +50, +100
+    ];
+    
+    const incrementIndex = Math.min(attempts, baseIncrements.length - 1);
+    return baseIncrements[incrementIndex];
+  };
+
   // Function to handle radius changes
-  const handleRadiusChange = (newRadius: number) => {
+  const handleRadiusChange = (newRadius: number, fromEmptyState = false) => {
     // Log the radius change with detailed information
     logRadiusChange(newRadius);
 
@@ -165,6 +180,14 @@ const TradesPersonJobs = () => {
       ...prev,
       radius: newRadius
     }));
+
+    // If this is from empty state, increment attempts counter
+    if (fromEmptyState) {
+      setRadiusAttempts(prev => prev + 1);
+    } else {
+      // Reset attempts when user manually changes radius through filter bar
+      setRadiusAttempts(0);
+    }
   };
 
   // Function to log radius changes for analytics/debugging
@@ -208,6 +231,20 @@ const TradesPersonJobs = () => {
 
           if (data.success && data.projects) {
             setJobs(data.projects);
+            
+            // Reset radius attempts when jobs are found
+            if (data.projects.length > 0) {
+              setRadiusAttempts(0);
+            }
+            
+            // Handle effective radius from backend if provided
+            if (data.filtersApplied?.effectiveRadiusKm && data.filtersApplied?.requestedRadiusKm) {
+              setEffectiveRadius(data.filtersApplied.effectiveRadiusKm);
+              setRequestedRadius(data.filtersApplied.requestedRadiusKm);
+            } else {
+              setEffectiveRadius(null);
+              setRequestedRadius(null);
+            }
           } else {
             setError('Failed to fetch jobs');
           }
@@ -436,6 +473,20 @@ const TradesPersonJobs = () => {
 
         if (data.success && data.projects) {
           setJobs(data.projects);
+          
+          // Reset radius attempts when jobs are found
+          if (data.projects.length > 0) {
+            setRadiusAttempts(0);
+          }
+          
+          // Handle effective radius from backend if provided
+          if (data.filtersApplied?.effectiveRadiusKm && data.filtersApplied?.requestedRadiusKm) {
+            setEffectiveRadius(data.filtersApplied.effectiveRadiusKm);
+            setRequestedRadius(data.filtersApplied.requestedRadiusKm);
+          } else {
+            setEffectiveRadius(null);
+            setRequestedRadius(null);
+          }
         } else {
           setError('Failed to fetch jobs');
         }
@@ -1436,27 +1487,178 @@ const TradesPersonJobs = () => {
             )}
             
             {visibleJobs.length === 0 ? (
-              <div className="text-center py-20">
-                <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Briefcase className="h-12 w-12 text-slate-400" />
-                </div>
-                <h3 className="text-2xl font-semibold text-slate-900 mb-3">No Jobs Available</h3>
-                <p className="text-slate-600 mb-8 max-w-md mx-auto">We're constantly adding new opportunities. Check back soon or subscribe to get notified when jobs matching your skills are posted.</p>
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  <Button
-                    onClick={() => window.location.reload()}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium"
-                  >
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Refresh Jobs
-                  </Button>
-                  {/* <Button 
-                    variant="outline"
-                    className="border-slate-300 text-slate-700 hover:bg-slate-50 px-6 py-3 rounded-lg font-medium"
-                  >
-                    Set Job Alerts
-                  </Button> */}
-                </div>
+              <div className="max-w-2xl mx-auto">
+                <Card className="bg-white border border-slate-200 shadow-sm rounded-lg p-8">
+                  <div className="text-center">
+                    {/* Icon */}
+                    <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <MapPin className="h-8 w-8 text-slate-400" />
+                    </div>
+                    
+                    {/* Main Message */}
+                    <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                      No jobs within {filters.radius || 25} miles{userPostcode ? ` of ${userPostcode}` : ''}
+                    </h3>
+                    <p className="text-slate-600 mb-8 max-w-md mx-auto">
+                      Try widening your search radius. You can also update your postcode in your profile settings.
+                    </p>
+
+                    {/* Effective Radius Notification */}
+                    {effectiveRadius && requestedRadius && effectiveRadius !== requestedRadius && (
+                      <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                        <div className="flex items-start gap-3">
+                          <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                          <div className="flex-1">
+                            <p className="text-sm text-amber-800 mb-2">
+                              No jobs within {requestedRadius} miles. Showing jobs within {effectiveRadius} miles.
+                            </p>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setEffectiveRadius(null);
+                                setRequestedRadius(null);
+                                handleRadiusChange(requestedRadius);
+                              }}
+                              className="text-amber-700 border-amber-300 hover:bg-amber-100 text-xs"
+                            >
+                              Revert to {requestedRadius} miles
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Quick Action Buttons */}
+                    <div className="space-y-6">
+                      {/* Progressive Radius Increment Buttons */}
+                      <div>
+                        <div className="text-center mb-3">
+                          <p className="text-sm font-medium text-slate-700">
+                            {radiusAttempts === 0 && "Try expanding your search radius:"}
+                            {radiusAttempts === 1 && "Still no luck? Try even wider search:"}
+                            {radiusAttempts >= 2 && "Try again with bigger miles:"}
+                          </p>
+                          {radiusAttempts > 0 && (
+                            <p className="text-xs text-slate-500 mt-1">
+                              Previous searches: {radiusAttempts} attempt{radiusAttempts > 1 ? 's' : ''}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap justify-center gap-2">
+                          {getProgressiveRadiusIncrements(filters.radius || 25, radiusAttempts).map((increment) => {
+                            const newRadius = (filters.radius || 25) + increment;
+                            return (
+                              <Button
+                                key={increment}
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleRadiusChange(newRadius, true)}
+                                className="border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg transition-all hover:border-blue-300 hover:text-blue-700"
+                                disabled={loadingPostcode}
+                              >
+                                {loadingPostcode ? (
+                                  <RefreshCw className="h-3 w-3 animate-spin mr-1" />
+                                ) : null}
+                                +{increment} miles
+                              </Button>
+                            );
+                          })}
+                        </div>
+                        {radiusAttempts >= 2 && (
+                          <p className="text-xs text-amber-600 text-center mt-2 font-medium">
+                            💡 Consider updating your postcode or clearing filters if still no results
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Clear Filters */}
+                      {(filters.categories.length > 0 || filters.locations.length > 0 || filters.urgency) && (
+                        <div>
+                          <p className="text-sm font-medium text-slate-700 mb-3">Active filters:</p>
+                          <div className="flex flex-wrap justify-center gap-2">
+                            {filters.categories.length > 0 && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setFilters(prev => ({ ...prev, categories: [] }));
+                                  setRadiusAttempts(0); // Reset attempts when clearing filters
+                                }}
+                                className="border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg transition-all hover:border-blue-300"
+                                disabled={loadingPostcode}
+                              >
+                                {loadingPostcode ? <RefreshCw className="h-3 w-3 animate-spin mr-1" /> : null}
+                                Clear categories ({filters.categories.length})
+                              </Button>
+                            )}
+                            {filters.locations.length > 0 && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setFilters(prev => ({ ...prev, locations: [] }));
+                                  setRadiusAttempts(0); // Reset attempts when clearing filters
+                                }}
+                                className="border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg transition-all hover:border-blue-300"
+                                disabled={loadingPostcode}
+                              >
+                                {loadingPostcode ? <RefreshCw className="h-3 w-3 animate-spin mr-1" /> : null}
+                                Clear locations ({filters.locations.length})
+                              </Button>
+                            )}
+                            {filters.urgency && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setFilters(prev => ({ ...prev, urgency: undefined }));
+                                  setRadiusAttempts(0); // Reset attempts when clearing filters
+                                }}
+                                className="border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg transition-all hover:border-blue-300"
+                                disabled={loadingPostcode}
+                              >
+                                {loadingPostcode ? <RefreshCw className="h-3 w-3 animate-spin mr-1" /> : null}
+                                Clear urgency
+                              </Button>
+                            )}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setFilters({ categories: [], locations: [] });
+                                setRadiusAttempts(0); // Reset attempts when clearing all filters
+                              }}
+                              className="border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg font-medium transition-all hover:border-blue-300"
+                              disabled={loadingPostcode}
+                            >
+                              {loadingPostcode ? <RefreshCw className="h-3 w-3 animate-spin mr-1" /> : null}
+                              Clear all filters
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Primary Action */}
+                      <div className="pt-4 border-t border-slate-200">
+                        <Button
+                          onClick={() => {
+                            setRadiusAttempts(0); // Reset attempts on manual refresh
+                            window.location.reload();
+                          }}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-all hover:shadow-md"
+                          disabled={loadingPostcode}
+                        >
+                          <RefreshCw className={`h-4 w-4 mr-2 ${loadingPostcode ? 'animate-spin' : ''}`} />
+                          {loadingPostcode ? 'Searching...' : 'Refresh Jobs'}
+                        </Button>
+                        <p className="text-xs text-slate-500 mt-2">
+                          This will reload the page and fetch the latest jobs
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
               </div>
             ) : (
               <>
