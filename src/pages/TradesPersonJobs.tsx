@@ -843,9 +843,10 @@ const TradesPersonJobs = () => {
                   onClick={() => setMobileRadiusOpen(!mobileRadiusOpen)}
                   className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
                     filters.radius && filters.radius !== 25
-                      ? 'bg-muted/80 text-muted-foreground border-border' 
+                      ? 'bg-primary/10 text-primary border-primary/20' 
                       : 'bg-background hover:bg-muted border-border'
-                  }`}
+                  } ${loadingPostcode ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  disabled={loadingPostcode}
                 >
                   <MapPin className="h-4 w-4" />
                   <span>Within {filters.radius || 25} miles</span>
@@ -855,11 +856,15 @@ const TradesPersonJobs = () => {
                       <span className="text-muted-foreground">from {userPostcode}</span>
                     </>
                   )}
-                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${mobileRadiusOpen ? 'rotate-180' : ''}`} />
+                  {loadingPostcode ? (
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${mobileRadiusOpen ? 'rotate-180' : ''}`} />
+                  )}
                 </button>
                 
-                {mobileRadiusOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border/20 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto min-w-[200px]">
+                {mobileRadiusOpen && !loadingPostcode && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border/20 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto min-w-[280px]">
                     {[5, 10, 25, 50, 100].map((radius) => (
                       <button
                         key={radius}
@@ -867,13 +872,18 @@ const TradesPersonJobs = () => {
                           handleRadiusChange(radius);
                           setMobileRadiusOpen(false);
                         }}
-                        className={`w-full p-3 text-left text-sm font-medium border-b border-border/10 last:border-b-0 transition-colors ${
+                        className={`w-full p-3 text-left text-sm font-medium border-b border-border/10 last:border-b-0 transition-colors flex items-center justify-between ${
                           (filters.radius || 25) === radius
                             ? 'bg-primary/10 text-primary font-bold'
                             : 'bg-card text-card-foreground hover:bg-muted/50'
                         }`}
                       >
-                        Within {radius} miles
+                        <span>Within {radius} miles</span>
+                        {(filters.radius || 25) === radius && (
+                          <Badge variant="default" className="bg-primary text-primary-foreground text-xs">
+                            Current
+                          </Badge>
+                        )}
                       </button>
                     ))}
                   </div>
