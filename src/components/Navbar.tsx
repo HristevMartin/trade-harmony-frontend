@@ -310,7 +310,6 @@ const Navbar = () => {
                 className="text-foreground hover:text-trust-blue transition-colors font-medium flex items-center gap-2"
               >
                 <LogOut className="h-4 w-4" />
-                Logout
               </button>
             ) : (
               <button
