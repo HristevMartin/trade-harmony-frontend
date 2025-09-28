@@ -840,13 +840,15 @@ const TradesPersonJobs = () => {
               {/* Combined Radius + Postcode Dropdown */}
               <div className="relative" data-mobile-radius>
                 <button
-                  onClick={() => setMobileRadiusOpen(!mobileRadiusOpen)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
+                  onClick={() => {
+                    console.log('Miles dropdown clicked, loadingPostcode:', loadingPostcode, 'mobileRadiusOpen:', mobileRadiusOpen);
+                    setMobileRadiusOpen(!mobileRadiusOpen);
+                  }}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all cursor-pointer ${
                     filters.radius && filters.radius !== 25
                       ? 'bg-primary/10 text-primary border-primary/20' 
                       : 'bg-background hover:bg-muted border-border'
-                  } ${loadingPostcode ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  disabled={loadingPostcode}
+                  }`}
                 >
                   <MapPin className="h-4 w-4" />
                   <span>Within {filters.radius || 25} miles</span>
@@ -856,26 +858,23 @@ const TradesPersonJobs = () => {
                       <span className="text-muted-foreground">from {userPostcode}</span>
                     </>
                   )}
-                  {loadingPostcode ? (
-                    <RefreshCw className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${mobileRadiusOpen ? 'rotate-180' : ''}`} />
-                  )}
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${mobileRadiusOpen ? 'rotate-180' : ''}`} />
                 </button>
                 
-                {mobileRadiusOpen && !loadingPostcode && (
+                {mobileRadiusOpen && (
                   <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-card border border-border/20 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto w-64">
                     {[5, 10, 25, 50, 100].map((radius) => (
                       <button
                         key={radius}
                         onClick={() => {
+                          console.log('Radius option clicked:', radius);
                           handleRadiusChange(radius);
                           setMobileRadiusOpen(false);
                         }}
-                        className={`w-full p-3 text-left text-sm font-medium border-b border-border/10 last:border-b-0 transition-colors flex items-center justify-between ${
+                        className={`w-full p-3 text-left text-sm font-medium border-b border-border/10 last:border-b-0 transition-colors flex items-center justify-between hover:bg-muted/80 ${
                           (filters.radius || 25) === radius
                             ? 'bg-primary/10 text-primary font-bold'
-                            : 'bg-card text-card-foreground hover:bg-muted/50'
+                            : 'bg-card text-card-foreground'
                         }`}
                       >
                         <span>Within {radius} miles</span>
