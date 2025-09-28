@@ -756,64 +756,230 @@ const TradesPersonJobs = () => {
         }
       />
 
-      {/* Sticky Filter Bar - Shows on Scroll */}
-      <AnimatePresence>
-        {showStickyFilter && (
-          <motion.div
-            initial={{ opacity: 0, y: -60 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -60 }}
-            transition={{ duration: 0.2 }}
-            className="fixed top-4 left-4 right-4 z-50 bg-gradient-to-r from-white/95 via-slate-50/95 to-white/95 backdrop-blur-md border border-slate-200/40 shadow-xl rounded-2xl"
-            style={{ 
-              marginTop: 'env(safe-area-inset-top, 0px)',
-              backdropFilter: 'blur(20px) saturate(180%)'
-            }}
-          >
-            <div className="px-4 py-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full animate-pulse"></div>
-                    <h2 className="font-semibold text-slate-900 text-sm">Active Filters</h2>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {filters.categories.length > 0 && (
-                      <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
-                        {filters.categories.length} Categories
-                      </Badge>
-                    )}
-                    {filters.locations.length > 0 && (
-                      <Badge variant="secondary" className="text-xs bg-green-50 text-green-700 border-green-200">
-                        {filters.locations.length} Locations
-                      </Badge>
-                    )}
-                    {filters.urgency && (
-                      <Badge variant="secondary" className="text-xs bg-amber-50 text-amber-700 border-amber-200">
-                        {filters.urgency}
-                      </Badge>
-                    )}
-                    {filters.radius && (
-                      <Badge variant="secondary" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
-                        {filters.radius} miles
-                      </Badge>
-                    )}
-                  </div>
+      {/* Mobile-First Sticky Filter Bar */}
+      <div className="sticky top-16 z-40 bg-background border-b border-border/20 shadow-sm">
+        <div className="px-4 py-3">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+            {/* Category Filter Chip */}
+            <button
+              onClick={() => setOpenPopovers(prev => ({ ...prev, category: !prev.category }))}
+              className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
+                filters.categories.length > 0 
+                  ? 'bg-primary text-primary-foreground border-primary' 
+                  : 'bg-background hover:bg-muted border-border'
+              }`}
+            >
+              <Building2 className="h-4 w-4" />
+              {filters.categories.length === 0 ? 'Category' : 
+               filters.categories.length === 1 ? filters.categories[0] : 
+               `${filters.categories.length} Categories`}
+              {filters.categories.length > 0 && (
+                <Badge variant="secondary" className="bg-primary-foreground/20 text-primary-foreground text-xs px-1.5 py-0.5 h-5">
+                  {filters.categories.length}
+                </Badge>
+              )}
+            </button>
+
+            {/* Location Filter Chip */}
+            <button
+              onClick={() => setOpenPopovers(prev => ({ ...prev, location: !prev.location }))}
+              className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
+                filters.locations.length > 0 
+                  ? 'bg-trust-green text-trust-green-foreground border-trust-green' 
+                  : 'bg-background hover:bg-muted border-border'
+              }`}
+            >
+              <MapPin className="h-4 w-4" />
+              {filters.locations.length === 0 ? 'Location' : 
+               filters.locations.length === 1 ? filters.locations[0] : 
+               `${filters.locations.length} Locations`}
+              {filters.locations.length > 0 && (
+                <Badge variant="secondary" className="bg-trust-green-foreground/20 text-trust-green-foreground text-xs px-1.5 py-0.5 h-5">
+                  {filters.locations.length}
+                </Badge>
+              )}
+            </button>
+
+            {/* ASAP Filter Chip */}
+            <button
+              onClick={() => setFilters(prev => ({ 
+                ...prev, 
+                urgency: prev.urgency === 'ASAP' ? undefined : 'ASAP' 
+              }))}
+              className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
+                filters.urgency === 'ASAP' 
+                  ? 'bg-accent-orange text-accent-orange-foreground border-accent-orange' 
+                  : 'bg-background hover:bg-muted border-border'
+              }`}
+            >
+              <Zap className="h-4 w-4" />
+              ASAP
+            </button>
+
+            {/* Date Filter Chip */}
+            <button
+              onClick={() => {
+                const urgencies = ['This week', 'This month', 'Flexible'];
+                const currentIndex = filters.urgency && urgencies.includes(filters.urgency) 
+                  ? urgencies.indexOf(filters.urgency) : -1;
+                const nextUrgency = currentIndex === urgencies.length - 1 
+                  ? undefined 
+                  : urgencies[currentIndex + 1];
+                setFilters(prev => ({ ...prev, urgency: nextUrgency }));
+              }}
+              className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
+                filters.urgency && !['ASAP'].includes(filters.urgency)
+                  ? 'bg-trust-blue text-trust-blue-foreground border-trust-blue' 
+                  : 'bg-background hover:bg-muted border-border'
+              }`}
+            >
+              <Calendar className="h-4 w-4" />
+              {filters.urgency && !['ASAP'].includes(filters.urgency) ? filters.urgency : 'Date'}
+            </button>
+
+            {/* Combined Radius + Postcode Chip */}
+            <button
+              onClick={() => {
+                const radiusOptions = [5, 10, 25, 50, 100];
+                const currentIndex = radiusOptions.indexOf(filters.radius || 25);
+                const nextRadius = currentIndex === radiusOptions.length - 1 
+                  ? radiusOptions[0] 
+                  : radiusOptions[currentIndex + 1];
+                handleRadiusChange(nextRadius);
+              }}
+              className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
+                filters.radius && filters.radius !== 25
+                  ? 'bg-muted/80 text-muted-foreground border-border' 
+                  : 'bg-background hover:bg-muted border-border'
+              }`}
+            >
+              <MapPin className="h-4 w-4" />
+              <span>Within {filters.radius || 25} miles</span>
+              {userPostcode && (
+                <>
+                  <span className="text-muted-foreground">·</span>
+                  <span className="text-muted-foreground">from {userPostcode}</span>
+                </>
+              )}
+            </button>
+
+            {/* Advanced Filters Chip */}
+            <button
+              onClick={() => setShowMobileFilters(true)}
+              className="flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium bg-background hover:bg-muted border-border transition-all"
+            >
+              <Filter className="h-4 w-4" />
+              Filters
+              {(filters.categories.length + filters.locations.length + (filters.urgency ? 1 : 0) + (filters.radius && filters.radius !== 25 ? 1 : 0)) > 0 && (
+                <Badge variant="default" className="bg-primary text-primary-foreground text-xs px-1.5 py-0.5 h-5">
+                  {filters.categories.length + filters.locations.length + (filters.urgency ? 1 : 0) + (filters.radius && filters.radius !== 25 ? 1 : 0)}
+                </Badge>
+              )}
+            </button>
+
+            {/* Clear All Action */}
+            {(filters.categories.length > 0 || filters.locations.length > 0 || filters.urgency || (filters.radius && filters.radius !== 25)) && (
+              <button
+                onClick={() => {
+                  setFilters({ categories: [], locations: [], radius: 25 });
+                }}
+                className="flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/20 transition-all"
+              >
+                Clear all
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Category Popover */}
+        <AnimatePresence>
+          {openPopovers.category && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="absolute top-full left-0 right-0 bg-card border-x border-b border-border/20 shadow-lg z-50"
+              data-popover
+            >
+              <div className="p-4 max-h-60 overflow-y-auto">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {filterOptions.categories.map(category => (
+                    <button
+                      key={category}
+                      onClick={() => {
+                        if (filters.categories.includes(category)) {
+                          setFilters(prev => ({
+                            ...prev,
+                            categories: prev.categories.filter(c => c !== category)
+                          }));
+                        } else {
+                          setFilters(prev => ({
+                            ...prev,
+                            categories: [...prev.categories, category]
+                          }));
+                        }
+                      }}
+                      className={`p-3 rounded-lg text-sm font-medium text-left transition-all ${
+                        filters.categories.includes(category)
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted hover:bg-muted/80 text-muted-foreground'
+                      }`}
+                    >
+                      {category}
+                    </button>
+                  ))}
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowMobileFilters(true)}
-                  className="text-xs bg-white/80 hover:bg-white border-slate-300 shadow-sm hover:shadow-md transition-all"
-                >
-                  <Filter className="w-4 h-4 mr-1" />
-                  Edit
-                </Button>
               </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Location Popover */}
+        <AnimatePresence>
+          {openPopovers.location && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="absolute top-full left-0 right-0 bg-card border-x border-b border-border/20 shadow-lg z-50"
+              data-popover
+            >
+              <div className="p-4 max-h-60 overflow-y-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {filterOptions.locations.map(location => (
+                    <button
+                      key={location}
+                      onClick={() => {
+                        if (filters.locations.includes(location)) {
+                          setFilters(prev => ({
+                            ...prev,
+                            locations: prev.locations.filter(l => l !== location)
+                          }));
+                        } else {
+                          setFilters(prev => ({
+                            ...prev,
+                            locations: [location]
+                          }));
+                        }
+                        setOpenPopovers(prev => ({ ...prev, location: false }));
+                      }}
+                      className={`p-3 rounded-lg text-sm font-medium text-left transition-all ${
+                        filters.locations.includes(location)
+                          ? 'bg-trust-green text-trust-green-foreground'
+                          : 'bg-muted hover:bg-muted/80 text-muted-foreground'
+                      }`}
+                    >
+                      {location}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       <div className="min-h-screen bg-gradient-to-br from-background via-muted/5 to-background">
         <div className="container mx-auto px-4 max-w-6xl py-8">
@@ -880,378 +1046,7 @@ const TradesPersonJobs = () => {
             </div>
           </motion.div>
 
-          {/* Enhanced Desktop Sticky Filter Bar */}
-          <div className="desktop-filter-bar sticky top-16 sm:top-20 z-40 mb-8 w-full">
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="hidden md:block bg-card/80 backdrop-blur-sm border border-border/20 shadow-xl rounded-2xl px-6 py-5 w-full min-h-[80px]"
-              style={{ 
-                position: 'relative',
-                willChange: 'transform'
-              }}
-            >
-              {/* Desktop Filters */}
-              <div className="flex flex-wrap gap-3 items-center min-h-[48px] w-full">
-                {/* Category Chip Popover */}
-                <div className="relative" data-popover>
-                  <button
-                    onClick={() => setOpenPopovers(prev => ({ ...prev, category: !prev.category }))}
-                    className="inline-flex items-center gap-2 rounded-xl px-4 h-10 bg-background hover:bg-muted/50 border border-border/20 text-foreground transition-all focus:outline-none focus:ring-2 focus:ring-primary shadow-sm hover:shadow-md flex-shrink-0"
-                    aria-expanded={openPopovers.category}
-                  >
-                    <Building2 className="h-4 w-4" />
-                    <span className="text-sm font-medium">
-                      {filters.categories.length === 0
-                        ? 'Category'
-                        : filters.categories.length === 1
-                          ? filters.categories[0]
-                          : filters.categories.length === 2
-                            ? `${filters.categories[0]}, ${filters.categories[1]}`
-                            : `${filters.categories[0]}, ${filters.categories[1]} +${filters.categories.length - 2}`
-                      }
-                    </span>
-                    {filters.categories.length > 0 && (
-                      <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-medium text-primary-foreground bg-primary rounded-full">
-                        {filters.categories.length}
-                      </span>
-                    )}
-                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${openPopovers.category ? 'rotate-180' : ''}`} />
-                  </button>
-
-                  {openPopovers.category && (
-                    <div className="absolute top-full left-0 mt-2 w-64 bg-card rounded-2xl border border-border/20 shadow-2xl z-50 backdrop-blur-sm">
-                      <div className="p-4 space-y-2 max-h-64 overflow-y-auto">
-                        {filterOptions.categories.map((category, index) => (
-                          <div key={category}>
-                            <label className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={filters.categories.includes(category)}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setFilters(prev => ({ ...prev, categories: [...prev.categories, category] }));
-                                  } else {
-                                    setFilters(prev => ({ ...prev, categories: prev.categories.filter(c => c !== category) }));
-                                  }
-                                }}
-                                className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                              />
-                              <span className="text-sm text-slate-700">{category}</span>
-                            </label>
-                            {index < filterOptions.categories.length - 1 && <div className="h-px bg-slate-100 my-1" />}
-                          </div>
-                        ))}
-                      </div>
-                      <div className="border-t border-slate-100 p-3 flex gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() => setOpenPopovers(prev => ({ ...prev, category: false }))}
-                          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-                        >
-                          Apply
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setFilters(prev => ({ ...prev, categories: [] }));
-                            setOpenPopovers(prev => ({ ...prev, category: false }));
-                          }}
-                          className="flex-1"
-                        >
-                          Clear
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Location Chip Popover */}
-                <div className="relative" data-popover>
-                  <button
-                    onClick={() => setOpenPopovers(prev => ({ ...prev, location: !prev.location }))}
-                    className="inline-flex items-center gap-2 rounded-full px-3 h-9 bg-white hover:bg-slate-50 ring-1 ring-slate-200 text-slate-700 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 flex-shrink-0"
-                    aria-expanded={openPopovers.location}
-                  >
-                    <MapPin className="h-4 w-4" />
-                    <span className="text-sm font-medium">
-                      {filters.locations.length === 0
-                        ? 'Location'
-                        : filters.locations.length === 1
-                          ? filters.locations[0]
-                          : filters.locations.length === 2
-                            ? `${filters.locations[0]}, ${filters.locations[1]}`
-                            : `${filters.locations[0]}, ${filters.locations[1]} +${filters.locations.length - 2}`
-                      }
-                    </span>
-                    {filters.locations.length > 0 && (
-                      <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-medium text-white bg-blue-500 rounded-full">
-                        {filters.locations.length}
-                      </span>
-                    )}
-                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${openPopovers.location ? 'rotate-180' : ''}`} />
-                  </button>
-
-                  {openPopovers.location && (
-                    <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl border border-slate-200 shadow-lg z-50">
-                      <div className="p-3 space-y-2 max-h-64 overflow-y-auto">
-                        {filterOptions.locations.map((location, index) => (
-                          <div key={location}>
-                            <label className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={filters.locations.includes(location)}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setFilters(prev => ({ ...prev, locations: [...prev.locations, location] }));
-                                  } else {
-                                    setFilters(prev => ({ ...prev, locations: prev.locations.filter(l => l !== location) }));
-                                  }
-                                }}
-                                className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                              />
-                              <span className="text-sm text-slate-700">{location}</span>
-                            </label>
-                            {index < filterOptions.locations.length - 1 && <div className="h-px bg-slate-100 my-1" />}
-                          </div>
-                        ))}
-                      </div>
-                      <div className="border-t border-slate-100 p-3 flex gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() => setOpenPopovers(prev => ({ ...prev, location: false }))}
-                          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-                        >
-                          Apply
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setFilters(prev => ({ ...prev, locations: [] }));
-                            setOpenPopovers(prev => ({ ...prev, location: false }));
-                          }}
-                          className="flex-1"
-                        >
-                          Clear
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Urgency Toggle Chips */}
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-2">
-                    {filterOptions.urgencies.map((urgency) => {
-                      const getUrgencyIcon = (urgencyLabel: string) => {
-                        if (urgencyLabel === 'ASAP') return AlertCircle;
-                        if (urgencyLabel === 'This week') return Calendar;
-                        return Clock;
-                      };
-
-                      const Icon = getUrgencyIcon(urgency);
-                      const isPressed = filters.urgency === urgency;
-                      return (
-                        <button
-                          key={urgency}
-                          onClick={() => setFilters(prev => ({
-                            ...prev,
-                            urgency: prev.urgency === urgency ? undefined : urgency
-                          }))}
-                          className={`inline-flex items-center gap-2 rounded-full px-3 h-9 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 flex-shrink-0 ${isPressed
-                              ? 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200'
-                              : 'bg-white hover:bg-slate-50 ring-1 ring-slate-200 text-slate-700'
-                            }`}
-                          aria-pressed={isPressed}
-                          aria-label={`Filter by ${urgency} urgency`}
-                        >
-                          <Icon className="h-4 w-4" />
-                          <span className="text-sm font-medium">{urgency}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button className="text-slate-400 hover:text-slate-600 transition-colors ml-1">
-                        <AlertCircle className="h-4 w-4" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="bg-slate-900 text-white text-xs px-3 py-2 rounded-lg shadow-lg z-[60]">
-                      <p>Filter jobs by start time</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-
-                {/* Professional Radius Filter */}
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <div className="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-full px-5 py-2.5 ring-1 ring-blue-200/50 shadow-sm border border-blue-100/50 min-w-fit">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1 bg-blue-100 rounded-full">
-                        <MapPin className="h-3 w-3 text-blue-600" />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <select
-                          value={filters.radius || 25}
-                          onChange={(e) => handleRadiusChange(Number(e.target.value))}
-                          className="text-sm font-semibold bg-transparent border-none outline-none cursor-pointer text-blue-900 appearance-none pr-1"
-                        >
-                          <option value={5} className="bg-white text-slate-800 font-semibold py-3 px-4 border-b border-slate-100">Within 5 miles</option>
-                          <option value={10} className="bg-white text-slate-800 font-semibold py-3 px-4 border-b border-slate-100">Within 10 miles</option>
-                          <option value={25} className="bg-blue-50 text-blue-900 font-bold py-3 px-4 border-b border-blue-100">Within 25 miles</option>
-                          <option value={50} className="bg-white text-slate-800 font-semibold py-3 px-4 border-b border-slate-100">Within 50 miles</option>
-                          <option value={100} className="bg-white text-slate-800 font-semibold py-3 px-4">Within 100 miles</option>
-                        </select>
-                        <ChevronDown className="h-3 w-3 text-blue-600 pointer-events-none" />
-                      </div>
-                    </div>
-                    {userPostcode && (
-                      <div className="flex items-center gap-1.5 pl-2 border-l border-blue-200">
-                        <span className="text-xs text-blue-700 font-medium">from</span>
-                        <span className="text-xs font-bold text-blue-800 bg-blue-100 px-2 py-0.5 rounded-md">
-                          {userPostcode}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button className="text-blue-400 hover:text-blue-600 transition-colors p-1">
-                        <AlertCircle className="h-4 w-4" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="bg-slate-900 text-white text-xs px-3 py-2 rounded-lg shadow-lg z-[60]">
-                      <p>Search radius from your postcode location</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-
-              </div>
-
-            </motion.div>
-
-            {/* Active Filters Pills */}
-            {(filters.categories.length > 0 || filters.locations.length > 0 || filters.urgency || (filters.radius && filters.radius !== 25)) && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.2 }}
-                className="mt-12 flex flex-wrap gap-2 items-center"
-              >
-                <span className="text-sm text-slate-600 font-medium">Active filters:</span>
-
-                {filters.categories.map(category => (
-                  <Badge
-                    key={`cat-${category}`}
-                    variant="secondary"
-                    className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
-                  >
-                    <Building2 className="h-3 w-3" />
-                    {category}
-                    <button
-                      onClick={() => setFilters(prev => ({
-                        ...prev,
-                        categories: prev.categories.filter(c => c !== category)
-                      }))}
-                      className="ml-1 hover:bg-blue-200 rounded-full p-0.5"
-                      aria-label={`Remove ${category} filter`}
-                    >
-                      ×
-                    </button>
-                  </Badge>
-                ))}
-
-                {filters.locations.map(location => (
-                  <Badge
-                    key={`loc-${location}`}
-                    variant="secondary"
-                    className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
-                  >
-                    <MapPin className="h-3 w-3" />
-                    {location}
-                    <button
-                      onClick={() => setFilters(prev => ({
-                        ...prev,
-                        locations: prev.locations.filter(l => l !== location)
-                      }))}
-                      className="ml-1 hover:bg-emerald-200 rounded-full p-0.5"
-                      aria-label={`Remove ${location} filter`}
-                    >
-                      ×
-                    </button>
-                  </Badge>
-                ))}
-
-                {filters.urgency && (
-                  <Badge
-                    variant="secondary"
-                    className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
-                  >
-                    <Clock className="h-3 w-3" />
-                    {filters.urgency}
-                    <button
-                      onClick={() => setFilters(prev => ({ ...prev, urgency: undefined }))}
-                      className="ml-1 hover:bg-amber-200 rounded-full p-0.5"
-                      aria-label={`Remove ${filters.urgency} urgency filter`}
-                    >
-                      ×
-                    </button>
-                  </Badge>
-                )}
-
-                {filters.radius && filters.radius !== 25 && (
-                  <Badge
-                    variant="secondary"
-                    className="inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-800 border-blue-200 hover:from-blue-100 hover:to-indigo-100 shadow-sm"
-                  >
-                    <div className="p-0.5 bg-blue-100 rounded-full">
-                      <MapPin className="h-2.5 w-2.5 text-blue-600" />
-                    </div>
-                    <span className="font-semibold">{filters.radius} miles</span>
-                    {userPostcode && (
-                      <span className="text-xs text-blue-600 font-medium">from {userPostcode}</span>
-                    )}
-                    <button
-                      onClick={() => setFilters(prev => ({ ...prev, radius: 25 }))}
-                      className="ml-1 hover:bg-blue-200 rounded-full p-0.5 transition-colors"
-                      aria-label="Reset radius to default (25 miles)"
-                    >
-                      ×
-                    </button>
-                  </Badge>
-                )}
-
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setFilters({ categories: [], locations: [] })}
-                  className="text-slate-600 hover:text-slate-900 h-7 px-2"
-                >
-                  Clear all
-                </Button>
-              </motion.div>
-            )}
-          </div>
-
-          {/* Mobile FAB */}
-          <button
-            onClick={() => setShowMobileFilters(true)}
-            className="sm:hidden fixed right-4 bottom-[calc(env(safe-area-inset-bottom)+1rem)] z-50 inline-flex h-11 items-center gap-2 rounded-full px-4 bg-indigo-600 text-white shadow-lg ring-1 ring-indigo-500/20 active:scale-[0.98] transition focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-            aria-haspopup="dialog"
-            aria-controls="filters-sheet"
-            aria-expanded={showMobileFilters}
-          >
-            <Filter className="h-4 w-4" />
-            <span className="text-sm font-medium">
-              Filters ({filters.categories.length + filters.locations.length + (filters.urgency ? 1 : 0)})
-            </span>
-          </button>
+          {/* Jobs Grid */}
 
           {/* Mobile Filter Bottom Sheet */}
           {showMobileFilters && (
