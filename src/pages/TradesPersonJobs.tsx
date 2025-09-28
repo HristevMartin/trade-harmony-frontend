@@ -65,16 +65,18 @@ const TradesPersonJobs = () => {
     urgency?: string;
     radius?: number;
   }>({ categories: [], locations: [] });
-  const [sortBy, setSortBy] = useState<'newest' | 'budget' | 'nearest'>('newest');
+  const [sortBy, setSortBy] = useState<'budget_high' | 'budget_low'>('budget_high');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [openPopovers, setOpenPopovers] = useState<{ category: boolean; location: boolean }>({
+  const [openPopovers, setOpenPopovers] = useState<{ category: boolean; location: boolean; radius: boolean }>({
     category: false,
-    location: false
+    location: false,
+    radius: false
   });
   const [mobileRadiusOpen, setMobileRadiusOpen] = useState(false);
   const [showStickyFilter, setShowStickyFilter] = useState(false);
   const [userPostcode, setUserPostcode] = useState<string>('');
   const [loadingPostcode, setLoadingPostcode] = useState(false);
+  const [searchTerms, setSearchTerms] = useState({ category: '', location: '' });
   const [effectiveRadius, setEffectiveRadius] = useState<number | null>(null);
   const [requestedRadius, setRequestedRadius] = useState<number | null>(null);
   const [radiusAttempts, setRadiusAttempts] = useState(0);
@@ -102,7 +104,9 @@ const TradesPersonJobs = () => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
       if (!target.closest('[data-popover]')) {
-        setOpenPopovers({ category: false, location: false });
+        setOpenPopovers({ category: false, location: false, radius: false });
+        // Clear search terms when closing popovers
+        setSearchTerms({ category: '', location: '' });
       }
       // Close mobile radius dropdown when clicking outside
       if (!target.closest('[data-mobile-radius]')) {
@@ -341,7 +345,7 @@ const TradesPersonJobs = () => {
     const categories = urlParams.get('categories')?.split(',').filter(Boolean) || [];
     const locations = urlParams.get('locations')?.split(',').filter(Boolean) || [];
     const urgency = urlParams.get('urgency');
-    const sort = urlParams.get('sort') as 'newest' | 'budget' | 'nearest';
+    const sort = urlParams.get('sort') as 'budget_high' | 'budget_low';
 
     initialFilters.categories = categories;
     initialFilters.locations = locations;
@@ -358,7 +362,7 @@ const TradesPersonJobs = () => {
     if (filters.categories.length > 0) urlParams.set('categories', filters.categories.join(','));
     if (filters.locations.length > 0) urlParams.set('locations', filters.locations.join(','));
     if (filters.urgency) urlParams.set('urgency', filters.urgency);
-    if (sortBy !== 'newest') urlParams.set('sort', sortBy);
+    if (sortBy !== 'budget_high') urlParams.set('sort', sortBy);
 
     const newUrl = urlParams.toString() ? `${window.location.pathname}?${urlParams.toString()}` : window.location.pathname;
     window.history.replaceState({}, '', newUrl);
@@ -414,18 +418,21 @@ const TradesPersonJobs = () => {
       return true;
     });
 
-    // Sort jobs
+    // Sort jobs by budget
     filtered.sort((a, b) => {
+      const budgetOrder = { 'over-1000': 4, '500-1000': 3, '200-500': 2, 'under-200': 1, 'flexible': 0 };
+      const aBudgetValue = budgetOrder[a.budget as keyof typeof budgetOrder] || 0;
+      const bBudgetValue = budgetOrder[b.budget as keyof typeof budgetOrder] || 0;
+      
       switch (sortBy) {
-        case 'newest':
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-        case 'budget':
-          const budgetOrder = { 'over-1000': 4, '500-1000': 3, '200-500': 2, 'under-200': 1, 'flexible': 0 };
-          return (budgetOrder[b.budget as keyof typeof budgetOrder] || 0) - (budgetOrder[a.budget as keyof typeof budgetOrder] || 0);
-        case 'nearest':
-          return a.location.localeCompare(b.location);
+        case 'budget_high':
+          // Highest to lowest
+          return bBudgetValue - aBudgetValue;
+        case 'budget_low':
+          // Lowest to highest
+          return aBudgetValue - bBudgetValue;
         default:
-          return 0;
+          return bBudgetValue - aBudgetValue; // Default to highest first
       }
     });
 
@@ -442,16 +449,24 @@ const TradesPersonJobs = () => {
     // First filter out completed jobs before generating filter options
     const activeJobs = jobs.filter(job => !(job.status && job.status.toLowerCase() === 'completed'));
 
-    const categories = [...new Set(activeJobs.map(job => job.additional_data?.serviceCategory || job.service_category).filter(Boolean))];
+    const allCategories = [...new Set(activeJobs.map(job => job.additional_data?.serviceCategory || job.service_category).filter(Boolean))];
     // Use nuts field for location options, fallback to location if nuts is not available
-    const locations = [...new Set(activeJobs.map(job => {
+    const allLocations = [...new Set(activeJobs.map(job => {
       const jobNuts = job.additional_data?.nuts || job.nuts;
       return jobNuts || job.location;
     }).filter(Boolean))];
     const urgencies = [...new Set(activeJobs.map(job => formatUrgency(job.urgency)).filter(Boolean))];
 
-    return { categories, locations, urgencies };
-  }, [jobs]);
+    // Filter categories and locations based on search terms
+    const categories = allCategories.filter(category => 
+      category.toLowerCase().includes(searchTerms.category.toLowerCase())
+    );
+    const locations = allLocations.filter(location => 
+      location.toLowerCase().includes(searchTerms.location.toLowerCase())
+    );
+
+    return { categories, locations, urgencies, allCategories, allLocations };
+  }, [jobs, searchTerms]);
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -756,8 +771,453 @@ const TradesPersonJobs = () => {
         }
       />
 
-      {/* Mobile-First Sticky Filter Bar */}
-      <div className="sticky top-16 z-40 bg-background border-b border-border/20 shadow-sm">
+      {/* Desktop Filter Bar */}
+      <div className="desktop-filter-bar hidden md:block bg-background border-b border-border/20 shadow-sm">
+        <div className="container mx-auto px-4 max-w-6xl py-4">
+          <div className="flex items-center justify-between gap-4">
+            {/* Left side - Filter chips */}
+            <div className="flex items-center gap-3 flex-wrap">
+              {/* Category Filter */}
+              <div className="relative" data-popover>
+                <button
+                  onClick={() => setOpenPopovers(prev => ({ ...prev, category: !prev.category }))}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all ${
+                    filters.categories.length > 0 
+                      ? 'bg-primary text-primary-foreground border-primary shadow-sm' 
+                      : 'bg-background hover:bg-muted border-border hover:border-border/60'
+                  }`}
+                >
+                  <Building2 className="h-4 w-4" />
+                  <span className="text-sm">
+                    {filters.categories.length === 0 ? 'Category' : 
+                     filters.categories.length === 1 ? filters.categories[0] : 
+                     `${filters.categories.length} Categories`}
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${openPopovers.category ? 'rotate-180' : ''}`} />
+                  {filters.categories.length > 0 && (
+                    <Badge variant="secondary" className="bg-primary-foreground/20 text-primary-foreground text-xs px-1.5 py-0.5 h-5 ml-1">
+                      {filters.categories.length}
+                    </Badge>
+                  )}
+                </button>
+                
+                {/* Category Dropdown */}
+                <AnimatePresence>
+                  {openPopovers.category && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute top-full left-0 mt-2 bg-card border border-border/20 rounded-xl shadow-lg z-50 min-w-72 max-h-80"
+                    >
+                      <div className="p-4">
+                        {/* Search Input */}
+                        <div className="mb-3">
+                          <Input
+                            placeholder="Search categories..."
+                            value={searchTerms.category}
+                            onChange={(e) => setSearchTerms(prev => ({ ...prev, category: e.target.value }))}
+                            className="h-9 text-sm border-border/40 focus:border-primary"
+                            autoFocus
+                          />
+                        </div>
+                        
+                        {/* Categories Grid */}
+                        <div className="max-h-48 overflow-y-auto">
+                          {filterOptions.categories.length > 0 ? (
+                            <div className="grid grid-cols-2 gap-2">
+                              {filterOptions.categories.map(category => (
+                                <button
+                                  key={category}
+                                  onClick={() => {
+                                    if (filters.categories.includes(category)) {
+                                      setFilters(prev => ({
+                                        ...prev,
+                                        categories: prev.categories.filter(c => c !== category)
+                                      }));
+                                    } else {
+                                      setFilters(prev => ({
+                                        ...prev,
+                                        categories: [...prev.categories, category]
+                                      }));
+                                    }
+                                  }}
+                                  className={`p-3 rounded-lg text-sm font-medium text-left transition-all ${
+                                    filters.categories.includes(category)
+                                      ? 'bg-primary text-primary-foreground'
+                                      : 'bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground'
+                                  }`}
+                                >
+                                  {category}
+                                </button>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-4">
+                              <p className="text-sm text-muted-foreground">No categories found</p>
+                              {searchTerms.category && (
+                                <button
+                                  onClick={() => setSearchTerms(prev => ({ ...prev, category: '' }))}
+                                  className="text-xs text-primary hover:underline mt-1"
+                                >
+                                  Clear search
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Location Filter */}
+              <div className="relative" data-popover>
+                <button
+                  onClick={() => setOpenPopovers(prev => ({ ...prev, location: !prev.location }))}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all ${
+                    filters.locations.length > 0 
+                      ? 'bg-trust-green text-trust-green-foreground border-trust-green shadow-sm' 
+                      : 'bg-background hover:bg-muted border-border hover:border-border/60'
+                  }`}
+                >
+                  <MapPin className="h-4 w-4" />
+                  <span className="text-sm">
+                    {filters.locations.length === 0 ? 'Location' : 
+                     filters.locations.length === 1 ? filters.locations[0] : 
+                     `${filters.locations.length} Locations`}
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${openPopovers.location ? 'rotate-180' : ''}`} />
+                  {filters.locations.length > 0 && (
+                    <Badge variant="secondary" className="bg-trust-green-foreground/20 text-trust-green-foreground text-xs px-1.5 py-0.5 h-5 ml-1">
+                      {filters.locations.length}
+                    </Badge>
+                  )}
+                </button>
+                
+                {/* Location Dropdown */}
+                <AnimatePresence>
+                  {openPopovers.location && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute top-full left-0 mt-2 bg-card border border-border/20 rounded-xl shadow-lg z-50 min-w-64 max-h-80"
+                    >
+                      <div className="p-4">
+                        {/* Search Input */}
+                        <div className="mb-3">
+                          <Input
+                            placeholder="Search locations..."
+                            value={searchTerms.location}
+                            onChange={(e) => setSearchTerms(prev => ({ ...prev, location: e.target.value }))}
+                            className="h-9 text-sm border-border/40 focus:border-primary"
+                            autoFocus
+                          />
+                        </div>
+                        
+                        {/* Locations List */}
+                        <div className="max-h-48 overflow-y-auto">
+                          {filterOptions.locations.length > 0 ? (
+                            <div className="space-y-2">
+                              {filterOptions.locations.map(location => (
+                                <button
+                                  key={location}
+                                  onClick={() => {
+                                    if (filters.locations.includes(location)) {
+                                      setFilters(prev => ({
+                                        ...prev,
+                                        locations: prev.locations.filter(l => l !== location)
+                                      }));
+                                    } else {
+                                      setFilters(prev => ({
+                                        ...prev,
+                                        locations: [location]
+                                      }));
+                                    }
+                                    setOpenPopovers(prev => ({ ...prev, location: false }));
+                                  }}
+                                  className={`w-full p-3 rounded-lg text-sm font-medium text-left transition-all ${
+                                    filters.locations.includes(location)
+                                      ? 'bg-trust-green text-trust-green-foreground'
+                                      : 'bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground'
+                                  }`}
+                                >
+                                  {location}
+                                </button>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-4">
+                              <p className="text-sm text-muted-foreground">No locations found</p>
+                              {searchTerms.location && (
+                                <button
+                                  onClick={() => setSearchTerms(prev => ({ ...prev, location: '' }))}
+                                  className="text-xs text-primary hover:underline mt-1"
+                                >
+                                  Clear search
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Radius Filter */}
+              <div className="relative" data-popover>
+                <button
+                  onClick={() => setOpenPopovers(prev => ({ ...prev, radius: !prev.radius }))}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all ${
+                    filters.radius && filters.radius !== 25
+                      ? 'bg-primary text-primary-foreground border-primary shadow-sm' 
+                      : 'bg-background hover:bg-muted border-border hover:border-border/60'
+                  }`}
+                >
+                  <MapPin className="h-4 w-4" />
+                  <span className="text-sm">
+                    Within {filters.radius || 25} miles
+                    {userPostcode && (
+                      <span className={`ml-1 ${filters.radius && filters.radius !== 25 ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>from {userPostcode}</span>
+                    )}
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${openPopovers.radius ? 'rotate-180' : ''}`} />
+                  {filters.radius && filters.radius !== 25 && (
+                    <Badge variant="secondary" className="bg-primary-foreground/20 text-primary-foreground text-xs px-1.5 py-0.5 h-5 ml-1">
+                      {filters.radius}mi
+                    </Badge>
+                  )}
+                </button>
+                
+                {/* Radius Dropdown */}
+                <AnimatePresence>
+                  {openPopovers.radius && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute top-full left-0 mt-2 bg-card border border-border/20 rounded-xl shadow-lg z-50 min-w-64"
+                    >
+                      <div className="p-4">
+                        <div className="space-y-2">
+                          {[5, 10, 25, 50, 100].map((radius) => (
+                            <button
+                              key={radius}
+                              onClick={() => {
+                                handleRadiusChange(radius);
+                                setOpenPopovers(prev => ({ ...prev, radius: false }));
+                              }}
+                              className={`w-full p-3 text-left text-sm font-medium rounded-lg transition-all ${
+                                (filters.radius || 25) === radius
+                                  ? 'bg-primary text-primary-foreground'
+                                  : 'bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground'
+                              }`}
+                              disabled={loadingPostcode}
+                            >
+                              Within {radius} miles
+                              {(filters.radius || 25) === radius && userPostcode && (
+                                <span className="text-primary-foreground/70 ml-1">from {userPostcode}</span>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Urgency Filter Chips */}
+              {filterOptions.urgencies.map((urgency) => {
+                const getUrgencyIcon = (urgencyLabel: string) => {
+                  if (urgencyLabel === 'ASAP') return Zap;
+                  if (urgencyLabel === 'This week') return Calendar;
+                  if (urgencyLabel === 'This month') return Calendar;
+                  return Clock;
+                };
+
+                const getUrgencyColor = (urgencyLabel: string) => {
+                  if (urgencyLabel === 'ASAP') return 'bg-red-500 text-white border-red-500';
+                  if (urgencyLabel === 'This week') return 'bg-amber-500 text-white border-amber-500';
+                  return 'bg-blue-500 text-white border-blue-500';
+                };
+
+                const Icon = getUrgencyIcon(urgency);
+                const isActive = filters.urgency === urgency;
+                
+                return (
+                  <button
+                    key={urgency}
+                    onClick={() => setFilters(prev => ({ 
+                      ...prev, 
+                      urgency: prev.urgency === urgency ? undefined : urgency 
+                    }))}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all ${
+                      isActive 
+                        ? getUrgencyColor(urgency) + ' shadow-sm'
+                        : 'bg-background hover:bg-muted border-border hover:border-border/60'
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span className="text-sm">{urgency}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Right side - Sort and Clear */}
+            <div className="flex items-center gap-3">
+              {/* Sort Dropdown */}
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                className="px-3 py-2 rounded-lg border border-border bg-background text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              >
+                <option value="budget_high">Highest Budget First</option>
+                <option value="budget_low">Lowest Budget First</option>
+              </select>
+
+              {/* Clear All Button */}
+              {(filters.categories.length > 0 || filters.locations.length > 0 || filters.urgency || (filters.radius && filters.radius !== 25)) && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setFilters({ categories: [], locations: [], radius: 25 });
+                  }}
+                  className="text-destructive border-destructive/20 hover:bg-destructive/10"
+                >
+                  Clear All
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Sticky Filter Bar - Shows when scrolling */}
+      {showStickyFilter && (
+        <div className="sticky top-16 z-40 bg-background border-b border-border/20 shadow-sm">
+          <div className="px-4 py-3">
+            <div className="flex justify-center">
+              <div className="flex gap-2 overflow-x-auto scrollbar-hide max-w-full">
+                {/* Category Filter Chip */}
+                <button
+                  onClick={() => setOpenPopovers(prev => ({ ...prev, category: !prev.category }))}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
+                    filters.categories.length > 0 
+                      ? 'bg-primary text-primary-foreground border-primary' 
+                      : 'bg-background hover:bg-muted border-border'
+                  }`}
+                >
+                  <Building2 className="h-4 w-4" />
+                  {filters.categories.length === 0 ? 'Category' : 
+                   filters.categories.length === 1 ? filters.categories[0] : 
+                   `${filters.categories.length} Categories`}
+                  {filters.categories.length > 0 && (
+                    <Badge variant="secondary" className="bg-primary-foreground/20 text-primary-foreground text-xs px-1.5 py-0.5 h-5">
+                      {filters.categories.length}
+                    </Badge>
+                  )}
+                </button>
+
+                {/* Location Filter Chip */}
+                <button
+                  onClick={() => setOpenPopovers(prev => ({ ...prev, location: !prev.location }))}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
+                    filters.locations.length > 0 
+                      ? 'bg-trust-green text-trust-green-foreground border-trust-green' 
+                      : 'bg-background hover:bg-muted border-border'
+                  }`}
+                >
+                  <MapPin className="h-4 w-4" />
+                  {filters.locations.length === 0 ? 'Location' : 
+                   filters.locations.length === 1 ? filters.locations[0] : 
+                   `${filters.locations.length} Locations`}
+                  {filters.locations.length > 0 && (
+                    <Badge variant="secondary" className="bg-trust-green-foreground/20 text-trust-green-foreground text-xs px-1.5 py-0.5 h-5">
+                      {filters.locations.length}
+                    </Badge>
+                  )}
+                </button>
+
+                {/* Available Urgency Filter Chips - only show if available from API */}
+                {filterOptions.urgencies.map((urgency) => {
+                  const getUrgencyIcon = (urgencyLabel: string) => {
+                    if (urgencyLabel === 'ASAP') return Zap;
+                    if (urgencyLabel === 'This week') return Calendar;
+                    if (urgencyLabel === 'This month') return Calendar;
+                    return Clock;
+                  };
+
+                  const getUrgencyColor = (urgencyLabel: string) => {
+                    if (urgencyLabel === 'ASAP') return 'bg-accent-orange text-accent-orange-foreground border-accent-orange';
+                    return 'bg-trust-blue text-trust-blue-foreground border-trust-blue';
+                  };
+
+                  const Icon = getUrgencyIcon(urgency);
+                  const isActive = filters.urgency === urgency;
+                  
+                  return (
+                    <button
+                      key={urgency}
+                      onClick={() => setFilters(prev => ({ 
+                        ...prev, 
+                        urgency: prev.urgency === urgency ? undefined : urgency 
+                      }))}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
+                        isActive 
+                          ? getUrgencyColor(urgency)
+                          : 'bg-background hover:bg-muted border-border'
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {urgency}
+                    </button>
+                  );
+                })}
+
+
+                {/* Advanced Filters Chip */}
+                <button
+                  onClick={() => setShowMobileFilters(true)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium bg-background hover:bg-muted border-border transition-all"
+                >
+                  <Filter className="h-4 w-4" />
+                  Filters
+                  {(filters.categories.length + filters.locations.length + (filters.urgency ? 1 : 0) + (filters.radius && filters.radius !== 25 ? 1 : 0)) > 0 && (
+                    <Badge variant="default" className="bg-primary text-primary-foreground text-xs px-1.5 py-0.5 h-5">
+                      {filters.categories.length + filters.locations.length + (filters.urgency ? 1 : 0) + (filters.radius && filters.radius !== 25 ? 1 : 0)}
+                    </Badge>
+                  )}
+                </button>
+
+                {/* Clear All Action */}
+                {(filters.categories.length > 0 || filters.locations.length > 0 || filters.urgency || (filters.radius && filters.radius !== 25)) && (
+                  <button
+                    onClick={() => {
+                      setFilters({ categories: [], locations: [], radius: 25 });
+                    }}
+                    className="flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/20 transition-all"
+                  >
+                    Clear all
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile-First Sticky Filter Bar - Only for mobile when not using the main sticky filter */}
+      <div className={`md:hidden sticky top-16 z-40 bg-background border-b border-border/20 shadow-sm ${showStickyFilter ? 'hidden' : ''}`}>
         <div className="px-4 py-3">
           <div className="flex justify-center">
             <div className="flex gap-2 overflow-x-auto scrollbar-hide max-w-full">
@@ -837,57 +1297,7 @@ const TradesPersonJobs = () => {
                 );
               })}
 
-              {/* Combined Radius + Postcode Dropdown */}
-              <div className="relative" data-mobile-radius>
-                <button
-                  onClick={() => {
-                    console.log('Miles dropdown clicked, loadingPostcode:', loadingPostcode, 'mobileRadiusOpen:', mobileRadiusOpen);
-                    setMobileRadiusOpen(!mobileRadiusOpen);
-                  }}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all cursor-pointer ${
-                    filters.radius && filters.radius !== 25
-                      ? 'bg-primary/10 text-primary border-primary/20' 
-                      : 'bg-background hover:bg-muted border-border'
-                  }`}
-                >
-                  <MapPin className="h-4 w-4" />
-                  <span>Within {filters.radius || 25} miles</span>
-                  {userPostcode && (
-                    <>
-                      <span className="text-muted-foreground">·</span>
-                      <span className="text-muted-foreground">from {userPostcode}</span>
-                    </>
-                  )}
-                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${mobileRadiusOpen ? 'rotate-180' : ''}`} />
-                </button>
-                
-                {mobileRadiusOpen && (
-                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-card border border-border/20 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto w-64">
-                    {[5, 10, 25, 50, 100].map((radius) => (
-                      <button
-                        key={radius}
-                        onClick={() => {
-                          console.log('Radius option clicked:', radius);
-                          handleRadiusChange(radius);
-                          setMobileRadiusOpen(false);
-                        }}
-                        className={`w-full p-3 text-left text-sm font-medium border-b border-border/10 last:border-b-0 transition-colors flex items-center justify-between hover:bg-muted/80 ${
-                          (filters.radius || 25) === radius
-                            ? 'bg-primary/10 text-primary font-bold'
-                            : 'bg-card text-card-foreground'
-                        }`}
-                      >
-                        <span>Within {radius} miles</span>
-                        {(filters.radius || 25) === radius && (
-                          <Badge variant="default" className="bg-primary text-primary-foreground text-xs">
-                            Current
-                          </Badge>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+
 
               {/* Advanced Filters Chip */}
               <button
@@ -929,33 +1339,60 @@ const TradesPersonJobs = () => {
               className="absolute top-full left-0 right-0 bg-card border-x border-b border-border/20 shadow-lg z-50"
               data-popover
             >
-              <div className="p-4 max-h-60 overflow-y-auto">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {filterOptions.categories.map(category => (
-                    <button
-                      key={category}
-                      onClick={() => {
-                        if (filters.categories.includes(category)) {
-                          setFilters(prev => ({
-                            ...prev,
-                            categories: prev.categories.filter(c => c !== category)
-                          }));
-                        } else {
-                          setFilters(prev => ({
-                            ...prev,
-                            categories: [...prev.categories, category]
-                          }));
-                        }
-                      }}
-                      className={`p-3 rounded-lg text-sm font-medium text-left transition-all ${
-                        filters.categories.includes(category)
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted hover:bg-muted/80 text-muted-foreground'
-                      }`}
-                    >
-                      {category}
-                    </button>
-                  ))}
+              <div className="p-4">
+                {/* Search Input */}
+                <div className="mb-3">
+                  <Input
+                    placeholder="Search categories..."
+                    value={searchTerms.category}
+                    onChange={(e) => setSearchTerms(prev => ({ ...prev, category: e.target.value }))}
+                    className="h-9 text-sm border-border/40 focus:border-primary"
+                  />
+                </div>
+                
+                {/* Categories Grid */}
+                <div className="max-h-48 overflow-y-auto">
+                  {filterOptions.categories.length > 0 ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {filterOptions.categories.map(category => (
+                        <button
+                          key={category}
+                          onClick={() => {
+                            if (filters.categories.includes(category)) {
+                              setFilters(prev => ({
+                                ...prev,
+                                categories: prev.categories.filter(c => c !== category)
+                              }));
+                            } else {
+                              setFilters(prev => ({
+                                ...prev,
+                                categories: [...prev.categories, category]
+                              }));
+                            }
+                          }}
+                          className={`p-3 rounded-lg text-sm font-medium text-left transition-all ${
+                            filters.categories.includes(category)
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-muted hover:bg-muted/80 text-muted-foreground'
+                          }`}
+                        >
+                          {category}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-sm text-muted-foreground">No categories found</p>
+                      {searchTerms.category && (
+                        <button
+                          onClick={() => setSearchTerms(prev => ({ ...prev, category: '' }))}
+                          className="text-xs text-primary hover:underline mt-1"
+                        >
+                          Clear search
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </motion.div>
@@ -973,34 +1410,61 @@ const TradesPersonJobs = () => {
               className="absolute top-full left-0 right-0 bg-card border-x border-b border-border/20 shadow-lg z-50"
               data-popover
             >
-              <div className="p-4 max-h-60 overflow-y-auto">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {filterOptions.locations.map(location => (
-                    <button
-                      key={location}
-                      onClick={() => {
-                        if (filters.locations.includes(location)) {
-                          setFilters(prev => ({
-                            ...prev,
-                            locations: prev.locations.filter(l => l !== location)
-                          }));
-                        } else {
-                          setFilters(prev => ({
-                            ...prev,
-                            locations: [location]
-                          }));
-                        }
-                        setOpenPopovers(prev => ({ ...prev, location: false }));
-                      }}
-                      className={`p-3 rounded-lg text-sm font-medium text-left transition-all ${
-                        filters.locations.includes(location)
-                          ? 'bg-trust-green text-trust-green-foreground'
-                          : 'bg-muted hover:bg-muted/80 text-muted-foreground'
-                      }`}
-                    >
-                      {location}
-                    </button>
-                  ))}
+              <div className="p-4">
+                {/* Search Input */}
+                <div className="mb-3">
+                  <Input
+                    placeholder="Search locations..."
+                    value={searchTerms.location}
+                    onChange={(e) => setSearchTerms(prev => ({ ...prev, location: e.target.value }))}
+                    className="h-9 text-sm border-border/40 focus:border-primary"
+                  />
+                </div>
+                
+                {/* Locations Grid */}
+                <div className="max-h-48 overflow-y-auto">
+                  {filterOptions.locations.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {filterOptions.locations.map(location => (
+                        <button
+                          key={location}
+                          onClick={() => {
+                            if (filters.locations.includes(location)) {
+                              setFilters(prev => ({
+                                ...prev,
+                                locations: prev.locations.filter(l => l !== location)
+                              }));
+                            } else {
+                              setFilters(prev => ({
+                                ...prev,
+                                locations: [location]
+                              }));
+                            }
+                            setOpenPopovers(prev => ({ ...prev, location: false }));
+                          }}
+                          className={`p-3 rounded-lg text-sm font-medium text-left transition-all ${
+                            filters.locations.includes(location)
+                              ? 'bg-trust-green text-trust-green-foreground'
+                              : 'bg-muted hover:bg-muted/80 text-muted-foreground'
+                          }`}
+                        >
+                          {location}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-sm text-muted-foreground">No locations found</p>
+                      {searchTerms.location && (
+                        <button
+                          onClick={() => setSearchTerms(prev => ({ ...prev, location: '' }))}
+                          className="text-xs text-primary hover:underline mt-1"
+                        >
+                          Clear search
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </motion.div>
@@ -1111,7 +1575,7 @@ const TradesPersonJobs = () => {
                       size="sm"
                       onClick={() => {
                         setFilters({ categories: [], locations: [] });
-                        setSortBy('newest');
+                        setSortBy('budget_high');
                       }}
                       className="text-slate-600 hover:text-slate-900"
                     >
@@ -1265,8 +1729,8 @@ const TradesPersonJobs = () => {
                     <h4 className="text-sm font-medium text-slate-700 mb-3">Sort by</h4>
                     <div className="space-y-2">
                       {[
-                        { key: 'newest', label: 'Newest' },
-                        { key: 'budget', label: 'Highest Budget' },
+                        { key: 'budget_high', label: 'Highest Budget First' },
+                        { key: 'budget_low', label: 'Lowest Budget First' },
                       ].map(({ key, label }) => (
                         <button
                           key={key}
