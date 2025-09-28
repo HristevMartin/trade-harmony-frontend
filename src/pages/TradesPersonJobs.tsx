@@ -764,21 +764,38 @@ const TradesPersonJobs = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -60 }}
             transition={{ duration: 0.2 }}
-            className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200/60 shadow-lg"
+            className="fixed top-4 left-4 right-4 z-50 bg-gradient-to-r from-white/95 via-slate-50/95 to-white/95 backdrop-blur-md border border-slate-200/40 shadow-xl rounded-2xl"
+            style={{ 
+              marginTop: 'env(safe-area-inset-top, 0px)',
+              backdropFilter: 'blur(20px) saturate(180%)'
+            }}
           >
-            <div className="container mx-auto px-4 py-3">
+            <div className="px-4 py-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <h2 className="font-semibold text-slate-900">Filter Jobs</h2>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full animate-pulse"></div>
+                    <h2 className="font-semibold text-slate-900 text-sm">Active Filters</h2>
+                  </div>
                   <div className="flex items-center gap-2">
                     {filters.categories.length > 0 && (
-                      <Badge variant="secondary" className="text-xs">
+                      <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
                         {filters.categories.length} Categories
                       </Badge>
                     )}
                     {filters.locations.length > 0 && (
-                      <Badge variant="secondary" className="text-xs">
+                      <Badge variant="secondary" className="text-xs bg-green-50 text-green-700 border-green-200">
                         {filters.locations.length} Locations
+                      </Badge>
+                    )}
+                    {filters.urgency && (
+                      <Badge variant="secondary" className="text-xs bg-amber-50 text-amber-700 border-amber-200">
+                        {filters.urgency}
+                      </Badge>
+                    )}
+                    {filters.radius && (
+                      <Badge variant="secondary" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
+                        {filters.radius} miles
                       </Badge>
                     )}
                   </div>
@@ -787,10 +804,10 @@ const TradesPersonJobs = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => setShowMobileFilters(true)}
-                  className="text-xs"
+                  className="text-xs bg-white/80 hover:bg-white border-slate-300 shadow-sm hover:shadow-md transition-all"
                 >
                   <Filter className="w-4 h-4 mr-1" />
-                  Filter
+                  Edit
                 </Button>
               </div>
             </div>
