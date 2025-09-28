@@ -1508,6 +1508,7 @@ const PostJob = () => {
                     setPendingSubmission(false);
                 }}
                 onSuccess={handleAuthSuccess}
+                initialEmail={formData.email}
             />
         </>
     );

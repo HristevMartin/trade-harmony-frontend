@@ -479,6 +479,18 @@ const TradesPersonOnboarding = () => {
     
     console.log('Authentication data confirmed, proceeding with API call');
 
+    // Validate required fields before submission
+    const requiredFields = ['name', 'email', 'primaryTrade', 'city', 'postcode'];
+    const missingFields = requiredFields.filter(field => !formData[field as keyof ProDraft]);
+    
+    if (missingFields.length > 0) {
+      console.error('Missing required fields:', missingFields);
+      setErrors({ general: `Missing required fields: ${missingFields.join(', ')}. Please complete all steps.` });
+      setIsSubmitting(false);
+      setHasSubmitted(false);
+      return;
+    }
+
     setIsSubmitting(true);
     setHasSubmitted(true);
     
@@ -533,10 +545,13 @@ const TradesPersonOnboarding = () => {
       }
 
       console.log('Sending tradesperson data to:', `${import.meta.env.VITE_API_URL}/travel/save-trader-project`);
-      console.log('Form data includes:', {
-        name: formData.name,
-        email: formData.email,
-        primaryTrade: formData.primaryTrade,
+      console.log('Complete formData state:', formData);
+      console.log('Required fields check:', {
+        name: formData.name || 'MISSING',
+        email: formData.email || 'MISSING',
+        primaryTrade: formData.primaryTrade || 'MISSING',
+        city: formData.city || 'MISSING',
+        postcode: formData.postcode || 'MISSING',
         portfolioCount: formData.portfolio.length,
         certificationImagesCount: formData.certificationImages.length,
         hasToken: !!token
@@ -650,6 +665,19 @@ const TradesPersonOnboarding = () => {
 
     console.log('Saving tradesperson data with provided auth data...');
     
+    // Validate required fields before submission
+    const requiredFields = ['name', 'email', 'primaryTrade', 'city', 'postcode'];
+    const missingFields = requiredFields.filter(field => !formData[field as keyof ProDraft]);
+    
+    if (missingFields.length > 0) {
+      console.error('Missing required fields:', missingFields);
+      console.log('Complete formData state:', formData);
+      setErrors({ general: `Missing required fields: ${missingFields.join(', ')}. Please complete all steps.` });
+      setIsSubmitting(false);
+      setHasSubmitted(false);
+      return;
+    }
+    
     setIsSubmitting(true);
     setHasSubmitted(true);
     
@@ -701,15 +729,28 @@ const TradesPersonOnboarding = () => {
       }
 
       console.log('Sending tradesperson data with auth data to:', `${import.meta.env.VITE_API_URL}/travel/save-trader-project`);
-      console.log('Form data includes:', {
-        name: formData.name,
-        email: formData.email,
-        primaryTrade: formData.primaryTrade,
+      console.log('Complete formData state:', formData);
+      console.log('Required fields check:', {
+        name: formData.name || 'MISSING',
+        email: formData.email || 'MISSING',
+        primaryTrade: formData.primaryTrade || 'MISSING',
+        city: formData.city || 'MISSING',
+        postcode: formData.postcode || 'MISSING',
         portfolioCount: formData.portfolio.length,
         certificationImagesCount: formData.certificationImages.length,
         hasToken: !!authData.token,
         userId: authData.id
       });
+      
+      // Debug: Log all FormData entries
+      console.log('FormData entries:');
+      for (let [key, value] of formDataToSend.entries()) {
+        if (value instanceof File) {
+          console.log(`${key}:`, `File(${value.name}, ${value.size} bytes, ${value.type})`);
+        } else {
+          console.log(`${key}:`, value);
+        }
+      }
       
       const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/save-trader-project`, {
         method: 'POST',
