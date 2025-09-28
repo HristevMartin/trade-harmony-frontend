@@ -474,18 +474,25 @@ const TradesPersonJobs = () => {
     }, 800);
   };
 
-  const getCategoryIcon = (category: string) => {
+  const getCategoryIcon = (category: string, size: 'sm' | 'md' | 'lg' = 'md') => {
     const categoryIcons: { [key: string]: any } = {
       'plumbing': Wrench,
       'electrical': Zap,
       'painting': Paintbrush,
       'construction': Hammer,
+      'carpentry': Hammer,
       'general': Building2,
       'default': Briefcase
     };
     const IconComponent = categoryIcons[category?.toLowerCase()] || categoryIcons.default;
-    return <IconComponent className="h-10 w-10 text-blue-600" />;
+    const sizeClasses = {
+      'sm': 'h-5 w-5',
+      'md': 'h-8 w-8',
+      'lg': 'h-12 w-12'
+    };
+    return <IconComponent className={`${sizeClasses[size]} text-slate-500`} />;
   };
+
 
   const LoadingSkeleton = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -796,7 +803,7 @@ const TradesPersonJobs = () => {
           </motion.div>
 
           {/* Enhanced Desktop Sticky Filter Bar */}
-          <div className="desktop-filter-bar sticky top-16 sm:top-4 z-40 mb-8 w-full">
+          <div className="desktop-filter-bar sticky top-16 sm:top-20 z-40 mb-8 w-full">
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -1437,47 +1444,56 @@ const TradesPersonJobs = () => {
                         transition={{ delay: index * 0.1 }}
                         whileHover={{ y: -2, transition: { duration: 0.2, ease: 'easeOut' } }}
                       >
-                        <Card className="bg-white border border-slate-200/60 shadow-sm hover:shadow-lg transition-all duration-300 group flex flex-col h-[440px] rounded-2xl overflow-hidden">
+                        <Card className="bg-white border border-slate-200/60 shadow-sm hover:shadow-xl hover:border-slate-300/60 transition-all duration-300 group flex flex-col h-[480px] rounded-2xl overflow-hidden">
                           {/* Job Image Section */}
-                          <div className="relative h-48 w-full bg-gradient-to-br from-slate-50 to-slate-100 overflow-hidden">
+                          <div className="relative h-44 w-full bg-gradient-to-br from-slate-50 to-slate-100 overflow-hidden">
                             {job.image_urls && job.image_urls.length > 0 ? (
-                              <img
-                                src={job.image_urls[0]}
-                                alt={job.job_title}
-                                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                loading="lazy"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.style.display = 'none';
-                                  const fallback = target.nextElementSibling as HTMLElement;
-                                  if (fallback) fallback.style.display = 'flex';
-                                }}
-                              />
+                              <>
+                                <img
+                                  src={job.image_urls[0]}
+                                  alt={job.job_title}
+                                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                  loading="lazy"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = 'none';
+                                    const fallback = target.nextElementSibling as HTMLElement;
+                                    if (fallback) fallback.style.display = 'flex';
+                                  }}
+                                />
+                                {/* Fallback for broken images */}
+                                <div className="absolute inset-0 bg-gradient-to-br from-slate-100 to-slate-200 items-center justify-center hidden">
+                                  <div className="p-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-sm">
+                                    {getCategoryIcon(job.additional_data?.serviceCategory || job.service_category, 'lg')}
+                                  </div>
+                                </div>
+                              </>
                             ) : null}
                             {/* Placeholder when no image */}
                             <div
                               className={`absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center ${job.image_urls && job.image_urls.length > 0 ? 'hidden' : 'flex'
                                 }`}
                             >
-                              <div className="p-6 bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg">
-                                {getCategoryIcon(job.service_category)}
+                              <div className="p-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-sm">
+                                {getCategoryIcon(job.additional_data?.serviceCategory || job.service_category, 'lg')}
                               </div>
                             </div>
 
-                            {/* Overlay Badges */}
-                            <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
-                              {/* Budget Badge */}
-                              <div className="bg-white/95 backdrop-blur-sm text-slate-700 text-xs font-semibold px-3 py-1.5 rounded-full shadow-sm border border-white/50">
+                            {/* Top Badges Row */}
+                            <div className="absolute top-3 left-3 right-3 flex items-start justify-between">
+                              {/* Budget Badge - Prominent */}
+                              <div className="bg-white/95 backdrop-blur-sm text-slate-900 text-sm font-bold px-3 py-2 rounded-lg shadow-md border border-white/50">
                                 {extractPriceOnly(job.budget)}
                               </div>
 
                               {/* Urgency Badge */}
-                              <div className={`text-xs font-semibold px-3 py-1.5 rounded-full shadow-sm backdrop-blur-sm border ${formatUrgency(job.urgency) === 'ASAP'
-                                  ? 'bg-red-500 text-white border-red-400/50'
+                              <div className={`text-xs font-bold px-3 py-1.5 rounded-lg shadow-md backdrop-blur-sm border ${
+                                formatUrgency(job.urgency) === 'ASAP'
+                                  ? 'bg-red-500/95 text-white border-red-400/50'
                                   : formatUrgency(job.urgency) === 'This week'
-                                    ? 'bg-amber-500 text-white border-amber-400/50'
-                                    : 'bg-blue-500 text-white border-blue-400/50'
-                                }`}>
+                                    ? 'bg-amber-500/95 text-white border-amber-400/50'
+                                    : 'bg-blue-500/95 text-white border-blue-400/50'
+                              }`}>
                                 {formatUrgency(job.urgency)}
                               </div>
                             </div>
@@ -1486,40 +1502,41 @@ const TradesPersonJobs = () => {
                           {/* Card Content */}
                           <div className="flex-1 p-5 flex flex-col">
                             {/* Header - Category & Time */}
-                            <div className="flex items-center justify-between mb-3">
-                              <span className="bg-slate-100 text-slate-600 text-xs font-medium px-2.5 py-1 rounded-lg">
-                                {job.additional_data?.serviceCategory || job.service_category}
-                              </span>
-                              <span className="text-xs text-slate-500 font-medium">
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="flex items-center gap-2">
+                                {getCategoryIcon(job.additional_data?.serviceCategory || job.service_category, 'sm')}
+                                <span className="text-xs text-slate-500 font-medium uppercase tracking-wide">
+                                  {job.additional_data?.serviceCategory || job.service_category}
+                                </span>
+                              </div>
+                              <span className="text-xs text-slate-400 font-medium">
                                 {formatTimeAgo(job.created_at)}
                               </span>
                             </div>
 
-                            {/* Job Title */}
-                            <h3 className="text-lg font-bold text-slate-900 line-clamp-2 leading-tight mb-3 min-h-[3.5rem]">
+                            {/* Job Title - Prominent */}
+                            <h3 className="text-lg font-bold text-slate-900 line-clamp-2 leading-tight mb-3 min-h-[3.5rem] group-hover:text-blue-700 transition-colors">
                               {job.job_title}
                             </h3>
 
                             {/* Location */}
-                            <div className="flex items-center gap-2 mb-3">
+                            <div className="flex items-center gap-2 mb-4">
                               <MapPin className="h-4 w-4 text-slate-400 flex-shrink-0" />
-                              <span className="text-sm text-slate-600 font-medium truncate">
+                              <span className="text-sm text-slate-500 font-medium truncate">
                                 {job.additional_data?.nuts || job.nuts || job.location}
                               </span>
                             </div>
 
-                            {/* Description */}
-                            <p className="text-sm text-slate-600 line-clamp-2 leading-relaxed mb-4 flex-1">
+                            {/* Description - Truncated */}
+                            <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed mb-4 flex-1">
                               {job.job_description}
                             </p>
                           </div>
 
-                          {/* Action Buttons */}
-                          <div className="p-5 pt-0 space-y-2.5">
+                          {/* Action Button */}
+                          <div className="p-5 pt-0">
                             <Button
-                              variant="outline"
-                              className="w-full border-slate-200 text-slate-700 hover:bg-slate-50 font-medium py-2.5 rounded-xl transition-colors duration-200"
-                              size="sm"
+                              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md group-hover:bg-blue-700"
                               onClick={() => navigate(`/jobs/${job.project_id}`)}
                             >
                               <Eye className="h-4 w-4 mr-2" />
