@@ -6,6 +6,7 @@ export type Counterparty = {
   name: string;
   avatar_url?: string;
   job_title?: string;
+  lastActiveAt?: string; // ISO timestamp of last activity
 };
 
 export type ChatItem = {

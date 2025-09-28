@@ -75,6 +75,45 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
+  const formatLastActiveTime = (lastActiveAt: string | undefined) => {
+    if (!lastActiveAt) return null;
+    
+    const lastActive = new Date(lastActiveAt);
+    const now = new Date();
+    const diffInMinutes = (now.getTime() - lastActive.getTime()) / (1000 * 60);
+    const diffInHours = diffInMinutes / 60;
+    const diffInDays = diffInHours / 24;
+    
+    // If more than 30 days, show friendly fallback
+    if (diffInDays > 30) {
+      return 'Active recently';
+    }
+    
+    // Less than 1 hour
+    if (diffInMinutes < 60) {
+      const minutes = Math.floor(diffInMinutes);
+      if (minutes < 1) return 'Last active just now';
+      return `Last active ${minutes}m ago`;
+    }
+    
+    // Less than 24 hours
+    if (diffInHours < 24) {
+      const hours = Math.floor(diffInHours);
+      return `Last active ${hours}h ago`;
+    }
+    
+    // Less than 7 days
+    if (diffInDays < 7) {
+      const days = Math.floor(diffInDays);
+      return `Last active ${days}d ago`;
+    }
+    
+    // 7-30 days
+    const weeks = Math.floor(diffInDays / 7);
+    if (weeks === 1) return 'Last active 1w ago';
+    return `Last active ${weeks}w ago`;
+  };
+
   const handleChatClick = (chat: ChatItem) => {
     navigate(`/chat/${chat.conversation_id}`);
     if (onClose) {
@@ -184,8 +223,6 @@ const Sidebar: React.FC<SidebarProps> = ({
                           {initials}
                         </AvatarFallback>
                       </Avatar>
-                      {/* Online indicator */}
-                      <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-background"></div>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between mb-1">
@@ -206,6 +243,12 @@ const Sidebar: React.FC<SidebarProps> = ({
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
+                          )}
+                          {/* Last active time */}
+                          {formatLastActiveTime(chat.counterparty?.lastActiveAt) && (
+                            <p className="text-xs text-muted-foreground/70 mt-0.5">
+                              {formatLastActiveTime(chat.counterparty?.lastActiveAt)}
+                            </p>
                           )}
                         </div>
                         <div className="flex flex-col items-end flex-shrink-0">
