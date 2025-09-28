@@ -71,6 +71,7 @@ const TradesPersonJobs = () => {
     category: false,
     location: false
   });
+  const [mobileRadiusOpen, setMobileRadiusOpen] = useState(false);
   const [showStickyFilter, setShowStickyFilter] = useState(false);
   const [userPostcode, setUserPostcode] = useState<string>('');
   const { toast } = useToast();
@@ -98,6 +99,10 @@ const TradesPersonJobs = () => {
       const target = event.target as Element;
       if (!target.closest('[data-popover]')) {
         setOpenPopovers({ category: false, location: false });
+      }
+      // Close mobile radius dropdown when clicking outside
+      if (!target.closest('[data-mobile-radius]')) {
+        setMobileRadiusOpen(false);
       }
     };
 
@@ -534,7 +539,7 @@ const TradesPersonJobs = () => {
                 <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
                   Available Jobs
                 </h1>
-                <p className="text-lg text-slate-600">Find your next opportunity with trusted clients</p>
+                <p className="text-lg text-slate-600">Your next opportunity is waiting nearby</p>
               </div>
 
               {/* Stats */}
@@ -737,7 +742,7 @@ const TradesPersonJobs = () => {
               <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-3xl blur-3xl scale-110 -z-10"></div>
               <div className="relative">
 
-                <h3 className="text-xl text-muted-foreground max-w-2xl mx-auto">Find your next opportunity with trusted clients</h3>
+                <h3 className="text-xl text-muted-foreground max-w-2xl mx-auto">Your next opportunity is waiting nearby</h3>
               </div>
             </div>
 
@@ -791,20 +796,24 @@ const TradesPersonJobs = () => {
           </motion.div>
 
           {/* Enhanced Desktop Sticky Filter Bar */}
-          <div className="desktop-filter-bar sticky top-14 z-40 mb-8">
+          <div className="desktop-filter-bar sticky top-16 sm:top-4 z-40 mb-8 w-full">
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="hidden md:block bg-card/80 backdrop-blur-sm border border-border/20 shadow-xl rounded-2xl px-6 py-5"
+              className="hidden md:block bg-card/80 backdrop-blur-sm border border-border/20 shadow-xl rounded-2xl px-6 py-5 w-full min-h-[80px]"
+              style={{ 
+                position: 'relative',
+                willChange: 'transform'
+              }}
             >
               {/* Desktop Filters */}
-              <div className="flex flex-wrap gap-3 items-center">
+              <div className="flex flex-wrap gap-3 items-center min-h-[48px] w-full">
                 {/* Category Chip Popover */}
                 <div className="relative" data-popover>
                   <button
                     onClick={() => setOpenPopovers(prev => ({ ...prev, category: !prev.category }))}
-                    className="inline-flex items-center gap-2 rounded-xl px-4 h-10 bg-background hover:bg-muted/50 border border-border/20 text-foreground transition-all focus:outline-none focus:ring-2 focus:ring-primary shadow-sm hover:shadow-md"
+                    className="inline-flex items-center gap-2 rounded-xl px-4 h-10 bg-background hover:bg-muted/50 border border-border/20 text-foreground transition-all focus:outline-none focus:ring-2 focus:ring-primary shadow-sm hover:shadow-md flex-shrink-0"
                     aria-expanded={openPopovers.category}
                   >
                     <Building2 className="h-4 w-4" />
@@ -878,7 +887,7 @@ const TradesPersonJobs = () => {
                 <div className="relative" data-popover>
                   <button
                     onClick={() => setOpenPopovers(prev => ({ ...prev, location: !prev.location }))}
-                    className="inline-flex items-center gap-2 rounded-full px-3 h-9 bg-white hover:bg-slate-50 ring-1 ring-slate-200 text-slate-700 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="inline-flex items-center gap-2 rounded-full px-3 h-9 bg-white hover:bg-slate-50 ring-1 ring-slate-200 text-slate-700 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 flex-shrink-0"
                     aria-expanded={openPopovers.location}
                   >
                     <MapPin className="h-4 w-4" />
@@ -967,7 +976,7 @@ const TradesPersonJobs = () => {
                             ...prev,
                             urgency: prev.urgency === urgency ? undefined : urgency
                           }))}
-                          className={`inline-flex items-center gap-2 rounded-full px-3 h-9 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 ${isPressed
+                          className={`inline-flex items-center gap-2 rounded-full px-3 h-9 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 flex-shrink-0 ${isPressed
                               ? 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200'
                               : 'bg-white hover:bg-slate-50 ring-1 ring-slate-200 text-slate-700'
                             }`}
@@ -994,8 +1003,8 @@ const TradesPersonJobs = () => {
                 </div>
 
                 {/* Professional Radius Filter */}
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-full px-5 py-2.5 ring-1 ring-blue-200/50 shadow-sm border border-blue-100/50">
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-full px-5 py-2.5 ring-1 ring-blue-200/50 shadow-sm border border-blue-100/50 min-w-fit">
                     <div className="flex items-center gap-2">
                       <div className="p-1 bg-blue-100 rounded-full">
                         <MapPin className="h-3 w-3 text-blue-600" />
@@ -1048,7 +1057,7 @@ const TradesPersonJobs = () => {
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.2 }}
-                className="mt-4 flex flex-wrap gap-2 items-center"
+                className="mt-12 flex flex-wrap gap-2 items-center"
               >
                 <span className="text-sm text-slate-600 font-medium">Active filters:</span>
 
@@ -1181,7 +1190,11 @@ const TradesPersonJobs = () => {
                 role="dialog"
                 aria-labelledby="filters-title"
                 aria-modal="true"
-                style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1rem)' }}
+                style={{ 
+                  paddingBottom: 'calc(env(safe-area-inset-bottom) + 1rem)',
+                  transform: 'translateZ(0)',
+                  willChange: 'transform'
+                }}
               >
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-6">
@@ -1303,17 +1316,36 @@ const TradesPersonJobs = () => {
                           </div>
                         )}
                       </div>
-                      <select
-                        value={filters.radius || 25}
-                        onChange={(e) => handleRadiusChange(Number(e.target.value))}
-                        className="w-full p-4 border-2 border-blue-200 rounded-xl text-sm font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-blue-900 shadow-sm"
-                      >
-                        <option value={5} className="bg-white text-slate-800 font-semibold py-4 px-4 border-b border-slate-100">Within 5 miles</option>
-                        <option value={10} className="bg-white text-slate-800 font-semibold py-4 px-4 border-b border-slate-100">Within 10 miles</option>
-                        <option value={25} className="bg-blue-50 text-blue-900 font-bold py-4 px-4 border-b border-blue-100">Within 25 miles</option>
-                        <option value={50} className="bg-white text-slate-800 font-semibold py-4 px-4 border-b border-slate-100">Within 50 miles</option>
-                        <option value={100} className="bg-white text-slate-800 font-semibold py-4 px-4">Within 100 miles</option>
-                      </select>
+                      <div className="relative" data-mobile-radius>
+                        <button
+                          onClick={() => setMobileRadiusOpen(!mobileRadiusOpen)}
+                          className="w-full p-4 border-2 border-blue-200 rounded-xl text-sm font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-blue-900 shadow-sm flex items-center justify-between"
+                        >
+                          <span>Within {filters.radius || 25} miles{(filters.radius || 25) === 25 ? '' : ''}</span>
+                          <ChevronDown className={`h-4 w-4 text-blue-600 transition-transform duration-200 ${mobileRadiusOpen ? 'rotate-180' : ''}`} />
+                        </button>
+                        
+                        {mobileRadiusOpen && (
+                          <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-blue-200 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto">
+                            {[5, 10, 25, 50, 100].map((radius) => (
+                              <button
+                                key={radius}
+                                onClick={() => {
+                                  handleRadiusChange(radius);
+                                  setMobileRadiusOpen(false);
+                                }}
+                                className={`w-full p-4 text-left text-sm font-semibold border-b border-slate-100 last:border-b-0 transition-colors ${
+                                  (filters.radius || 25) === radius
+                                    ? 'bg-blue-50 text-blue-900 font-bold'
+                                    : 'bg-white text-slate-800 hover:bg-slate-50'
+                                }`}
+                              >
+                                Within {radius} miles{radius === 25 ? '' : ''}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                       <p className="text-xs text-blue-600 mt-2 flex items-center gap-1">
                         <AlertCircle className="h-3 w-3" />
                         Jobs within your selected radius will be shown
