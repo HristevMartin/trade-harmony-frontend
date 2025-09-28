@@ -71,8 +71,13 @@ const TradesPersonJobs = () => {
     category: false,
     location: false
   });
+  const [mobileRadiusOpen, setMobileRadiusOpen] = useState(false);
   const [showStickyFilter, setShowStickyFilter] = useState(false);
   const [userPostcode, setUserPostcode] = useState<string>('');
+  const [loadingPostcode, setLoadingPostcode] = useState(false);
+  const [effectiveRadius, setEffectiveRadius] = useState<number | null>(null);
+  const [requestedRadius, setRequestedRadius] = useState<number | null>(null);
+  const [radiusAttempts, setRadiusAttempts] = useState(0);
   const { toast } = useToast();
 
   // Convert km to the nearest supported miles option used by the dropdown
@@ -98,6 +103,10 @@ const TradesPersonJobs = () => {
       const target = event.target as Element;
       if (!target.closest('[data-popover]')) {
         setOpenPopovers({ category: false, location: false });
+      }
+      // Close mobile radius dropdown when clicking outside
+      if (!target.closest('[data-mobile-radius]')) {
+        setMobileRadiusOpen(false);
       }
     };
 
@@ -150,8 +159,20 @@ const TradesPersonJobs = () => {
     apiRequest();
   }, []);
 
+  // Calculate progressive radius increments based on attempts
+  const getProgressiveRadiusIncrements = (currentRadius: number, attempts: number) => {
+    const baseIncrements = [
+      [5, 10, 20],    // First attempt: +5, +10, +20
+      [10, 20, 30],   // Second attempt: +10, +20, +30  
+      [25, 50, 100]   // Third+ attempt: +25, +50, +100
+    ];
+    
+    const incrementIndex = Math.min(attempts, baseIncrements.length - 1);
+    return baseIncrements[incrementIndex];
+  };
+
   // Function to handle radius changes
-  const handleRadiusChange = (newRadius: number) => {
+  const handleRadiusChange = (newRadius: number, fromEmptyState = false) => {
     // Log the radius change with detailed information
     logRadiusChange(newRadius);
 
@@ -159,6 +180,14 @@ const TradesPersonJobs = () => {
       ...prev,
       radius: newRadius
     }));
+
+    // If this is from empty state, increment attempts counter
+    if (fromEmptyState) {
+      setRadiusAttempts(prev => prev + 1);
+    } else {
+      // Reset attempts when user manually changes radius through filter bar
+      setRadiusAttempts(0);
+    }
   };
 
   // Function to log radius changes for analytics/debugging
@@ -171,6 +200,8 @@ const TradesPersonJobs = () => {
 
     const requestApi = async () => {
       try {
+        setLoadingPostcode(true);
+        
         const request = await fetch(`${import.meta.env.VITE_API_URL}/travel/post-user-radius-km`, {
           method: 'POST',
           headers: {
@@ -200,12 +231,33 @@ const TradesPersonJobs = () => {
 
           if (data.success && data.projects) {
             setJobs(data.projects);
+            
+            // Reset radius attempts when jobs are found
+            if (data.projects.length > 0) {
+              setRadiusAttempts(0);
+            }
+            
+            // Handle effective radius from backend if provided
+            if (data.filtersApplied?.effectiveRadiusKm && data.filtersApplied?.requestedRadiusKm) {
+              setEffectiveRadius(data.filtersApplied.effectiveRadiusKm);
+              setRequestedRadius(data.filtersApplied.requestedRadiusKm);
+            } else {
+              setEffectiveRadius(null);
+              setRequestedRadius(null);
+            }
           } else {
             setError('Failed to fetch jobs');
           }
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update location. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoadingPostcode(false);
       }
     }
 
@@ -421,6 +473,20 @@ const TradesPersonJobs = () => {
 
         if (data.success && data.projects) {
           setJobs(data.projects);
+          
+          // Reset radius attempts when jobs are found
+          if (data.projects.length > 0) {
+            setRadiusAttempts(0);
+          }
+          
+          // Handle effective radius from backend if provided
+          if (data.filtersApplied?.effectiveRadiusKm && data.filtersApplied?.requestedRadiusKm) {
+            setEffectiveRadius(data.filtersApplied.effectiveRadiusKm);
+            setRequestedRadius(data.filtersApplied.requestedRadiusKm);
+          } else {
+            setEffectiveRadius(null);
+            setRequestedRadius(null);
+          }
         } else {
           setError('Failed to fetch jobs');
         }
@@ -469,18 +535,25 @@ const TradesPersonJobs = () => {
     }, 800);
   };
 
-  const getCategoryIcon = (category: string) => {
+  const getCategoryIcon = (category: string, size: 'sm' | 'md' | 'lg' = 'md') => {
     const categoryIcons: { [key: string]: any } = {
       'plumbing': Wrench,
       'electrical': Zap,
       'painting': Paintbrush,
       'construction': Hammer,
+      'carpentry': Hammer,
       'general': Building2,
       'default': Briefcase
     };
     const IconComponent = categoryIcons[category?.toLowerCase()] || categoryIcons.default;
-    return <IconComponent className="h-10 w-10 text-blue-600" />;
+    const sizeClasses = {
+      'sm': 'h-5 w-5',
+      'md': 'h-8 w-8',
+      'lg': 'h-12 w-12'
+    };
+    return <IconComponent className={`${sizeClasses[size]} text-slate-500`} />;
   };
+
 
   const LoadingSkeleton = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -534,7 +607,7 @@ const TradesPersonJobs = () => {
                 <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
                   Available Jobs
                 </h1>
-                <p className="text-lg text-slate-600">Find your next opportunity with trusted clients</p>
+                <p className="text-lg text-slate-600">Your next opportunity is waiting nearby</p>
               </div>
 
               {/* Stats */}
@@ -737,7 +810,7 @@ const TradesPersonJobs = () => {
               <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-3xl blur-3xl scale-110 -z-10"></div>
               <div className="relative">
 
-                <h3 className="text-xl text-muted-foreground max-w-2xl mx-auto">Find your next opportunity with trusted clients</h3>
+                <h3 className="text-xl text-muted-foreground max-w-2xl mx-auto">Your next opportunity is waiting nearby</h3>
               </div>
             </div>
 
@@ -791,20 +864,24 @@ const TradesPersonJobs = () => {
           </motion.div>
 
           {/* Enhanced Desktop Sticky Filter Bar */}
-          <div className="desktop-filter-bar sticky top-14 z-40 mb-8">
+          <div className="desktop-filter-bar sticky top-16 sm:top-20 z-40 mb-8 w-full">
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="hidden md:block bg-card/80 backdrop-blur-sm border border-border/20 shadow-xl rounded-2xl px-6 py-5"
+              className="hidden md:block bg-card/80 backdrop-blur-sm border border-border/20 shadow-xl rounded-2xl px-6 py-5 w-full min-h-[80px]"
+              style={{ 
+                position: 'relative',
+                willChange: 'transform'
+              }}
             >
               {/* Desktop Filters */}
-              <div className="flex flex-wrap gap-3 items-center">
+              <div className="flex flex-wrap gap-3 items-center min-h-[48px] w-full">
                 {/* Category Chip Popover */}
                 <div className="relative" data-popover>
                   <button
                     onClick={() => setOpenPopovers(prev => ({ ...prev, category: !prev.category }))}
-                    className="inline-flex items-center gap-2 rounded-xl px-4 h-10 bg-background hover:bg-muted/50 border border-border/20 text-foreground transition-all focus:outline-none focus:ring-2 focus:ring-primary shadow-sm hover:shadow-md"
+                    className="inline-flex items-center gap-2 rounded-xl px-4 h-10 bg-background hover:bg-muted/50 border border-border/20 text-foreground transition-all focus:outline-none focus:ring-2 focus:ring-primary shadow-sm hover:shadow-md flex-shrink-0"
                     aria-expanded={openPopovers.category}
                   >
                     <Building2 className="h-4 w-4" />
@@ -878,7 +955,7 @@ const TradesPersonJobs = () => {
                 <div className="relative" data-popover>
                   <button
                     onClick={() => setOpenPopovers(prev => ({ ...prev, location: !prev.location }))}
-                    className="inline-flex items-center gap-2 rounded-full px-3 h-9 bg-white hover:bg-slate-50 ring-1 ring-slate-200 text-slate-700 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="inline-flex items-center gap-2 rounded-full px-3 h-9 bg-white hover:bg-slate-50 ring-1 ring-slate-200 text-slate-700 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 flex-shrink-0"
                     aria-expanded={openPopovers.location}
                   >
                     <MapPin className="h-4 w-4" />
@@ -967,7 +1044,7 @@ const TradesPersonJobs = () => {
                             ...prev,
                             urgency: prev.urgency === urgency ? undefined : urgency
                           }))}
-                          className={`inline-flex items-center gap-2 rounded-full px-3 h-9 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 ${isPressed
+                          className={`inline-flex items-center gap-2 rounded-full px-3 h-9 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 flex-shrink-0 ${isPressed
                               ? 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200'
                               : 'bg-white hover:bg-slate-50 ring-1 ring-slate-200 text-slate-700'
                             }`}
@@ -994,8 +1071,8 @@ const TradesPersonJobs = () => {
                 </div>
 
                 {/* Professional Radius Filter */}
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-full px-5 py-2.5 ring-1 ring-blue-200/50 shadow-sm border border-blue-100/50">
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-full px-5 py-2.5 ring-1 ring-blue-200/50 shadow-sm border border-blue-100/50 min-w-fit">
                     <div className="flex items-center gap-2">
                       <div className="p-1 bg-blue-100 rounded-full">
                         <MapPin className="h-3 w-3 text-blue-600" />
@@ -1048,7 +1125,7 @@ const TradesPersonJobs = () => {
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.2 }}
-                className="mt-4 flex flex-wrap gap-2 items-center"
+                className="mt-12 flex flex-wrap gap-2 items-center"
               >
                 <span className="text-sm text-slate-600 font-medium">Active filters:</span>
 
@@ -1181,7 +1258,11 @@ const TradesPersonJobs = () => {
                 role="dialog"
                 aria-labelledby="filters-title"
                 aria-modal="true"
-                style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1rem)' }}
+                style={{ 
+                  paddingBottom: 'calc(env(safe-area-inset-bottom) + 1rem)',
+                  transform: 'translateZ(0)',
+                  willChange: 'transform'
+                }}
               >
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-6">
@@ -1303,17 +1384,36 @@ const TradesPersonJobs = () => {
                           </div>
                         )}
                       </div>
-                      <select
-                        value={filters.radius || 25}
-                        onChange={(e) => handleRadiusChange(Number(e.target.value))}
-                        className="w-full p-4 border-2 border-blue-200 rounded-xl text-sm font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-blue-900 shadow-sm"
-                      >
-                        <option value={5} className="bg-white text-slate-800 font-semibold py-4 px-4 border-b border-slate-100">Within 5 miles</option>
-                        <option value={10} className="bg-white text-slate-800 font-semibold py-4 px-4 border-b border-slate-100">Within 10 miles</option>
-                        <option value={25} className="bg-blue-50 text-blue-900 font-bold py-4 px-4 border-b border-blue-100">Within 25 miles</option>
-                        <option value={50} className="bg-white text-slate-800 font-semibold py-4 px-4 border-b border-slate-100">Within 50 miles</option>
-                        <option value={100} className="bg-white text-slate-800 font-semibold py-4 px-4">Within 100 miles</option>
-                      </select>
+                      <div className="relative" data-mobile-radius>
+                        <button
+                          onClick={() => setMobileRadiusOpen(!mobileRadiusOpen)}
+                          className="w-full p-4 border-2 border-blue-200 rounded-xl text-sm font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-blue-900 shadow-sm flex items-center justify-between"
+                        >
+                          <span>Within {filters.radius || 25} miles{(filters.radius || 25) === 25 ? '' : ''}</span>
+                          <ChevronDown className={`h-4 w-4 text-blue-600 transition-transform duration-200 ${mobileRadiusOpen ? 'rotate-180' : ''}`} />
+                        </button>
+                        
+                        {mobileRadiusOpen && (
+                          <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-blue-200 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto">
+                            {[5, 10, 25, 50, 100].map((radius) => (
+                              <button
+                                key={radius}
+                                onClick={() => {
+                                  handleRadiusChange(radius);
+                                  setMobileRadiusOpen(false);
+                                }}
+                                className={`w-full p-4 text-left text-sm font-semibold border-b border-slate-100 last:border-b-0 transition-colors ${
+                                  (filters.radius || 25) === radius
+                                    ? 'bg-blue-50 text-blue-900 font-bold'
+                                    : 'bg-white text-slate-800 hover:bg-slate-50'
+                                }`}
+                              >
+                                Within {radius} miles{radius === 25 ? '' : ''}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                       <p className="text-xs text-blue-600 mt-2 flex items-center gap-1">
                         <AlertCircle className="h-3 w-3" />
                         Jobs within your selected radius will be shown
@@ -1368,29 +1468,197 @@ const TradesPersonJobs = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
+            className="relative"
           >
+            {/* Loading Overlay for Postcode Updates */}
+            {loadingPostcode && (
+              <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-2xl">
+                <div className="bg-white p-6 rounded-2xl shadow-lg border border-slate-200 flex flex-col items-center gap-4">
+                  <div className="relative">
+                    <RefreshCw className="h-8 w-8 text-blue-600 animate-spin" />
+                    <div className="absolute inset-0 bg-blue-100 rounded-full animate-pulse opacity-30"></div>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-semibold text-slate-900 mb-1">Updating jobs for your location</p>
+                    <p className="text-xs text-slate-600">Finding jobs near {userPostcode}...</p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             {visibleJobs.length === 0 ? (
-              <div className="text-center py-20">
-                <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Briefcase className="h-12 w-12 text-slate-400" />
-                </div>
-                <h3 className="text-2xl font-semibold text-slate-900 mb-3">No Jobs Available</h3>
-                <p className="text-slate-600 mb-8 max-w-md mx-auto">We're constantly adding new opportunities. Check back soon or subscribe to get notified when jobs matching your skills are posted.</p>
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  <Button
-                    onClick={() => window.location.reload()}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium"
-                  >
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Refresh Jobs
-                  </Button>
-                  {/* <Button 
-                    variant="outline"
-                    className="border-slate-300 text-slate-700 hover:bg-slate-50 px-6 py-3 rounded-lg font-medium"
-                  >
-                    Set Job Alerts
-                  </Button> */}
-                </div>
+              <div className="max-w-2xl mx-auto">
+                <Card className="bg-white border border-slate-200 shadow-sm rounded-lg p-8">
+                  <div className="text-center">
+                    {/* Icon */}
+                    <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <MapPin className="h-8 w-8 text-slate-400" />
+                    </div>
+                    
+                    {/* Main Message */}
+                    <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                      No jobs within {filters.radius || 25} miles{userPostcode ? ` of ${userPostcode}` : ''}
+                    </h3>
+                    <p className="text-slate-600 mb-8 max-w-md mx-auto">
+                      Try widening your search radius. You can also update your postcode in your profile settings.
+                    </p>
+
+                    {/* Effective Radius Notification */}
+                    {effectiveRadius && requestedRadius && effectiveRadius !== requestedRadius && (
+                      <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                        <div className="flex items-start gap-3">
+                          <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                          <div className="flex-1">
+                            <p className="text-sm text-amber-800 mb-2">
+                              No jobs within {requestedRadius} miles. Showing jobs within {effectiveRadius} miles.
+                            </p>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setEffectiveRadius(null);
+                                setRequestedRadius(null);
+                                handleRadiusChange(requestedRadius);
+                              }}
+                              className="text-amber-700 border-amber-300 hover:bg-amber-100 text-xs"
+                            >
+                              Revert to {requestedRadius} miles
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Quick Action Buttons */}
+                    <div className="space-y-6">
+                      {/* Progressive Radius Increment Buttons */}
+                      <div>
+                        <div className="text-center mb-3">
+                          <p className="text-sm font-medium text-slate-700">
+                            {radiusAttempts === 0 && "Try expanding your search radius:"}
+                            {radiusAttempts === 1 && "Still no luck? Try even wider search:"}
+                            {radiusAttempts >= 2 && "Try again with bigger miles:"}
+                          </p>
+                          {radiusAttempts > 0 && (
+                            <p className="text-xs text-slate-500 mt-1">
+                              Previous searches: {radiusAttempts} attempt{radiusAttempts > 1 ? 's' : ''}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap justify-center gap-2">
+                          {getProgressiveRadiusIncrements(filters.radius || 25, radiusAttempts).map((increment) => {
+                            const newRadius = (filters.radius || 25) + increment;
+                            return (
+                              <Button
+                                key={increment}
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleRadiusChange(newRadius, true)}
+                                className="border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg transition-all hover:border-blue-300 hover:text-blue-700"
+                                disabled={loadingPostcode}
+                              >
+                                {loadingPostcode ? (
+                                  <RefreshCw className="h-3 w-3 animate-spin mr-1" />
+                                ) : null}
+                                +{increment} miles
+                              </Button>
+                            );
+                          })}
+                        </div>
+                        {radiusAttempts >= 2 && (
+                          <p className="text-xs text-amber-600 text-center mt-2 font-medium">
+                            💡 Consider updating your postcode or clearing filters if still no results
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Clear Filters */}
+                      {(filters.categories.length > 0 || filters.locations.length > 0 || filters.urgency) && (
+                        <div>
+                          <p className="text-sm font-medium text-slate-700 mb-3">Active filters:</p>
+                          <div className="flex flex-wrap justify-center gap-2">
+                            {filters.categories.length > 0 && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setFilters(prev => ({ ...prev, categories: [] }));
+                                  setRadiusAttempts(0); // Reset attempts when clearing filters
+                                }}
+                                className="border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg transition-all hover:border-blue-300"
+                                disabled={loadingPostcode}
+                              >
+                                {loadingPostcode ? <RefreshCw className="h-3 w-3 animate-spin mr-1" /> : null}
+                                Clear categories ({filters.categories.length})
+                              </Button>
+                            )}
+                            {filters.locations.length > 0 && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setFilters(prev => ({ ...prev, locations: [] }));
+                                  setRadiusAttempts(0); // Reset attempts when clearing filters
+                                }}
+                                className="border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg transition-all hover:border-blue-300"
+                                disabled={loadingPostcode}
+                              >
+                                {loadingPostcode ? <RefreshCw className="h-3 w-3 animate-spin mr-1" /> : null}
+                                Clear locations ({filters.locations.length})
+                              </Button>
+                            )}
+                            {filters.urgency && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setFilters(prev => ({ ...prev, urgency: undefined }));
+                                  setRadiusAttempts(0); // Reset attempts when clearing filters
+                                }}
+                                className="border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg transition-all hover:border-blue-300"
+                                disabled={loadingPostcode}
+                              >
+                                {loadingPostcode ? <RefreshCw className="h-3 w-3 animate-spin mr-1" /> : null}
+                                Clear urgency
+                              </Button>
+                            )}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setFilters({ categories: [], locations: [] });
+                                setRadiusAttempts(0); // Reset attempts when clearing all filters
+                              }}
+                              className="border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg font-medium transition-all hover:border-blue-300"
+                              disabled={loadingPostcode}
+                            >
+                              {loadingPostcode ? <RefreshCw className="h-3 w-3 animate-spin mr-1" /> : null}
+                              Clear all filters
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Primary Action */}
+                      <div className="pt-4 border-t border-slate-200">
+                        <Button
+                          onClick={() => {
+                            setRadiusAttempts(0); // Reset attempts on manual refresh
+                            window.location.reload();
+                          }}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-all hover:shadow-md"
+                          disabled={loadingPostcode}
+                        >
+                          <RefreshCw className={`h-4 w-4 mr-2 ${loadingPostcode ? 'animate-spin' : ''}`} />
+                          {loadingPostcode ? 'Searching...' : 'Refresh Jobs'}
+                        </Button>
+                        <p className="text-xs text-slate-500 mt-2">
+                          This will reload the page and fetch the latest jobs
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
               </div>
             ) : (
               <>
@@ -1405,47 +1673,56 @@ const TradesPersonJobs = () => {
                         transition={{ delay: index * 0.1 }}
                         whileHover={{ y: -2, transition: { duration: 0.2, ease: 'easeOut' } }}
                       >
-                        <Card className="bg-white border border-slate-200/60 shadow-sm hover:shadow-lg transition-all duration-300 group flex flex-col h-[440px] rounded-2xl overflow-hidden">
+                        <Card className="bg-white border border-slate-200/60 shadow-sm hover:shadow-xl hover:border-slate-300/60 transition-all duration-300 group flex flex-col h-[480px] rounded-2xl overflow-hidden">
                           {/* Job Image Section */}
-                          <div className="relative h-48 w-full bg-gradient-to-br from-slate-50 to-slate-100 overflow-hidden">
+                          <div className="relative h-44 w-full bg-gradient-to-br from-slate-50 to-slate-100 overflow-hidden">
                             {job.image_urls && job.image_urls.length > 0 ? (
-                              <img
-                                src={job.image_urls[0]}
-                                alt={job.job_title}
-                                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                loading="lazy"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.style.display = 'none';
-                                  const fallback = target.nextElementSibling as HTMLElement;
-                                  if (fallback) fallback.style.display = 'flex';
-                                }}
-                              />
+                              <>
+                                <img
+                                  src={job.image_urls[0]}
+                                  alt={job.job_title}
+                                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                  loading="lazy"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = 'none';
+                                    const fallback = target.nextElementSibling as HTMLElement;
+                                    if (fallback) fallback.style.display = 'flex';
+                                  }}
+                                />
+                                {/* Fallback for broken images */}
+                                <div className="absolute inset-0 bg-gradient-to-br from-slate-100 to-slate-200 items-center justify-center hidden">
+                                  <div className="p-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-sm">
+                                    {getCategoryIcon(job.additional_data?.serviceCategory || job.service_category, 'lg')}
+                                  </div>
+                                </div>
+                              </>
                             ) : null}
                             {/* Placeholder when no image */}
                             <div
                               className={`absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center ${job.image_urls && job.image_urls.length > 0 ? 'hidden' : 'flex'
                                 }`}
                             >
-                              <div className="p-6 bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg">
-                                {getCategoryIcon(job.service_category)}
+                              <div className="p-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-sm">
+                                {getCategoryIcon(job.additional_data?.serviceCategory || job.service_category, 'lg')}
                               </div>
                             </div>
 
-                            {/* Overlay Badges */}
-                            <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
-                              {/* Budget Badge */}
-                              <div className="bg-white/95 backdrop-blur-sm text-slate-700 text-xs font-semibold px-3 py-1.5 rounded-full shadow-sm border border-white/50">
+                            {/* Top Badges Row */}
+                            <div className="absolute top-3 left-3 right-3 flex items-start justify-between">
+                              {/* Budget Badge - Prominent */}
+                              <div className="bg-white/95 backdrop-blur-sm text-slate-900 text-sm font-bold px-3 py-2 rounded-lg shadow-md border border-white/50">
                                 {extractPriceOnly(job.budget)}
                               </div>
 
                               {/* Urgency Badge */}
-                              <div className={`text-xs font-semibold px-3 py-1.5 rounded-full shadow-sm backdrop-blur-sm border ${formatUrgency(job.urgency) === 'ASAP'
-                                  ? 'bg-red-500 text-white border-red-400/50'
+                              <div className={`text-xs font-bold px-3 py-1.5 rounded-lg shadow-md backdrop-blur-sm border ${
+                                formatUrgency(job.urgency) === 'ASAP'
+                                  ? 'bg-red-500/95 text-white border-red-400/50'
                                   : formatUrgency(job.urgency) === 'This week'
-                                    ? 'bg-amber-500 text-white border-amber-400/50'
-                                    : 'bg-blue-500 text-white border-blue-400/50'
-                                }`}>
+                                    ? 'bg-amber-500/95 text-white border-amber-400/50'
+                                    : 'bg-blue-500/95 text-white border-blue-400/50'
+                              }`}>
                                 {formatUrgency(job.urgency)}
                               </div>
                             </div>
@@ -1454,40 +1731,41 @@ const TradesPersonJobs = () => {
                           {/* Card Content */}
                           <div className="flex-1 p-5 flex flex-col">
                             {/* Header - Category & Time */}
-                            <div className="flex items-center justify-between mb-3">
-                              <span className="bg-slate-100 text-slate-600 text-xs font-medium px-2.5 py-1 rounded-lg">
-                                {job.additional_data?.serviceCategory || job.service_category}
-                              </span>
-                              <span className="text-xs text-slate-500 font-medium">
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="flex items-center gap-2">
+                                {getCategoryIcon(job.additional_data?.serviceCategory || job.service_category, 'sm')}
+                                <span className="text-xs text-slate-500 font-medium uppercase tracking-wide">
+                                  {job.additional_data?.serviceCategory || job.service_category}
+                                </span>
+                              </div>
+                              <span className="text-xs text-slate-400 font-medium">
                                 {formatTimeAgo(job.created_at)}
                               </span>
                             </div>
 
-                            {/* Job Title */}
-                            <h3 className="text-lg font-bold text-slate-900 line-clamp-2 leading-tight mb-3 min-h-[3.5rem]">
+                            {/* Job Title - Prominent */}
+                            <h3 className="text-lg font-bold text-slate-900 line-clamp-2 leading-tight mb-3 min-h-[3.5rem] group-hover:text-blue-700 transition-colors">
                               {job.job_title}
                             </h3>
 
                             {/* Location */}
-                            <div className="flex items-center gap-2 mb-3">
+                            <div className="flex items-center gap-2 mb-4">
                               <MapPin className="h-4 w-4 text-slate-400 flex-shrink-0" />
-                              <span className="text-sm text-slate-600 font-medium truncate">
+                              <span className="text-sm text-slate-500 font-medium truncate">
                                 {job.additional_data?.nuts || job.nuts || job.location}
                               </span>
                             </div>
 
-                            {/* Description */}
-                            <p className="text-sm text-slate-600 line-clamp-2 leading-relaxed mb-4 flex-1">
+                            {/* Description - Truncated */}
+                            <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed mb-4 flex-1">
                               {job.job_description}
                             </p>
                           </div>
 
-                          {/* Action Buttons */}
-                          <div className="p-5 pt-0 space-y-2.5">
+                          {/* Action Button */}
+                          <div className="p-5 pt-0">
                             <Button
-                              variant="outline"
-                              className="w-full border-slate-200 text-slate-700 hover:bg-slate-50 font-medium py-2.5 rounded-xl transition-colors duration-200"
-                              size="sm"
+                              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md group-hover:bg-blue-700"
                               onClick={() => navigate(`/jobs/${job.project_id}`)}
                             >
                               <Eye className="h-4 w-4 mr-2" />
