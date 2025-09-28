@@ -11,9 +11,11 @@ import {
   HiEye,
   HiPencilSquare,
   HiPhoto,
-  HiPlus
+  HiPlus,
+  HiUserGroup,
+  HiArrowPath
 } from "react-icons/hi2";
-import { RefreshCw, CheckCircle, Trash2, Edit } from "lucide-react";
+import { RefreshCw, CheckCircle, Trash2, Edit, Users, Clock } from "lucide-react";
 
 interface Project {
   id: string;
@@ -145,13 +147,36 @@ const HomeownerGetProjects = () => {
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending': return 'bg-accent-orange/10 text-accent-orange border border-accent-orange/20';
-      case 'active': return 'bg-trust-blue/10 text-trust-blue border border-trust-blue/20';
-      case 'completed': return 'bg-trust-green/10 text-trust-green border border-trust-green/20';
-      case 'cancelled': return 'bg-muted text-muted-foreground border border-border';
-      default: return 'bg-muted text-muted-foreground border border-border';
+    switch (status.toLowerCase()) {
+      case 'pending': return 'bg-amber-50 text-amber-700 border border-amber-200';
+      case 'active': return 'bg-green-50 text-green-700 border border-green-200';
+      case 'completed': return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+      case 'cancelled': 
+      case 'closed': return 'bg-gray-50 text-gray-600 border border-gray-200';
+      default: return 'bg-gray-50 text-gray-600 border border-gray-200';
     }
+  };
+
+  const getNextActionHint = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'pending': return "We're reviewing and notifying local tradespeople.";
+      case 'active': return "You'll receive applications here. Check your Chats to respond.";
+      case 'completed': return "Marked complete. Thank you!";
+      case 'cancelled':
+      case 'closed': return "This job is closed.";
+      default: return "Project status updated.";
+    }
+  };
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
+    
+    if (diffInHours < 1) return 'just now';
+    if (diffInHours < 24) return `${Math.floor(diffInHours)}h ago`;
+    if (diffInHours < 168) return `${Math.floor(diffInHours / 24)}d ago`;
+    return date.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' });
   };
 
   const openConfirmModal = (title: string, message: string, onConfirm: () => void, confirmText: string, confirmStyle: string) => {
@@ -312,22 +337,42 @@ const HomeownerGetProjects = () => {
             
             {/* Skeleton cards */}
             <div className="w-full max-w-6xl px-4">
-              <div className="animate-pulse space-y-6 sm:space-y-8">
-                <div className="h-6 sm:h-8 bg-muted rounded-md w-1/3 mx-auto"></div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-                  {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <Card key={i} className="shadow-sm max-w-sm mx-auto sm:max-w-none w-full">
-                      <CardContent className="p-4 sm:p-6 space-y-3 sm:space-y-4">
-                        <div className="h-3 sm:h-4 bg-muted rounded w-3/4"></div>
-                        <div className="h-2 sm:h-3 bg-muted rounded w-1/2"></div>
-                        <div className="h-24 sm:h-32 bg-muted rounded-lg"></div>
-                        <div className="space-y-2">
-                          <div className="h-2 sm:h-3 bg-muted rounded w-full"></div>
-                          <div className="h-2 sm:h-3 bg-muted rounded w-2/3"></div>
+              <div className="animate-pulse space-y-8">
+                <div className="h-8 bg-muted rounded-md w-1/3 mx-auto"></div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {[1, 2, 3].map((i) => (
+                    <Card key={i} className="rounded-xl border border-border">
+                      <CardHeader className="p-6 pb-4">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="h-6 bg-muted rounded-lg w-20"></div>
+                          <div className="h-4 bg-muted rounded w-16"></div>
                         </div>
-                        <div className="flex flex-col sm:flex-row gap-2">
-                          <div className="h-6 sm:h-8 bg-muted rounded flex-1"></div>
-                          <div className="h-6 sm:h-8 bg-muted rounded flex-1"></div>
+                        <div className="h-6 bg-muted rounded w-3/4 mb-3"></div>
+                        <div className="h-4 bg-muted rounded w-full mb-2"></div>
+                        <div className="h-4 bg-muted rounded w-2/3 mb-4"></div>
+                        <div className="h-12 bg-muted rounded-lg"></div>
+                      </CardHeader>
+                      <CardContent className="p-6 pt-0">
+                        <div className="h-32 bg-muted rounded-lg mb-6"></div>
+                        <div className="grid grid-cols-2 gap-4 mb-6">
+                          <div className="space-y-3">
+                            <div className="h-4 bg-muted rounded w-full"></div>
+                            <div className="h-4 bg-muted rounded w-3/4"></div>
+                          </div>
+                          <div className="space-y-3">
+                            <div className="h-4 bg-muted rounded w-full"></div>
+                            <div className="h-4 bg-muted rounded w-3/4"></div>
+                          </div>
+                        </div>
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="h-11 bg-muted rounded-xl"></div>
+                            <div className="h-11 bg-muted rounded-xl"></div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="h-11 bg-muted rounded-xl"></div>
+                            <div className="h-11 bg-muted rounded-xl"></div>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -402,7 +447,7 @@ const HomeownerGetProjects = () => {
            </button>
            
            {/* Single Title */}
-           <h1 className="text-lg font-semibold text-foreground">My Jobs</h1>
+           <h1 className="text-lg font-semibold text-foreground">My Projects</h1>
          </div>
        </div>
       <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
@@ -420,10 +465,13 @@ const HomeownerGetProjects = () => {
          {/* Header Section - Desktop Only */}
          <div className="text-center mb-8 sm:mb-12 hidden sm:block">
            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground mb-3 sm:mb-4">
-             My Jobs
+             My Projects
            </h1>
-          <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
-            Manage your posted jobs and track their progress
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-4 max-w-2xl mx-auto px-4">
+            Here are your projects. Edit details, mark complete, or delete anytime.
+          </p>
+          <p className="text-sm text-muted-foreground/80 mb-6 sm:mb-8 max-w-xl mx-auto px-4">
+            Track applications, communicate with tradespeople, and manage your home improvement journey.
           </p>
           
           {/* Post New Job Button - Hidden on mobile, shown on larger screens */}
@@ -442,117 +490,145 @@ const HomeownerGetProjects = () => {
         {/* Projects Grid */}
         {projects.length === 0 ? (
           <div className="flex justify-center px-4">
-            <Card className="w-full max-w-lg shadow-lg bg-gradient-to-br from-card via-card to-card/80">
+            <Card className="w-full max-w-lg shadow-lg border border-border/50 bg-gradient-to-br from-card via-card to-card/80">
               <CardContent className="p-8 sm:p-12 text-center">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 bg-trust-blue/10 rounded-full flex items-center justify-center">
-                  <HiPhoto className="w-8 h-8 sm:w-10 sm:h-10 text-trust-blue" />
+                <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-6 bg-gradient-to-br from-primary/10 to-primary/5 rounded-full flex items-center justify-center">
+                  <HiPhoto className="w-10 h-10 sm:w-12 sm:h-12 text-primary/70" />
                 </div>
-                <h3 className="text-xl sm:text-2xl font-semibold mb-2 sm:mb-3 text-foreground">No projects yet</h3>
-                <p className="text-muted-foreground mb-6 sm:mb-8 text-base sm:text-lg leading-relaxed">
-                  Ready to find skilled tradespeople? Post your first job and get quotes from professionals in your area.
+                <h3 className="text-xl sm:text-2xl font-semibold mb-3 text-foreground">No projects yet</h3>
+                <p className="text-muted-foreground mb-8 text-base leading-relaxed max-w-sm mx-auto">
+                  Post your first job and connect with trusted tradespeople in your area.
                 </p>
                 <Button
                   onClick={() => navigate('/post-job')}
-                  className="bg-trust-blue hover:bg-trust-blue/90 text-trust-blue-foreground px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105 w-full sm:w-auto"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105 w-full sm:w-auto"
                   size="lg"
                 >
-                  <HiPlus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                  Post Your First Job
+                  <HiPlus className="w-5 h-5 mr-2" />
+                  Post New Job
                 </Button>
               </CardContent>
             </Card>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {projects.map((project) => (
               <Card 
                 key={project.id} 
-                className="group rounded-2xl bg-gradient-to-br from-card via-card to-card/80 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-border/50 hover:border-trust-blue/30 mx-auto w-full max-w-sm sm:max-w-none"
+                className="group rounded-xl bg-card border border-border hover:border-border/60 hover:shadow-md transition-all duration-200 overflow-hidden"
               >
-                <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
-                  <div className="flex items-start justify-between mb-3 sm:mb-4">
-                    <Badge className={`${getStatusColor(project.status)} font-medium px-2 sm:px-3 py-1 rounded-full text-xs`}>
+                <CardHeader className="p-6 pb-4">
+                  {/* Status and ID Row */}
+                  <div className="flex items-center justify-between mb-4">
+                    <Badge 
+                      className={`${getStatusColor(project.status)} font-medium px-3 py-1.5 rounded-lg text-sm`}
+                      aria-live="polite"
+                    >
                       {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
                     </Badge>
-                    <span className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-md hidden sm:inline">
-                      #{project.project_id.split('-')[0]}
+                    <span className="text-xs text-muted-foreground/70 font-mono bg-muted/30 px-2 py-1 rounded">
+                      #{project.project_id.slice(-8)}
                     </span>
                   </div>
                   
-                  <CardTitle className="text-lg sm:text-xl font-bold text-foreground line-clamp-2 group-hover:text-trust-blue transition-colors leading-tight">
+                  {/* Title */}
+                  <CardTitle className="text-xl font-bold text-foreground line-clamp-2 leading-tight mb-3">
                     {project.job_title}
                   </CardTitle>
-                </CardHeader>
-
-                <CardContent className="p-4 sm:p-6 pt-0">
-                  <p className="text-sm sm:text-base text-muted-foreground line-clamp-3 mb-4 sm:mb-6 leading-relaxed">
+                  
+                  {/* Description */}
+                  <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed mb-4">
                     {project.job_description}
                   </p>
+                  
+                  {/* Next Action Hint */}
+                  <div className="mb-4">
+                    <p className="text-sm text-muted-foreground/80 italic bg-muted/30 rounded-lg px-3 py-2">
+                      {getNextActionHint(project.status)}
+                    </p>
+                  </div>
+                </CardHeader>
 
+                <CardContent className="p-6 pt-0">
                   {/* Project Image */}
-                  <div className="mb-4 sm:mb-6">
-                    <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-muted/30 ring-1 ring-border/50">
-                      {project.image_urls && project.image_urls.length > 0 ? (
+                  {project.image_urls && project.image_urls.length > 0 && (
+                    <div className="mb-6">
+                      <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-muted/30">
                         <img
                           src={project.image_urls[0]}
                           alt="Project"
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          className="w-full h-full object-cover"
                           loading="lazy"
                         />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted/80">
-                          <HiPhoto className="w-8 h-8 sm:w-12 sm:h-12 text-muted-foreground" />
-                        </div>
-                      )}
-                      {project.image_count > 1 && (
-                        <div className="absolute bottom-2 sm:bottom-3 right-2 sm:right-3 bg-black/80 text-white text-xs px-2 sm:px-3 py-1 rounded-full backdrop-blur-sm">
-                          +{project.image_count - 1} more
-                        </div>
-                      )}
+                        {project.image_count > 1 && (
+                          <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm">
+                            +{project.image_count - 1} more
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Key Metadata Row */}
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    {/* Left Column */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 text-sm">
+                        <HiMapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        <span className="text-muted-foreground truncate">
+                          {project.additional_data?.location}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center gap-2 text-sm">
+                        <HiCurrencyPound className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        <span className="font-medium text-foreground">
+                          {formatBudget(project.budget)}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Right Column */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 text-sm">
+                        <HiClock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        <span className="text-muted-foreground">
+                          {formatUrgency(project.urgency)}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center gap-2 text-sm">
+                        <HiCalendarDays className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        <span className="text-muted-foreground">
+                          {formatDate(project.created_at)}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Project Details */}
-                  <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
-                    <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground">
-                      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-trust-blue/10 flex items-center justify-center flex-shrink-0">
-                        <HiMapPin className="w-3 h-3 sm:w-4 sm:h-4 text-trust-blue" />
+                  {/* Optional chips */}
+                  <div className="flex items-center justify-between mb-6 text-xs">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <Users className="w-3 h-3" />
+                        <span>Applications: 0</span>
                       </div>
-                      <span className="font-medium truncate">
-                        {project.additional_data?.location}, {project.additional_data?.country}
-                      </span>
                     </div>
-                    
-                    <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground">
-                      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-trust-green/10 flex items-center justify-center flex-shrink-0">
-                        <HiCurrencyPound className="w-3 h-3 sm:w-4 sm:h-4 text-trust-green" />
-                      </div>
-                      <span className="font-medium">{formatBudget(project.budget)}</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground">
-                      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-accent-orange/10 flex items-center justify-center flex-shrink-0">
-                        <HiClock className="w-3 h-3 sm:w-4 sm:h-4 text-accent-orange" />
-                      </div>
-                      <span className="font-medium">{formatUrgency(project.urgency)}</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground">
-                      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                        <HiCalendarDays className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />
-                      </div>
-                      <span>Posted {formatDate(project.created_at)}</span>
+                    <div className="flex items-center gap-1 text-muted-foreground">
+                      <Clock className="w-3 h-3" />
+                      <span>Updated {formatTimeAgo(project.updated_at)}</span>
                     </div>
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="space-y-3 sm:space-y-3">
+                  <div className="space-y-3">
                     {/* Primary Actions */}
-                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-3">
+                    <div className="grid grid-cols-2 gap-3">
                       <Button
                         onClick={() => navigate(`/jobs/${project.project_id}`)}
                         variant="outline"
-                        className="flex-1 min-h-[44px] px-4 py-3 border-trust-blue/20 text-trust-blue hover:bg-trust-blue/10 hover:border-trust-blue/40 text-sm sm:text-sm font-medium rounded-xl transition-all"
+                        className="h-11 px-4 rounded-xl border-border hover:bg-muted/50 text-sm font-medium transition-all"
+                        aria-label={`View details for ${project.job_title}`}
                       >
                         <HiEye className="w-4 h-4 mr-2" />
                         View Details
@@ -561,7 +637,8 @@ const HomeownerGetProjects = () => {
                       <Button
                         onClick={() => navigate(`/edit-job/${project?.project_id}`)}
                         variant="outline"
-                        className="flex-1 min-h-[44px] px-4 py-3 border-border hover:bg-muted/50 text-sm sm:text-sm font-medium rounded-xl transition-all"
+                        className="h-11 px-4 rounded-xl border-border hover:bg-muted/50 text-sm font-medium transition-all"
+                        aria-label={`Edit ${project.job_title}`}
                       >
                         <Edit className="w-4 h-4 mr-2" />
                         Edit Job
@@ -569,21 +646,25 @@ const HomeownerGetProjects = () => {
                     </div>
                     
                     {/* Secondary Actions */}
-                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-3">
-                      {project.status !== 'completed' && (
+                    <div className="grid grid-cols-2 gap-3">
+                      {project.status !== 'completed' ? (
                         <Button
                           onClick={() => handleMarkComplete(project)}
-                          className="flex-1 min-h-[44px] px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm sm:text-sm font-medium rounded-xl transition-all shadow-sm"
+                          className="h-11 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl transition-all"
+                          aria-label={`Mark ${project.job_title} as complete`}
                         >
                           <CheckCircle className="w-4 h-4 mr-2" />
                           Mark Complete
                         </Button>
+                      ) : (
+                        <div></div>
                       )}
                       
                       <Button
                         onClick={() => handleCloseJob(project)}
                         variant="outline"
-                        className={`min-h-[44px] px-4 py-3 border-red-200 text-red-700 hover:bg-red-50 hover:border-red-300 text-sm sm:text-sm font-medium rounded-xl transition-all ${project.status !== 'completed' ? 'flex-1' : 'w-full'}`}
+                        className="h-11 px-4 border-red-200 text-red-700 hover:bg-red-50 hover:border-red-300 text-sm font-medium rounded-xl transition-all"
+                        aria-label={`Delete ${project.job_title}`}
                       >
                         <Trash2 className="w-4 h-4 mr-2" />
                         Delete Job
