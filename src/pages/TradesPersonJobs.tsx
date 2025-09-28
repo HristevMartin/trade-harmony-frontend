@@ -74,6 +74,7 @@ const TradesPersonJobs = () => {
   const [mobileRadiusOpen, setMobileRadiusOpen] = useState(false);
   const [showStickyFilter, setShowStickyFilter] = useState(false);
   const [userPostcode, setUserPostcode] = useState<string>('');
+  const [loadingPostcode, setLoadingPostcode] = useState(false);
   const { toast } = useToast();
 
   // Convert km to the nearest supported miles option used by the dropdown
@@ -176,6 +177,8 @@ const TradesPersonJobs = () => {
 
     const requestApi = async () => {
       try {
+        setLoadingPostcode(true);
+        
         const request = await fetch(`${import.meta.env.VITE_API_URL}/travel/post-user-radius-km`, {
           method: 'POST',
           headers: {
@@ -211,6 +214,13 @@ const TradesPersonJobs = () => {
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update location. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoadingPostcode(false);
       }
     }
 
@@ -1407,7 +1417,24 @@ const TradesPersonJobs = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
+            className="relative"
           >
+            {/* Loading Overlay for Postcode Updates */}
+            {loadingPostcode && (
+              <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-2xl">
+                <div className="bg-white p-6 rounded-2xl shadow-lg border border-slate-200 flex flex-col items-center gap-4">
+                  <div className="relative">
+                    <RefreshCw className="h-8 w-8 text-blue-600 animate-spin" />
+                    <div className="absolute inset-0 bg-blue-100 rounded-full animate-pulse opacity-30"></div>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-semibold text-slate-900 mb-1">Updating jobs for your location</p>
+                    <p className="text-xs text-slate-600">Finding jobs near {userPostcode}...</p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             {visibleJobs.length === 0 ? (
               <div className="text-center py-20">
                 <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">

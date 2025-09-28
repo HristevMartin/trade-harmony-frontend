@@ -343,20 +343,18 @@ const JobDetail = () => {
                 <div  className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8 py-4 md:py-6 lg:py-10">
                     {/* Header */}
                     <div className="mb-6 md:mb-8">
-                        {/* Mobile Back Button - Above Title */}
-                        {isTrader && userPaid && (
-                            <div className="sm:hidden mb-4">
-                                <Button
-                                    onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/')}
-                                    variant="outline"
-                                    size="sm"
-                                    className="flex items-center gap-2 bg-white/90 backdrop-blur-sm hover:bg-white border-slate-200 shadow-sm"
-                                >
-                                    <HiArrowLeft className="w-4 h-4" />
-                                    Back
-                                </Button>
-                            </div>
-                        )}
+                        {/* Mobile Back Button - Above Title - Show for all users */}
+                        <div className="sm:hidden mb-4">
+                            <Button
+                                onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/')}
+                                variant="outline"
+                                size="sm"
+                                className="flex items-center gap-2 bg-white/90 backdrop-blur-sm hover:bg-white border-slate-200 shadow-sm"
+                            >
+                                <HiArrowLeft className="w-4 h-4" />
+                                Back
+                            </Button>
+                        </div>
                         
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4">
                             {/* <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
