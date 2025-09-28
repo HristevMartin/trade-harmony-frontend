@@ -864,7 +864,7 @@ const TradesPersonJobs = () => {
                 </button>
                 
                 {mobileRadiusOpen && !loadingPostcode && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border/20 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto min-w-[280px]">
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-card border border-border/20 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto w-64">
                     {[5, 10, 25, 50, 100].map((radius) => (
                       <button
                         key={radius}
