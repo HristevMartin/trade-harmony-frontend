@@ -759,135 +759,153 @@ const TradesPersonJobs = () => {
       {/* Mobile-First Sticky Filter Bar */}
       <div className="sticky top-16 z-40 bg-background border-b border-border/20 shadow-sm">
         <div className="px-4 py-3">
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-            {/* Category Filter Chip */}
-            <button
-              onClick={() => setOpenPopovers(prev => ({ ...prev, category: !prev.category }))}
-              className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
-                filters.categories.length > 0 
-                  ? 'bg-primary text-primary-foreground border-primary' 
-                  : 'bg-background hover:bg-muted border-border'
-              }`}
-            >
-              <Building2 className="h-4 w-4" />
-              {filters.categories.length === 0 ? 'Category' : 
-               filters.categories.length === 1 ? filters.categories[0] : 
-               `${filters.categories.length} Categories`}
-              {filters.categories.length > 0 && (
-                <Badge variant="secondary" className="bg-primary-foreground/20 text-primary-foreground text-xs px-1.5 py-0.5 h-5">
-                  {filters.categories.length}
-                </Badge>
-              )}
-            </button>
-
-            {/* Location Filter Chip */}
-            <button
-              onClick={() => setOpenPopovers(prev => ({ ...prev, location: !prev.location }))}
-              className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
-                filters.locations.length > 0 
-                  ? 'bg-trust-green text-trust-green-foreground border-trust-green' 
-                  : 'bg-background hover:bg-muted border-border'
-              }`}
-            >
-              <MapPin className="h-4 w-4" />
-              {filters.locations.length === 0 ? 'Location' : 
-               filters.locations.length === 1 ? filters.locations[0] : 
-               `${filters.locations.length} Locations`}
-              {filters.locations.length > 0 && (
-                <Badge variant="secondary" className="bg-trust-green-foreground/20 text-trust-green-foreground text-xs px-1.5 py-0.5 h-5">
-                  {filters.locations.length}
-                </Badge>
-              )}
-            </button>
-
-            {/* ASAP Filter Chip */}
-            <button
-              onClick={() => setFilters(prev => ({ 
-                ...prev, 
-                urgency: prev.urgency === 'ASAP' ? undefined : 'ASAP' 
-              }))}
-              className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
-                filters.urgency === 'ASAP' 
-                  ? 'bg-accent-orange text-accent-orange-foreground border-accent-orange' 
-                  : 'bg-background hover:bg-muted border-border'
-              }`}
-            >
-              <Zap className="h-4 w-4" />
-              ASAP
-            </button>
-
-            {/* Date Filter Chip */}
-            <button
-              onClick={() => {
-                const urgencies = ['This week', 'This month', 'Flexible'];
-                const currentIndex = filters.urgency && urgencies.includes(filters.urgency) 
-                  ? urgencies.indexOf(filters.urgency) : -1;
-                const nextUrgency = currentIndex === urgencies.length - 1 
-                  ? undefined 
-                  : urgencies[currentIndex + 1];
-                setFilters(prev => ({ ...prev, urgency: nextUrgency }));
-              }}
-              className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
-                filters.urgency && !['ASAP'].includes(filters.urgency)
-                  ? 'bg-trust-blue text-trust-blue-foreground border-trust-blue' 
-                  : 'bg-background hover:bg-muted border-border'
-              }`}
-            >
-              <Calendar className="h-4 w-4" />
-              {filters.urgency && !['ASAP'].includes(filters.urgency) ? filters.urgency : 'Date'}
-            </button>
-
-            {/* Combined Radius + Postcode Chip */}
-            <button
-              onClick={() => {
-                const radiusOptions = [5, 10, 25, 50, 100];
-                const currentIndex = radiusOptions.indexOf(filters.radius || 25);
-                const nextRadius = currentIndex === radiusOptions.length - 1 
-                  ? radiusOptions[0] 
-                  : radiusOptions[currentIndex + 1];
-                handleRadiusChange(nextRadius);
-              }}
-              className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
-                filters.radius && filters.radius !== 25
-                  ? 'bg-muted/80 text-muted-foreground border-border' 
-                  : 'bg-background hover:bg-muted border-border'
-              }`}
-            >
-              <MapPin className="h-4 w-4" />
-              <span>Within {filters.radius || 25} miles</span>
-              {userPostcode && (
-                <>
-                  <span className="text-muted-foreground">·</span>
-                  <span className="text-muted-foreground">from {userPostcode}</span>
-                </>
-              )}
-            </button>
-
-            {/* Advanced Filters Chip */}
-            <button
-              onClick={() => setShowMobileFilters(true)}
-              className="flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium bg-background hover:bg-muted border-border transition-all"
-            >
-              <Filter className="h-4 w-4" />
-              Filters
-              {(filters.categories.length + filters.locations.length + (filters.urgency ? 1 : 0) + (filters.radius && filters.radius !== 25 ? 1 : 0)) > 0 && (
-                <Badge variant="default" className="bg-primary text-primary-foreground text-xs px-1.5 py-0.5 h-5">
-                  {filters.categories.length + filters.locations.length + (filters.urgency ? 1 : 0) + (filters.radius && filters.radius !== 25 ? 1 : 0)}
-                </Badge>
-              )}
-            </button>
-
-            {/* Clear All Action */}
-            {(filters.categories.length > 0 || filters.locations.length > 0 || filters.urgency || (filters.radius && filters.radius !== 25)) && (
+          <div className="flex justify-center">
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide max-w-full">
+              {/* Category Filter Chip */}
               <button
-                onClick={() => {
-                  setFilters({ categories: [], locations: [], radius: 25 });
-                }}
-                className="flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/20 transition-all"
+                onClick={() => setOpenPopovers(prev => ({ ...prev, category: !prev.category }))}
+                className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
+                  filters.categories.length > 0 
+                    ? 'bg-primary text-primary-foreground border-primary' 
+                    : 'bg-background hover:bg-muted border-border'
+                }`}
               >
-                Clear all
+                <Building2 className="h-4 w-4" />
+                {filters.categories.length === 0 ? 'Category' : 
+                 filters.categories.length === 1 ? filters.categories[0] : 
+                 `${filters.categories.length} Categories`}
+                {filters.categories.length > 0 && (
+                  <Badge variant="secondary" className="bg-primary-foreground/20 text-primary-foreground text-xs px-1.5 py-0.5 h-5">
+                    {filters.categories.length}
+                  </Badge>
+                )}
               </button>
-            )}
+
+              {/* Location Filter Chip */}
+              <button
+                onClick={() => setOpenPopovers(prev => ({ ...prev, location: !prev.location }))}
+                className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
+                  filters.locations.length > 0 
+                    ? 'bg-trust-green text-trust-green-foreground border-trust-green' 
+                    : 'bg-background hover:bg-muted border-border'
+                }`}
+              >
+                <MapPin className="h-4 w-4" />
+                {filters.locations.length === 0 ? 'Location' : 
+                 filters.locations.length === 1 ? filters.locations[0] : 
+                 `${filters.locations.length} Locations`}
+                {filters.locations.length > 0 && (
+                  <Badge variant="secondary" className="bg-trust-green-foreground/20 text-trust-green-foreground text-xs px-1.5 py-0.5 h-5">
+                    {filters.locations.length}
+                  </Badge>
+                )}
+              </button>
+
+              {/* Available Urgency Filter Chips - only show if available from API */}
+              {filterOptions.urgencies.map((urgency) => {
+                const getUrgencyIcon = (urgencyLabel: string) => {
+                  if (urgencyLabel === 'ASAP') return Zap;
+                  if (urgencyLabel === 'This week') return Calendar;
+                  if (urgencyLabel === 'This month') return Calendar;
+                  return Clock;
+                };
+
+                const getUrgencyColor = (urgencyLabel: string) => {
+                  if (urgencyLabel === 'ASAP') return 'bg-accent-orange text-accent-orange-foreground border-accent-orange';
+                  return 'bg-trust-blue text-trust-blue-foreground border-trust-blue';
+                };
+
+                const Icon = getUrgencyIcon(urgency);
+                const isActive = filters.urgency === urgency;
+                
+                return (
+                  <button
+                    key={urgency}
+                    onClick={() => setFilters(prev => ({ 
+                      ...prev, 
+                      urgency: prev.urgency === urgency ? undefined : urgency 
+                    }))}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
+                      isActive 
+                        ? getUrgencyColor(urgency)
+                        : 'bg-background hover:bg-muted border-border'
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {urgency}
+                  </button>
+                );
+              })}
+
+              {/* Combined Radius + Postcode Dropdown */}
+              <div className="relative" data-mobile-radius>
+                <button
+                  onClick={() => setMobileRadiusOpen(!mobileRadiusOpen)}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
+                    filters.radius && filters.radius !== 25
+                      ? 'bg-muted/80 text-muted-foreground border-border' 
+                      : 'bg-background hover:bg-muted border-border'
+                  }`}
+                >
+                  <MapPin className="h-4 w-4" />
+                  <span>Within {filters.radius || 25} miles</span>
+                  {userPostcode && (
+                    <>
+                      <span className="text-muted-foreground">·</span>
+                      <span className="text-muted-foreground">from {userPostcode}</span>
+                    </>
+                  )}
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${mobileRadiusOpen ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {mobileRadiusOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border/20 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto min-w-[200px]">
+                    {[5, 10, 25, 50, 100].map((radius) => (
+                      <button
+                        key={radius}
+                        onClick={() => {
+                          handleRadiusChange(radius);
+                          setMobileRadiusOpen(false);
+                        }}
+                        className={`w-full p-3 text-left text-sm font-medium border-b border-border/10 last:border-b-0 transition-colors ${
+                          (filters.radius || 25) === radius
+                            ? 'bg-primary/10 text-primary font-bold'
+                            : 'bg-card text-card-foreground hover:bg-muted/50'
+                        }`}
+                      >
+                        Within {radius} miles
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Advanced Filters Chip */}
+              <button
+                onClick={() => setShowMobileFilters(true)}
+                className="flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium bg-background hover:bg-muted border-border transition-all"
+              >
+                <Filter className="h-4 w-4" />
+                Filters
+                {(filters.categories.length + filters.locations.length + (filters.urgency ? 1 : 0) + (filters.radius && filters.radius !== 25 ? 1 : 0)) > 0 && (
+                  <Badge variant="default" className="bg-primary text-primary-foreground text-xs px-1.5 py-0.5 h-5">
+                    {filters.categories.length + filters.locations.length + (filters.urgency ? 1 : 0) + (filters.radius && filters.radius !== 25 ? 1 : 0)}
+                  </Badge>
+                )}
+              </button>
+
+              {/* Clear All Action */}
+              {(filters.categories.length > 0 || filters.locations.length > 0 || filters.urgency || (filters.radius && filters.radius !== 25)) && (
+                <button
+                  onClick={() => {
+                    setFilters({ categories: [], locations: [], radius: 25 });
+                  }}
+                  className="flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/20 transition-all"
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
