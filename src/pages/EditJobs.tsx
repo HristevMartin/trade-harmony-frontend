@@ -99,11 +99,11 @@ const EditJob = () => {
     const [jobData, setJobData] = useState<JobData | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [originalImages, setOriginalImages] = useState<string[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [showSuccess, setShowSuccess] = useState(false);
     const [showErrorModal, setShowErrorModal] = useState(false);
     const [errorModalMessage, setErrorModalMessage] = useState('');
-    
     const [formData, setFormData] = useState<FormData>({
         job_title: '',
         job_description: '',
@@ -152,6 +152,9 @@ const EditJob = () => {
                         country: job.additional_data?.country || '',
                         service_category: job.additional_data?.serviceCategory || ''
                     });
+                    
+                    // Track original images for deletion detection
+                    setOriginalImages(job.image_urls || []);
                 } else {
                     setError('Job not found');
                 }
@@ -229,9 +232,19 @@ const EditJob = () => {
             formDataToSend.append('country', formData.country);
             formDataToSend.append('service_category', formData.service_category);
             
+            // Calculate which images to delete (explicitly tell backend which images to remove)
+            const imagesToDelete = originalImages.filter(originalUrl => 
+                !formData.existing_images.includes(originalUrl)
+            );
+            
             // Add existing image URLs (that user wants to keep)
             formData.existing_images.forEach((imageUrl, index) => {
                 formDataToSend.append('existing_images', imageUrl);
+            });
+            
+            // Add images to delete (explicit deletion flag)
+            imagesToDelete.forEach((imageUrl) => {
+                formDataToSend.append('images_to_delete', imageUrl);
             });
             
             // Add new image files
@@ -259,6 +272,8 @@ const EditJob = () => {
                 existing_images_count: formData.existing_images.length,
                 new_images_count: formData.images.length,
                 existing_images: formData.existing_images,
+                images_to_delete: imagesToDelete,
+                original_images: originalImages
             });
 
             const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/edit-client-project/${id}`, {
