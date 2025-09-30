@@ -41,7 +41,7 @@ const PostJob = () => {
     // Service categories array
     const serviceCategories = [
         'Plumbing', 'Electrical', 'Carpentry', 'Roofing', 'Painting', 
-        'Gardening', 'Heating & Cooling', 'Flooring', 'Cleaning', 'Removals', 'Handyman'
+        'Gardening', 'Heating & Cooling', 'Flooring', 'Cleaning', 'Removals', 'Handyman', 'Mechanic'
     ];
     
     // Use the country if it exists in our mapping, otherwise default to GB
@@ -71,7 +71,8 @@ const PostJob = () => {
             'flooring': 'Flooring installation needed',
             'cleaning': 'Cleaning service required',
             'removals': 'Moving and removal service needed',
-            'handyman': 'Handyman services required'
+            'handyman': 'Handyman services required',
+            'mechanic': 'Mechanic services needed'
         };
         
         return categoryTitles[category.toLowerCase()] || `${category} work needed`;
@@ -1250,7 +1251,8 @@ const PostJob = () => {
                                                             'Flooring': 'Replace old carpet with laminate flooring',
                                                             'Cleaning': 'Deep clean after renovation work',
                                                             'Removals': 'Moving from 3-bed house to 2-bed flat',
-                                                            'Handyman': 'Various small repairs around the house'
+                                                            'Handyman': 'Various small repairs around the house',
+                                                            'Mechanic': 'Car won\'t start, need diagnostic and repair'
                                                         };
                                                         
                                                         const example = formData.serviceCategory 

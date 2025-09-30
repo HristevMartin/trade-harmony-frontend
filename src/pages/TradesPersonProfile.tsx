@@ -472,8 +472,18 @@ const TradesPersonProfile = () => {
                                 <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{traderProfile.experienceYears}</div>
                                 <div className="text-sm text-muted-foreground">Years Experience</div>
                             </div>
-                            <div className="bg-background/50 backdrop-blur-sm rounded-xl p-4 border border-border/20">
-                                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{traderProfile.radiusKm}km</div>
+                            <div
+                                className="bg-background/50 backdrop-blur-sm rounded-xl p-4 border border-border/20"
+                                tabIndex={0}
+                                aria-label={`Service Radius: ${Number.isFinite(traderProfile.radiusKm) ? parseInt(traderProfile.radiusKm, 10) : traderProfile.radiusKm} kilometers`}
+                                role="region"
+                            >
+                                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-baseline justify-center md:justify-start">
+                                    {Number.isFinite(Number(traderProfile.radiusKm))
+                                        ? parseInt(traderProfile.radiusKm, 10)
+                                        : traderProfile.radiusKm}
+                                    <span className="ml-1 text-base text-muted-foreground">km</span>
+                                </div>
                                 <div className="text-sm text-muted-foreground">Service Radius</div>
                             </div>
                             {/* <div className="bg-background/50 backdrop-blur-sm rounded-xl p-4 border border-border/20">
