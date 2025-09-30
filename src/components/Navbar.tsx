@@ -282,8 +282,8 @@ const Navbar = () => {
               </>
             )}
 
-            {/* Chat Button - Show if user is authenticated and has chats */}
-            {isLoggedIn && hasChats && !loadingSummary && (
+            {/* Chat Button - Show if user is authenticated */}
+            {isLoggedIn && (
               <button
                 onClick={handleChatNavigation}
                 className={`relative text-foreground hover:text-trust-blue transition-colors font-medium flex items-center gap-2 ${location.pathname.startsWith('/chat') ? 'text-trust-blue' : ''}`}
@@ -393,8 +393,8 @@ const Navbar = () => {
                   </>
                 )}
 
-                {/* Chat Button - Show if user is authenticated and has chats */}
-                {isLoggedIn && hasChats && !loadingSummary && (
+                {/* Chat Button - Show if user is authenticated */}
+                {isLoggedIn && (
                   <button
                     onClick={handleChatNavigation}
                     className={`flex items-center justify-between w-full text-left py-2 px-4 rounded-lg transition-colors ${location.pathname.startsWith('/chat') ? 'bg-trust-blue/10 text-trust-blue' : 'text-foreground hover:bg-muted'}`}
