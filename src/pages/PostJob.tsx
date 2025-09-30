@@ -158,6 +158,10 @@ const PostJob = () => {
     const [isAiGenerating, setIsAiGenerating] = useState(false);
     const [aiSuggestion, setAiSuggestion] = useState('');
     const [showAiSuggestion, setShowAiSuggestion] = useState(false);
+    const [showAiBriefInput, setShowAiBriefInput] = useState(false);
+    const [aiBrief, setAiBrief] = useState('');
+    const [aiResponse, setAiResponse] = useState<{title: string, description: string, service_category?: string} | null>(null);
+    const [aiError, setAiError] = useState('');
 
     // Calculate completion progress for each step
     const getStepCompletion = () => {
@@ -403,35 +407,120 @@ const PostJob = () => {
         validateField(field, value);
     };
 
-    const handleAiGeneration = async () => {
-        setIsAiGenerating(true);
+    const handleAiGeneration = () => {
+        setShowAiBriefInput(true);
         setShowAiSuggestion(false);
+        setAiError('');
+        setAiResponse(null);
         
-        // Simulate AI generation delay
+        // Scroll to the AI input section after a brief delay to ensure it's rendered
         setTimeout(() => {
-            const sampleSuggestion = `I need help with ${formData.serviceCategory?.toLowerCase() || 'home improvement'} work. The issue requires professional attention and I would like to get quotes from qualified tradespeople. Please provide a detailed assessment and quote for the work needed.`;
-            setAiSuggestion(sampleSuggestion);
+            const aiSection = document.getElementById('ai-brief-section');
+            if (aiSection) {
+                aiSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }
+        }, 100);
+    };
+
+    const handleAiBriefSubmit = async () => {
+        if (!aiBrief.trim()) {
+            setAiError('Please enter a brief description of your job');
+            return;
+        }
+
+        setIsAiGenerating(true);
+        setAiError('');
+        
+        try {
+            // Enhance the brief with service category context
+            const enhancedBrief = formData.serviceCategory 
+                ? `${formData.serviceCategory} service needed: ${aiBrief.trim()}`
+                : aiBrief.trim();
+
+            const response = await fetch(`${API_URL}/travel/ai-helper`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    brief: enhancedBrief,
+                    service_category: formData.serviceCategory || undefined
+                }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setAiResponse(data);
+                setShowAiSuggestion(true);
+                setShowAiBriefInput(false);
+                
+                // Scroll to the AI suggestion section after a brief delay
+                setTimeout(() => {
+                    const suggestionSection = document.getElementById('ai-suggestion-section');
+                    if (suggestionSection) {
+                        suggestionSection.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                    }
+                }, 300);
+            } else if (response.status === 429) {
+                setAiError('AI service is currently busy. Please try again in a moment.');
+            } else {
+                const errorData = await response.json().catch(() => ({}));
+                setAiError(errorData.message || 'Failed to generate suggestions. Please try again.');
+            }
+        } catch (error) {
+            console.error('AI generation error:', error);
+            setAiError('Connection error. Please check your internet and try again.');
+        } finally {
             setIsAiGenerating(false);
-            setShowAiSuggestion(true);
-        }, 2000);
+        }
     };
 
     const handleAcceptSuggestion = () => {
-        handleInputChange('jobDescription', aiSuggestion);
+        if (aiResponse) {
+            handleInputChange('jobTitle', aiResponse.title);
+            handleInputChange('jobDescription', aiResponse.description);
+            
+            // Update service category if AI suggested one and it's valid
+            if (aiResponse.service_category && serviceCategories.includes(aiResponse.service_category)) {
+                handleInputChange('serviceCategory', aiResponse.service_category);
+            }
+        }
         setShowAiSuggestion(false);
-        // Clear any description errors
-        if (formErrors.jobDescription) {
+        setShowAiBriefInput(false);
+        setAiBrief('');
+        
+        // Clear any form errors
+        if (formErrors.jobDescription || formErrors.jobTitle || formErrors.serviceCategory) {
             setFormErrors(prev => {
                 const newErrors = { ...prev };
                 delete newErrors.jobDescription;
+                delete newErrors.jobTitle;
+                delete newErrors.serviceCategory;
                 return newErrors;
             });
         }
     };
 
     const handleEditSuggestion = () => {
-        handleInputChange('jobDescription', aiSuggestion);
+        if (aiResponse) {
+            handleInputChange('jobTitle', aiResponse.title);
+            handleInputChange('jobDescription', aiResponse.description);
+            
+            // Update service category if AI suggested one and it's valid
+            if (aiResponse.service_category && serviceCategories.includes(aiResponse.service_category)) {
+                handleInputChange('serviceCategory', aiResponse.service_category);
+            }
+        }
         setShowAiSuggestion(false);
+        setShowAiBriefInput(false);
+        setAiBrief('');
+        
         // Focus the textarea for editing
         setTimeout(() => {
             const textarea = document.getElementById('jobDescription') as HTMLTextAreaElement;
@@ -441,6 +530,37 @@ const PostJob = () => {
                 textarea.setSelectionRange(textarea.value.length, textarea.value.length);
             }
         }, 100);
+    };
+
+    const handleRegenerateSuggestion = () => {
+        setShowAiBriefInput(true);
+        setShowAiSuggestion(false);
+        setAiError('');
+        
+        // Scroll to the AI input section after a brief delay
+        setTimeout(() => {
+            const aiSection = document.getElementById('ai-brief-section');
+            if (aiSection) {
+                aiSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+                
+                // Focus the textarea for immediate editing
+                setTimeout(() => {
+                    const textarea = aiSection.querySelector('textarea');
+                    if (textarea) {
+                        textarea.focus();
+                    }
+                }, 300);
+            }
+        }, 100);
+    };
+
+    const handleCloseBriefInput = () => {
+        setShowAiBriefInput(false);
+        setAiBrief('');
+        setAiError('');
     };
 
     const API_URL = import.meta.env.VITE_API_URL;
@@ -929,9 +1049,28 @@ const PostJob = () => {
 
                         {/* Section 2: Job Details */}
                         <fieldset className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-5 md:p-6 mb-5 md:mb-6 transition-shadow hover:shadow-md">
-                            <legend className="text-lg font-semibold text-slate-900 flex items-center gap-2 mb-4 px-2">
-                                <HiWrenchScrewdriver className="w-5 h-5 text-blue-600" aria-hidden="true" />
-                                Job Details
+                            <legend className="text-lg font-semibold text-slate-900 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 px-2">
+                                <div className="flex items-center gap-2">
+                                    <HiWrenchScrewdriver className="w-5 h-5 text-blue-600" aria-hidden="true" />
+                                    Job Details
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={handleAiGeneration}
+                                    disabled={isAiGenerating || showAiBriefInput}
+                                    className={`
+                                        inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-lg shadow-sm
+                                        bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600
+                                        transition-all duration-200 ease-in-out w-fit
+                                        ${(isAiGenerating || showAiBriefInput) ? 'opacity-75 cursor-not-allowed' : 'hover:scale-105 hover:shadow-md'}
+                                        focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2
+                                    `}
+                                    aria-label="Generate job details with AI"
+                                >
+                                    <span className="text-lg">✨</span>
+                                    <span className="hidden sm:inline">AI Assistant</span>
+                                    <span className="sm:hidden">AI Help</span>
+                                </button>
                             </legend>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
@@ -997,38 +1136,9 @@ const PostJob = () => {
                                     )}
                                 </div>
                                 <div className="md:col-span-2">
-                                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 mb-2">
-                                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                                            <Label htmlFor="jobDescription" className="text-sm font-medium text-slate-700">Job Description <span className="text-red-500">*</span></Label>
-                                            <button
-                                                type="button"
-                                                onClick={handleAiGeneration}
-                                                disabled={isAiGenerating}
-                                                className={`
-                                                    inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white rounded-lg shadow-sm
-                                                    bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600
-                                                    transition-all duration-200 ease-in-out w-fit
-                                                    ${isAiGenerating ? 'opacity-75 cursor-not-allowed' : 'hover:scale-105 hover:shadow-md'}
-                                                    focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2
-                                                `}
-                                                aria-label="Generate job description with AI"
-                                            >
-                                                {isAiGenerating ? (
-                                                    <>
-                                                        <svg className="animate-spin h-3 w-3 text-white" fill="none" viewBox="0 0 24 24">
-                                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                        </svg>
-                                                        Generating...
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        ✨ Write with AI
-                                                    </>
-                                                )}
-                                            </button>
-                                        </div>
-                                        <span className="text-xs text-slate-500 self-start sm:self-auto">{formData.jobDescription.length} characters</span>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <Label htmlFor="jobDescription" className="text-sm font-medium text-slate-700">Job Description <span className="text-red-500">*</span></Label>
+                                        <span className="text-xs text-slate-500">{formData.jobDescription.length} characters</span>
                                     </div>
                                     <Textarea
                                         id="jobDescription"
@@ -1069,59 +1179,241 @@ const PostJob = () => {
                                         </div>
                                     )}
 
-                                    {/* AI Suggestion Box */}
-                                    <div className={`
-                                        overflow-hidden transition-all duration-500 ease-in-out
-                                        ${showAiSuggestion ? 'max-h-96 opacity-100 mt-4' : 'max-h-0 opacity-0'}
-                                    `}>
+                                    {/* AI Brief Input */}
+                                    <div 
+                                        id="ai-brief-section"
+                                        className={`
+                                            overflow-hidden transition-all duration-300 ease-in-out
+                                            ${showAiBriefInput ? 'max-h-96 opacity-100 mt-4' : 'max-h-0 opacity-0'}
+                                        `}
+                                    >
                                         <div className="bg-gradient-to-br from-purple-50 to-blue-50 border border-purple-200 rounded-xl p-4 shadow-sm">
-                                            <div className="flex items-center gap-2 mb-3">
-                                                <div className="flex items-center justify-center w-6 h-6 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full">
-                                                    <span className="text-white text-sm">✨</span>
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="flex items-center justify-center w-6 h-6 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full">
+                                                        <span className="text-white text-sm">✨</span>
+                                                    </div>
+                                                    <h4 className="text-sm font-semibold text-slate-800">AI Job Assistant</h4>
                                                 </div>
-                                                <h4 className="text-sm font-semibold text-slate-800">AI Suggestions</h4>
+                                                <button
+                                                    type="button"
+                                                    onClick={handleCloseBriefInput}
+                                                    className="text-slate-400 hover:text-slate-600 transition-colors"
+                                                    aria-label="Close AI assistant"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </button>
                                             </div>
                                             
-                                            <div className="bg-white/60 border border-purple-200/50 rounded-lg p-3 mb-4">
-                                                <p className="text-sm text-slate-700 leading-relaxed">
-                                                    {aiSuggestion}
+                                            <div className="mb-3">
+                                                {formData.serviceCategory && (
+                                                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full mb-2">
+                                                        <HiWrenchScrewdriver className="w-3 h-3" />
+                                                        {formData.serviceCategory} Project
+                                                    </div>
+                                                )}
+                                                <p className="text-sm text-slate-600">
+                                                    {formData.serviceCategory 
+                                                        ? `Tell me about your ${formData.serviceCategory.toLowerCase()} project, and I'll help you write a compelling job title and description.`
+                                                        : 'Tell me briefly what work you need done, and I\'ll help you write a compelling job title and description.'
+                                                    }
                                                 </p>
                                             </div>
                                             
-                                            <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
+                                            <div className="space-y-3">
+                                                <Textarea
+                                                    value={aiBrief}
+                                                    onChange={(e) => {
+                                                        setAiBrief(e.target.value);
+                                                        if (aiError) setAiError('');
+                                                    }}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                                                            e.preventDefault();
+                                                            if (aiBrief.trim() && !isAiGenerating) {
+                                                                handleAiBriefSubmit();
+                                                            }
+                                                        } else if (e.key === 'Escape') {
+                                                            e.preventDefault();
+                                                            handleCloseBriefInput();
+                                                        }
+                                                    }}
+                                                    placeholder={(() => {
+                                                        const examples = {
+                                                            'Plumbing': 'My kitchen tap is dripping and won\'t turn off properly',
+                                                            'Electrical': 'Need 3 ceiling lights installed in living room',
+                                                            'Carpentry': 'Custom built-in wardrobe needed for bedroom',
+                                                            'Roofing': 'Roof tiles damaged in storm, need repair',
+                                                            'Painting': 'Need 2 bedrooms painted, walls are currently white',
+                                                            'Gardening': 'Garden overgrown, need pruning and landscaping',
+                                                            'Heating & Cooling': 'Boiler not working, no hot water or heating',
+                                                            'Flooring': 'Replace old carpet with laminate flooring',
+                                                            'Cleaning': 'Deep clean after renovation work',
+                                                            'Removals': 'Moving from 3-bed house to 2-bed flat',
+                                                            'Handyman': 'Various small repairs around the house'
+                                                        };
+                                                        
+                                                        const example = formData.serviceCategory 
+                                                            ? examples[formData.serviceCategory as keyof typeof examples] || `Need help with ${formData.serviceCategory.toLowerCase()} work`
+                                                            : 'My kitchen tap is dripping and won\'t turn off properly';
+                                                            
+                                                        return `e.g., ${example}... (Ctrl+Enter to generate, Esc to cancel)`;
+                                                    })()}
+                                                    className="min-h-[80px] rounded-lg border-purple-200 bg-white/80 placeholder:text-slate-400 focus:border-purple-400 focus:ring-2 focus:ring-purple-100 resize-none"
+                                                    disabled={isAiGenerating}
+                                                />
+                                                
+                                                {aiError && (
+                                                    <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                                        <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
+                                                        </svg>
+                                                        <p className="text-sm text-red-700">{aiError}</p>
+                                                    </div>
+                                                )}
+                                                
+                                                <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
+                                                    <button
+                                                        type="button"
+                                                        onClick={handleCloseBriefInput}
+                                                        disabled={isAiGenerating}
+                                                        className="
+                                                            inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium
+                                                            text-slate-600 bg-white border border-slate-300 rounded-lg
+                                                            hover:bg-slate-50 hover:border-slate-400 disabled:opacity-50
+                                                            transition-all duration-200 ease-in-out
+                                                            focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2
+                                                            order-2 sm:order-1
+                                                        "
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={handleAiBriefSubmit}
+                                                        disabled={isAiGenerating || !aiBrief.trim()}
+                                                        className="
+                                                            inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-medium
+                                                            text-white bg-gradient-to-r from-purple-500 to-blue-500
+                                                            hover:from-purple-600 hover:to-blue-600 rounded-lg shadow-sm
+                                                            disabled:opacity-50 disabled:cursor-not-allowed
+                                                            transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md
+                                                            focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2
+                                                            order-1 sm:order-2
+                                                        "
+                                                    >
+                                                        {isAiGenerating ? (
+                                                            <>
+                                                                <svg className="animate-spin h-3 w-3 text-white" fill="none" viewBox="0 0 24 24">
+                                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                                </svg>
+                                                                Generating...
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                ✨ Generate
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* AI Suggestion Box */}
+                                    <div 
+                                        id="ai-suggestion-section"
+                                        className={`
+                                            overflow-hidden transition-all duration-500 ease-in-out
+                                            ${showAiSuggestion ? 'max-h-[600px] opacity-100 mt-4' : 'max-h-0 opacity-0'}
+                                        `}
+                                    >
+                                        <div className="bg-gradient-to-br from-purple-50 to-blue-50 border border-purple-200 rounded-xl p-4 shadow-sm">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="flex items-center justify-center w-6 h-6 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full">
+                                                        <span className="text-white text-sm">✨</span>
+                                                    </div>
+                                                    <h4 className="text-sm font-semibold text-slate-800">AI Suggestions</h4>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={handleRegenerateSuggestion}
+                                                    className="text-purple-600 hover:text-purple-700 text-xs font-medium transition-colors"
+                                                    aria-label="Regenerate suggestions"
+                                                >
+                                                    Regenerate
+                                                </button>
+                                            </div>
+                                            
+                                            {aiResponse && (
+                                                <div className="space-y-3 mb-4">
+                                                    {aiResponse.service_category && (
+                                                        <div className="bg-white/60 border border-purple-200/50 rounded-lg p-3">
+                                                            <h5 className="text-xs font-semibold text-purple-700 mb-1">Suggested Service Category:</h5>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                                                                    <HiWrenchScrewdriver className="w-3 h-3" />
+                                                                    {aiResponse.service_category}
+                                                                </span>
+                                                                {aiResponse.service_category !== formData.serviceCategory && formData.serviceCategory && (
+                                                                    <span className="text-xs text-amber-600 font-medium">
+                                                                        (Different from current: {formData.serviceCategory})
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    <div className="bg-white/60 border border-purple-200/50 rounded-lg p-3">
+                                                        <h5 className="text-xs font-semibold text-purple-700 mb-1">Suggested Title:</h5>
+                                                        <p className="text-sm text-slate-700 font-medium">
+                                                            {aiResponse.title}
+                                                        </p>
+                                                    </div>
+                                                    <div className="bg-white/60 border border-purple-200/50 rounded-lg p-3">
+                                                        <h5 className="text-xs font-semibold text-purple-700 mb-1">Suggested Description:</h5>
+                                                        <p className="text-sm text-slate-700 leading-relaxed">
+                                                            {aiResponse.description}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            
+                                            <div className="flex flex-col sm:flex-row gap-3 sm:justify-center mt-4 border-t border-purple-200/50 pt-4">
                                                 <button
                                                     type="button"
                                                     onClick={handleEditSuggestion}
                                                     className="
-                                                        inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium
-                                                        text-purple-700 bg-white border border-purple-300 rounded-lg
-                                                        hover:bg-purple-50 hover:border-purple-400
-                                                        transition-all duration-200 ease-in-out
-                                                        focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2
-                                                        order-2 sm:order-1
+                                                        inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium
+                                                        text-purple-700 bg-white border-2 border-purple-300 rounded-lg
+                                                        hover:bg-purple-50 hover:border-purple-400 hover:shadow-md
+                                                        transition-all duration-200 ease-in-out transform hover:scale-105
+                                                        focus:outline-none focus:ring-3 focus:ring-purple-500 focus:ring-offset-2
+                                                        flex-1 sm:flex-none sm:min-w-[140px]
                                                     "
                                                 >
-                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                     </svg>
-                                                    Edit
+                                                    Use & Edit
                                                 </button>
                                                 <button
                                                     type="button"
                                                     onClick={handleAcceptSuggestion}
                                                     className="
-                                                        inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium
+                                                        inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium
                                                         text-white bg-gradient-to-r from-purple-500 to-blue-500
-                                                        hover:from-purple-600 hover:to-blue-600 rounded-lg shadow-sm
-                                                        transition-all duration-200 ease-in-out hover:scale-105 hover:shadow-md
-                                                        focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2
-                                                        order-1 sm:order-2
+                                                        hover:from-purple-600 hover:to-blue-600 rounded-lg shadow-lg
+                                                        transition-all duration-200 ease-in-out transform hover:scale-105 hover:shadow-xl
+                                                        focus:outline-none focus:ring-3 focus:ring-purple-500 focus:ring-offset-2
+                                                        flex-1 sm:flex-none sm:min-w-[140px]
                                                     "
                                                 >
-                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                                     </svg>
-                                                    Accept
+                                                    Accept All
                                                 </button>
                                             </div>
                                         </div>
