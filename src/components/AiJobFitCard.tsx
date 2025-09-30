@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,22 +9,9 @@ import {
   HiExclamationTriangle,
   HiChevronDown,
   HiChevronUp,
-  HiInformationCircle,
-  HiClipboard
+  HiInformationCircle
 } from 'react-icons/hi2';
-
-interface AIJobFitResponse {
-  jobId: string;
-  traderId: string;
-  summary: string;
-  fit_score: number;
-  effort_hours: { min: number; max: number };
-  complexity: string;
-  assumptions: string[];
-  follow_up?: string[];
-  confidence: number;
-  disclaimer: string;
-}
+import { useAiJobFit } from '@/hooks/useAiJobFit';
 
 interface AiJobFitCardProps {
   jobId: string;
@@ -61,82 +48,13 @@ export const scoreToBadge = (score: number) => {
   return `${colors.bg} ${colors.text} ${colors.border}`;
 };
 
-// Simple cache implementation
-const jobFitCache = new Map<string, { data: AIJobFitResponse; timestamp: number }>();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-
 const AiJobFitCard = ({ jobId }: AiJobFitCardProps) => {
-  const [fitData, setFitData] = useState<AIJobFitResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { fitData, isLoading, error } = useAiJobFit(jobId);
   const [showAllAssumptions, setShowAllAssumptions] = useState(false);
   const [showError, setShowError] = useState(false);
-  const [minLoadingTime, setMinLoadingTime] = useState(true);
 
   // Check feature flag
   const isFeatureEnabled = import.meta.env.VITE_FEATURE_AI_JOBFIT !== 'false';
-
-  useEffect(() => {
-    // Minimum loading time to prevent flicker
-    const timer = setTimeout(() => {
-      setMinLoadingTime(false);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    const fetchJobFit = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        // Check cache first
-        const cached = jobFitCache.get(jobId);
-        if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-          setFitData(cached.data);
-          setIsLoading(false);
-          return;
-        }
-
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/trader-helper`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ id: jobId }),
-        });
-
-        if (response.status === 401 || response.status === 403) {
-          setError('Unauthorized');
-          return;
-        }
-
-        if (!response.ok) {
-          throw new Error(`API error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        
-        // Cache the response
-        jobFitCache.set(jobId, { data, timestamp: Date.now() });
-        
-        setFitData(data);
-      } catch (err) {
-        console.error('Error fetching job fit:', err);
-        setError('AI unavailable. Try again later.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (jobId && isFeatureEnabled) {
-      fetchJobFit();
-    } else {
-      setIsLoading(false);
-    }
-  }, [jobId, isFeatureEnabled]);
 
   // Don't render if feature disabled or unauthorized
   if (!isFeatureEnabled || error === 'Unauthorized') {
@@ -156,21 +74,11 @@ const AiJobFitCard = ({ jobId }: AiJobFitCardProps) => {
     return str.charAt(0).toUpperCase() + str.slice(1);
   };
 
-  const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch (err) {
-      console.error('Failed to copy to clipboard:', err);
-    }
-  };
-
   const visibleAssumptions = fitData?.assumptions 
     ? (showAllAssumptions ? fitData.assumptions : fitData.assumptions.slice(0, 3))
     : [];
 
-  const visibleFollowUps = fitData?.follow_up?.slice(0, 3) || [];
-
-  if (isLoading || minLoadingTime) {
+  if (isLoading) {
     return (
       <Card 
         className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-4 md:p-6 transition-shadow" 
@@ -257,13 +165,6 @@ const AiJobFitCard = ({ jobId }: AiJobFitCardProps) => {
         <h2 id="ai-jobfit-header" className="text-lg font-semibold text-slate-800">
           AI Job Fit for You
         </h2>
-        <div className="group relative">
-          <HiInformationCircle className="w-4 h-4 text-slate-400 hover:text-slate-600 cursor-help" />
-          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-slate-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-            Model estimate; not a quote
-            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-slate-900"></div>
-          </div>
-        </div>
       </div>
 
       {/* Low fit score warning */}
@@ -327,25 +228,6 @@ const AiJobFitCard = ({ jobId }: AiJobFitCardProps) => {
             </div>
           )}
 
-          {/* Follow-up Questions (if present) */}
-          {visibleFollowUps.length > 0 && (
-            <div>
-              <h3 className="font-semibold text-slate-800 mb-2 text-sm">Follow-up Questions</h3>
-              <div className="flex flex-wrap gap-2">
-                {visibleFollowUps.map((question, index) => (
-                  <button
-                    key={index}
-                    onClick={() => copyToClipboard(question)}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-medium rounded-full border border-blue-200 hover:bg-blue-100 hover:border-blue-300 transition-colors cursor-pointer"
-                    title="Click to copy to clipboard"
-                  >
-                    <span>{question}</span>
-                    <HiClipboard className="w-3 h-3" aria-hidden="true" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Sidebar Metrics */}
@@ -402,30 +284,7 @@ const AiJobFitCard = ({ jobId }: AiJobFitCardProps) => {
               </div>
             )}
 
-            {/* Confidence */}
-            {typeof fitData.confidence === 'number' && (
-              <div className="flex items-center justify-between">
-                <div className="group relative flex items-center gap-2">
-                  <span className="text-sm font-medium text-slate-700">Confidence</span>
-                  <HiInformationCircle className="w-3 h-3 text-slate-400 hover:text-slate-600 cursor-help" />
-                  <div className="absolute bottom-full left-0 mb-2 px-3 py-2 bg-slate-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-                    Model certainty based on available details
-                    <div className="absolute top-full left-4 border-4 border-transparent border-t-slate-900"></div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-12 bg-slate-200 rounded-full h-1.5">
-                    <div 
-                      className="h-1.5 bg-blue-400 rounded-full transition-all duration-300"
-                      style={{ width: `${Math.max(0, Math.min(100, fitData.confidence * 100))}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-sm text-slate-600 w-8 text-right">
-                    {formatPercent(fitData.confidence)}
-                  </span>
-                </div>
-              </div>
-            )}
+          
           </div>
         </div>
       </div>

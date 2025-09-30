@@ -9,6 +9,8 @@ import PayToApplyModal from "@/components/PayToApplyModal";
 import PaidUserBanner from "@/components/PaidUserBanner";
 import CompetitionIndicator from "@/components/CompetitionIndicator";
 import AiJobFitCard from "@/components/AiJobFitCard";
+import FollowUpQuestions from "@/components/FollowUpQuestions";
+import { useAiJobFit } from "@/hooks/useAiJobFit";
 import {
     HiMapPin,
     HiWrenchScrewdriver,
@@ -70,6 +72,37 @@ const JobDetail = () => {
     const [userPaid, setUserPaid] = useState(false);
     const [paymentStatusLoaded, setPaymentStatusLoaded] = useState(false);
 
+    // Get AI job fit data for follow-up questions
+    const { followUpQuestions } = useAiJobFit(jobData?.project_id || '');
+
+    // Handler functions for follow-up questions
+    const handleFollowUpQuestion = async (question: string) => {
+        if (userPaid) {
+            // Post-payment: Navigate to chat with the question
+            try {
+                console.log('Opening chat for job:', jobData?.project_id);
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/chat-component/get-conversation-by-id/${jobData?.project_id}`, {
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to fetch conversation');
+                }
+                const data = await response.json();
+                console.log('Got conversation data:', data);
+                navigate(`/chat/${data.conversation.conversation_id}?message=${encodeURIComponent(question)}`);
+            } catch (error) {
+                console.error('Error opening chat:', error);
+                // Fallback: try with job ID directly
+                navigate(`/chat/${jobData?.project_id}?message=${encodeURIComponent(question)}`);
+            }
+        } else {
+            // Pre-payment: Trigger payment flow
+            setShowPayToApplyModal(true);
+        }
+    };
 
     // Check if current user is a trader
     const isTrader = Array.isArray(user?.role)
@@ -501,6 +534,18 @@ const JobDetail = () => {
                     {isTrader && paymentStatusLoaded && (
                         <div className="mb-6">
                             <AiJobFitCard jobId={jobData.project_id} />
+                        </div>
+                    )}
+
+                    {/* Follow-up Questions - Only for traders */}
+                    {isTrader && paymentStatusLoaded && followUpQuestions.length > 0 && (
+                        <div className="mb-6">
+                            <FollowUpQuestions
+                                questions={followUpQuestions}
+                                mode={userPaid ? 'postpay' : 'prepay'}
+                                onQuestionClick={handleFollowUpQuestion}
+                                className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 p-4 md:p-6"
+                            />
                         </div>
                     )}
 
