@@ -25,8 +25,10 @@ import {
   HiStar, 
   HiLockClosed 
 } from "react-icons/hi2";
-import { X } from "lucide-react";
+import { X, Sparkles } from "lucide-react";
 import UKLocationInput from "@/components/UKLocationInput";
+import type { JobDraft } from "@/lib/ai/placeholders";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const PostJob = () => {
     const [searchParams] = useSearchParams();
@@ -163,6 +165,7 @@ const PostJob = () => {
     const [aiBrief, setAiBrief] = useState('');
     const [aiResponse, setAiResponse] = useState<{title: string, description: string, service_category?: string} | null>(null);
     const [aiError, setAiError] = useState('');
+    const [isDraftApplied, setIsDraftApplied] = useState(false);
 
     // Calculate completion progress for each step
     const getStepCompletion = () => {
@@ -199,6 +202,46 @@ const PostJob = () => {
             jobTitle: newJobTitle
         }));
     }, [initialCountry, initialPostcode, initialCategory]);
+
+    // Handle AI draft from query params
+    useEffect(() => {
+        const draftParam = searchParams.get('draft');
+        if (draftParam && !isDraftApplied) {
+            try {
+                const draft: JobDraft = JSON.parse(decodeURIComponent(draftParam));
+                
+                // Map the draft urgency to our form urgency options
+                const urgencyMap: Record<string, string> = {
+                    'urgent': 'immediate',
+                    'flexible': 'flexible',
+                    'planned': 'next-month'
+                };
+                
+                // Find matching service category
+                const matchedCategory = serviceCategories.find(
+                    cat => cat.toLowerCase() === draft.categoryLabel.toLowerCase()
+                ) || draft.categoryLabel;
+                
+                setFormData(prev => ({
+                    ...prev,
+                    serviceCategory: matchedCategory,
+                    jobTitle: draft.title,
+                    jobDescription: draft.description,
+                    urgency: urgencyMap[draft.urgency] || 'flexible',
+                    budget: draft.suggestedBudget?.min && draft.suggestedBudget?.max 
+                        ? `${draft.suggestedBudget.min}-${draft.suggestedBudget.max}` 
+                        : ''
+                }));
+                
+                setIsDraftApplied(true);
+                
+                // Scroll to top to show the AI draft banner
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (error) {
+                console.error('Error parsing draft:', error);
+            }
+        }
+    }, [searchParams, isDraftApplied]);
 
     // Check user role on component mount
     useEffect(() => {
@@ -858,6 +901,16 @@ const PostJob = () => {
                         </div>
 
                     </div>
+
+                    {/* AI Draft Banner */}
+                    {isDraftApplied && (
+                        <Alert className="mb-6 border-trust-blue/20 bg-trust-blue/5">
+                            <Sparkles className="h-4 w-4 text-trust-blue" />
+                            <AlertDescription className="text-sm">
+                                <strong>AI draft applied</strong> — Review the details below and make any changes before posting
+                            </AlertDescription>
+                        </Alert>
+                    )}
 
                     {/* Breadcrumb Steps */}
                     <div className="mb-8">

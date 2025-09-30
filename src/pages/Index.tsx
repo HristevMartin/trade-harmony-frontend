@@ -31,6 +31,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import usePageTracking from "@/hooks/usePageTracking";
+import { AssistantLauncher } from "@/components/ai/AssistantLauncher";
+import { AiJobAssistant } from "@/components/ai/AiJobAssistant";
+import type { JobDraft } from "@/lib/ai/placeholders";
 
 const Index = () => {
   const [postcode, setPostcode] = useState("");
@@ -40,6 +43,7 @@ const Index = () => {
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
   const [user, setUser] = useState<any>(null);
+  const [isAssistantOpen, setIsAssistantOpen] = useState(false);
 
   const navigate = useNavigate();
   usePageTracking('home');
@@ -224,6 +228,12 @@ const Index = () => {
       e.preventDefault();
       handleServiceClick(serviceSlug);
     }
+  };
+
+  // Handle AI draft
+  const handleUseDraft = (draft: JobDraft) => {
+    const draftData = encodeURIComponent(JSON.stringify(draft));
+    navigate(`/post-job?draft=${draftData}`);
   };
 
   return (
@@ -466,6 +476,16 @@ const Index = () => {
                   </span>
                 </Button>
               )}
+            </motion.div>
+
+            {/* AI Job Assistant Launcher */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.7 }}
+              className="mt-6"
+            >
+              <AssistantLauncher onClick={() => setIsAssistantOpen(true)} />
             </motion.div>
 
             {/* Trustpilot Social Proof */}
@@ -802,6 +822,12 @@ const Index = () => {
 
       </div>
 
+      {/* AI Job Assistant Modal */}
+      <AiJobAssistant 
+        isOpen={isAssistantOpen}
+        onClose={() => setIsAssistantOpen(false)}
+        onUseDraft={handleUseDraft}
+      />
     </div>
   );
 };
