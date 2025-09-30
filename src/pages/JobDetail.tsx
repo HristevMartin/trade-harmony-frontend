@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import PayToApplyModal from "@/components/PayToApplyModal";
 import PaidUserBanner from "@/components/PaidUserBanner";
 import CompetitionIndicator from "@/components/CompetitionIndicator";
+import AiJobFitCard from "@/components/AiJobFitCard";
 import {
     HiMapPin,
     HiWrenchScrewdriver,
@@ -88,8 +89,6 @@ const JobDetail = () => {
         }
     }, []);
 
-    console.log('the userData is', user)
-
     useEffect(() => {
         const getCustomerApplication = async () => {
             if (!user?.id || !id) {
@@ -123,6 +122,26 @@ const JobDetail = () => {
 
         getCustomerApplication();
     }, [user, id]);
+
+    useEffect(() => {
+        if (isTrader){
+            const makeRequest = async () => {
+                let apiResponse = await fetch(`${import.meta.env.VITE_API_URL}/travel/trader-helper`,{
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        id
+                    })
+                })
+                let data = await apiResponse.json()
+                console.log('the data is', data)
+            }
+            makeRequest()
+        }
+    },[isTrader])
 
     // Scroll to top when component mounts
     useEffect(() => {
@@ -477,6 +496,13 @@ const JobDetail = () => {
                             />
                         )
                     }
+
+                    {/* AI Job Fit Card - Only for traders */}
+                    {isTrader && paymentStatusLoaded && (
+                        <div className="mb-6">
+                            <AiJobFitCard jobId={jobData.project_id} />
+                        </div>
+                    )}
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 pb-24 md:pb-0">
                         {/* Main Content */}
