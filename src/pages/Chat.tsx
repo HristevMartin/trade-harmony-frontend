@@ -6,6 +6,8 @@ import { ArrowLeft, Send, MessageCircle, CheckCircle, DollarSign, Clock, Briefca
 import MessageList from '@/components/chat/MessageList';
 import Sidebar from '@/components/chat/Sidebar';
 import { useChats, type Counterparty } from '@/components/chat/useChatStore';
+import FollowUpQuestions from '@/components/FollowUpQuestions';
+import { useAiJobFit } from '@/hooks/useAiJobFit';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 
 const Chat = () => {
@@ -27,6 +29,9 @@ const Chat = () => {
   
   // Check if this is coming from payment flow
   const isPaymentFlow = !conversationId && jobId && homeownerName;
+
+  // Get AI job fit data for follow-up questions (if we have a jobId)
+  const { followUpQuestions } = useAiJobFit(jobId || '');
   
   // Helper functions for job data formatting
   const formatBudget = (budget: string | null) => {
@@ -53,9 +58,11 @@ const Chat = () => {
     finalConversationId: conversationId,
     isPaymentFlow,
     paymentFlowParams: { jobId, homeownerName, traderName, jobTitle, jobBudget, jobUrgency, jobCategory },
+    messageParam: searchParams.get('message'),
     currentUrl: window.location.href
   });
-  const [message, setMessage] = useState('');
+  
+  const [message, setMessage] = useState(searchParams.get('message') || '');
   const [conversation, setConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [isLoadingMessages, setIsLoadingMessages] = useState(true);
@@ -370,6 +377,22 @@ const Chat = () => {
     };
   }, [conversationId, authToken]);
 
+  // Handle pre-filled message from URL search parameters
+  useEffect(() => {
+    const messageParam = searchParams.get('message');
+    if (messageParam && messageParam !== message) {
+      console.log('Setting message from URL parameter:', messageParam);
+      setMessage(messageParam);
+      
+      // Clear the message parameter from the URL after setting it to state
+      // to avoid re-triggering this effect
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete('message');
+      const newUrl = `${window.location.pathname}${newSearchParams.toString() ? '?' + newSearchParams.toString() : ''}`;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, [searchParams]);
+
   // Create a UserRef-compatible counterparty for legacy components with defensive checks
   const legacyCounterparty = counterparty ? {
     id: counterparty.id || '',
@@ -388,9 +411,10 @@ const Chat = () => {
     isLoadingMessages
   });
 
-  const handleSendMessage = async () => {
-    if (!message.trim() || !conversationId) {
-      console.log('Cannot send message:', { message: message.trim(), conversationId });
+  const handleSendMessage = async (messageText?: string) => {
+    const textToSend = messageText || message.trim();
+    if (!textToSend || !conversationId) {
+      console.log('Cannot send message:', { message: textToSend, conversationId });
       return;
     }
     
@@ -398,7 +422,7 @@ const Chat = () => {
     const chatObj = {
       conversationId: conversationId,
       senderId: currentUserId, // Add sender ID to identify who is sending
-      body: message.trim(),
+      body: textToSend,
       action: "send_message"
     };
 
@@ -421,7 +445,10 @@ const Chat = () => {
       if (response.ok) {
         const responseData = await response.json();
         console.log('Message sent successfully:', responseData);
-        setMessage(''); // Clear the input after sending
+        // Only clear message if it was user typed (not from follow-up question)
+        if (!messageText) {
+          setMessage(''); // Clear the input after sending
+        }
         
         // Refresh messages after sending
         const refreshUrl = `${apiUrl}/travel/chat-component/${conversationId}`;
@@ -658,6 +685,19 @@ const Chat = () => {
             )}
           </div>
 
+          {/* Follow-up Questions - Only in active conversations with jobId */}
+          {conversationId && jobId && followUpQuestions.length > 0 && (
+            <div className="flex-shrink-0 border-t border-gray-100 bg-gray-50">
+              <div className="p-3 sm:p-4">
+                <FollowUpQuestions
+                  questions={followUpQuestions}
+                  mode="postpay"
+                  onQuestionClick={(question) => handleSendMessage(question)}
+                />
+              </div>
+            </div>
+          )}
+
           {/* Message Input - Fixed at bottom */}
           <div className="flex-shrink-0 border-t border-gray-200 bg-white shadow-lg">
             <div className="p-3 sm:p-4 md:p-6">
@@ -672,7 +712,7 @@ const Chat = () => {
                   className="flex-1 px-3 py-2.5 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed text-sm sm:text-base transition-all min-h-[44px]"
                 />
                 <Button 
-                  onClick={handleSendMessage}
+                  onClick={() => handleSendMessage()}
                   disabled={!message.trim() || !conversationId}
                   className="px-3 py-2.5 sm:px-4 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all min-h-[44px] min-w-[44px] flex items-center justify-center"
                   size="default"
