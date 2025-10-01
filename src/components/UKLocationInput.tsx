@@ -128,31 +128,29 @@ const UKLocationInput: React.FC<UKLocationInputProps> = ({ value, onChange, erro
         )}
       </div>
 
-      {/* Postcode Input - Only show if London is selected */}
-      {value.location === 'London' && (
-        <div>
-          <Label htmlFor="uk-postcode" className="text-sm font-medium text-slate-700">
-            Postcode <span className="text-red-500">*</span>
-          </Label>
-          <Input
-            id="uk-postcode"
-            value={value.postcode}
-            onChange={(e) => handlePostcodeChange(e.target.value)}
-            onBlur={handlePostcodeBlur}
-            placeholder="e.g., SW1A 1AA"
-            className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${
-              displayPostcodeError ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
-            }`}
-            aria-invalid={!!displayPostcodeError}
-            aria-describedby={displayPostcodeError ? 'postcode-error' : 'postcode-help'}
-          />
-          {displayPostcodeError ? (
-            <p id="postcode-error" className="text-xs text-red-600 mt-1">{displayPostcodeError}</p>
-          ) : (
-            <p id="postcode-help" className="text-xs text-slate-500 mt-1">Enter your full London postcode</p>
-          )}
-        </div>
-      )}
+      {/* Postcode Input - Always show for all UK cities */}
+      <div>
+        <Label htmlFor="uk-postcode" className="text-sm font-medium text-slate-700">
+          Postcode <span className="text-red-500">*</span>
+        </Label>
+        <Input
+          id="uk-postcode"
+          value={value.postcode}
+          onChange={(e) => handlePostcodeChange(e.target.value)}
+          onBlur={handlePostcodeBlur}
+          placeholder="e.g., SW1A 1AA"
+          className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${
+            displayPostcodeError ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
+          }`}
+          aria-invalid={!!displayPostcodeError}
+          aria-describedby={displayPostcodeError ? 'postcode-error' : 'postcode-help'}
+        />
+        {displayPostcodeError ? (
+          <p id="postcode-error" className="text-xs text-red-600 mt-1">{displayPostcodeError}</p>
+        ) : (
+          <p id="postcode-help" className="text-xs text-slate-500 mt-1">Enter your full UK postcode</p>
+        )}
+      </div>
 
       {/* Privacy Note */}
       <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">

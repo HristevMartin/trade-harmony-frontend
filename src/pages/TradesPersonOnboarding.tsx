@@ -11,6 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ChevronLeft, ChevronRight, Upload, X, CheckCircle, Badge } from 'lucide-react';
 import AuthModal from '@/components/AuthModal';
+import UKLocationInput from '@/components/UKLocationInput';
 
 type ProDraft = {
   name: string;
@@ -53,10 +54,10 @@ const serviceOptions = [
 ];
 
 const radiusOptions = [
-  { label: 'Within 5 km', value: 5 },
-  { label: 'Within 10 km', value: 10 },
-  { label: 'Within 25 km', value: 25 },
-  { label: 'Within 50 km', value: 50 }
+  { label: 'Within 5 miles', value: 5 },
+  { label: 'Within 10 miles', value: 10 },
+  { label: 'Within 25 miles', value: 25 },
+  { label: 'Within 50 miles', value: 50 }
 ];
 
 const TradesPersonOnboarding = () => {
@@ -242,7 +243,8 @@ const TradesPersonOnboarding = () => {
         }
         break;
       case 'postcode':
-        if (!formData.postcode.trim()) {
+        // Validate postcode for all UK cities (only if a city is selected)
+        if (formData.city && !formData.postcode.trim()) {
           newErrors.postcode = 'Required';
         } else {
           delete newErrors.postcode;
@@ -276,6 +278,7 @@ const TradesPersonOnboarding = () => {
         fieldsToValidate.push('primaryTrade');
         break;
       case 3:
+        // Validate both city and postcode for all UK cities
         fieldsToValidate.push('city', 'postcode');
         break;
       case 4:
@@ -293,8 +296,10 @@ const TradesPersonOnboarding = () => {
       case 2:
         return !!formData.primaryTrade;
       case 3:
+        // Require both city and postcode for all UK cities
         return !!formData.city.trim() && !!formData.postcode.trim();
       case 4:
+        // For step 4, just check marketing consent (all previous fields should already be validated)
         return formData.marketingConsent;
       default:
         return false;
@@ -653,7 +658,7 @@ const TradesPersonOnboarding = () => {
     // Directly call submitRegistration with the auth data we received
     console.log('Auth success - calling submitRegistration directly with provided auth data');
     submitRegistrationWithAuthData(authData);
-  }, []);
+  }, [formData]);
 
   // Submit registration with auth data directly (bypassing localStorage timing issues)
   const submitRegistrationWithAuthData = useCallback(async (authData: { id: string; role: string; token: string; email?: string }) => {
@@ -814,6 +819,17 @@ const TradesPersonOnboarding = () => {
 
     // Clear any previous errors
     setErrors(prev => ({ ...prev, general: '' }));
+
+    // Debug: Log current form data state
+    console.log('Complete Registration - Current Form Data:', {
+      name: formData.name || 'MISSING',
+      email: formData.email || 'MISSING',
+      primaryTrade: formData.primaryTrade || 'MISSING',
+      city: formData.city || 'MISSING',
+      postcode: formData.postcode || 'MISSING',
+      radiusKm: formData.radiusKm,
+      marketingConsent: formData.marketingConsent
+    });
 
     // Check user role first (for authenticated users)
     const roleCheck = checkUserRole();
@@ -1193,66 +1209,101 @@ const TradesPersonOnboarding = () => {
             {/* Step 3: Location & Service Area */}
             {currentStep === 3 && (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <Label htmlFor="city" className="text-base font-medium text-slate-900">City *</Label>
-                    <Input
-                      id="city"
-                      value={formData.city}
-                      onChange={(e) => updateFormData('city', e.target.value)}
-                      onBlur={() => handleFieldBlur('city')}
-                      placeholder="Enter your city"
-                      className={`h-12 text-base px-4 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:ring-offset-0 ${errors.city ? 'border-red-500 bg-red-50' : ''}`}
-                      style={{borderRadius: '12px', fontSize: '16px'}}
-                      aria-invalid={!!errors.city}
-                      aria-describedby={errors.city ? 'city-error' : 'city-help'}
-                    />
-                    {errors.city ? (
-                      <p id="city-error" className="text-sm text-red-600 font-medium">{errors.city}</p>
-                    ) : (
-                      <p id="city-help" className="text-sm text-slate-500">Required for job matching</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-3">
-                    <Label htmlFor="postcode" className="text-base font-medium text-slate-900">Postcode *</Label>
-                    <Input
-                      id="postcode"
-                      value={formData.postcode}
-                      onChange={(e) => handlePostcodeChange(e.target.value)}
-                      onBlur={() => handleFieldBlur('postcode')}
-                      placeholder="e.g., SW20 9NP"
-                      className={`h-12 text-base px-4 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:ring-offset-0 ${errors.postcode ? 'border-red-500 bg-red-50' : ''}`}
-                      style={{borderRadius: '12px', fontSize: '16px'}}
-                      aria-invalid={!!errors.postcode}
-                      aria-describedby={errors.postcode ? 'postcode-error' : 'postcode-help'}
-                    />
-                    {errors.postcode ? (
-                      <p id="postcode-error" className="text-sm text-red-600 font-medium">{errors.postcode}</p>
-                    ) : (
-                      <p id="postcode-help" className="text-sm text-slate-500">UK postcode format</p>
-                    )}
-                  </div>
+                <div className="space-y-6">
+                  <UKLocationInput
+                    value={{
+                      country: 'GB',
+                      location: formData.city,
+                      postcode: formData.postcode
+                    }}
+                    onChange={(locationData) => {
+                      updateFormData('city', locationData.location);
+                      updateFormData('postcode', locationData.postcode);
+                      
+                      // Clear errors when fields are updated
+                      if (locationData.location && errors.city) {
+                        setErrors(prev => {
+                          const newErrors = { ...prev };
+                          delete newErrors.city;
+                          return newErrors;
+                        });
+                      }
+                      if (locationData.postcode && errors.postcode) {
+                        setErrors(prev => {
+                          const newErrors = { ...prev };
+                          delete newErrors.postcode;
+                          return newErrors;
+                        });
+                      }
+                    }}
+                    errors={{
+                      location: errors.city,
+                      postcode: errors.postcode
+                    }}
+                  />
                 </div>
 
                 <div className="space-y-3">
                   <Label htmlFor="serviceRadius" className="text-base font-medium text-slate-900">Service Radius</Label>
-                  <Select
-                    value={formData.radiusKm.toString()}
-                    onValueChange={(value) => updateFormData('radiusKm', parseInt(value))}
-                  >
-                    <SelectTrigger className="h-12 text-base border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:ring-offset-0" style={{borderRadius: '12px', fontSize: '16px'}}>
-                      <SelectValue placeholder="Select service radius" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {radiusOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value.toString()}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-sm text-slate-500">How far are you willing to travel for jobs?</p>
+                  <div className="space-y-3">
+                    <Select
+                      value={formData.radiusKm.toString()}
+                      onValueChange={(value) => updateFormData('radiusKm', parseInt(value))}
+                    >
+                      <SelectTrigger className="h-12 text-base border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:ring-offset-0" style={{borderRadius: '12px', fontSize: '16px'}}>
+                        <SelectValue placeholder="Select service radius" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {radiusOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value.toString()}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-px bg-slate-300"></div>
+                      <span className="text-xs text-slate-500 font-medium">OR</span>
+                      <div className="flex-1 h-px bg-slate-300"></div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                      <Input
+                        id="customRadius"
+                        type="number"
+                        min="1"
+                        max="200"
+                        value={formData.radiusKm}
+                        onChange={(e) => {
+                          const inputValue = e.target.value;
+                          // Allow empty input while typing
+                          if (inputValue === '') {
+                            updateFormData('radiusKm', 1);
+                            return;
+                          }
+                          const value = parseInt(inputValue);
+                          // Only update if it's a valid number
+                          if (!isNaN(value)) {
+                            updateFormData('radiusKm', Math.min(200, Math.max(1, value)));
+                          }
+                        }}
+                        onBlur={(e) => {
+                          // On blur, ensure we have a valid value
+                          const value = parseInt(e.target.value);
+                          if (isNaN(value) || value < 1) {
+                            updateFormData('radiusKm', 10);
+                          }
+                        }}
+                        placeholder="Enter custom radius"
+                        className="h-12 text-base px-4 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:ring-offset-0"
+                        style={{borderRadius: '12px', fontSize: '16px'}}
+                        aria-describedby="radius-help"
+                      />
+                      <span className="text-base font-medium text-slate-700 whitespace-nowrap">miles</span>
+                    </div>
+                  </div>
+                  <p id="radius-help" className="text-sm text-slate-500">How far are you willing to travel for jobs? (1-200 miles)</p>
                 </div>
 
                 <div className="space-y-3">
