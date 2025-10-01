@@ -46,6 +46,7 @@ const PostJob = () => {
         'Gardening', 'Heating & Cooling', 'Flooring', 'Cleaning', 'Removals', 'Handyman', 'Mechanic'
     ];
     
+    
     // Use the country if it exists in our mapping, otherwise default to GB
     const initialCountry = countryCodeMap[countryParam as keyof typeof countryCodeMap] ? countryParam : 'GB';
     const initialPostcode = searchParams.get('postcode') || '';
@@ -616,6 +617,39 @@ const PostJob = () => {
         return !!token;
     };
 
+    // Check if user is authenticated as a homeowner/customer
+    const isAuthenticatedHomeowner = () => {
+        const authUser = localStorage.getItem('auth_user');
+        
+        console.log('isAuthenticatedHomeowner check:', { authUser: !!authUser });
+        
+        if (!authUser) {
+            console.log('Missing authUser');
+            return false;
+        }
+
+        try {
+            const userData = JSON.parse(authUser);
+            const userRole = Array.isArray(userData.role) ? userData.role : [userData.role];
+            console.log('User data:', { userData, userRole });
+            
+            // Check if user has customer/homeowner role
+            const isHomeowner = userRole.includes('customer') || userRole.includes('CUSTOMER') || userRole.includes('homeowner') || userRole.includes('HOMEOWNER');
+            console.log('Is homeowner:', isHomeowner);
+            console.log('Role check details:', {
+                hasCustomer: userRole.includes('customer'),
+                hasCUSTOMER: userRole.includes('CUSTOMER'),
+                hasHomeowner: userRole.includes('homeowner'),
+                hasHOMEOWNER: userRole.includes('HOMEOWNER'),
+                roleArray: userRole
+            });
+            return isHomeowner;
+        } catch (error) {
+            console.error('Error parsing user data:', error);
+            return false;
+        }
+    };
+
     // Check if authenticated user has correct role for posting jobs
     const checkUserRole = () => {
         const token = localStorage.getItem('access_token');
@@ -761,13 +795,19 @@ const PostJob = () => {
             return;
         }
 
-        // Check if user is authenticated
-        if (!isAuthenticated()) {
+        // Check if user is authenticated as a homeowner
+        const isHomeowner = isAuthenticatedHomeowner();
+        console.log('Form submission - isAuthenticatedHomeowner result:', isHomeowner);
+        
+        if (!isHomeowner) {
+            console.log('User is not authenticated as homeowner, showing auth modal');
             // Show auth modal and mark submission as pending
             setPendingSubmission(true);
             setShowAuthModal(true);
             return;
         }
+        
+        console.log('User is authenticated as homeowner, proceeding with submission');
 
         await submitJobData();
     };
@@ -1878,7 +1918,7 @@ const PostJob = () => {
                                 )}
                             </button>
                             <p className="text-xs text-slate-500 mt-2 text-center">
-                                {!isAuthenticated() 
+                                {!isAuthenticatedHomeowner() 
                                     ? "You'll be asked to sign in or create an account."
                                     : "We'll notify local tradespeople right away."
                                 }
