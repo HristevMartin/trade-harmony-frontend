@@ -400,9 +400,10 @@ const PostJob = () => {
                 }
                 break;
             case 'postcode':
-                if (formData.country === 'GB') {
+                // Only validate postcode if country is GB and location is London
+                if (formData.country === 'GB' && formData.area === 'London') {
                     if (!value || (value as string).trim() === '') {
-                        errors[field] = 'Postcode is required';
+                        errors[field] = 'Postcode is required for London';
                     } else {
                         const ukPostcodeRegex = /^[A-Z]{1,2}[0-9]{1,2}[A-Z]?\s?[0-9][A-Z]{2}$/i;
                         if (!ukPostcodeRegex.test((value as string).trim())) {
@@ -711,9 +712,13 @@ const PostJob = () => {
         setFormErrors({});
         
         // Validate all fields
+        // Only include postcode validation if country is GB AND location is London
+        const baseFields = ['serviceCategory', 'jobTitle', 'jobDescription', 'budget', 'customBudget', 'email', 'firstName', 'phone', 'urgency', 'gdprConsent'];
         const fieldsToValidate = formData.country === 'GB' 
-            ? ['postcode', 'area', 'serviceCategory', 'jobTitle', 'jobDescription', 'budget', 'customBudget', 'email', 'firstName', 'phone', 'urgency', 'gdprConsent']
-            : ['location', 'serviceCategory', 'jobTitle', 'jobDescription', 'budget', 'customBudget', 'email', 'firstName', 'phone', 'urgency', 'gdprConsent'];
+            ? (formData.area === 'London' 
+                ? ['postcode', 'area', ...baseFields]
+                : ['area', ...baseFields])
+            : ['location', ...baseFields];
         let isValid = true;
         
         const currentErrors: Record<string, string> = {};
