@@ -67,10 +67,11 @@ const TradesPersonJobs = () => {
   }>({ categories: [], locations: [] });
   const [sortBy, setSortBy] = useState<'budget_high' | 'budget_low'>('budget_high');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [openPopovers, setOpenPopovers] = useState<{ category: boolean; location: boolean; radius: boolean }>({
+  const [openPopovers, setOpenPopovers] = useState<{ category: boolean; location: boolean; radius: boolean; sort: boolean }>({
     category: false,
     location: false,
-    radius: false
+    radius: false,
+    sort: false
   });
   const [mobileRadiusOpen, setMobileRadiusOpen] = useState(false);
   const [showStickyFilter, setShowStickyFilter] = useState(false);
@@ -104,7 +105,7 @@ const TradesPersonJobs = () => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
       if (!target.closest('[data-popover]')) {
-        setOpenPopovers({ category: false, location: false, radius: false });
+        setOpenPopovers({ category: false, location: false, radius: false, sort: false });
         // Clear search terms when closing popovers
         setSearchTerms({ category: '', location: '' });
       }
@@ -420,19 +421,54 @@ const TradesPersonJobs = () => {
 
     // Sort jobs by budget
     filtered.sort((a, b) => {
-      const budgetOrder = { 'over-1000': 4, '500-1000': 3, '200-500': 2, 'under-200': 1, 'flexible': 0 };
-      const aBudgetValue = budgetOrder[a.budget as keyof typeof budgetOrder] || 0;
-      const bBudgetValue = budgetOrder[b.budget as keyof typeof budgetOrder] || 0;
+      // Helper function to get numeric value for sorting
+      const getBudgetValue = (budget: string) => {
+        // Check if it's a concrete price (contains £ symbol or is just a number)
+        const concretePriceMatch = budget.match(/£[\d,]+/);
+        const customPriceMatch = budget.match(/Custom:\s*£[\d,]+/);
+        const plainNumberMatch = budget.match(/^\d+$/);
+        
+        if (concretePriceMatch) {
+          // Extract numeric value from concrete price like "£150"
+          const numericValue = parseInt(concretePriceMatch[0].replace(/[£,]/g, ''));
+          return numericValue;
+        } else if (customPriceMatch) {
+          // Extract numeric value from custom price like "Custom: £150"
+          const numericValue = parseInt(customPriceMatch[0].replace(/[Custom:\s£,]/g, ''));
+          return numericValue;
+        } else if (plainNumberMatch) {
+          // Handle plain numbers like "150"
+          return parseInt(plainNumberMatch[0]);
+        }
+        
+        // Handle range-based budgets
+        const budgetOrder = { 'over-1000': 1000, '500-1000': 750, '200-500': 350, 'under-200': 200, 'flexible': 0 };
+        return budgetOrder[budget as keyof typeof budgetOrder] || 0;
+      };
+
+      const aBudgetValue = getBudgetValue(a.budget);
+      const bBudgetValue = getBudgetValue(b.budget);
+      
+      // Check if either has a concrete price (including plain numbers)
+      const aIsConcrete = /£[\d,]+/.test(a.budget) || /Custom:\s*£[\d,]+/.test(a.budget) || /^\d+$/.test(a.budget);
+      const bIsConcrete = /£[\d,]+/.test(b.budget) || /Custom:\s*£[\d,]+/.test(b.budget) || /^\d+$/.test(b.budget);
       
       switch (sortBy) {
         case 'budget_high':
-          // Highest to lowest
+          // Concrete prices first, then by value (highest to lowest)
+          if (aIsConcrete && !bIsConcrete) return -1;
+          if (!aIsConcrete && bIsConcrete) return 1;
           return bBudgetValue - aBudgetValue;
         case 'budget_low':
-          // Lowest to highest
+          // Concrete prices first, then by value (lowest to highest)
+          if (aIsConcrete && !bIsConcrete) return -1;
+          if (!aIsConcrete && bIsConcrete) return 1;
           return aBudgetValue - bBudgetValue;
         default:
-          return bBudgetValue - aBudgetValue; // Default to highest first
+          // Default to highest first with concrete prices prioritized
+          if (aIsConcrete && !bIsConcrete) return -1;
+          if (!aIsConcrete && bIsConcrete) return 1;
+          return bBudgetValue - aBudgetValue;
       }
     });
 
@@ -1075,14 +1111,55 @@ const TradesPersonJobs = () => {
             {/* Right side - Sort and Clear */}
             <div className="flex items-center gap-3">
               {/* Sort Dropdown */}
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                className="px-3 py-2 rounded-lg border border-border bg-background text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              >
-                <option value="budget_high">Highest Budget First</option>
-                <option value="budget_low">Lowest Budget First</option>
-              </select>
+              <div className="relative" data-popover>
+                <button
+                  onClick={() => setOpenPopovers(prev => ({ ...prev, sort: !prev.sort }))}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all bg-background hover:bg-muted border-border hover:border-border/60 min-w-[180px]"
+                >
+                  <PoundSterling className="h-4 w-4 flex-shrink-0" />
+                  <span className="text-sm whitespace-nowrap flex-1 text-left">
+                    {sortBy === 'budget_high' ? 'Highest Budget First' : 'Lowest Budget First'}
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition-transform flex-shrink-0 ${openPopovers.sort ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {/* Sort Dropdown */}
+                <AnimatePresence>
+                  {openPopovers.sort && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute top-full right-0 mt-2 bg-card border border-border/20 rounded-xl shadow-lg z-50 min-w-64"
+                    >
+                      <div className="p-4">
+                        <div className="space-y-2">
+                          {[
+                            { key: 'budget_high', label: 'Highest Budget First' },
+                            { key: 'budget_low', label: 'Lowest Budget First' },
+                          ].map(({ key, label }) => (
+                            <button
+                              key={key}
+                              onClick={() => {
+                                setSortBy(key as typeof sortBy);
+                                setOpenPopovers(prev => ({ ...prev, sort: false }));
+                              }}
+                              className={`w-full p-3 text-left text-sm font-medium rounded-lg transition-all ${
+                                sortBy === key
+                                  ? 'bg-primary text-primary-foreground'
+                                  : 'bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground'
+                              }`}
+                            >
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
               {/* Clear All Button */}
               {(filters.categories.length > 0 || filters.locations.length > 0 || filters.urgency || (filters.radius && filters.radius !== 25)) && (
