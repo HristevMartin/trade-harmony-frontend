@@ -71,6 +71,12 @@ const JobDetail = () => {
     const [showPayToApplyModal, setShowPayToApplyModal] = useState(false);
     const [userPaid, setUserPaid] = useState(false);
     const [paymentStatusLoaded, setPaymentStatusLoaded] = useState(false);
+    const [jobStats, setJobStats] = useState<{
+        completed_jobs: number;
+        in_progress_jobs: number;
+        active_jobs: number;
+        cancelled_jobs: number;
+    } | null>(null);
 
     // Get AI job fit data for follow-up questions
     const { followUpQuestions } = useAiJobFit(jobData?.project_id || '');
@@ -103,6 +109,35 @@ const JobDetail = () => {
             setShowPayToApplyModal(true);
         }
     };
+
+
+    useEffect(() => {
+        const request = async () => {
+            try {
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/get-client-completed-jobs/${id}`, {
+                    credentials: 'include',
+                })
+                if (!response.ok) {
+                    console.log('Failed to fetch job stats');
+                    return;
+                }
+                const data = await response.json();
+                console.log('Job statistics:', data);
+                if (data.success) {
+                    setJobStats({
+                        completed_jobs: data.completed_jobs,
+                        in_progress_jobs: data.in_progress_jobs,
+                        active_jobs: data.active_jobs || data.total_posted || 0,
+                        cancelled_jobs: data.cancelled_jobs || 0
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching job stats:', error);
+            }
+        }
+        request();
+    }, [id]);
+
 
     // Check if current user is a trader
     const isTrader = Array.isArray(user?.role)
@@ -157,9 +192,9 @@ const JobDetail = () => {
     }, [user, id]);
 
     useEffect(() => {
-        if (isTrader){
+        if (isTrader) {
             const makeRequest = async () => {
-                let apiResponse = await fetch(`${import.meta.env.VITE_API_URL}/travel/trader-helper`,{
+                let apiResponse = await fetch(`${import.meta.env.VITE_API_URL}/travel/trader-helper`, {
                     method: 'POST',
                     credentials: 'include',
                     headers: {
@@ -174,7 +209,7 @@ const JobDetail = () => {
             }
             makeRequest()
         }
-    },[isTrader])
+    }, [isTrader])
 
     // Scroll to top when component mounts
     useEffect(() => {
@@ -392,7 +427,7 @@ const JobDetail = () => {
                     </div>
                 )}
 
-                <div  className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8 py-4 md:py-6 lg:py-10">
+                <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8 py-4 md:py-6 lg:py-10">
                     {/* Header */}
                     <div className="mb-6 md:mb-8">
                         {/* Mobile Back Button - Above Title - Show for all users */}
@@ -407,7 +442,7 @@ const JobDetail = () => {
                                 Back
                             </Button>
                         </div>
-                        
+
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4">
                             {/* <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                                 <Button
@@ -449,16 +484,42 @@ const JobDetail = () => {
                                 <HiCalendar className="w-4 h-4 flex-shrink-0" />
                                 <span className="truncate">Posted {formatDate(jobData.created_at)}</span>
                             </div>
-                            <div className="flex items-center gap-1">
-                                <HiEye className="w-4 h-4 flex-shrink-0" />
-                                <span className="truncate">Job #{jobData.project_id.split('-')[0]}</span>
-                            </div>
                         </div>
-                        
+
                         {/* Competition Indicator */}
                         {isTrader && !userPaid && paymentStatusLoaded && (
                             <div className="mt-3">
                                 <CompetitionIndicator id={id || ''} />
+                            </div>
+                        )}
+
+                        {/* Job Statistics - For Traders */}
+                        {isTrader && jobStats && (
+                            <div className="mt-4">
+                                <Card className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-4 md:p-5">
+                                    <h3 className="text-sm font-semibold text-slate-700 mb-3">Homeowner's Job Activity</h3>
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                        <div className="text-center p-3 bg-green-50 rounded-xl border border-green-200">
+                                            <div className="text-2xl font-bold text-green-700">{jobStats.completed_jobs}</div>
+                                            <div className="text-xs text-green-600 font-medium mt-1">Completed</div>
+                                        </div>
+                                        <div className="text-center p-3 bg-blue-50 rounded-xl border border-blue-200">
+                                            <div className="text-2xl font-bold text-blue-700">{jobStats.in_progress_jobs}</div>
+                                            <div className="text-xs text-blue-600 font-medium mt-1">Active</div>
+                                        </div>
+                                        <div className="text-center p-3 bg-red-50 rounded-xl border border-red-200">
+                                            <div className="text-2xl font-bold text-red-700">{jobStats.cancelled_jobs}</div>
+                                            <div className="text-xs text-red-600 font-medium mt-1">Cancelled</div>
+                                        </div>
+                                        <div className="text-center p-3 bg-slate-50 rounded-xl border border-slate-200">
+                                            <div className="text-2xl font-bold text-slate-700">{jobStats.active_jobs}</div>
+                                            <div className="text-xs text-slate-600 font-medium mt-1">Total Jobs</div>
+                                        </div>
+                                    </div>
+                                    <p className="text-xs text-slate-500 mt-3 text-center">
+                                        This shows the homeowner's job history on our platform
+                                    </p>
+                                </Card>
                             </div>
                         )}
                     </div>
@@ -524,7 +585,7 @@ const JobDetail = () => {
                                     phone: jobData.phone
                                 }}
                                 onOpenChat={() => {
-                                    
+
                                 }}
                             />
                         )
@@ -647,40 +708,40 @@ const JobDetail = () => {
                             {/* Contact Information - Hidden for traders */}
                             {!isTrader && (
                                 <Card className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-4 md:p-6 transition-shadow hover:shadow-md">
-                                <div className="flex items-center gap-2 mb-3 md:mb-4">
-                                    <HiUserCircle className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
-                                    <h2 className="text-base md:text-lg font-semibold text-slate-800">Contact Information</h2>
-                                </div>
-
-                                <div className="space-y-3 md:space-y-4">
-                                    <div>
-                                        <h3 className="font-semibold text-slate-800 mb-1 text-sm md:text-base">Name</h3>
-                                        <p className="text-slate-600 text-sm md:text-base">{jobData.first_name}</p>
+                                    <div className="flex items-center gap-2 mb-3 md:mb-4">
+                                        <HiUserCircle className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
+                                        <h2 className="text-base md:text-lg font-semibold text-slate-800">Contact Information</h2>
                                     </div>
 
-                                    <div>
-                                        <h3 className="font-semibold text-slate-800 mb-1 flex items-center gap-1 text-sm md:text-base">
-                                            <HiEnvelope className="w-4 h-4" />
-                                            Email
-                                        </h3>
-                                        <p className="text-slate-600 text-sm md:text-base break-all">{jobData.email}</p>
-                                    </div>
+                                    <div className="space-y-3 md:space-y-4">
+                                        <div>
+                                            <h3 className="font-semibold text-slate-800 mb-1 text-sm md:text-base">Name</h3>
+                                            <p className="text-slate-600 text-sm md:text-base">{jobData.first_name}</p>
+                                        </div>
 
-                                    {jobData.phone && (
                                         <div>
                                             <h3 className="font-semibold text-slate-800 mb-1 flex items-center gap-1 text-sm md:text-base">
-                                                <HiPhone className="w-4 h-4" />
-                                                Phone
+                                                <HiEnvelope className="w-4 h-4" />
+                                                Email
                                             </h3>
-                                            <p className="text-slate-600 text-sm md:text-base">{jobData.phone}</p>
+                                            <p className="text-slate-600 text-sm md:text-base break-all">{jobData.email}</p>
                                         </div>
-                                    )}
 
-                                    <div>
-                                        <h3 className="font-semibold text-slate-800 mb-1 text-sm md:text-base">Preferred Contact</h3>
-                                        <p className="text-slate-600 capitalize text-sm md:text-base">{jobData.contact_method}</p>
+                                        {jobData.phone && (
+                                            <div>
+                                                <h3 className="font-semibold text-slate-800 mb-1 flex items-center gap-1 text-sm md:text-base">
+                                                    <HiPhone className="w-4 h-4" />
+                                                    Phone
+                                                </h3>
+                                                <p className="text-slate-600 text-sm md:text-base">{jobData.phone}</p>
+                                            </div>
+                                        )}
+
+                                        <div>
+                                            <h3 className="font-semibold text-slate-800 mb-1 text-sm md:text-base">Preferred Contact</h3>
+                                            <p className="text-slate-600 capitalize text-sm md:text-base">{jobData.contact_method}</p>
+                                        </div>
                                     </div>
-                                </div>
                                 </Card>
                             )}
 
@@ -724,10 +785,6 @@ const JobDetail = () => {
                                         <Badge className={`${getStatusColor(jobData.status)} border-0 text-xs`}>
                                             {jobData.status.charAt(0).toUpperCase() + jobData.status.slice(1)}
                                         </Badge>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-slate-500">Job ID:</span>
-                                        <span className="text-slate-900 font-mono text-xs">#{jobData.project_id.split('-')[0]}</span>
                                     </div>
                                 </div>
                             </Card>
