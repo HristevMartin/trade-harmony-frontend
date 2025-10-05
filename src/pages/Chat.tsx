@@ -488,7 +488,7 @@ const Chat = () => {
   };
 
   return (
-    <div className="h-screen bg-background flex flex-col overflow-hidden">
+    <div className="h-screen bg-background flex flex-col overflow-hidden fixed inset-0">
       {/* Header - Final refined design pass */}
       <header className="flex-shrink-0 bg-background">
         <div className="flex items-center justify-between px-4 sm:px-6 py-2.5">
@@ -700,12 +700,12 @@ const Chat = () => {
           </SheetContent>
         </Sheet>
 
-        {/* Chat Content Area */}
-        <div className="flex-1 flex flex-col min-w-0 bg-background">
-          {/* Messages Container - Takes all available space minus input */}
-          <div className="flex-1 min-h-0 overflow-hidden">
+        {/* Chat Content Area - Optimized layout */}
+        <div className="flex-1 flex flex-col min-w-0 bg-background overflow-hidden">
+          {/* Messages Container - Scrollable area with padding */}
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6">
             {!conversationId && !isPaymentFlow ? (
-              <div className="h-full flex items-center justify-center p-6">
+              <div className="flex items-center justify-center min-h-full">
                 <div className="text-center max-w-md">
                   <div className="w-20 h-20 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-6">
                     <MessageCircle className="w-10 h-10 text-muted-foreground" />
@@ -725,14 +725,14 @@ const Chat = () => {
                 </div>
               </div>
             ) : isLoadingMessages ? (
-              <div className="h-full flex items-center justify-center p-6">
+              <div className="flex items-center justify-center min-h-full">
                 <div className="text-center">
                   <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                   <p className="text-muted-foreground">Loading messages...</p>
                 </div>
               </div>
             ) : messages.length === 0 ? (
-              <div className="h-full flex items-center justify-center p-6">
+              <div className="flex items-center justify-center min-h-full">
                 <div className="text-center max-w-md">
                   {/* Enhanced Welcome State for Payment Flow */}
                   {isPaymentFlow ? (
@@ -773,7 +773,7 @@ const Chat = () => {
                 </div>
               </div>
             ) : (
-              <div className="h-full overflow-y-auto">
+              <div className="max-w-4xl mx-auto">
                 <MessageList
                   messages={messages}
                   conversation={conversation}
@@ -784,10 +784,10 @@ const Chat = () => {
             )}
           </div>
 
-          {/* Follow-up Questions - Only in active conversations with jobId */}
+          {/* Follow-up Questions - Sticky above input */}
           {conversationId && jobId && followUpQuestions.length > 0 && (
             <div className="flex-shrink-0 border-t border-gray-100 bg-gray-50">
-              <div className="p-3 sm:p-4">
+              <div className="p-3 sm:p-4 max-w-4xl mx-auto">
                 <FollowUpQuestions
                   questions={followUpQuestions}
                   mode="postpay"
@@ -797,9 +797,9 @@ const Chat = () => {
             </div>
           )}
 
-          {/* Message Input - Fixed at bottom */}
-          <div className="flex-shrink-0 border-t border-border bg-background/95 backdrop-blur-sm shadow-lg">
-            <div className="p-3 sm:p-4">
+          {/* Message Input - Fixed at bottom, always visible */}
+          <div className="flex-shrink-0 border-t border-border bg-background shadow-lg">
+            <div className="p-4 sm:p-5">
               <div className="flex gap-3 max-w-4xl mx-auto bg-muted/30 rounded-2xl p-3 shadow-sm border border-border/50">
                 <input
                   type="text"
