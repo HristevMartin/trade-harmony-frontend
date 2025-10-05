@@ -114,7 +114,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       {onClose && (
         <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b bg-background/95 backdrop-blur-sm">
           <h2 className="font-semibold text-lg text-foreground flex items-center gap-2">
-            <MessageCircle className="w-5 h-5 text-primary" />
+            <MessageCircle className="w-5 h-5 text-gray-700" />
             Conversations
           </h2>
           <Button
@@ -140,8 +140,8 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div className="p-4 lg:p-6 border-b bg-background/80 backdrop-blur-sm">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-foreground text-lg flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <MessageCircle className="w-5 h-5 text-primary" />
+              <div className="p-2 bg-primary/10 rounded-lg transition-colors duration-200 hover:bg-primary/15">
+                <MessageCircle className="w-5 h-5 text-gray-700 transition-colors duration-200" />
               </div>
               Conversations
             </h3>
