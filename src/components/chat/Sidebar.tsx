@@ -245,7 +245,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                       
                       {/* Job title */}
                       {chat.counterparty?.job_title && (
-                        <p className={`text-sm truncate mb-1 ${hasUnread ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>
+                        <p className={`text-sm truncate mb-3 ${hasUnread ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>
                           {chat.counterparty.job_title}
                         </p>
                       )}
