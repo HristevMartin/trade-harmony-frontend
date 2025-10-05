@@ -227,7 +227,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                       {/* Header row */}
                       <div className="flex items-start justify-between mb-1">
                         <div className="flex-1 min-w-0 mr-3">
-                          <h4 className={`font-semibold truncate text-sm ${isActive ? 'text-primary' : 'text-foreground'} ${hasUnread ? 'font-bold' : ''}`}>
+                          <h4 className={`font-semibold truncate text-sm text-foreground ${hasUnread ? 'font-bold' : ''}`}>
                             {chat.counterparty?.name || 'Unknown'}
                           </h4>
                         </div>

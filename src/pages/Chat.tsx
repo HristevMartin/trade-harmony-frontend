@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Send, MessageCircle, CheckCircle, DollarSign, Clock, Briefcase } from 'lucide-react';
+import { ArrowLeft, Send, MessageCircle, CheckCircle, DollarSign, Clock, Briefcase, User } from 'lucide-react';
 import MessageList from '@/components/chat/MessageList';
 import Sidebar from '@/components/chat/Sidebar';
 import { useChats, type Counterparty } from '@/components/chat/useChatStore';
@@ -128,6 +128,11 @@ const Chat = () => {
   // Get current user from localStorage
   const authUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
   const currentUserId = authUser.id;
+  
+  // Check if current user is a homeowner/customer
+  const isCustomer = Array.isArray(authUser?.role) 
+    ? authUser.role.includes('customer') || authUser.role.includes('CUSTOMER') || authUser.role.includes('homeowner') || authUser.role.includes('HOMEOWNER')
+    : authUser?.role === 'customer' || authUser?.role === 'CUSTOMER' || authUser?.role === 'homeowner' || authUser?.role === 'HOMEOWNER';
   
   // Debug authentication state
   console.log('Chat Auth Debug:', {
@@ -484,41 +489,135 @@ const Chat = () => {
 
   return (
     <div className="h-screen bg-background flex flex-col overflow-hidden">
-      {/* Header - Fixed height */}
-      <header className="flex-shrink-0 bg-background border-b border-border shadow-sm">
-        <div className="flex items-center justify-between h-14 sm:h-16 px-4 sm:px-6">
+      {/* Header - Final refined design pass */}
+      <header className="flex-shrink-0 bg-background">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-2.5">
           {/* Left side - Back button */}
-          <div className="flex items-center">
+          <div className="flex items-center flex-shrink-0">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => navigate(-1)}
-              className="hover:bg-muted -ml-2"
+              className="hover:bg-muted -ml-2 min-h-[44px] min-w-[44px]"
+              aria-label="Go back"
             >
               <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
           </div>
           
-          {/* Center - Title */}
-          <div className="flex-1 flex justify-center px-4">
-            <h1 className="font-semibold text-base sm:text-lg text-foreground truncate">
-              {counterparty?.name || (isPaymentFlow ? homeownerName : 'Chat')}
-            </h1>
+          {/* Center - Profile Capsule (only clickable for customers) */}
+          <div className="flex-1 flex flex-col items-center justify-center px-4">
+            {counterparty && isCustomer ? (
+              <>
+                {/* Profile Capsule - Extra padding for centering */}
+                <div className="py-1.5">
+                  <button
+                    onClick={(e) => {
+                      // Premium micro-interaction
+                      e.currentTarget.style.transform = 'scale(1.02)';
+                      e.currentTarget.style.opacity = '0.85';
+                      setTimeout(() => {
+                        navigate(`/tradesperson/profile/${counterparty.id}`);
+                      }, 170);
+                    }}
+                    className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 group hover:bg-[#F0F7FF] rounded-lg px-3 sm:px-4 py-3 sm:py-2.5 transition-all duration-200 ease-in-out cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 min-h-[44px] w-full sm:w-auto"
+                    aria-label="View tradesperson profile"
+                  >
+                    {/* Avatar - 32px circle with light gray border */}
+                    {counterparty.avatar_url ? (
+                      <img
+                        src={counterparty.avatar_url}
+                        alt={counterparty.name}
+                        className="w-8 h-8 rounded-full object-cover border-2 border-[#E5E7EB] flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center border-2 border-[#E5E7EB] flex-shrink-0">
+                        <User className="w-4 h-4 text-slate-600" />
+                      </div>
+                    )}
+                    
+                    {/* Name, Arrow, and Profession - Aligned */}
+                    <div className="flex flex-col items-center sm:items-start min-w-0 gap-0.5">
+                      <div className="flex items-baseline gap-1">
+                        <h1 className="font-bold text-base text-gray-800 group-hover:text-blue-600 transition-colors duration-200 ease-in-out truncate">
+                          {counterparty.name}
+                        </h1>
+                        <svg
+                          className="w-2.5 h-2.5 text-gray-500 group-hover:text-blue-600 transition-colors duration-200 ease-in-out flex-shrink-0"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          style={{ marginLeft: '4px' }}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                      
+                      {/* Profession - consistent 16px line height */}
+                      {counterparty.job_title && (
+                        <span className="text-sm text-gray-500 truncate max-w-[200px] sm:max-w-[260px]" style={{ lineHeight: '16px' }}>
+                          {counterparty.job_title}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                </div>
+                
+                {/* Hint text - improved spacing and readability */}
+                <p className="text-sm text-gray-600 italic mt-1 mb-2 text-center px-4 max-w-[80%] mx-auto leading-relaxed">
+                  💡 You can click the trader's name above to view their profile
+                </p>
+              </>
+            ) : counterparty ? (
+              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 px-2 py-3">
+                {/* Non-clickable version for traders */}
+                {counterparty.avatar_url ? (
+                  <img
+                    src={counterparty.avatar_url}
+                    alt={counterparty.name}
+                    className="w-8 h-8 rounded-full object-cover border-2 border-[#E5E7EB]"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center border-2 border-[#E5E7EB]">
+                    <User className="w-4 h-4 text-slate-600" />
+                  </div>
+                )}
+                <div className="flex flex-col items-center sm:items-start gap-0.5">
+                  <h1 className="font-bold text-base text-gray-800 truncate">
+                    {counterparty.name}
+                  </h1>
+                  {counterparty.job_title && (
+                    <span className="text-sm text-gray-500 truncate" style={{ lineHeight: '16px' }}>
+                      {counterparty.job_title}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <h1 className="font-semibold text-base sm:text-lg text-foreground truncate py-3">
+                {isPaymentFlow ? homeownerName : 'Chat'}
+              </h1>
+            )}
           </div>
           
           {/* Right side - Mobile Conversations Button */}
-          <div className="flex items-center">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <Button
               variant="default"
               size="sm"
               onClick={() => setSidebarOpen(true)}
-              className="sm:hidden flex-shrink-0 min-h-[36px] px-3 text-xs font-medium shadow-sm"
+              className="sm:hidden flex-shrink-0 min-h-[44px] min-w-[44px] px-3 text-xs font-medium shadow-sm"
               aria-label="Open conversations"
             >
               <MessageCircle className="w-4 h-4 mr-1.5" />
               Chats
             </Button>
           </div>
+        </div>
+        
+        {/* Hairline divider - separated and light */}
+        <div className="pt-2">
+          <div className="h-px bg-[#E5E7EB]"></div>
         </div>
       </header>
 
