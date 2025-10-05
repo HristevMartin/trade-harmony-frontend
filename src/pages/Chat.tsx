@@ -674,7 +674,7 @@ const Chat = () => {
                 </div>
               </div>
             ) : (
-              <div className="h-full overflow-y-auto bg-muted/20">
+              <div className="h-full overflow-y-auto">
                 <MessageList
                   messages={messages}
                   conversation={conversation}
@@ -699,25 +699,30 @@ const Chat = () => {
           )}
 
           {/* Message Input - Fixed at bottom */}
-          <div className="flex-shrink-0 border-t border-gray-200 bg-white shadow-lg">
-            <div className="p-3 sm:p-4 md:p-6">
-              <div className="flex gap-2 sm:gap-3 max-w-4xl mx-auto">
+          <div className="flex-shrink-0 border-t border-border bg-background/95 backdrop-blur-sm shadow-lg">
+            <div className="p-3 sm:p-4">
+              <div className="flex gap-3 max-w-4xl mx-auto bg-muted/30 rounded-2xl p-3 shadow-sm border border-border/50">
                 <input
                   type="text"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && conversationId && handleSendMessage()}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey && conversationId) {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
+                  }}
                   placeholder={conversationId ? "Type your message..." : "Select a conversation to start chatting"}
                   disabled={!conversationId}
-                  className="flex-1 px-3 py-2.5 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed text-sm sm:text-base transition-all min-h-[44px]"
+                  className="flex-1 px-4 py-3 bg-background rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed text-sm transition-all min-h-[44px]"
                 />
                 <Button 
                   onClick={() => handleSendMessage()}
                   disabled={!message.trim() || !conversationId}
-                  className="px-3 py-2.5 sm:px-4 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all min-h-[44px] min-w-[44px] flex items-center justify-center"
-                  size="default"
+                  className="rounded-xl min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  size="icon"
                 >
-                  <Send className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <Send className="w-5 h-5" />
                 </Button>
               </div>
             </div>

@@ -71,10 +71,10 @@ const MessageList: React.FC<MessageListProps> = ({
               
               {/* Message bubble */}
               <div
-                className={`rounded-lg px-3 py-2 ${
+                className={`rounded-2xl px-4 py-3 shadow-sm ${
                   isCurrentUser
                     ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground'
+                    : 'bg-muted/80 text-foreground'
                 } ${message.pending ? 'opacity-60' : ''}`}
               >
                 <p className="text-sm whitespace-pre-wrap break-words">

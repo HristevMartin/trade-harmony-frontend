@@ -109,7 +109,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   );
 
   return (
-    <div className="w-full bg-background flex flex-col overflow-hidden h-full">
+    <div className="w-full bg-muted/30 flex flex-col overflow-hidden h-full border-r border-border">
       {/* Mobile header with close button */}
       {onClose && (
         <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b bg-background/95 backdrop-blur-sm">
@@ -137,7 +137,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       
       {/* Desktop header */}
       {!onClose && (
-        <div className="p-4 lg:p-6 border-b bg-gradient-to-r from-background to-muted/10">
+        <div className="p-4 lg:p-6 border-b bg-background/80 backdrop-blur-sm">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-foreground text-lg flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-lg">
@@ -146,7 +146,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               Conversations
             </h3>
             {chats.length > 0 && (
-              <Badge variant="secondary" className="text-xs px-2 py-1 bg-muted">
+              <Badge variant="secondary" className="text-xs px-2 py-1 bg-primary/10 text-primary">
                 {chats.length}
               </Badge>
             )}

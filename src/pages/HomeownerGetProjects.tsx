@@ -579,8 +579,6 @@ const HomeownerGetProjects = () => {
             <div className="mb-8">
               <Card className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-4 md:p-5">
                 <h3 className="text-sm font-semibold text-slate-700 mb-3">Your Job Activity</h3>
-                {/* Debug info - remove this later */}
-                {console.log('Rendering homeowner stats:', homeownerStats)}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <div className="text-center p-3 bg-green-50 rounded-xl border border-green-200">
                     <div className="text-2xl font-bold text-green-700">{homeownerStats.completed_jobs}</div>
