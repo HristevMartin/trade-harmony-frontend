@@ -602,6 +602,9 @@ const HomeownerGetProjects = () => {
                 <p className="text-xs text-slate-500 mt-3 text-center">
                   Overview of your job activity on our platform
                 </p>
+                <p className="text-xs text-slate-600 mt-2 text-center font-medium">
+                  Tip: Complete or close jobs to improve your reliability rating.
+                </p>
               </Card>
             </div>
           )}
