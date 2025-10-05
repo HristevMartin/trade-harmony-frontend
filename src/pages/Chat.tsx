@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Send, MessageCircle, CheckCircle, DollarSign, Clock, Briefcase } from 'lucide-react';
+import { ArrowLeft, Send, MessageCircle, CheckCircle, DollarSign, Clock, Briefcase, User } from 'lucide-react';
 import MessageList from '@/components/chat/MessageList';
 import Sidebar from '@/components/chat/Sidebar';
 import { useChats, type Counterparty } from '@/components/chat/useChatStore';
@@ -67,6 +67,7 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [isLoadingMessages, setIsLoadingMessages] = useState(true);
   const [counterparty, setCounterparty] = useState<Counterparty | null>(null);
+  const [traderId, setTraderId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { chats, fetchChats } = useChats();
 
@@ -129,6 +130,11 @@ const Chat = () => {
   const authUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
   const currentUserId = authUser.id;
   
+  // Check if current user is a homeowner/customer
+  const isCustomer = Array.isArray(authUser?.role) 
+    ? authUser.role.includes('customer') || authUser.role.includes('CUSTOMER') || authUser.role.includes('homeowner') || authUser.role.includes('HOMEOWNER')
+    : authUser?.role === 'customer' || authUser?.role === 'CUSTOMER' || authUser?.role === 'homeowner' || authUser?.role === 'HOMEOWNER';
+  
   // Debug authentication state
   console.log('Chat Auth Debug:', {
     authUser,
@@ -179,6 +185,55 @@ const Chat = () => {
 
   // Find current chat from the chats list to get counterparty info
   const currentChat = chats.find(chat => chat.conversation_id === conversationId);
+
+  // Extract trader ID from chat data when available
+  useEffect(() => {
+    if (currentChat && isCustomer) {
+      // For homeowners, we need to find the trader_id from the chat summary API
+      // The counterparty.id should be the trader's ID when viewing from homeowner perspective
+      if (currentChat.counterparty?.id) {
+        console.log('Setting trader ID from current chat:', currentChat.counterparty.id);
+        setTraderId(currentChat.counterparty.id);
+      }
+    }
+  }, [currentChat, isCustomer]);
+
+  // Fetch trader ID from chat-summary API when we have a conversation
+  useEffect(() => {
+    const fetchTraderId = async () => {
+      if (!conversationId || !isCustomer || traderId) return; // Don't fetch if we already have it
+      
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const response = await fetch(`${apiUrl}/travel/chat-component/chat-summary`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Chat summary data for trader ID:', data);
+          
+          // Find the conversation that matches our current conversationId
+          const conversation = data.conversations?.find((conv: any) => 
+            conv.conversation_id === conversationId
+          );
+          
+          if (conversation?.trader_id) {
+            console.log('Found trader ID from chat summary:', conversation.trader_id);
+            setTraderId(conversation.trader_id);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching trader ID from chat summary:', error);
+      }
+    };
+    
+    fetchTraderId();
+  }, [conversationId, isCustomer, traderId]);
 
   // Handle payment flow - create counterparty from URL parameters
   useEffect(() => {
@@ -244,6 +299,7 @@ const Chat = () => {
     setMessages([]);
     setConversation(null);
     setCounterparty(null);
+    setTraderId(null);
     setIsLoadingMessages(true);
   }, [conversationId]);
 
@@ -407,8 +463,10 @@ const Chat = () => {
     conversation,
     counterparty,
     currentChat,
+    traderId,
     messagesLength: messages.length,
-    isLoadingMessages
+    isLoadingMessages,
+    isCustomer
   });
 
   const handleSendMessage = async (messageText?: string) => {
@@ -484,41 +542,136 @@ const Chat = () => {
 
   return (
     <div className="h-screen bg-background flex flex-col overflow-hidden">
-      {/* Header - Fixed height */}
-      <header className="flex-shrink-0 bg-background border-b border-border shadow-sm">
-        <div className="flex items-center justify-between h-14 sm:h-16 px-4 sm:px-6">
+      {/* Header - Final refined design pass */}
+      <header className="flex-shrink-0 bg-background">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-2.5">
           {/* Left side - Back button */}
-          <div className="flex items-center">
+          <div className="flex items-center flex-shrink-0">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => navigate(-1)}
-              className="hover:bg-muted -ml-2"
+              className="hover:bg-muted -ml-2 min-h-[44px] min-w-[44px]"
+              aria-label="Go back"
             >
               <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
           </div>
           
-          {/* Center - Title */}
-          <div className="flex-1 flex justify-center px-4">
-            <h1 className="font-semibold text-base sm:text-lg text-foreground truncate">
-              {counterparty?.name || (isPaymentFlow ? homeownerName : 'Chat')}
-            </h1>
+          {/* Center - Profile Capsule (only clickable for customers) */}
+          <div className="flex-1 flex flex-col items-center justify-center px-2 sm:px-4 overflow-hidden">
+            {counterparty && isCustomer ? (
+              <>
+                <button
+                  onClick={(e) => {
+                    // Premium micro-interaction
+                    e.currentTarget.style.transform = 'scale(1.02)';
+                    e.currentTarget.style.opacity = '0.85';
+                    setTimeout(() => {
+                      // Use the stored traderId if available, fallback to counterparty.id
+                      const profileId = traderId || counterparty.id;
+                      console.log('Navigating to profile with ID:', profileId);
+                      navigate(`/tradesperson/profile?nameId=${profileId}`);
+                    }, 170);
+                  }}
+                  className="flex items-center gap-2 sm:gap-3 group hover:bg-[#F0F7FF] rounded-lg px-2 sm:px-4 py-2 transition-all duration-200 ease-in-out cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 min-h-[44px] max-w-full"
+                  aria-label="View tradesperson profile"
+                  title="Click to view tradesperson's profile"
+                >
+                  {/* Avatar - 32px circle with light gray border */}
+                  {counterparty.avatar_url ? (
+                    <img
+                      src={counterparty.avatar_url}
+                      alt={counterparty.name}
+                      className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border-2 border-[#E5E7EB] flex-shrink-0"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center border-2 border-[#E5E7EB] flex-shrink-0">
+                      <User className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600" />
+                    </div>
+                  )}
+                  
+                  {/* Name, Arrow, and Profession - Aligned */}
+                  <div className="flex flex-col items-start min-w-0 gap-0.5">
+                    <div className="flex items-baseline gap-1">
+                      <h1 className="font-bold text-sm sm:text-base text-gray-800 group-hover:text-blue-600 transition-colors duration-200 ease-in-out truncate">
+                        {counterparty.name}
+                      </h1>
+                      <svg
+                        className="w-2.5 h-2.5 text-gray-500 group-hover:text-blue-600 transition-colors duration-200 ease-in-out flex-shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        style={{ marginLeft: '4px' }}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                    
+                    {/* Profession - consistent 16px line height, hidden on very small screens */}
+                    {counterparty.job_title && (
+                      <span className="hidden sm:inline text-sm text-gray-500 truncate max-w-[200px] sm:max-w-[260px] pb-1" style={{ lineHeight: '16px' }}>
+                        {counterparty.job_title}
+                      </span>
+                    )}
+                  </div>
+                </button>
+                
+                {/* Hint text - visible for homeowners */}
+                <p className="text-xs sm:text-sm text-gray-600 italic mt-1 text-center px-2 max-w-[90%] mx-auto leading-relaxed">
+                  💡 You can click the trader's name above to view their profile
+                </p>
+              </>
+            ) : counterparty ? (
+              <div className="flex items-center gap-2 sm:gap-3 px-2 py-2">
+                {/* Non-clickable version for traders */}
+                {counterparty.avatar_url ? (
+                  <img
+                    src={counterparty.avatar_url}
+                    alt={counterparty.name}
+                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border-2 border-[#E5E7EB] flex-shrink-0"
+                  />
+                ) : (
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center border-2 border-[#E5E7EB] flex-shrink-0">
+                    <User className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600" />
+                  </div>
+                )}
+                <div className="flex flex-col items-start gap-0.5 min-w-0">
+                  <h1 className="font-bold text-sm sm:text-base text-gray-800 truncate">
+                    {counterparty.name}
+                  </h1>
+                  {counterparty.job_title && (
+                    <span className="hidden sm:inline text-sm text-gray-500 truncate pb-1" style={{ lineHeight: '16px' }}>
+                      {counterparty.job_title}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <h1 className="font-semibold text-sm sm:text-base text-foreground truncate py-2">
+                {isPaymentFlow ? homeownerName : 'Chat'}
+              </h1>
+            )}
           </div>
           
           {/* Right side - Mobile Conversations Button */}
-          <div className="flex items-center">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <Button
               variant="default"
               size="sm"
               onClick={() => setSidebarOpen(true)}
-              className="sm:hidden flex-shrink-0 min-h-[36px] px-3 text-xs font-medium shadow-sm"
+              className="sm:hidden flex-shrink-0 min-h-[44px] min-w-[44px] px-3 text-xs font-medium shadow-sm"
               aria-label="Open conversations"
             >
               <MessageCircle className="w-4 h-4 mr-1.5" />
               Chats
             </Button>
           </div>
+        </div>
+        
+        {/* Hairline divider - separated and light */}
+        <div className="pt-2">
+          <div className="h-px bg-[#E5E7EB]"></div>
         </div>
       </header>
 
@@ -601,12 +754,12 @@ const Chat = () => {
           </SheetContent>
         </Sheet>
 
-        {/* Chat Content Area */}
-        <div className="flex-1 flex flex-col min-w-0 bg-background">
-          {/* Messages Container - Takes all available space minus input */}
-          <div className="flex-1 min-h-0 overflow-hidden">
+        {/* Chat Content Area - Optimized layout */}
+        <div className="flex-1 flex flex-col min-w-0 bg-background overflow-hidden">
+          {/* Messages Container - Scrollable area with padding */}
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6">
             {!conversationId && !isPaymentFlow ? (
-              <div className="h-full flex items-center justify-center p-6">
+              <div className="flex items-center justify-center min-h-full">
                 <div className="text-center max-w-md">
                   <div className="w-20 h-20 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-6">
                     <MessageCircle className="w-10 h-10 text-muted-foreground" />
@@ -626,14 +779,14 @@ const Chat = () => {
                 </div>
               </div>
             ) : isLoadingMessages ? (
-              <div className="h-full flex items-center justify-center p-6">
+              <div className="flex items-center justify-center min-h-full">
                 <div className="text-center">
                   <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                   <p className="text-muted-foreground">Loading messages...</p>
                 </div>
               </div>
             ) : messages.length === 0 ? (
-              <div className="h-full flex items-center justify-center p-6">
+              <div className="flex items-center justify-center min-h-full">
                 <div className="text-center max-w-md">
                   {/* Enhanced Welcome State for Payment Flow */}
                   {isPaymentFlow ? (
@@ -674,7 +827,7 @@ const Chat = () => {
                 </div>
               </div>
             ) : (
-              <div className="h-full overflow-y-auto">
+              <div className="max-w-4xl mx-auto">
                 <MessageList
                   messages={messages}
                   conversation={conversation}
@@ -685,10 +838,10 @@ const Chat = () => {
             )}
           </div>
 
-          {/* Follow-up Questions - Only in active conversations with jobId */}
+          {/* Follow-up Questions - Sticky above input */}
           {conversationId && jobId && followUpQuestions.length > 0 && (
             <div className="flex-shrink-0 border-t border-gray-100 bg-gray-50">
-              <div className="p-3 sm:p-4">
+              <div className="p-3 sm:p-4 max-w-4xl mx-auto">
                 <FollowUpQuestions
                   questions={followUpQuestions}
                   mode="postpay"
@@ -698,9 +851,9 @@ const Chat = () => {
             </div>
           )}
 
-          {/* Message Input - Fixed at bottom */}
-          <div className="flex-shrink-0 border-t border-border bg-background/95 backdrop-blur-sm shadow-lg">
-            <div className="p-3 sm:p-4">
+          {/* Message Input - Fixed at bottom, always visible */}
+          <div className="flex-shrink-0 border-t border-border bg-background shadow-lg">
+            <div className="p-4 sm:p-5">
               <div className="flex gap-3 max-w-4xl mx-auto bg-muted/30 rounded-2xl p-3 shadow-sm border border-border/50">
                 <input
                   type="text"
