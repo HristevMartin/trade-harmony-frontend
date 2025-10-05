@@ -74,8 +74,8 @@ const JobDetail = () => {
     const [jobStats, setJobStats] = useState<{
         completed_jobs: number;
         in_progress_jobs: number;
-        active_jobs: number;
-        cancelled_jobs: number;
+        total_posted: number;
+        total_cancelled: number;
     } | null>(null);
 
     // Get AI job fit data for follow-up questions
@@ -125,10 +125,10 @@ const JobDetail = () => {
                 console.log('Job statistics:', data);
                 if (data.success) {
                     setJobStats({
-                        completed_jobs: data.completed_jobs,
-                        in_progress_jobs: data.in_progress_jobs,
-                        active_jobs: data.active_jobs || data.total_posted || 0,
-                        cancelled_jobs: data.cancelled_jobs || 0
+                        completed_jobs: data.completed_jobs || 0,
+                        in_progress_jobs: data.in_progress_jobs || 0,
+                        total_posted: data.total_posted || 0,
+                        total_cancelled: data.total_cancelled || 0
                     });
                 }
             } catch (error) {
@@ -508,11 +508,11 @@ const JobDetail = () => {
                                             <div className="text-xs text-blue-600 font-medium mt-1">Active</div>
                                         </div>
                                         <div className="text-center p-3 bg-red-50 rounded-xl border border-red-200">
-                                            <div className="text-2xl font-bold text-red-700">{jobStats.cancelled_jobs}</div>
+                                            <div className="text-2xl font-bold text-red-700">{jobStats.total_cancelled}</div>
                                             <div className="text-xs text-red-600 font-medium mt-1">Cancelled</div>
                                         </div>
                                         <div className="text-center p-3 bg-slate-50 rounded-xl border border-slate-200">
-                                            <div className="text-2xl font-bold text-slate-700">{jobStats.active_jobs}</div>
+                                            <div className="text-2xl font-bold text-slate-700">{jobStats.total_posted}</div>
                                             <div className="text-xs text-slate-600 font-medium mt-1">Total Jobs</div>
                                         </div>
                                     </div>
