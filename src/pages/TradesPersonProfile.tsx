@@ -11,6 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useToast } from "@/hooks/use-toast";
+import { useSearchParams } from "react-router-dom";
+
 import {
     User,
     MapPin,
@@ -35,6 +37,7 @@ const TradesPersonProfile = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const { toast } = useToast();
+  
 
     // Editing states
     const [editingField, setEditingField] = useState<string | null>(null);
@@ -43,6 +46,11 @@ const TradesPersonProfile = () => {
     const [selectedServices, setSelectedServices] = useState<string[]>([]);
     const [saving, setSaving] = useState(false);
     const [uploadingImage, setUploadingImage] = useState(false);
+
+    const [searchParams] = useSearchParams();
+
+    const nameId = searchParams.get("nameId");
+    console.log('show me the nameId', nameId);
 
     // Service options - simplified to match popular services
     const getServiceOptions = () => {
@@ -58,9 +66,16 @@ const TradesPersonProfile = () => {
         ];
     };
 
-    // Save profile data
+    // Save profile data (only for own profile)
     const saveProfile = async (field: string, value: any) => {
-        if (!userId) return;
+        if (!isOwnProfile || !userId) {
+            toast({
+                title: "Cannot Edit",
+                description: "You can only edit your own profile.",
+                variant: "destructive",
+            });
+            return;
+        }
         
         setSaving(true);
         try {
@@ -160,7 +175,16 @@ const TradesPersonProfile = () => {
     // Handle image upload
     const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
-        if (!file || !userId) return;
+        if (!file || !isOwnProfile || !userId) {
+            if (!isOwnProfile) {
+                toast({
+                    title: "Cannot Upload",
+                    description: "You can only upload images to your own profile.",
+                    variant: "destructive",
+                });
+            }
+            return;
+        }
 
         setUploadingImage(true);
         try {
@@ -214,8 +238,15 @@ const TradesPersonProfile = () => {
 
     const handleCertificationImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
-        if (!file || !userId) {
-            console.log('No file selected or user not authenticated:', { file: !!file, userId });
+        if (!file || !isOwnProfile || !userId) {
+            console.log('No file selected or user not authenticated:', { file: !!file, userId, isOwnProfile });
+            if (!isOwnProfile) {
+                toast({
+                    title: "Cannot Upload",
+                    description: "You can only upload images to your own profile.",
+                    variant: "destructive",
+                });
+            }
             return;
         }
 
@@ -340,6 +371,12 @@ const TradesPersonProfile = () => {
 
     const { userId, userData } = getUserData();
     
+    // Determine which ID to use for fetching the profile
+    const profileId = userId || nameId;
+    
+    // Check if this is the user's own profile (for editing capabilities)
+    const isOwnProfile = userId && !nameId;
+    
     // Check if user has master role for verified professional status
     const hasVerifiedProfessionalStatus = () => {
         if (!userData || !userData.role) return false;
@@ -353,15 +390,18 @@ const TradesPersonProfile = () => {
 
     useEffect(() => {
         const fetchProfile = async () => {
-            if (!userId) {
-                setError('User not authenticated');
+            // Use nameId if available (viewing someone else's profile), otherwise use userId (own profile)
+            const targetId = nameId || userId;
+            
+            if (!targetId) {
+                setError('No profile ID provided');
                 setLoading(false);
                 return;
             }
 
             try {
                 setLoading(true);
-                const response = await fetch(`${apiUrl}/travel/get-trader-project/${userId}`, {
+                const response = await fetch(`${apiUrl}/travel/get-trader-project/${targetId}`, {
                     credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json'
@@ -382,7 +422,7 @@ const TradesPersonProfile = () => {
             }
         };
         fetchProfile();
-    }, [userId, apiUrl]);
+    }, [userId, nameId, apiUrl]);
 
     // Parse otherServices from JSON string
     const getOtherServices = () => {
@@ -520,7 +560,7 @@ const TradesPersonProfile = () => {
                                          <div className="flex-1">
                                              <div className="flex items-center justify-between mb-2">
                                                  <p className="text-sm text-muted-foreground">Email Address</p>
-                                                 {editingField !== 'email' && (
+                                                 {isOwnProfile && editingField !== 'email' && (
                                                      <Button
                                                          size="sm"
                                                          variant="ghost"
@@ -577,7 +617,7 @@ const TradesPersonProfile = () => {
                                          <div className="flex-1">
                                              <div className="flex items-center justify-between mb-2">
                                                  <p className="text-sm text-muted-foreground">Phone Number</p>
-                                                 {editingField !== 'phone' && (
+                                                 {isOwnProfile && editingField !== 'phone' && (
                                                      <Button
                                                          size="sm"
                                                          variant="ghost"
@@ -634,7 +674,7 @@ const TradesPersonProfile = () => {
                                          <div className="flex-1">
                                              <div className="flex items-center justify-between mb-2">
                                                  <p className="text-sm text-muted-foreground">Service Location</p>
-                                                 {editingField !== 'location' && (
+                                                 {isOwnProfile && editingField !== 'location' && (
                                                      <Button
                                                          size="sm"
                                                          variant="ghost"
@@ -712,10 +752,12 @@ const TradesPersonProfile = () => {
                                      </div>
                                  </div>
                                 
-                                <Button className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground shadow-lg">
-                                    <Edit3 className="h-4 w-4 mr-2" />
-                                    Update Contact Info
-                                </Button>
+                                {isOwnProfile && (
+                                    <Button className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground shadow-lg">
+                                        <Edit3 className="h-4 w-4 mr-2" />
+                                        Update Contact Info
+                                    </Button>
+                                )}
                             </CardContent>
                         </Card>
 
@@ -738,7 +780,7 @@ const TradesPersonProfile = () => {
                                 <div>
                                     <div className="flex items-center justify-between mb-4">
                                         <h4 className="font-semibold text-lg">Primary Specialization</h4>
-                                        {editingField !== 'primaryTrade' && (
+                                        {isOwnProfile && editingField !== 'primaryTrade' && (
                                             <Button
                                                 size="sm"
                                                 variant="outline"
@@ -802,7 +844,7 @@ const TradesPersonProfile = () => {
                                 <div>
                                     <div className="flex items-center justify-between mb-4">
                                         <h4 className="font-semibold text-lg">Additional Services</h4>
-                                        {!editingServices && (
+                                        {isOwnProfile && !editingServices && (
                                             <Button
                                                 size="sm"
                                                 variant="outline"
@@ -900,24 +942,26 @@ const TradesPersonProfile = () => {
                                 <div className="mt-6">
                                     <div className="flex items-center justify-between mb-4">
                                         <h4 className="font-semibold text-lg">Certification Images</h4>
-                                        <div className="relative">
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={handleCertificationImageUpload}
-                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                                disabled={uploadingImage}
-                                            />
-                                            <Button 
-                                                variant="outline" 
-                                                size="sm" 
-                                                className="border-primary/20 hover:bg-primary/5"
-                                                disabled={uploadingImage}
-                                            >
-                                                <Camera className="h-4 w-4 mr-2" />
-                                                {uploadingImage ? 'Uploading...' : 'Add Images'}
-                                            </Button>
-                                        </div>
+                                        {isOwnProfile && (
+                                            <div className="relative">
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={handleCertificationImageUpload}
+                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                                    disabled={uploadingImage}
+                                                />
+                                                <Button 
+                                                    variant="outline" 
+                                                    size="sm" 
+                                                    className="border-primary/20 hover:bg-primary/5"
+                                                    disabled={uploadingImage}
+                                                >
+                                                    <Camera className="h-4 w-4 mr-2" />
+                                                    {uploadingImage ? 'Uploading...' : 'Add Images'}
+                                                </Button>
+                                            </div>
+                                        )}
                                     </div>
 
                                     {traderProfile.certificationImages && traderProfile.certificationImages.length > 0 ? (
@@ -933,29 +977,31 @@ const TradesPersonProfile = () => {
                                                         <div className="absolute bottom-2 left-2 text-white">
                                                             <p className="text-xs font-medium">Certificate {index + 1}</p>
                                                         </div>
-                                                        <Button
-                                                            size="sm"
-                                                            variant="destructive"
-                                                            className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                                                            onClick={async () => {
-                                                                try {
-                                                                    const updatedImages = traderProfile.certificationImages.filter((_, i) => i !== index);
-                                                                    await saveProfile('certificationImages', updatedImages);
-                                                                    toast({
-                                                                        title: "Image deleted",
-                                                                        description: "Certification image has been removed from your profile.",
-                                                                    });
-                                                                } catch (error) {
-                                                                    toast({
-                                                                        title: "Error",
-                                                                        description: "Failed to delete image. Please try again.",
-                                                                        variant: "destructive",
-                                                                    });
-                                                                }
-                                                            }}
-                                                        >
-                                                            <Trash2 className="h-3 w-3" />
-                                                        </Button>
+                                                        {isOwnProfile && (
+                                                            <Button
+                                                                size="sm"
+                                                                variant="destructive"
+                                                                className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                                                onClick={async () => {
+                                                                    try {
+                                                                        const updatedImages = traderProfile.certificationImages.filter((_, i) => i !== index);
+                                                                        await saveProfile('certificationImages', updatedImages);
+                                                                        toast({
+                                                                            title: "Image deleted",
+                                                                            description: "Certification image has been removed from your profile.",
+                                                                        });
+                                                                    } catch (error) {
+                                                                        toast({
+                                                                            title: "Error",
+                                                                            description: "Failed to delete image. Please try again.",
+                                                                            variant: "destructive",
+                                                                        });
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <Trash2 className="h-3 w-3" />
+                                                            </Button>
+                                                        )}
                                                     </div>
                                                 </div>
                                             ))}
@@ -967,24 +1013,26 @@ const TradesPersonProfile = () => {
                                             <p className="text-xs text-muted-foreground mb-3 max-w-xs mx-auto">
                                                 Upload images of your certifications
                                             </p>
-                                            <div className="relative inline-block">
-                                                <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={handleCertificationImageUpload}
-                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                                    disabled={uploadingImage}
-                                                />
-                                                <Button 
-                                                    variant="outline" 
-                                                    size="sm"
-                                                    className="border-primary/20 hover:bg-primary/5 text-xs"
-                                                    disabled={uploadingImage}
-                                                >
-                                                    <Camera className="h-3 w-3 mr-1" />
-                                                    {uploadingImage ? 'Uploading...' : 'Upload'}
-                                                </Button>
-                                            </div>
+                                            {isOwnProfile && (
+                                                <div className="relative inline-block">
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={handleCertificationImageUpload}
+                                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                                        disabled={uploadingImage}
+                                                    />
+                                                    <Button 
+                                                        variant="outline" 
+                                                        size="sm"
+                                                        className="border-primary/20 hover:bg-primary/5 text-xs"
+                                                        disabled={uploadingImage}
+                                                    >
+                                                        <Camera className="h-3 w-3 mr-1" />
+                                                        {uploadingImage ? 'Uploading...' : 'Upload'}
+                                                    </Button>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>
@@ -996,7 +1044,7 @@ const TradesPersonProfile = () => {
                              <CardHeader className="pb-6">
                                  <div className="flex items-center justify-between">
                                      <CardTitle className="text-2xl">About Me</CardTitle>
-                                     {editingField !== 'bio' && (
+                                     {isOwnProfile && editingField !== 'bio' && (
                                          <Button 
                                              variant="outline" 
                                              size="sm" 
@@ -1058,24 +1106,26 @@ const TradesPersonProfile = () => {
                                          <Camera className="h-6 w-6 mr-3 text-primary" />
                                          Portfolio Gallery
                                      </CardTitle>
-                                     <div className="relative">
-                                         <input
-                                             type="file"
-                                             accept="image/*"
-                                             onChange={handleImageUpload}
-                                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                             disabled={uploadingImage}
-                                         />
-                                         <Button 
-                                             variant="outline" 
-                                             size="sm" 
-                                             className="border-primary/20 hover:bg-primary/5"
-                                             disabled={uploadingImage}
-                                         >
-                                             <Camera className="h-4 w-4 mr-2" />
-                                             {uploadingImage ? 'Uploading...' : 'Add Images'}
-                                         </Button>
-                                     </div>
+                                     {isOwnProfile && (
+                                         <div className="relative">
+                                             <input
+                                                 type="file"
+                                                 accept="image/*"
+                                                 onChange={handleImageUpload}
+                                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                                 disabled={uploadingImage}
+                                             />
+                                             <Button 
+                                                 variant="outline" 
+                                                 size="sm" 
+                                                 className="border-primary/20 hover:bg-primary/5"
+                                                 disabled={uploadingImage}
+                                             >
+                                                 <Camera className="h-4 w-4 mr-2" />
+                                                 {uploadingImage ? 'Uploading...' : 'Add Images'}
+                                             </Button>
+                                         </div>
+                                     )}
                                  </div>
                              </CardHeader>
                              <CardContent>
@@ -1103,23 +1153,25 @@ const TradesPersonProfile = () => {
                                          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
                                              Showcase your best work by adding photos of completed projects. High-quality images help attract more clients.
                                          </p>
-                                         <div className="relative inline-block">
-                                             <input
-                                                 type="file"
-                                                 accept="image/*"
-                                                 onChange={handleImageUpload}
-                                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                                 disabled={uploadingImage}
-                                             />
-                                             <Button 
-                                                 variant="outline" 
-                                                 className="border-primary/20 hover:bg-primary/5"
-                                                 disabled={uploadingImage}
-                                             >
-                                                 <Camera className="h-4 w-4 mr-2" />
-                                                 {uploadingImage ? 'Uploading...' : 'Upload Your First Image'}
-                                             </Button>
-                                         </div>
+                                         {isOwnProfile && (
+                                             <div className="relative inline-block">
+                                                 <input
+                                                     type="file"
+                                                     accept="image/*"
+                                                     onChange={handleImageUpload}
+                                                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                                     disabled={uploadingImage}
+                                                 />
+                                                 <Button 
+                                                     variant="outline" 
+                                                     className="border-primary/20 hover:bg-primary/5"
+                                                     disabled={uploadingImage}
+                                                 >
+                                                     <Camera className="h-4 w-4 mr-2" />
+                                                     {uploadingImage ? 'Uploading...' : 'Upload Your First Image'}
+                                                 </Button>
+                                             </div>
+                                         )}
                                      </div>
                                  )}
                              </CardContent>

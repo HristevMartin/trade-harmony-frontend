@@ -67,6 +67,7 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [isLoadingMessages, setIsLoadingMessages] = useState(true);
   const [counterparty, setCounterparty] = useState<Counterparty | null>(null);
+  const [traderId, setTraderId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { chats, fetchChats } = useChats();
 
@@ -185,6 +186,55 @@ const Chat = () => {
   // Find current chat from the chats list to get counterparty info
   const currentChat = chats.find(chat => chat.conversation_id === conversationId);
 
+  // Extract trader ID from chat data when available
+  useEffect(() => {
+    if (currentChat && isCustomer) {
+      // For homeowners, we need to find the trader_id from the chat summary API
+      // The counterparty.id should be the trader's ID when viewing from homeowner perspective
+      if (currentChat.counterparty?.id) {
+        console.log('Setting trader ID from current chat:', currentChat.counterparty.id);
+        setTraderId(currentChat.counterparty.id);
+      }
+    }
+  }, [currentChat, isCustomer]);
+
+  // Fetch trader ID from chat-summary API when we have a conversation
+  useEffect(() => {
+    const fetchTraderId = async () => {
+      if (!conversationId || !isCustomer || traderId) return; // Don't fetch if we already have it
+      
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const response = await fetch(`${apiUrl}/travel/chat-component/chat-summary`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Chat summary data for trader ID:', data);
+          
+          // Find the conversation that matches our current conversationId
+          const conversation = data.conversations?.find((conv: any) => 
+            conv.conversation_id === conversationId
+          );
+          
+          if (conversation?.trader_id) {
+            console.log('Found trader ID from chat summary:', conversation.trader_id);
+            setTraderId(conversation.trader_id);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching trader ID from chat summary:', error);
+      }
+    };
+    
+    fetchTraderId();
+  }, [conversationId, isCustomer, traderId]);
+
   // Handle payment flow - create counterparty from URL parameters
   useEffect(() => {
     if (isPaymentFlow && homeownerName) {
@@ -249,6 +299,7 @@ const Chat = () => {
     setMessages([]);
     setConversation(null);
     setCounterparty(null);
+    setTraderId(null);
     setIsLoadingMessages(true);
   }, [conversationId]);
 
@@ -412,8 +463,10 @@ const Chat = () => {
     conversation,
     counterparty,
     currentChat,
+    traderId,
     messagesLength: messages.length,
-    isLoadingMessages
+    isLoadingMessages,
+    isCustomer
   });
 
   const handleSendMessage = async (messageText?: string) => {
@@ -515,7 +568,10 @@ const Chat = () => {
                     e.currentTarget.style.transform = 'scale(1.02)';
                     e.currentTarget.style.opacity = '0.85';
                     setTimeout(() => {
-                      navigate(`/tradesperson/profile/${counterparty.id}`);
+                      // Use the stored traderId if available, fallback to counterparty.id
+                      const profileId = traderId || counterparty.id;
+                      console.log('Navigating to profile with ID:', profileId);
+                      navigate(`/tradesperson/profile?nameId=${profileId}`);
                     }, 170);
                   }}
                   className="flex items-center gap-2 sm:gap-3 group hover:bg-[#F0F7FF] rounded-lg px-2 sm:px-4 py-2 transition-all duration-200 ease-in-out cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 min-h-[44px] max-w-full"
