@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { Star, Calendar, Clock, Wrench, Award, Phone, Mail, Video, ChevronLeft, MapPin, Edit, Save, X } from "lucide-react";
+import { Star, Calendar, Clock, Wrench, Award, Phone, Mail, Video, ChevronLeft, MapPin, Edit, Save, X, CheckCircle2, MessageCircle, GraduationCap, Camera, User, Briefcase } from "lucide-react";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -275,238 +275,322 @@ const ServiceProviderDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+    <div className="min-h-screen bg-background">
       <Navbar />
 
-      {/* Improved Navigation Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 py-4 pt-20 md:py-6 md:pt-24">
+      {/* Navigation */}
+      <div className="bg-muted/30 border-b py-4 pt-20 md:py-6 md:pt-24">
         <div className="container mx-auto px-4">
           <Link
             to="/service-providers"
-            className="inline-flex items-center text-white/90 hover:text-white transition-colors duration-300 group"
+            className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors duration-200 group"
           >
-            <ChevronLeft className="w-4 h-4 md:w-5 md:h-5 mr-2 transition-transform duration-300 group-hover:-translate-x-1" />
-            <span className="text-base md:text-lg font-medium">Back to Service Providers</span>
+            <ChevronLeft className="w-5 h-5 mr-2 transition-transform duration-200 group-hover:-translate-x-1" />
+            <span className="text-base font-medium">Back to Service Providers</span>
           </Link>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 mt-4 md:mt-8 relative z-10">
-        {/* Profile Card */}
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Hero Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="bg-white rounded-xl md:rounded-2xl shadow-2xl overflow-hidden mb-6 md:mb-8"
+          transition={{ duration: 0.4 }}
+          className="bg-card rounded-3xl shadow-lg border overflow-hidden mb-6"
         >
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-0">
-            {/* Profile Image Section */}
-            <div className="lg:col-span-1 relative">
-              <div className="aspect-square lg:aspect-auto lg:h-full relative overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6 p-6 md:p-8">
+            {/* Avatar Section */}
+            <div className="flex flex-col items-center lg:items-start gap-4">
+              <div className="relative">
                 <img
                   src={personProfile?.profileImage || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1974&auto=format&fit=crop"}
                   alt={personProfile?.fullName || "Construction Professional"}
-                  className="w-full h-full object-cover"
+                  className="w-40 h-40 lg:w-full lg:h-auto rounded-2xl object-cover shadow-md"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                <div className="absolute -bottom-2 -right-2 bg-trust-blue text-trust-blue-foreground p-2 rounded-full shadow-lg">
+                  <CheckCircle2 className="w-6 h-6" />
+                </div>
+              </div>
+              
+              {/* Quick Stats - Mobile */}
+              <div className="lg:hidden w-full space-y-3 pt-2">
+                <div className="flex items-center gap-3 text-sm">
+                  <Briefcase className="w-4 h-4 text-muted-foreground" />
+                  <span className="font-medium">{personProfile?.yearsExperience || 15} years experience</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm">
+                  <MapPin className="w-4 h-4 text-muted-foreground" />
+                  <span>{personProfile?.city || personProfile?.location || "UK Wide"}</span>
+                </div>
               </div>
             </div>
 
-            {/* Profile Info Section */}
-            <div className="lg:col-span-2 p-4 sm:p-6 md:p-8 lg:p-12">
-              <div className="flex flex-col h-full">
-                <div className="flex-1">
-                  {/* Header with name and service badge */}
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.2, duration: 0.6 }}
-                    className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-4"
-                  >
-                    <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
+            {/* Info Section */}
+            <div className="flex flex-col">
+              <div className="flex-1">
+                {/* Name & Badge */}
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
+                  <div>
+                    <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
                       {personProfile?.fullName || "Construction Professional"}
                     </h1>
-                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-sm md:text-sm font-semibold shadow-md flex-shrink-0">
+                    <p className="text-lg text-muted-foreground font-medium">
                       {getServiceDisplayName()}
-                    </div>
-                  </motion.div>
-
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.3, duration: 0.6 }}
-                    className="flex items-center gap-2 mb-4 md:mb-6"
-                  >
-                    <RatingStars rating={personProfile?.rating || 4.9} />
-                    <span className="text-gray-600 ml-1 text-sm md:text-base">({personProfile?.reviews || 143} reviews)</span>
-                  </motion.div>
-
-                  <motion.p
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.4, duration: 0.6 }}
-                    className="text-gray-700 text-base md:text-lg leading-relaxed mb-6 md:mb-8"
-                  >
-                    {personProfile?.bio}
-                  </motion.p>
-
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.5, duration: 0.6 }}
-                    className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8"
-                  >
-                    <div className="flex items-center gap-3 md:gap-4">
-                      <div className="bg-blue-100 p-2.5 md:p-3 rounded-full">
-                        <Wrench className="text-blue-600 w-5 h-5 md:w-6 md:h-6" />
-                      </div>
-                      <div>
-                        <p className="text-xs md:text-sm text-gray-500 font-medium">Experience</p>
-                        <p className="font-bold text-gray-900 text-base md:text-lg">{personProfile?.yearsExperience || 15} Years</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3 md:gap-4">
-                      <div className="bg-green-100 p-2.5 md:p-3 rounded-full">
-                        <Calendar className="text-green-600 w-5 h-5 md:w-6 md:h-6" />
-                      </div>
-                      <div>
-                        <p className="text-xs md:text-sm text-gray-500 font-medium">Availability</p>
-                        <p className="font-bold text-gray-900 text-base md:text-lg">{personProfile?.availability || "Monday to Friday, 8 AM - 6 PM"}</p>
-                      </div>
-                    </div>
-                  </motion.div>
+                    </p>
+                  </div>
+                  <div className="inline-flex items-center gap-2 bg-trust-blue/10 text-trust-blue px-4 py-2 rounded-full text-sm font-semibold border border-trust-blue/20">
+                    <CheckCircle2 className="w-4 h-4" />
+                    Verified Pro
+                  </div>
                 </div>
 
-                {/* Action Buttons */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6, duration: 0.6 }}
-                  className="flex flex-col sm:flex-row flex-wrap gap-3 md:gap-4"
+                {/* Rating */}
+                <div className="flex items-center gap-3 mb-6">
+                  <RatingStars rating={personProfile?.rating || 4.9} />
+                  <span className="text-muted-foreground">({personProfile?.reviews || 143} reviews)</span>
+                </div>
+
+                {/* Quick Stats - Desktop */}
+                <div className="hidden lg:flex items-center gap-6 mb-6 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Briefcase className="w-4 h-4 text-muted-foreground" />
+                    <span className="font-medium">{personProfile?.yearsExperience || 15} years experience</span>
+                  </div>
+                  <div className="h-4 w-px bg-border" />
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-muted-foreground" />
+                    <span>{personProfile?.city || personProfile?.location || "UK Wide"}</span>
+                  </div>
+                </div>
+
+                {/* Bio */}
+                <p className="text-muted-foreground leading-relaxed mb-6">
+                  {personProfile?.bio}
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap gap-3 pt-4 border-t">
+                <Button
+                  size="lg"
+                  className="bg-trust-blue hover:bg-trust-blue/90 text-trust-blue-foreground shadow-md"
+                  onClick={handleBookMeeting}
                 >
-                  <Button
-                    size="lg"
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2.5 md:px-8 md:py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-sm md:text-base"
-                    onClick={handleBookMeeting}
-                  >
-                    <Video className="w-4 h-4 md:w-5 md:h-5 mr-2" />
-                    Book Meeting
-                  </Button>
+                  <MessageCircle className="w-5 h-5 mr-2" />
+                  Chat with Trader
+                </Button>
 
-                  <Button
-                    size="lg"
-                    className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white px-6 py-2.5 md:px-8 md:py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-sm md:text-base"
-                    onClick={handleCallClick}
-                  >
-                    <Phone className="w-4 h-4 md:w-5 md:h-5 mr-2" />
-                    Call Now
-                  </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-2"
+                  onClick={handleCallClick}
+                >
+                  <Phone className="w-5 h-5 mr-2" />
+                  Call Now
+                </Button>
 
-                  {/* <Button
-                    size="lg"
-                    variant="outline"
-                    className="border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-6 py-2.5 md:px-8 md:py-3 rounded-xl transition-all duration-300 text-sm md:text-base"
-                    onClick={handleMessageClick}
-                  >
-                    <Mail className="w-4 h-4 md:w-5 md:h-5 mr-2" />
-                    Message
-                  </Button> */}
-                </motion.div>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-2"
+                >
+                  <Star className="w-5 h-5 mr-2" />
+                  View Reviews
+                </Button>
               </div>
             </div>
           </div>
         </motion.div>
 
-        {/* Additional Information Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8 md:mb-12">
-          {personProfile?.specialties && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8, duration: 0.6 }}
-            >
-              <Card className="p-4 md:p-6 lg:p-8 h-full bg-gradient-to-br from-blue-50 to-indigo-50 border-0 shadow-lg">
-                <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 flex items-center gap-3 text-gray-900">
-                  <div className="bg-blue-600 p-2 md:p-3 rounded-full">
-                    <Wrench className="text-white w-5 h-5 md:w-6 md:h-6" />
-                  </div>
-                  <span className="text-base md:text-xl lg:text-2xl">Specialties</span>
-                </h2>
-                <div className="flex flex-wrap gap-2 md:gap-3">
-                  <span className="bg-white text-blue-700 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium shadow-md">
-                    {personProfile.specialties}
-                  </span>
-                </div>
-              </Card>
-            </motion.div>
-          )}
-        </div>
-
-        {/* Recent Projects */}
+        {/* Trust Metrics Strip */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.0, duration: 0.6 }}
-          className="mb-8 md:mb-12"
+          transition={{ delay: 0.1, duration: 0.4 }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"
         >
-          <div className="flex items-center justify-between mb-6 md:mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold flex items-center gap-3 text-gray-900">
-              <div className="bg-gradient-to-r from-yellow-500 to-orange-500 p-2 md:p-3 rounded-full">
-                <Award className="text-white w-6 h-6 md:w-8 md:h-8" />
+          <Card className="p-6 border shadow-sm">
+            <div className="flex items-center gap-4">
+              <div className="bg-trust-green/10 p-3 rounded-xl">
+                <CheckCircle2 className="w-6 h-6 text-trust-green" />
               </div>
-              <span className="text-xl md:text-2xl lg:text-3xl">Recent Projects</span>
+              <div>
+                <p className="text-2xl font-bold text-foreground">98%</p>
+                <p className="text-sm text-muted-foreground">Job completion rate</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-6 border shadow-sm">
+            <div className="flex items-center gap-4">
+              <div className="bg-accent-orange/10 p-3 rounded-xl">
+                <Star className="w-6 h-6 text-accent-orange fill-accent-orange" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-foreground">4.9/5</p>
+                <p className="text-sm text-muted-foreground">Average rating ({personProfile?.reviews || 143})</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-6 border shadow-sm">
+            <div className="flex items-center gap-4">
+              <div className="bg-trust-blue/10 p-3 rounded-xl">
+                <Clock className="w-6 h-6 text-trust-blue" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-foreground">2 hours</p>
+                <p className="text-sm text-muted-foreground">Typical response time</p>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+
+        {/* Services & Expertise */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.4 }}
+          className="mb-8"
+        >
+          <Card className="p-6 md:p-8 border shadow-sm">
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-3 text-foreground">
+              <div className="bg-trust-blue/10 p-2.5 rounded-xl">
+                <Wrench className="text-trust-blue w-6 h-6" />
+              </div>
+              Services & Expertise
             </h2>
-           
+            <div className="flex flex-wrap gap-3">
+              {personProfile?.specialties && (
+                <span className="bg-muted text-foreground px-4 py-2 rounded-full text-sm font-medium border">
+                  {personProfile.specialties}
+                </span>
+              )}
+              {personProfile?.expertise?.map((skill, index) => (
+                <span key={index} className="bg-muted text-foreground px-4 py-2 rounded-full text-sm font-medium border">
+                  {skill}
+                </span>
+              )) || (
+                <>
+                  <span className="bg-muted text-foreground px-4 py-2 rounded-full text-sm font-medium border">
+                    {getServiceDisplayName()}
+                  </span>
+                  <span className="bg-muted text-foreground px-4 py-2 rounded-full text-sm font-medium border">
+                    Residential Work
+                  </span>
+                  <span className="bg-muted text-foreground px-4 py-2 rounded-full text-sm font-medium border">
+                    Commercial Projects
+                  </span>
+                </>
+              )}
+            </div>
+          </Card>
+        </motion.div>
+
+        {/* About Me */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25, duration: 0.4 }}
+          className="mb-8"
+        >
+          <Card className="p-6 md:p-8 border shadow-sm">
+            <h2 className="text-2xl font-bold mb-4 flex items-center gap-3 text-foreground">
+              <div className="bg-trust-blue/10 p-2.5 rounded-xl">
+                <User className="text-trust-blue w-6 h-6" />
+              </div>
+              About Me
+            </h2>
+            <div className="space-y-4">
+              <p className="text-muted-foreground leading-relaxed">
+                {personProfile?.bio || "Experienced tradesperson dedicated to delivering high-quality work and excellent customer service."}
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+                <div className="flex items-center gap-3">
+                  <Calendar className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Availability</p>
+                    <p className="font-medium">{personProfile?.availability || "Mon-Fri, 8 AM - 6 PM"}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <MapPin className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Service Area</p>
+                    <p className="font-medium">{personProfile?.city || personProfile?.location || "30 miles radius"}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+
+        {/* Portfolio */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.4 }}
+          className="mb-8"
+        >
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold flex items-center gap-3 text-foreground">
+              <div className="bg-accent-orange/10 p-2.5 rounded-xl">
+                <Camera className="text-accent-orange w-6 h-6" />
+              </div>
+              Portfolio
+            </h2>
+            <p className="text-muted-foreground mt-2">Recent projects and completed work</p>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {projectsRegistered && (
               !isEditingProject ? (
-                <Link to={`/project/${id}`} className="block">
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 1.1, duration: 0.6 }}
-                    whileHover={{ y: -4, scale: 1.02 }}
-                    className="bg-white rounded-xl md:rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer"
-                  >
-                    <div className="aspect-w-16 aspect-h-9 relative overflow-hidden">
+                <Link to={`/project/${id}`} className="group block">
+                  <Card className="overflow-hidden border shadow-sm hover:shadow-lg transition-all duration-300">
+                    <div className="relative aspect-video overflow-hidden">
                       <img
                         src={projectImage}
                         alt={projectsRegistered?.title}
-                        className="w-full h-40 md:h-48 object-cover transition-transform duration-300 hover:scale-110"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                        <p className="text-white text-sm font-medium">View Project Details →</p>
+                      </div>
                     </div>
                     
-                    <div className="p-4 md:p-6">
-                      {/* View Mode */}
-                      <div className="flex flex-wrap items-center gap-2 mb-4">
-                        <span className="px-3 py-1.5 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white rounded-full text-xs font-semibold shadow-sm">
-                          Project Scope
-                        </span>
+                    <div className="p-5">
+                      <div className="flex flex-wrap gap-2 mb-3">
                         {Array.isArray(projectsRegistered?.specifications) ? (
                           projectsRegistered.specifications.map((spec: string, index: number) => (
                             <span 
                               key={index}
-                              className="px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full text-xs font-medium shadow-sm hover:shadow-md transition-shadow duration-200"
+                              className="px-3 py-1 bg-trust-blue/10 text-trust-blue rounded-full text-xs font-medium border border-trust-blue/20"
                             >
                               {spec}
                             </span>
                           ))
                         ) : (
-                          <span className="px-3 py-1.5 bg-gradient-to-r from-gray-400 to-gray-500 text-white rounded-full text-xs font-medium shadow-sm">
+                          <span className="px-3 py-1 bg-muted text-foreground rounded-full text-xs font-medium border">
                             General Construction
                           </span>
                         )}
                       </div>
                       
-                      <h3 className="font-bold text-lg md:text-xl mb-2 md:mb-3 text-gray-900">{projectsRegistered?.title}</h3>
-                      <p className="text-gray-600 mb-3 md:mb-4 leading-relaxed text-sm md:text-base">{projectsRegistered?.description}</p>
-                      <p className="text-blue-600 font-semibold text-sm md:text-base">{projectsRegistered?.projectDate}</p>
+                      <h3 className="font-bold text-lg mb-2 text-foreground group-hover:text-trust-blue transition-colors">
+                        {projectsRegistered?.title}
+                      </h3>
+                      <p className="text-muted-foreground text-sm leading-relaxed mb-3 line-clamp-2">
+                        {projectsRegistered?.description}
+                      </p>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Calendar className="w-4 h-4" />
+                        <span>{projectsRegistered?.projectDate}</span>
+                      </div>
                     </div>
-                  </motion.div>
+                  </Card>
                 </Link>
               ) : (
                 <div className="block">
