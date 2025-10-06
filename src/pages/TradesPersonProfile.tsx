@@ -28,7 +28,11 @@ import {
     CheckCircle,
     Save,
     X,
-    Trash2
+    Trash2,
+    MessageCircle,
+    ChevronDown,
+    ChevronUp,
+    ArrowLeft
 } from "lucide-react";
 
 const TradesPersonProfile = () => {
@@ -46,6 +50,15 @@ const TradesPersonProfile = () => {
     const [selectedServices, setSelectedServices] = useState<string[]>([]);
     const [saving, setSaving] = useState(false);
     const [uploadingImage, setUploadingImage] = useState(false);
+    
+    // Accordion states for mobile
+    const [accordionStates, setAccordionStates] = useState({
+        contact: true,
+        services: false,
+        certifications: false,
+        portfolio: false,
+        about: false
+    });
 
     const [searchParams] = useSearchParams();
 
@@ -170,6 +183,14 @@ const TradesPersonProfile = () => {
         setEditingServices(false);
         setTempData({});
         setSelectedServices([]);
+    };
+
+    // Toggle accordion sections
+    const toggleAccordion = (section: keyof typeof accordionStates) => {
+        setAccordionStates(prev => ({
+            ...prev,
+            [section]: !prev[section]
+        }));
     };
 
     // Handle image upload
@@ -480,10 +501,98 @@ const TradesPersonProfile = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-background via-muted/5 to-background">
-            {/* Hero Section */}
+            {/* Hero Section - Compact Mobile Layout */}
             <div className="relative bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 border-b border-border/5">
-                <div className="container mx-auto px-4 py-12 max-w-6xl">
-                    <div className="flex flex-col md:flex-row items-center gap-8">
+                <div className="container mx-auto px-4 py-6 md:py-12 max-w-6xl">
+                    {/* Mobile: Compact Stack Layout */}
+                    <div className="block md:hidden">
+                        {/* Back button for homeowners coming from chat */}
+                        {nameId && (
+                            <div className="flex items-center mb-4">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => window.history.back()}
+                                    className="hover:bg-muted -ml-2 min-h-[44px] min-w-[44px] p-2"
+                                    aria-label="Go back to chat"
+                                >
+                                    <ArrowLeft className="w-5 h-5" />
+                                </Button>
+                                <span className="text-sm text-muted-foreground ml-2">Back to chat</span>
+                            </div>
+                        )}
+                        
+                        <div className="flex items-center gap-4 mb-4">
+                            <Avatar className="h-16 w-16 border-2 border-background shadow-lg">
+                                <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground text-lg font-bold">
+                                    {traderProfile.name?.split(' ').map((n: string) => n[0]).join('') || 'TP'}
+                                </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                                <h1 className="text-2xl font-bold text-foreground truncate">
+                                    {traderProfile.name}
+                                </h1>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <Badge variant="default" className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground border-0 px-2 py-1 text-sm font-medium">
+                                        {traderProfile.primaryTrade} Specialist
+                                    </Badge>
+                                    <button
+                                        onClick={() => {
+                                            console.log('Rating clicked:', {
+                                                traderName: traderProfile.name,
+                                                rating: 4.9,
+                                                totalReviews: 32,
+                                                timestamp: new Date().toISOString()
+                                            });
+                                        }}
+                                        className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-blue-50 to-slate-50 rounded-lg border border-blue-200/50"
+                                    >
+                                        <Star className="h-4 w-4 text-[#FACC15] fill-current" />
+                                        <span className="text-sm font-bold text-gray-800">4.9</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <p className="text-muted-foreground text-sm mb-4">
+                            Professional {traderProfile.primaryTrade.toLowerCase()} services in {traderProfile.city}
+                        </p>
+                        
+                        {/* Mobile Statistics */}
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-background/50 backdrop-blur-sm rounded-lg p-3 border border-border/20 text-center">
+                                <div className="text-lg font-bold text-gray-900 dark:text-gray-100">{traderProfile.experienceYears}</div>
+                                <div className="text-xs text-muted-foreground">Years Experience</div>
+                            </div>
+                            <div className="bg-background/50 backdrop-blur-sm rounded-lg p-3 border border-border/20 text-center">
+                                <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                                    <span className="inline-flex items-baseline justify-center">
+                                        {Number.isFinite(Number(traderProfile.radiusKm))
+                                            ? parseInt(traderProfile.radiusKm, 10)
+                                            : traderProfile.radiusKm}
+                                        <span className="ml-1 text-sm text-muted-foreground">km</span>
+                                    </span>
+                                </div>
+                                <div className="text-xs text-muted-foreground">Service Radius</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Desktop: Original Layout */}
+                    <div className="hidden md:flex flex-col md:flex-row items-center gap-8">
+                        {/* Back button for homeowners coming from chat - Desktop */}
+                        {nameId && (
+                            <div className="absolute top-4 left-4">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => window.history.back()}
+                                    className="hover:bg-muted min-h-[44px] min-w-[44px] p-2"
+                                    aria-label="Go back to chat"
+                                >
+                                    <ArrowLeft className="w-5 h-5" />
+                                </Button>
+                            </div>
+                        )}
                         <div className="relative">
                             <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full blur-2xl scale-110"></div>
                             <Avatar className="relative h-32 w-32 border-4 border-background shadow-2xl">
@@ -494,13 +603,46 @@ const TradesPersonProfile = () => {
                         </div>
 
                         <div className="flex-1 text-center md:text-left">
-                            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-3">
-                                {traderProfile.name}
-                            </h1>
-                            <div className="flex items-center justify-center md:justify-start gap-2 mb-4">
-                                <Badge variant="default" className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground border-0 px-4 py-2 text-base font-medium">
-                                    {traderProfile.primaryTrade} Specialist
-                                </Badge>
+                            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-3">
+                                <div className="flex-1">
+                                    <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-3">
+                                        {traderProfile.name}
+                                    </h1>
+                                    <div className="flex items-center justify-center md:justify-start gap-2 mb-4">
+                                        <Badge variant="default" className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground border-0 px-4 py-2 text-base font-medium">
+                                            {traderProfile.primaryTrade} Specialist
+                                        </Badge>
+                                    </div>
+                                </div>
+                                
+                                {/* Rating Element */}
+                                <div className="flex justify-center md:justify-end">
+                                    <button
+                                        onClick={() => {
+                                            console.log('Rating clicked:', {
+                                                traderName: traderProfile.name,
+                                                rating: 4.9,
+                                                totalReviews: 32,
+                                                timestamp: new Date().toISOString()
+                                            });
+                                        }}
+                                        className="group flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-slate-50 hover:from-blue-100 hover:to-slate-100 rounded-xl border border-blue-200/50 hover:border-blue-300/70 transition-all duration-200 ease-in-out shadow-sm hover:shadow-md"
+                                        aria-label="View rating details"
+                                    >
+                                        <div className="flex items-center gap-1">
+                                            <Star className="h-5 w-5 text-[#FACC15] fill-current" />
+                                            <span className="text-lg font-bold text-gray-800 group-hover:text-blue-700 transition-colors">
+                                                4.9
+                                            </span>
+                                        </div>
+                                        <div className="text-sm text-gray-600 group-hover:text-blue-600 transition-colors">
+                                            / 5
+                                        </div>
+                                        <div className="hidden sm:block text-xs text-gray-500 group-hover:text-blue-500 transition-colors">
+                                            (32 reviews)
+                                        </div>
+                                    </button>
+                                </div>
                             </div>
                             <p className="text-muted-foreground text-lg max-w-2xl">
                                 Professional {traderProfile.primaryTrade.toLowerCase()} services in {traderProfile.city} and surrounding areas
@@ -509,8 +651,8 @@ const TradesPersonProfile = () => {
 
                         <div className="grid grid-cols-3 gap-4 text-center">
                             <div className="bg-background/50 backdrop-blur-sm rounded-xl p-4 border border-border/20">
-                                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{traderProfile.experienceYears}</div>
-                                <div className="text-sm text-muted-foreground">Years Experience</div>
+                                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100 text-center">{traderProfile.experienceYears}</div>
+                                <div className="text-sm text-muted-foreground text-center">Years Experience</div>
                             </div>
                             <div
                                 className="bg-background/50 backdrop-blur-sm rounded-xl p-4 border border-border/20"
@@ -518,21 +660,16 @@ const TradesPersonProfile = () => {
                                 aria-label={`Service Radius: ${Number.isFinite(traderProfile.radiusKm) ? parseInt(traderProfile.radiusKm, 10) : traderProfile.radiusKm} kilometers`}
                                 role="region"
                             >
-                                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-baseline justify-center md:justify-start">
-                                    {Number.isFinite(Number(traderProfile.radiusKm))
-                                        ? parseInt(traderProfile.radiusKm, 10)
-                                        : traderProfile.radiusKm}
-                                    <span className="ml-1 text-base text-muted-foreground">km</span>
+                                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100 text-center">
+                                    <span className="inline-flex items-baseline justify-center">
+                                        {Number.isFinite(Number(traderProfile.radiusKm))
+                                            ? parseInt(traderProfile.radiusKm, 10)
+                                            : traderProfile.radiusKm}
+                                        <span className="ml-1 text-base text-muted-foreground">km</span>
+                                    </span>
                                 </div>
-                                <div className="text-sm text-muted-foreground">Service Radius</div>
+                                <div className="text-sm text-muted-foreground text-center">Service Radius</div>
                             </div>
-                            {/* <div className="bg-background/50 backdrop-blur-sm rounded-xl p-4 border border-border/20">
-                                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center justify-center">
-                                    <Star className="h-5 w-5 fill-current mr-1" />
-                                    Verified Pro
-                                </div>
-                                <div className="text-sm text-muted-foreground">Status</div>
-                            </div> */}
                         </div>
                     </div>
                 </div>
@@ -545,131 +682,150 @@ const TradesPersonProfile = () => {
                         {/* Contact Information */}
                         <Card className="shadow-xl bg-gradient-to-br from-card to-card/80 border-0">
                             <CardHeader className="pb-4">
-                                <CardTitle className="text-xl flex items-center">
-                                    <User className="h-5 w-5 mr-2 text-primary" />
-                                    Contact Details
-                                </CardTitle>
+                                <div className="flex items-center justify-between">
+                                    <CardTitle className="text-xl flex items-center">
+                                        <User className="h-5 w-5 mr-2 text-gray-800" />
+                                        Contact Details
+                                    </CardTitle>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="md:hidden p-1"
+                                        onClick={() => toggleAccordion('contact')}
+                                    >
+                                        {accordionStates.contact ? (
+                                            <ChevronUp className="h-4 w-4" />
+                                        ) : (
+                                            <ChevronDown className="h-4 w-4" />
+                                        )}
+                                    </Button>
+                                </div>
                             </CardHeader>
-                            <CardContent className="space-y-6">
+                            <div className={`md:block ${accordionStates.contact ? 'block' : 'hidden'}`}>
+                                <CardContent className="space-y-6">
                                  <div className="space-y-4">
-                                     {/* Email */}
-                                     <div className="flex items-start space-x-4 p-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl border border-primary/10">
-                                         <div className="bg-primary/10 p-2 rounded-lg">
-                                             <Mail className="h-4 w-4 text-primary" />
-                                         </div>
-                                         <div className="flex-1">
-                                             <div className="flex items-center justify-between mb-2">
-                                                 <p className="text-sm text-muted-foreground">Email Address</p>
-                                                 {isOwnProfile && editingField !== 'email' && (
-                                                     <Button
-                                                         size="sm"
-                                                         variant="ghost"
-                                                         onClick={() => {
-                                                             setEditingField('email');
-                                                             setTempData({ email: traderProfile.email });
-                                                         }}
-                                                         className="h-6 w-6 p-0 hover:bg-primary/10"
-                                                     >
-                                                         <Edit3 className="h-3 w-3" />
-                                                     </Button>
+                                     {/* Email - Hidden for homeowners viewing other profiles */}
+                                     {isOwnProfile && (
+                                         <div className="flex items-start space-x-4 p-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl border border-primary/10">
+                                             <div className="bg-primary/10 p-2 rounded-lg">
+                                                 <Mail className="h-4 w-4 text-gray-800" />
+                                             </div>
+                                             <div className="flex-1">
+                                                 <div className="flex items-center justify-between mb-2">
+                                                     <p className="text-sm text-muted-foreground">Email Address</p>
+                                                     {editingField !== 'email' && (
+                                                         <Button
+                                                             size="sm"
+                                                             variant="ghost"
+                                                             onClick={() => {
+                                                                 setEditingField('email');
+                                                                 setTempData({ email: traderProfile.email });
+                                                             }}
+                                                             className="h-6 w-6 p-0 hover:bg-primary/10"
+                                                         >
+                                                             <Edit3 className="h-3 w-3" />
+                                                         </Button>
+                                                     )}
+                                                 </div>
+                                                 {editingField === 'email' ? (
+                                                     <div className="space-y-2">
+                                                         <Input
+                                                             value={tempData.email || ''}
+                                                             onChange={(e) => setTempData({ ...tempData, email: e.target.value })}
+                                                             type="email"
+                                                             className="text-sm"
+                                                         />
+                                                         <div className="flex gap-2">
+                                                             <Button
+                                                                 size="sm"
+                                                                 onClick={() => saveProfile('email', tempData.email)}
+                                                                 disabled={saving}
+                                                                 className="h-7 px-3"
+                                                             >
+                                                                 <Save className="h-3 w-3 mr-1" />
+                                                                 Save
+                                                             </Button>
+                                                             <Button
+                                                                 size="sm"
+                                                                 variant="outline"
+                                                                 onClick={cancelEditing}
+                                                                 className="h-7 px-3"
+                                                             >
+                                                                 <X className="h-3 w-3 mr-1" />
+                                                                 Cancel
+                                                             </Button>
+                                                         </div>
+                                                     </div>
+                                                 ) : (
+                                                     <p className="font-medium text-foreground break-all">{traderProfile.email}</p>
                                                  )}
                                              </div>
-                                             {editingField === 'email' ? (
-                                                 <div className="space-y-2">
-                                                     <Input
-                                                         value={tempData.email || ''}
-                                                         onChange={(e) => setTempData({ ...tempData, email: e.target.value })}
-                                                         type="email"
-                                                         className="text-sm"
-                                                     />
-                                                     <div className="flex gap-2">
-                                                         <Button
-                                                             size="sm"
-                                                             onClick={() => saveProfile('email', tempData.email)}
-                                                             disabled={saving}
-                                                             className="h-7 px-3"
-                                                         >
-                                                             <Save className="h-3 w-3 mr-1" />
-                                                             Save
-                                                         </Button>
-                                                         <Button
-                                                             size="sm"
-                                                             variant="outline"
-                                                             onClick={cancelEditing}
-                                                             className="h-7 px-3"
-                                                         >
-                                                             <X className="h-3 w-3 mr-1" />
-                                                             Cancel
-                                                         </Button>
-                                                     </div>
-                                                 </div>
-                                             ) : (
-                                                 <p className="font-medium text-foreground break-all">{traderProfile.email}</p>
-                                             )}
                                          </div>
-                                     </div>
+                                     )}
                                      
-                                     {/* Phone */}
-                                     <div className="flex items-start space-x-4 p-4 bg-gradient-to-r from-secondary/5 to-secondary/10 rounded-xl border border-secondary/10">
-                                         <div className="bg-secondary/10 p-2 rounded-lg">
-                                             <Phone className="h-4 w-4 text-secondary" />
-                                         </div>
-                                         <div className="flex-1">
-                                             <div className="flex items-center justify-between mb-2">
-                                                 <p className="text-sm text-muted-foreground">Phone Number</p>
-                                                 {isOwnProfile && editingField !== 'phone' && (
-                                                     <Button
-                                                         size="sm"
-                                                         variant="ghost"
-                                                         onClick={() => {
-                                                             setEditingField('phone');
-                                                             setTempData({ phone: traderProfile.phone });
-                                                         }}
-                                                         className="h-6 w-6 p-0 hover:bg-secondary/10"
-                                                     >
-                                                         <Edit3 className="h-3 w-3" />
-                                                     </Button>
+                                     {/* Phone - Hidden for homeowners viewing other profiles */}
+                                     {isOwnProfile && (
+                                         <div className="flex items-start space-x-4 p-4 bg-gradient-to-r from-secondary/5 to-secondary/10 rounded-xl border border-secondary/10">
+                                             <div className="bg-secondary/10 p-2 rounded-lg">
+                                                 <Phone className="h-4 w-4 text-gray-800" />
+                                             </div>
+                                             <div className="flex-1">
+                                                 <div className="flex items-center justify-between mb-2">
+                                                     <p className="text-sm text-muted-foreground">Phone Number</p>
+                                                     {editingField !== 'phone' && (
+                                                         <Button
+                                                             size="sm"
+                                                             variant="ghost"
+                                                             onClick={() => {
+                                                                 setEditingField('phone');
+                                                                 setTempData({ phone: traderProfile.phone });
+                                                             }}
+                                                             className="h-6 w-6 p-0 hover:bg-secondary/10"
+                                                         >
+                                                             <Edit3 className="h-3 w-3" />
+                                                         </Button>
+                                                     )}
+                                                 </div>
+                                                 {editingField === 'phone' ? (
+                                                     <div className="space-y-2">
+                                                         <Input
+                                                             value={tempData.phone || ''}
+                                                             onChange={(e) => setTempData({ ...tempData, phone: e.target.value })}
+                                                             type="tel"
+                                                             className="text-sm"
+                                                         />
+                                                         <div className="flex gap-2">
+                                                             <Button
+                                                                 size="sm"
+                                                                 onClick={() => saveProfile('phone', tempData.phone)}
+                                                                 disabled={saving}
+                                                                 className="h-7 px-3"
+                                                             >
+                                                                 <Save className="h-3 w-3 mr-1" />
+                                                                 Save
+                                                             </Button>
+                                                             <Button
+                                                                 size="sm"
+                                                                 variant="outline"
+                                                                 onClick={cancelEditing}
+                                                                 className="h-7 px-3"
+                                                             >
+                                                                 <X className="h-3 w-3 mr-1" />
+                                                                 Cancel
+                                                             </Button>
+                                                         </div>
+                                                     </div>
+                                                 ) : (
+                                                     <p className="font-medium text-foreground">{traderProfile.phone}</p>
                                                  )}
                                              </div>
-                                             {editingField === 'phone' ? (
-                                                 <div className="space-y-2">
-                                                     <Input
-                                                         value={tempData.phone || ''}
-                                                         onChange={(e) => setTempData({ ...tempData, phone: e.target.value })}
-                                                         type="tel"
-                                                         className="text-sm"
-                                                     />
-                                                     <div className="flex gap-2">
-                                                         <Button
-                                                             size="sm"
-                                                             onClick={() => saveProfile('phone', tempData.phone)}
-                                                             disabled={saving}
-                                                             className="h-7 px-3"
-                                                         >
-                                                             <Save className="h-3 w-3 mr-1" />
-                                                             Save
-                                                         </Button>
-                                                         <Button
-                                                             size="sm"
-                                                             variant="outline"
-                                                             onClick={cancelEditing}
-                                                             className="h-7 px-3"
-                                                         >
-                                                             <X className="h-3 w-3 mr-1" />
-                                                             Cancel
-                                                         </Button>
-                                                     </div>
-                                                 </div>
-                                             ) : (
-                                                 <p className="font-medium text-foreground">{traderProfile.phone}</p>
-                                             )}
                                          </div>
-                                     </div>
+                                     )}
                                      
                                      {/* Location */}
                                      <div className="flex items-start space-x-4 p-4 bg-gradient-to-r from-accent/5 to-accent/10 rounded-xl border border-accent/10">
                                          <div className="bg-accent/10 p-2 rounded-lg">
-                                             <MapPin className="h-4 w-4 text-accent" />
+                                             <MapPin className="h-4 w-4 text-gray-800" />
                                          </div>
                                          <div className="flex-1">
                                              <div className="flex items-center justify-between mb-2">
@@ -743,7 +899,7 @@ const TradesPersonProfile = () => {
                                      
                                      <div className="flex items-start space-x-4 p-4 bg-gradient-to-r from-muted/5 to-muted/10 rounded-xl border border-muted/20">
                                          <div className="bg-muted/10 p-2 rounded-lg">
-                                             <Calendar className="h-4 w-4 text-muted-foreground" />
+                                             <Calendar className="h-4 w-4 text-gray-800" />
                                          </div>
                                          <div className="flex-1">
                                              <p className="text-sm text-muted-foreground">Member Since</p>
@@ -758,7 +914,17 @@ const TradesPersonProfile = () => {
                                         Update Contact Info
                                     </Button>
                                 )}
-                            </CardContent>
+                                
+                                {/* Message for homeowners viewing other profiles */}
+                                {!isOwnProfile && (
+                                    <div className="text-center py-4">
+                                        <p className="text-sm text-muted-foreground">
+                                            Contact information is private. Use the chat feature to get in touch with this tradesperson.
+                                        </p>
+                                    </div>
+                                )}
+                                </CardContent>
+                            </div>
                         </Card>
 
                     
@@ -771,7 +937,7 @@ const TradesPersonProfile = () => {
                             <CardHeader className="pb-6">
                                 <div className="flex items-center justify-between">
                                     <CardTitle className="text-2xl flex items-center">
-                                        <Briefcase className="h-6 w-6 mr-3 text-primary" />
+                                        <Briefcase className="h-6 w-6 mr-3 text-gray-800" />
                                         Services & Expertise
                                     </CardTitle>
                                 </div>
@@ -924,7 +1090,7 @@ const TradesPersonProfile = () => {
                                     <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-950/20 dark:to-blue-900/20 p-6 rounded-xl border border-blue-200 dark:border-blue-800">
                                         <div className="flex items-start space-x-4">
                                             <div className="bg-blue-500 p-2 rounded-lg">
-                                                <Award className="h-5 w-5 text-white" />
+                                                <Award className="h-5 w-5 text-gray-800" />
                                             </div>
                                             <div>
                                                 <p className="font-medium text-blue-900 dark:text-blue-100 text-lg">
@@ -965,50 +1131,53 @@ const TradesPersonProfile = () => {
                                     </div>
 
                                     {traderProfile.certificationImages && traderProfile.certificationImages.length > 0 ? (
-                                        <div className="flex flex-wrap gap-3">
-                                            {traderProfile.certificationImages.map((image: string, index: number) => (
-                                                <div key={index} className="relative group overflow-hidden rounded-lg bg-muted/20 aspect-square w-32 h-32">
-                                                    <img 
-                                                        src={image} 
-                                                        alt={`Certification ${index + 1}`}
-                                                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                                    />
-                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                                        <div className="absolute bottom-2 left-2 text-white">
-                                                            <p className="text-xs font-medium">Certificate {index + 1}</p>
+                                        <div className="overflow-x-auto">
+                                            <div className="flex gap-3 pb-2 min-w-max md:flex-wrap md:min-w-0">
+                                                {traderProfile.certificationImages.map((image: string, index: number) => (
+                                                    <div key={index} className="relative group overflow-hidden rounded-lg bg-muted/20 aspect-square w-24 h-24 md:w-32 md:h-32 flex-shrink-0">
+                                                        <img 
+                                                            src={image} 
+                                                            alt={`Certification ${index + 1}`}
+                                                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                                            loading="lazy"
+                                                        />
+                                                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                                            <div className="absolute bottom-1 left-1 text-white">
+                                                                <p className="text-xs font-medium">Cert {index + 1}</p>
+                                                            </div>
+                                                            {isOwnProfile && (
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="destructive"
+                                                                    className="absolute top-1 right-1 h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                                                    onClick={async () => {
+                                                                        try {
+                                                                            const updatedImages = traderProfile.certificationImages.filter((_, i) => i !== index);
+                                                                            await saveProfile('certificationImages', updatedImages);
+                                                                            toast({
+                                                                                title: "Image deleted",
+                                                                                description: "Certification image has been removed from your profile.",
+                                                                            });
+                                                                        } catch (error) {
+                                                                            toast({
+                                                                                title: "Error",
+                                                                                description: "Failed to delete image. Please try again.",
+                                                                                variant: "destructive",
+                                                                            });
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    <Trash2 className="h-3 w-3" />
+                                                                </Button>
+                                                            )}
                                                         </div>
-                                                        {isOwnProfile && (
-                                                            <Button
-                                                                size="sm"
-                                                                variant="destructive"
-                                                                className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                                                                onClick={async () => {
-                                                                    try {
-                                                                        const updatedImages = traderProfile.certificationImages.filter((_, i) => i !== index);
-                                                                        await saveProfile('certificationImages', updatedImages);
-                                                                        toast({
-                                                                            title: "Image deleted",
-                                                                            description: "Certification image has been removed from your profile.",
-                                                                        });
-                                                                    } catch (error) {
-                                                                        toast({
-                                                                            title: "Error",
-                                                                            description: "Failed to delete image. Please try again.",
-                                                                            variant: "destructive",
-                                                                        });
-                                                                    }
-                                                                }}
-                                                            >
-                                                                <Trash2 className="h-3 w-3" />
-                                                            </Button>
-                                                        )}
                                                     </div>
-                                                </div>
-                                            ))}
+                                                ))}
+                                            </div>
                                         </div>
                                     ) : (
                                         <div className="text-center py-6 bg-muted/20 rounded-lg border-2 border-dashed border-muted/40">
-                                            <Award className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
+                                            <Award className="h-6 w-6 text-gray-800 mx-auto mb-2" />
                                             <h3 className="text-sm font-medium text-foreground mb-1">No Certification Images</h3>
                                             <p className="text-xs text-muted-foreground mb-3 max-w-xs mx-auto">
                                                 Upload images of your certifications
@@ -1103,7 +1272,7 @@ const TradesPersonProfile = () => {
                              <CardHeader className="pb-6">
                                  <div className="flex items-center justify-between">
                                      <CardTitle className="text-2xl flex items-center">
-                                         <Camera className="h-6 w-6 mr-3 text-primary" />
+                                         <Camera className="h-6 w-6 mr-3 text-gray-800" />
                                          Portfolio Gallery
                                      </CardTitle>
                                      {isOwnProfile && (
@@ -1130,17 +1299,18 @@ const TradesPersonProfile = () => {
                              </CardHeader>
                              <CardContent>
                                  {traderProfile.projectImages && traderProfile.projectImages.length > 0 ? (
-                                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                     <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
                                          {traderProfile.projectImages.map((image: string, index: number) => (
                                              <div key={index} className="relative group overflow-hidden rounded-xl bg-muted/20 aspect-square">
                                                  <img 
                                                      src={image} 
                                                      alt={`Portfolio work ${index + 1}`}
                                                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                                     loading="lazy"
                                                  />
                                                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                                     <div className="absolute bottom-3 left-3 text-white">
-                                                         <p className="text-sm font-medium">Project {index + 1}</p>
+                                                     <div className="absolute bottom-2 left-2 text-white">
+                                                         <p className="text-xs font-medium">Project {index + 1}</p>
                                                      </div>
                                                  </div>
                                              </div>
@@ -1148,7 +1318,7 @@ const TradesPersonProfile = () => {
                                      </div>
                                  ) : (
                                      <div className="text-center py-12 bg-muted/20 rounded-xl border-2 border-dashed border-muted/40">
-                                         <Camera className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                                         <Camera className="h-12 w-12 text-gray-800 mx-auto mb-4" />
                                          <h3 className="text-lg font-medium text-foreground mb-2">No Portfolio Images</h3>
                                          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
                                              Showcase your best work by adding photos of completed projects. High-quality images help attract more clients.
@@ -1180,8 +1350,8 @@ const TradesPersonProfile = () => {
                       </div>
                   </div>
               </div>
-          </div>
+        </div>
       );
-};
+  };
 
 export default TradesPersonProfile;
