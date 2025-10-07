@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MessageCircle, X } from 'lucide-react';
+import { MessageCircle, X, Archive, ArchiveRestore } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -26,6 +26,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const navigate = useNavigate();
   const { chats, isLoading, error, fetchChats } = useChats();
+  const [showArchived, setShowArchived] = useState(false);
   
   // Debug logging
   console.log('Sidebar render - chats:', chats.length, 'isLoading:', isLoading, 'error:', error);
@@ -189,15 +190,51 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
         ) : (
           <div className="p-2">
-            {chats.map((chat) => {
-              const isActive = currentConversationId === chat.conversation_id;
-              const initials = getInitials(chat.counterparty?.name || 'Unknown');
-              const hasUnread = chat.unread_count && chat.unread_count > 0;
-              
+            {(() => {
+              // Group chats by trader_id
+              const groupedChats = chats.reduce((acc: { [key: string]: ChatItem[] }, chat) => {
+                const traderId = chat.counterparty?.id || 'unknown';
+                if (!acc[traderId]) {
+                  acc[traderId] = [];
+                }
+                acc[traderId].push(chat);
+                return acc;
+              }, {});
+
+              // Separate active and archived chats
+              const activeChats: ChatItem[] = [];
+              const archivedChats: ChatItem[] = [];
+
+              Object.values(groupedChats).forEach(traderChats => {
+                // Sort by most recent first
+                const sortedChats = traderChats.sort((a, b) => {
+                  const aTime = new Date(a.last_message_at || a.created_at || 0).getTime();
+                  const bTime = new Date(b.last_message_at || b.created_at || 0).getTime();
+                  return bTime - aTime;
+                });
+
+                // First chat is active, rest are archived
+                activeChats.push(sortedChats[0]);
+                if (sortedChats.length > 1) {
+                  archivedChats.push(...sortedChats.slice(1));
+                }
+              });
+
+              const chatsToShow = showArchived ? archivedChats : activeChats;
+              const hasArchivedChats = archivedChats.length > 0;
+
               return (
-                <button
-                  key={chat.conversation_id}
-                  onClick={() => handleChatClick(chat)}
+                <>
+                  {/* Active Chats */}
+                  {!showArchived && activeChats.map((chat) => {
+                    const isActive = currentConversationId === chat.conversation_id;
+                    const initials = getInitials(chat.counterparty?.name || 'Unknown');
+                    const hasUnread = chat.unread_count && chat.unread_count > 0;
+              
+                return (
+                  <button
+                    key={chat.conversation_id}
+                    onClick={() => handleChatClick(chat)}
                   className={`relative w-full p-4 mb-2 rounded-xl text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20 group ${
                     isActive 
                       ? 'bg-primary/8 border border-primary/20 shadow-sm' 
@@ -235,7 +272,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                           <span className="text-xs text-muted-foreground font-medium">
                             {formatLastMessageTime(chat.last_message_at)}
                           </span>
-                          {hasUnread && (
+                          {hasUnread && chat.unread_count > 0 && (
                             <Badge className="bg-primary text-primary-foreground text-xs px-2 py-0.5 min-w-[20px] h-5 rounded-full flex items-center justify-center">
                               {chat.unread_count > 99 ? '99+' : chat.unread_count}
                             </Badge>
@@ -251,14 +288,102 @@ const Sidebar: React.FC<SidebarProps> = ({
                       )}
                       
                       {/* Message count */}
-                      <p className="text-xs text-muted-foreground">
-                        {Number(chat.message_count) || 0} message{(Number(chat.message_count) || 0) !== 1 ? 's' : ''}
-                      </p>
+                      {Number(chat.message_count) > 0 && (
+                        <p className="text-xs text-muted-foreground">
+                          {Number(chat.message_count)} message{Number(chat.message_count) !== 1 ? 's' : ''}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </button>
+                  );
+                })}
+
+                  {/* Archived Chats Toggle */}
+                  {hasArchivedChats && (
+                    <div className="mt-4 pt-4 border-t border-border">
+                      <Button
+                        variant="ghost"
+                        onClick={() => setShowArchived(!showArchived)}
+                        className="w-full justify-start text-sm text-muted-foreground hover:text-foreground"
+                      >
+                        {showArchived ? (
+                          <>
+                            <ArchiveRestore className="w-4 h-4 mr-2" />
+                            Show Active Chats ({activeChats.length})
+                          </>
+                        ) : (
+                          <>
+                            <Archive className="w-4 h-4 mr-2" />
+                            Past Jobs ({archivedChats.length})
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Archived Chats */}
+                  {showArchived && archivedChats.map((chat) => {
+                    const isActive = currentConversationId === chat.conversation_id;
+                    const initials = getInitials(chat.counterparty?.name || 'Unknown');
+                    const hasUnread = chat.unread_count && chat.unread_count > 0;
+              
+                    return (
+                      <button
+                        key={chat.conversation_id}
+                        onClick={() => handleChatClick(chat)}
+                        className={`relative w-full p-4 mb-2 rounded-xl text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20 group ${
+                          isActive 
+                            ? 'bg-primary/8 border border-primary/20 shadow-sm' 
+                            : 'hover:bg-muted/50 border border-transparent hover:border-border/30'
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="relative flex-shrink-0">
+                            <Avatar className="h-12 w-12 border-2 border-background shadow-sm">
+                              <AvatarImage src={chat.counterparty?.avatar_url} />
+                              <AvatarFallback className={`${getAvatarColor(chat.counterparty?.id || 'default')} text-white font-semibold`}>
+                                {initials}
+                              </AvatarFallback>
+                            </Avatar>
+                            {hasUnread && chat.unread_count > 0 && (
+                              <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold border-2 border-background">
+                                {chat.unread_count}
+                              </div>
+                            )}
+                          </div>
+                          
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between mb-1">
+                              <h3 className={`font-semibold text-sm truncate ${hasUnread ? 'text-foreground' : 'text-foreground'}`}>
+                                {chat.counterparty?.name || 'Unknown'}
+                              </h3>
+                              <span className="text-xs text-muted-foreground flex-shrink-0 ml-2">
+                                {formatLastMessageTime(chat.last_message_at || chat.created_at)}
+                              </span>
+                            </div>
+                            
+                            {/* Job title */}
+                            {chat.counterparty?.job_title && (
+                              <p className={`text-sm truncate mb-3 ${hasUnread ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>
+                                {chat.counterparty.job_title}
+                              </p>
+                            )}
+                            
+                            {/* Message count */}
+                            {Number(chat.message_count) > 0 && (
+                              <p className="text-xs text-muted-foreground">
+                                {Number(chat.message_count)} message{Number(chat.message_count) !== 1 ? 's' : ''}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </>
               );
-            })}
+            })()}
           </div>
         )}
       </div>

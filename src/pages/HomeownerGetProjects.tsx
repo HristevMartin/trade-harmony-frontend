@@ -15,7 +15,9 @@ import {
   HiUserGroup,
   HiArrowPath
 } from "react-icons/hi2";
-import { RefreshCw, CheckCircle, Trash2, Edit, Users, Clock } from "lucide-react";
+import { RefreshCw, CheckCircle, Trash2, Edit, Users, Clock, Star, X, Loader2, MessageCircle, Briefcase } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Project {
   id: string;
@@ -34,6 +36,41 @@ interface Project {
     serviceCategory: string;
     country: string;
   };
+}
+
+interface TraderDetails {
+  name: string;
+  primaryTrade: string;
+  city: string;
+  email: string;
+  phone: string | null;
+}
+
+interface JobDetails {
+  job_title: string;
+  job_description: string;
+  budget: string;
+  urgency: string;
+  location: string;
+}
+
+interface LastMessage {
+  body: string;
+  sender_id: string;
+  created_at: string;
+}
+
+interface TraderConversation {
+  conversation_id: string;
+  job_id: string;
+  trader_id: string;
+  status: string;
+  message_count: string;
+  last_message_at: string;
+  created_at: string;
+  trader_details: TraderDetails;
+  job_details: JobDetails;
+  last_message: LastMessage;
 }
 
 const HomeownerGetProjects = () => {
@@ -66,6 +103,17 @@ const HomeownerGetProjects = () => {
     total_posted: number;
     total_cancelled: number;
   } | null>(null);
+  
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [traders, setTraders] = useState<TraderConversation[]>([]);
+  const [loadingTraders, setLoadingTraders] = useState(false);
+  const [selectedTrader, setSelectedTrader] = useState<TraderConversation | null>(null);
+  const [rating, setRating] = useState(0);
+  const [hoveredRating, setHoveredRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  
   const navigate = useNavigate();
   const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -119,6 +167,28 @@ const HomeownerGetProjects = () => {
     }
     requestApi();
   }, [apiUrl]);
+
+  useEffect(() => {
+     const apiFetchRequest=  async () => {
+      try {
+        
+        const response = await fetch(`${apiUrl}/travel/get-trader-completed-job`, {
+          credentials: 'include',
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('Trader completed jobs:', data);
+
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+      }
+     }
+     apiFetchRequest();
+  }, []);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -404,6 +474,181 @@ const HomeownerGetProjects = () => {
       isCompleted ? "Delete Job" : "Cancel Job",
       "bg-red-600 hover:bg-red-700 text-white"
     );
+  };
+
+  const handleOpenRatingModal = async (project: Project) => {
+    setSelectedProject(project);
+    setShowRatingModal(true);
+    setLoadingTraders(true);
+    
+    try {
+      console.log('Fetching traders for project:', project.project_id);
+      console.log('API URL:', `${apiUrl}/travel/get-trader-completed-job`);
+      
+      const response = await fetch(`${apiUrl}/travel/get-trader-completed-job`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Trader completed jobs response:', data);
+      
+      if (data.success && Array.isArray(data.chats)) {
+        const filteredTraders = data.chats.filter(
+          (chat: TraderConversation) => chat.job_id === project.project_id
+        );
+        
+        const uniqueTraders = filteredTraders.reduce((acc: TraderConversation[], current: TraderConversation) => {
+          const existingTrader = acc.find(trader => trader.trader_id === current.trader_id);
+          
+          if (!existingTrader) {
+            acc.push(current);
+          } else {
+            const currentMessages = parseInt(current.message_count) || 0;
+            const existingMessages = parseInt(existingTrader.message_count) || 0;
+            
+            if (currentMessages > existingMessages) {
+              const index = acc.indexOf(existingTrader);
+              acc[index] = current;
+            }
+          }
+          
+          return acc;
+        }, []);
+        
+        console.log(`Found ${filteredTraders.length} conversations, deduplicated to ${uniqueTraders.length} unique traders for this job`);
+        setTraders(uniqueTraders);
+        
+        if (uniqueTraders.length === 1) {
+          setSelectedTrader(uniqueTraders[0]);
+        }
+      } else {
+        console.error('Invalid response format:', data);
+        setTraders([]);
+      }
+      
+    } catch (err) {
+      console.error("Error fetching traders:", err);
+      setTraders([]);
+    } finally {
+      setLoadingTraders(false);
+    }
+  };
+
+  const handleCloseRatingModal = () => {
+    setShowRatingModal(false);
+    setSelectedProject(null);
+    setTraders([]);
+    setSelectedTrader(null);
+    setRating(0);
+    setHoveredRating(0);
+    setComment("");
+  };
+
+  const handleSelectTrader = (trader: TraderConversation) => {
+    setSelectedTrader(trader);
+  };
+
+  const handleBackToTraderList = () => {
+    setSelectedTrader(null);
+    setRating(0);
+    setHoveredRating(0);
+    setComment("");
+  };
+
+  const handleSubmitRating = async () => {
+    if (!selectedTrader || rating === 0) return;
+
+    setSubmitting(true);
+
+    const ratingPayload = {
+      userId: selectedTrader.trader_id,
+      homeownerId: userId,
+      jobId: selectedTrader.job_id,
+      rating: rating,
+      comment: comment.trim() || null,
+    };
+
+    console.log("=== RATING SUBMISSION ===");
+    console.log("Rating Details:");
+    console.log(`  ⭐ Stars: ${rating}/5`);
+    console.log(`  💬 Comment: ${comment.trim() || "No comment provided"}`);
+    console.log(`  📝 Comment Length: ${comment.trim().length} characters`);
+    console.log("");
+    console.log("Trader Information:");
+    console.log(`  👤 Name: ${selectedTrader.trader_details.name}`);
+    console.log(`  🔧 Trade: ${selectedTrader.trader_details.primaryTrade}`);
+    console.log(`  📍 City: ${selectedTrader.trader_details.city}`);
+    console.log(`  📧 Email: ${selectedTrader.trader_details.email}`);
+    console.log(`  📱 Phone: ${selectedTrader.trader_details.phone || "Not provided"}`);
+    console.log(`  🆔 Trader ID (userId): ${selectedTrader.trader_id}`);
+    console.log("");
+    console.log("Job Information:");
+    console.log(`  📋 Title: ${selectedTrader.job_details.job_title}`);
+    console.log(`  📝 Description: ${selectedTrader.job_details.job_description}`);
+    console.log(`  💰 Budget: ${selectedTrader.job_details.budget}`);
+    console.log(`  ⏰ Urgency: ${selectedTrader.job_details.urgency}`);
+    console.log(`  📍 Location: ${selectedTrader.job_details.location}`);
+    console.log(`  🆔 Job ID: ${selectedTrader.job_id}`);
+    console.log("");
+    console.log("Homeowner Information:");
+    console.log(`  🏠 Homeowner ID: ${userId}`);
+    console.log("");
+    console.log("Conversation Information:");
+    console.log(`  💬 Total Messages: ${selectedTrader.message_count}`);
+    console.log(`  🆔 Conversation ID: ${selectedTrader.conversation_id}`);
+    console.log(`  📊 Status: ${selectedTrader.status}`);
+    console.log("");
+    console.log("API Payload:");
+    console.log(JSON.stringify(ratingPayload, null, 2));
+    console.log("========================");
+
+    try {
+      const response = await fetch(`${apiUrl}/api/ratings/submit`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(ratingPayload),
+      });
+
+      const data = await response.json();
+      console.log("API Response:", data);
+
+      if (response.ok && data.success) {
+        setSubmitting(false);
+        handleCloseRatingModal();
+        setSuccessMessage(`Successfully rated ${selectedTrader.trader_details.name}!`);
+        setShowSuccess(true);
+        setTimeout(() => {
+          setShowSuccess(false);
+        }, 3000);
+      } else {
+        throw new Error(data.message || 'Failed to submit rating');
+      }
+    } catch (error) {
+      console.error('Error submitting rating:', error);
+      setSubmitting(false);
+      setError('Failed to submit rating. Please try again.');
+    }
+  };
+
+  const formatTimeAgoForMessage = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
+
+    if (diffInHours < 1) return "just now";
+    if (diffInHours < 24) return `${Math.floor(diffInHours)}h ago`;
+    if (diffInHours < 168) return `${Math.floor(diffInHours / 24)}d ago`;
+    return date.toLocaleDateString("en-GB", { month: "short", day: "numeric" });
   };
 
   if (loading) {
@@ -771,7 +1016,14 @@ const HomeownerGetProjects = () => {
                             Mark Complete
                           </Button>
                         ) : (
-                          <div></div>
+                          <Button
+                            onClick={() => handleOpenRatingModal(project)}
+                            className="h-11 px-4 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-xl transition-all"
+                            aria-label={`Rate trader for ${project.job_title}`}
+                          >
+                            <Star className="w-4 h-4 mr-2" />
+                            Rate Trader
+                          </Button>
                         )}
 
                         <Button
@@ -841,6 +1093,276 @@ const HomeownerGetProjects = () => {
                     )}
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Rating Modal */}
+        {showRatingModal && (
+          <div
+            className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 animate-in fade-in-0 duration-200"
+            onClick={handleCloseRatingModal}
+          >
+            <div
+              className="bg-background rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="sticky top-0 bg-background p-6 border-b border-border z-10">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-foreground">
+                    {selectedTrader ? "Rate Your Experience" : "Select Trader to Rate"}
+                  </h2>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCloseRatingModal}
+                    className="h-8 w-8 p-0 hover:bg-muted rounded-full"
+                    aria-label="Close modal"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Modal Content */}
+              <div className="p-6">
+                {loadingTraders ? (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <Loader2 className="h-12 w-12 text-primary animate-spin mb-4" />
+                    <p className="text-muted-foreground">Loading traders...</p>
+                  </div>
+                ) : traders.length === 0 ? (
+                  <div className="text-center py-12">
+                    <MessageCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold mb-2">No traders to rate</h3>
+                    <p className="text-muted-foreground mb-6">
+                      You haven't had any conversations with traders for this job yet.
+                    </p>
+                    <Button onClick={handleCloseRatingModal} variant="outline">
+                      Close
+                    </Button>
+                  </div>
+                ) : selectedTrader ? (
+                  <div className="space-y-6">
+                    {/* Back Button */}
+                    {traders.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        onClick={handleBackToTraderList}
+                        className="mb-4 -ml-2"
+                      >
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Back to trader list
+                      </Button>
+                    )}
+
+                    {/* Trader Info */}
+                    <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl">
+                      <Avatar className="h-16 w-16 border-2 border-background shadow-sm">
+                        <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground text-xl font-bold">
+                          {selectedTrader.trader_details.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <h3 className="font-semibold text-lg text-foreground">
+                          {selectedTrader.trader_details.name}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {selectedTrader.trader_details.primaryTrade} • {selectedTrader.trader_details.city}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Job Title */}
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-1">Job completed:</p>
+                      <p className="font-medium text-foreground">{selectedTrader.job_details.job_title}</p>
+                    </div>
+
+                    {/* Star Rating */}
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-3">
+                        Your Rating <span className="text-destructive">*</span>
+                      </label>
+                      <div className="flex items-center gap-2">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            type="button"
+                            onClick={() => setRating(star)}
+                            onMouseEnter={() => setHoveredRating(star)}
+                            onMouseLeave={() => setHoveredRating(0)}
+                            className="transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-full p-1"
+                            aria-label={`Rate ${star} stars`}
+                          >
+                            <Star
+                              className={`w-10 h-10 transition-colors ${
+                                star <= (hoveredRating || rating)
+                                  ? "text-[#FACC15] fill-[#FACC15]"
+                                  : "text-muted-foreground"
+                              }`}
+                            />
+                          </button>
+                        ))}
+                      </div>
+                      {rating > 0 && (
+                        <p className="text-sm text-muted-foreground mt-2">
+                          {rating === 5 && "Excellent! ⭐"}
+                          {rating === 4 && "Very Good! 👍"}
+                          {rating === 3 && "Good"}
+                          {rating === 2 && "Fair"}
+                          {rating === 1 && "Poor"}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Comment */}
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">
+                        Comment (Optional)
+                      </label>
+                      <Textarea
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        placeholder="Share your experience with this trader..."
+                        className="min-h-[100px] resize-none"
+                        maxLength={500}
+                      />
+                      <p className="text-xs text-muted-foreground mt-1 text-right">
+                        {comment.length}/500
+                      </p>
+                    </div>
+
+                    {/* Submit Button */}
+                    <div className="flex gap-3 justify-end pt-4 border-t border-border">
+                      <Button variant="outline" onClick={handleCloseRatingModal} disabled={submitting}>
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={handleSubmitRating}
+                        disabled={rating === 0 || submitting}
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground min-w-[120px]"
+                      >
+                        {submitting ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Submitting...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle className="w-4 h-4 mr-2" />
+                            Submit Rating
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Header Section */}
+                    <div className="text-center pb-4 border-b border-border">
+                      <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-amber-50 to-amber-100 rounded-full flex items-center justify-center">
+                        <Star className="w-8 h-8 text-amber-600" />
+                      </div>
+                      <h3 className="text-xl font-bold text-foreground mb-2">
+                        Who completed this job?
+                      </h3>
+                    </div>
+
+                    {/* Job Context Card */}
+                    {selectedProject && (
+                      <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
+                        <CardContent className="p-4">
+                          <p className="text-xs text-muted-foreground mb-1">Rating for:</p>
+                          <h4 className="font-semibold text-foreground">{selectedProject.job_title}</h4>
+                          <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                            <HiMapPin className="w-3 h-3" />
+                            <span>{selectedProject.additional_data?.location}</span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Traders List */}
+                    <div className="space-y-3">
+                      <p className="text-sm font-medium text-foreground mb-3">
+                        Select a tradesperson:
+                      </p>
+                      {traders.map((trader, index) => (
+                        <Card
+                          key={trader.conversation_id}
+                          className="group hover:shadow-lg transition-all duration-200 cursor-pointer border-2 border-border hover:border-primary/50 hover:bg-primary/5"
+                          onClick={() => handleSelectTrader(trader)}
+                        >
+                          <CardContent className="p-5">
+                            <div className="flex items-start gap-4">
+                              <div className="relative">
+                                <Avatar className="h-14 w-14 border-2 border-background shadow-sm">
+                                  <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground text-lg font-bold">
+                                    {trader.trader_details.name
+                                      .split(" ")
+                                      .map((n) => n[0])
+                                      .join("")}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold border-2 border-background">
+                                  {index + 1}
+                                </div>
+                              </div>
+
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between gap-4 mb-2">
+                                  <div className="flex-1">
+                                    <h3 className="font-bold text-lg text-foreground mb-1 group-hover:text-primary transition-colors">
+                                      {trader.trader_details.name}
+                                    </h3>
+                                    <div className="flex items-center gap-2 flex-wrap mb-2">
+                                      <Badge variant="secondary" className="text-xs font-medium">
+                                        <Briefcase className="w-3 h-3 mr-1" />
+                                        {trader.trader_details.primaryTrade}
+                                      </Badge>
+                                      <span className="text-sm text-muted-foreground flex items-center">
+                                        <HiMapPin className="w-3 h-3 mr-1" />
+                                        {trader.trader_details.city}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex flex-col items-end gap-2">
+                                    <div className="flex items-center gap-1 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200">
+                                      <MessageCircle className="w-3.5 h-3.5 text-blue-600" />
+                                      <span className="text-xs font-semibold text-blue-700">
+                                        {trader.message_count} messages
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <Button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSelectTrader(trader);
+                                  }}
+                                  className="w-full mt-4 bg-primary hover:bg-primary/90 text-primary-foreground group-hover:shadow-md transition-all"
+                                >
+                                  <Star className="w-4 h-4 mr-2" />
+                                  Rate {trader.trader_details.name}
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
