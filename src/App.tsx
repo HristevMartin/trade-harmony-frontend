@@ -28,6 +28,7 @@ import PaymentResult from "./pages/PaymentResult";
 import TestChatModal from "./pages/TestChatModal";
 import Chat from "./pages/Chat";
 import ResetPassword from "./pages/ResetPassword";
+import RateTraders from "./pages/RateTraders";
 import PWAUpdateNotification from "./components/PWAUpdateNotification";
 import PWAInstallPopup from "./components/PWAInstallPopup";
 import usePWAInstallPopup from "./hooks/usePWAInstallPopup";
@@ -81,6 +82,7 @@ const App = () => {
             <Route path="/chat" element={<Chat />} />
             <Route path="/chat/:conversation_id" element={<Chat />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/rate-traders/:jobId" element={<RateTraders />} />
           </Routes>
           <ConditionalFooter />
         </BrowserRouter>
