@@ -680,8 +680,8 @@ const Chat = () => {
         </div>
       </header>
 
-      {/* Job Info Header - Shows job context when available */}
-      {(isPaymentFlow || (conversationId && (jobBudget || jobUrgency || jobCategory || counterparty?.job_title))) && (
+      {/* Job Info Header - Shows job context only when a conversation is selected and loaded */}
+      {conversationId && (isPaymentFlow || conversation || counterparty) && (jobBudget || jobUrgency || jobCategory || counterparty?.job_title) && (
         <div className="flex-shrink-0 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100">
           <div className="px-4 sm:px-6 py-3">
             <div className="flex flex-wrap items-center gap-3 text-sm">
@@ -696,7 +696,7 @@ const Chat = () => {
               )}
 
               {/* Budget */}
-              {(jobBudget || formatBudget(jobBudget)) && (
+              {jobBudget && formatBudget(jobBudget) && (
                 <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
                   <DollarSign className="w-3 h-3 mr-1" />
                   {formatBudget(jobBudget)}
@@ -704,7 +704,7 @@ const Chat = () => {
               )}
 
               {/* Urgency */}
-              {(jobUrgency || formatUrgency(jobUrgency)) && (
+              {jobUrgency && formatUrgency(jobUrgency) && (
                 <Badge variant="secondary" className="bg-orange-100 text-orange-800 border-orange-200">
                   <Clock className="w-3 h-3 mr-1" />
                   {formatUrgency(jobUrgency)}
