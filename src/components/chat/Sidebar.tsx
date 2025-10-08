@@ -46,25 +46,14 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [showArchived, setShowArchived] = useState(false);
   const [completedJobs, setCompletedJobs] = useState<CompletedJob[]>([]);
   
-  // Debug logging
-  console.log('Sidebar render - chats:', chats.length, 'isLoading:', isLoading, 'error:', error, 'completedJobs:', completedJobs.length);
 
   // Fetch completed jobs data
   useEffect(() => {
     const fetchCompletedJobs = async () => {
-      console.log('=== FETCHING COMPLETED JOBS ===');
-      console.log('Auth token available:', !!authToken);
-      
-      if (!authToken) {
-        console.log('No auth token, skipping completed jobs fetch');
-        return;
-      }
+      if (!authToken) return;
       
       try {
         const apiUrl = import.meta.env.VITE_API_URL;
-        console.log('API URL:', apiUrl);
-        console.log('Fetching from:', `${apiUrl}/travel/past-jobs`);
-        
         const response = await fetch(`${apiUrl}/travel/past-jobs`, {
           method: 'GET',
           credentials: 'include',
@@ -73,39 +62,18 @@ const Sidebar: React.FC<SidebarProps> = ({
           }
         });
         
-        console.log('Response status:', response.status);
-        console.log('Response ok:', response.ok);
-        
         if (response.ok) {
           const data = await response.json();
-          console.log('Completed jobs data:', data);
-          
-          // Extract completed jobs from the response
           let completedJobsData = [];
           if (data.ratings && Array.isArray(data.ratings)) {
             completedJobsData = data.ratings;
-            console.log('Found ratings array:', completedJobsData);
           } else if (Array.isArray(data)) {
             completedJobsData = data;
-            console.log('Data is already an array:', completedJobsData);
-          } else {
-            console.warn('No valid completed jobs data found:', data);
-            completedJobsData = [];
-          }
-          
-          console.log('Setting completed jobs:', completedJobsData);
-          console.log('Completed jobs count:', completedJobsData.length);
-          if (completedJobsData.length > 0) {
-            console.log('First completed job structure:', completedJobsData[0]);
           }
           setCompletedJobs(completedJobsData);
-        } else {
-          console.error('Failed to fetch completed jobs:', response.status, response.statusText);
-          setCompletedJobs([]);
         }
       } catch (error) {
         console.error('Error fetching completed jobs:', error);
-        setCompletedJobs([]);
       }
     };
 
@@ -113,12 +81,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   }, [authToken]);
 
   useEffect(() => {
-    console.log('Sidebar useEffect triggered, authToken:', !!authToken, 'authToken value:', authToken);
     if (authToken) {
-      console.log('Calling fetchChats from Sidebar');
       fetchChats(authToken);
-    } else {
-      console.log('No authToken, not calling fetchChats');
     }
   }, [authToken]);
 
@@ -275,58 +239,22 @@ const Sidebar: React.FC<SidebarProps> = ({
               // Helper function to check if a job is completed
               // ANY chat that appears in the past-jobs endpoint should be marked as past job
               const isJobCompleted = (chat: ChatItem) => {
-                // TEMPORARY TEST: Force the first chat to be marked as completed
-                if (chats.length > 0 && chat.conversation_id === chats[0].conversation_id) {
-                  console.log('TESTING: Forcing first chat to be completed');
-                  return true;
-                }
-                
                 if (!completedJobs || !Array.isArray(completedJobs)) {
-                  console.log('No completed jobs data available');
                   return false;
                 }
                 
                 const isCompleted = completedJobs.some(completed => {
-                  // Check multiple possible field combinations
-                  const completedJobId = completed.jobId || completed.job_id;
-                  const completedTraderId = completed.userId || completed.trader_id || completed.user_id;
-                  const completedHomeownerId = completed.homeownerId || completed.homeowner_id;
-                  const completedConversationId = completed.conversation_id;
+                  const completedJobId = completed.jobId;
+                  const completedTraderId = completed.userId;
+                  const completedHomeownerId = completed.homeownerId;
                   
-                  // Match by conversation ID (most reliable)
-                  const conversationMatch = completedConversationId === chat.conversation_id;
-                  
-                  // Match by job ID and trader ID (for trader view)
                   const jobAndTraderMatch = completedJobId === chat.job_id && completedTraderId === chat.counterparty?.id;
-                  
-                  // Match by job ID and homeowner ID (for homeowner view)
                   const jobAndHomeownerMatch = completedJobId === chat.job_id && completedHomeownerId === chat.counterparty?.id;
                   
-                  // Match by job ID only (fallback)
-                  const jobOnlyMatch = completedJobId === chat.job_id;
                   
-                  const isCompleted = conversationMatch || jobAndTraderMatch || jobAndHomeownerMatch || jobOnlyMatch;
-                  
-                  console.log('Checking job completion:', {
-                    chatJobId: chat.job_id,
-                    chatCounterpartyId: chat.counterparty?.id,
-                    chatConversationId: chat.conversation_id,
-                    completedJobId: completedJobId,
-                    completedTraderId: completedTraderId,
-                    completedHomeownerId: completedHomeownerId,
-                    completedConversationId: completedConversationId,
-                    completedObject: completed,
-                    conversationMatch,
-                    jobAndTraderMatch,
-                    jobAndHomeownerMatch,
-                    jobOnlyMatch,
-                    isCompleted
-                  });
-                  
-                  return isCompleted;
+                  return jobAndTraderMatch || jobAndHomeownerMatch;
                 });
                 
-                console.log(`Job ${chat.job_id} is completed:`, isCompleted);
                 return isCompleted;
               };
 
@@ -340,22 +268,6 @@ const Sidebar: React.FC<SidebarProps> = ({
                 return acc;
               }, {});
 
-              // Debug: Log all the data we're working with
-              console.log('=== DEBUGGING JOB SEPARATION ===');
-              console.log('Current chats:', chats);
-              console.log('Completed jobs data:', completedJobs);
-              console.log('Grouped chats:', groupedChats);
-              
-              // Log individual chat details
-              chats.forEach((chat, index) => {
-                console.log(`Chat ${index}:`, {
-                  conversation_id: chat.conversation_id,
-                  job_id: chat.job_id,
-                  counterparty_id: chat.counterparty?.id,
-                  counterparty_name: chat.counterparty?.name,
-                  fullChatObject: chat
-                });
-              });
 
               // Separate active and past jobs based on completion status
               const activeChats: ChatItem[] = [];
@@ -372,15 +284,12 @@ const Sidebar: React.FC<SidebarProps> = ({
                 // Separate based on completion status
                 sortedChats.forEach(chat => {
                   const isCompleted = isJobCompleted(chat);
-                  console.log(`Processing chat ${chat.conversation_id} for trader ${chat.counterparty?.id}, job ${chat.job_id}: isCompleted = ${isCompleted}`);
                   
                   if (isCompleted) {
-                    console.log(`Adding to pastJobs: ${chat.conversation_id}`);
                     pastJobs.push(chat);
                   } else {
                     // Only show the most recent active chat per trader
                     if (!activeChats.find(activeChat => activeChat.counterparty?.id === chat.counterparty?.id)) {
-                      console.log(`Adding to activeChats: ${chat.conversation_id}`);
                       activeChats.push(chat);
                     }
                   }
@@ -418,14 +327,14 @@ const Sidebar: React.FC<SidebarProps> = ({
 
                   {/* Active Chats */}
                   {!showArchived && activeChats.map((chat) => {
-                    const isActive = currentConversationId === chat.conversation_id;
-                    const initials = getInitials(chat.counterparty?.name || 'Unknown');
-                    const hasUnread = chat.unread_count && chat.unread_count > 0;
+              const isActive = currentConversationId === chat.conversation_id;
+              const initials = getInitials(chat.counterparty?.name || 'Unknown');
+              const hasUnread = chat.unread_count && chat.unread_count > 0;
               
-                return (
-                  <button
-                    key={chat.conversation_id}
-                    onClick={() => handleChatClick(chat)}
+              return (
+                <button
+                  key={chat.conversation_id}
+                  onClick={() => handleChatClick(chat)}
                   className={`relative w-full p-4 mb-2 rounded-xl text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20 group ${
                     isActive 
                       ? 'bg-primary/8 border border-primary/20 shadow-sm' 
@@ -463,7 +372,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                           <span className="text-xs text-muted-foreground font-medium">
                             {formatLastMessageTime(chat.last_message_at)}
                           </span>
-                          {hasUnread && chat.unread_count > 0 && (
+                          {(chat.unread_count ?? 0) > 0 && (
                             <Badge className="bg-primary text-primary-foreground text-xs px-2 py-0.5 min-w-[20px] h-5 rounded-full flex items-center justify-center">
                               {chat.unread_count > 99 ? '99+' : chat.unread_count}
                             </Badge>
@@ -472,7 +381,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                       </div>
                       
                       {/* Job title */}
-                      {chat.counterparty?.job_title && (
+                      {chat.counterparty?.job_title && chat.counterparty.job_title !== '0' && (
                         <p className={`text-sm truncate mb-3 ${hasUnread ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>
                           {chat.counterparty.job_title}
                         </p>
@@ -480,15 +389,15 @@ const Sidebar: React.FC<SidebarProps> = ({
                       
                       {/* Message count */}
                       {Number(chat.message_count) > 0 && (
-                        <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground">
                           {Number(chat.message_count)} message{Number(chat.message_count) !== 1 ? 's' : ''}
-                        </p>
+                      </p>
                       )}
                     </div>
                   </div>
                 </button>
-                  );
-                })}
+              );
+            })}
 
 
                   {/* Past Jobs */}
@@ -517,7 +426,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                                 {initials}
                               </AvatarFallback>
                             </Avatar>
-                            {hasUnread && chat.unread_count > 0 && (
+                            {(chat.unread_count ?? 0) > 0 && (
                               <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold border-2 border-background">
                                 {chat.unread_count}
                               </div>
@@ -535,7 +444,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                             </div>
                             
                             {/* Job title */}
-                            {chat.counterparty?.job_title && (
+                            {chat.counterparty?.job_title && chat.counterparty.job_title !== '0' && (
                               <p className={`text-sm truncate mb-3 ${hasUnread ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>
                                 {chat.counterparty.job_title}
                               </p>

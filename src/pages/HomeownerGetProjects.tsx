@@ -575,42 +575,9 @@ const HomeownerGetProjects = () => {
       comment: comment.trim() || null,
     };
 
-    console.log("=== RATING SUBMISSION ===");
-    console.log("Rating Details:");
-    console.log(`  ⭐ Stars: ${rating}/5`);
-    console.log(`  💬 Comment: ${comment.trim() || "No comment provided"}`);
-    console.log(`  📝 Comment Length: ${comment.trim().length} characters`);
-    console.log("");
-    console.log("Trader Information:");
-    console.log(`  👤 Name: ${selectedTrader.trader_details.name}`);
-    console.log(`  🔧 Trade: ${selectedTrader.trader_details.primaryTrade}`);
-    console.log(`  📍 City: ${selectedTrader.trader_details.city}`);
-    console.log(`  📧 Email: ${selectedTrader.trader_details.email}`);
-    console.log(`  📱 Phone: ${selectedTrader.trader_details.phone || "Not provided"}`);
-    console.log(`  🆔 Trader ID (userId): ${selectedTrader.trader_id}`);
-    console.log("");
-    console.log("Job Information:");
-    console.log(`  📋 Title: ${selectedTrader.job_details.job_title}`);
-    console.log(`  📝 Description: ${selectedTrader.job_details.job_description}`);
-    console.log(`  💰 Budget: ${selectedTrader.job_details.budget}`);
-    console.log(`  ⏰ Urgency: ${selectedTrader.job_details.urgency}`);
-    console.log(`  📍 Location: ${selectedTrader.job_details.location}`);
-    console.log(`  🆔 Job ID: ${selectedTrader.job_id}`);
-    console.log("");
-    console.log("Homeowner Information:");
-    console.log(`  🏠 Homeowner ID: ${userId}`);
-    console.log("");
-    console.log("Conversation Information:");
-    console.log(`  💬 Total Messages: ${selectedTrader.message_count}`);
-    console.log(`  🆔 Conversation ID: ${selectedTrader.conversation_id}`);
-    console.log(`  📊 Status: ${selectedTrader.status}`);
-    console.log("");
-    console.log("API Payload:");
-    console.log(JSON.stringify(ratingPayload, null, 2));
-    console.log("========================");
 
     try {
-      const response = await fetch(`${apiUrl}/api/ratings/submit`, {
+      const response = await fetch(`${apiUrl}/travel/get-trader-completed-job`, {
         method: 'POST',
         credentials: 'include',
         headers: {
