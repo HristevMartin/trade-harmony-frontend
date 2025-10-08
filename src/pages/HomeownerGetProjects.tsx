@@ -230,6 +230,8 @@ const HomeownerGetProjects = () => {
     fetchProjects();
   }, [userId, apiUrl]);
 
+
+
   const formatBudget = (budget: string) => {
     const budgetMap: { [key: string]: string } = {
       'under-200': 'Under £200',

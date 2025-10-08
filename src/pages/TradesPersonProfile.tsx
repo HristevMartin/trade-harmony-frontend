@@ -50,6 +50,7 @@ const TradesPersonProfile = () => {
     const [selectedServices, setSelectedServices] = useState<string[]>([]);
     const [saving, setSaving] = useState(false);
     const [uploadingImage, setUploadingImage] = useState(false);
+    const [ratingTraderRatingProfile, setRatingTraderRatingProfile] = useState<any>(null);
     
     // Accordion states for mobile
     const [accordionStates, setAccordionStates] = useState({
@@ -78,6 +79,27 @@ const TradesPersonProfile = () => {
             'Mechanical Repairs'
         ];
     };
+
+    useEffect(() => {
+        const fetchTraders = async () => {
+          try {
+            const response = await fetch(`${apiUrl}/travel/get-trader-rating`, {
+              credentials: 'include',
+            });
+    
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+    
+            const data = await response.json();
+            console.log('Trader rating:', data);
+            setRatingTraderRatingProfile(data);
+          } catch (error) {
+            console.error('Error fetching traders:', error);
+          }
+        };
+        fetchTraders();
+      }, []);
 
     // Save profile data (only for own profile)
     const saveProfile = async (field: string, value: any) => {
@@ -536,20 +558,22 @@ const TradesPersonProfile = () => {
                                     <Badge variant="default" className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground border-0 px-2 py-1 text-sm font-medium">
                                         {traderProfile.primaryTrade} Specialist
                                     </Badge>
-                                    <button
-                                        onClick={() => {
-                                            console.log('Rating clicked:', {
-                                                traderName: traderProfile.name,
-                                                rating: 4.9,
-                                                totalReviews: 32,
-                                                timestamp: new Date().toISOString()
-                                            });
-                                        }}
-                                        className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-blue-50 to-slate-50 rounded-lg border border-blue-200/50"
-                                    >
-                                        <Star className="h-4 w-4 text-[#FACC15] fill-current" />
-                                        <span className="text-sm font-bold text-gray-800">4.9</span>
-                                    </button>
+                                    {ratingTraderRatingProfile?.rating && (
+                                        <button
+                                            onClick={() => {
+                                                console.log('Rating clicked:', {
+                                                    traderName: traderProfile.name,
+                                                    rating: ratingTraderRatingProfile.rating,
+                                                    totalReviews: ratingTraderRatingProfile.total_ratings,
+                                                    timestamp: new Date().toISOString()
+                                                });
+                                            }}
+                                            className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-blue-50 to-slate-50 rounded-lg border border-blue-200/50"
+                                        >
+                                            <Star className="h-4 w-4 text-[#FACC15] fill-current" />
+                                            <span className="text-sm font-bold text-gray-800">{ratingTraderRatingProfile.rating}</span>
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -615,34 +639,35 @@ const TradesPersonProfile = () => {
                                     </div>
                                 </div>
                                 
-                                {/* Rating Element */}
-                                <div className="flex justify-center md:justify-end">
-                                    <button
-                                        onClick={() => {
-                                            console.log('Rating clicked:', {
-                                                traderName: traderProfile.name,
-                                                rating: 4.9,
-                                                totalReviews: 32,
-                                                timestamp: new Date().toISOString()
-                                            });
-                                        }}
-                                        className="group flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-slate-50 hover:from-blue-100 hover:to-slate-100 rounded-xl border border-blue-200/50 hover:border-blue-300/70 transition-all duration-200 ease-in-out shadow-sm hover:shadow-md"
-                                        aria-label="View rating details"
-                                    >
-                                        <div className="flex items-center gap-1">
-                                            <Star className="h-5 w-5 text-[#FACC15] fill-current" />
-                                            <span className="text-lg font-bold text-gray-800 group-hover:text-blue-700 transition-colors">
-                                                4.9
-                                            </span>
-                                        </div>
-                                        <div className="text-sm text-gray-600 group-hover:text-blue-600 transition-colors">
-                                            / 5
-                                        </div>
-                                        <div className="hidden sm:block text-xs text-gray-500 group-hover:text-blue-500 transition-colors">
-                                            (32 reviews)
-                                        </div>
-                                    </button>
-                                </div>
+                                {ratingTraderRatingProfile?.rating && (
+                                    <div className="flex justify-center md:justify-end">
+                                        <button
+                                            onClick={() => {
+                                                console.log('Rating clicked:', {
+                                                    traderName: traderProfile.name,
+                                                    rating: ratingTraderRatingProfile.rating,
+                                                    totalReviews: ratingTraderRatingProfile.total_ratings,
+                                                    timestamp: new Date().toISOString()
+                                                });
+                                            }}
+                                            className="group flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-slate-50 hover:from-blue-100 hover:to-slate-100 rounded-xl border border-blue-200/50 hover:border-blue-300/70 transition-all duration-200 ease-in-out shadow-sm hover:shadow-md"
+                                            aria-label="View rating details"
+                                        >
+                                            <div className="flex items-center gap-1">
+                                                <Star className="h-5 w-5 text-[#FACC15] fill-current" />
+                                                <span className="text-lg font-bold text-gray-800 group-hover:text-blue-700 transition-colors">
+                                                    {ratingTraderRatingProfile.rating}
+                                                </span>
+                                            </div>
+                                            <div className="text-sm text-gray-600 group-hover:text-blue-600 transition-colors">
+                                                / 5
+                                            </div>
+                                            <div className="hidden sm:block text-xs text-gray-500 group-hover:text-blue-500 transition-colors">
+                                                ({ratingTraderRatingProfile.total_ratings} reviews)
+                                            </div>
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                             <p className="text-muted-foreground text-lg max-w-2xl">
                                 Professional {traderProfile.primaryTrade.toLowerCase()} services in {traderProfile.city} and surrounding areas
