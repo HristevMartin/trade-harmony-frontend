@@ -14,10 +14,10 @@ const Chat = () => {
   const navigate = useNavigate();
   const { conversation_id: paramConversationId } = useParams();
   const [searchParams] = useSearchParams();
-  
+
   // Support both URL params and search params for backward compatibility
   const conversationId = paramConversationId || searchParams.get('conversation_id');
-  
+
   // Payment flow parameters
   const jobId = searchParams.get('job_id');
   const homeownerName = searchParams.get('homeowner_name');
@@ -26,13 +26,13 @@ const Chat = () => {
   const jobBudget = searchParams.get('budget');
   const jobUrgency = searchParams.get('urgency');
   const jobCategory = searchParams.get('category');
-  
+
   // Check if this is coming from payment flow
   const isPaymentFlow = !conversationId && jobId && homeownerName;
 
   // Get AI job fit data for follow-up questions (if we have a jobId)
   const { followUpQuestions } = useAiJobFit(jobId || '');
-  
+
   // Helper functions for job data formatting
   const formatBudget = (budget: string | null) => {
     if (!budget) return null;
@@ -51,17 +51,7 @@ const Chat = () => {
     return urgency;
   };
 
-  // Debug logging
-  console.log('Chat Component Debug:', {
-    paramConversationId,
-    searchParamsConversationId: searchParams.get('conversation_id'),
-    finalConversationId: conversationId,
-    isPaymentFlow,
-    paymentFlowParams: { jobId, homeownerName, traderName, jobTitle, jobBudget, jobUrgency, jobCategory },
-    messageParam: searchParams.get('message'),
-    currentUrl: window.location.href
-  });
-  
+
   const [message, setMessage] = useState(searchParams.get('message') || '');
   const [conversation, setConversation] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -88,7 +78,7 @@ const Chat = () => {
         });
         const data = await response.json();
         console.log('Authentication response:', data);
-        
+
         setIsAuthenticated(data.authenticated);
         // For backward compatibility, set a dummy token when authenticated
         setAuthToken(data.authenticated ? 'session-authenticated' : null);
@@ -98,11 +88,36 @@ const Chat = () => {
         setAuthToken(null);
       }
     };
-    
+
     checkAuthentication();
   }, []);
-  
-  
+
+
+  useEffect(() => {
+    const apiFetchRequest = async () => {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const response = await fetch(`${apiUrl}/travel/past-jobs`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Chat summary data:', data);
+        } else {
+          console.error('Failed to fetch chat summary:', response.status);
+        }
+      } catch (error) {
+        console.error('Error fetching chat summary:', error);
+      }
+    };
+
+    apiFetchRequest();
+  }, []);
+
 
   // parse sideBarOpen query param and auto-select latest conversation
   const sideBarOpen = searchParams.get('sideBarOpen');
@@ -110,13 +125,13 @@ const Chat = () => {
     if (sideBarOpen && !conversationId) {
       // On mobile, open the sidebar sheet
       setSidebarOpen(true);
-      
+
       if (chats.length > 0) {
         // Find the most recent conversation and navigate to it
         const latestConversation = chats
           .slice()
           .sort((a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime())[0];
-        
+
         if (latestConversation?.conversation_id) {
           // Navigate to the latest conversation, removing the sideBarOpen param
           navigate(`/chat/${latestConversation.conversation_id}`, { replace: true });
@@ -125,26 +140,16 @@ const Chat = () => {
       // If no chats, just keep the sidebar open to show "No conversations yet"
     }
   }, [sideBarOpen, chats, conversationId, navigate])
-  
+
   // Get current user from localStorage
   const authUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
   const currentUserId = authUser.id;
-  
+
   // Check if current user is a homeowner/customer
-  const isCustomer = Array.isArray(authUser?.role) 
+  const isCustomer = Array.isArray(authUser?.role)
     ? authUser.role.includes('customer') || authUser.role.includes('CUSTOMER') || authUser.role.includes('homeowner') || authUser.role.includes('HOMEOWNER')
     : authUser?.role === 'customer' || authUser?.role === 'CUSTOMER' || authUser?.role === 'homeowner' || authUser?.role === 'HOMEOWNER';
-  
-  // Debug authentication state
-  console.log('Chat Auth Debug:', {
-    authUser,
-    currentUserId,
-    isAuthenticated,
-    authToken: !!authToken,
-    conversationId
-  });
-  
-  
+
 
   // Function to mark conversation as read
   const markConversationAsRead = async (conversationId: string, authToken: string) => {
@@ -157,19 +162,19 @@ const Chat = () => {
           'Content-Type': 'application/json',
         }
       });
-      
+
       if (readResponse.ok) {
         console.log('Marked conversation as read:', conversationId);
-        
+
         // Find the current chat to get its unread count
         const currentChat = chats.find(chat => chat.conversation_id === conversationId);
         const unreadCount = currentChat?.unread_count || 0;
-        
+
         // Optimistically update navbar unread count
         if (unreadCount > 0 && (window as any).updateNavbarUnreadCount) {
           (window as any).updateNavbarUnreadCount(-unreadCount);
         }
-        
+
         // Trigger a refetch of chats to get updated data
         if (authToken) {
           fetchChats(authToken);
@@ -202,7 +207,7 @@ const Chat = () => {
   useEffect(() => {
     const fetchTraderId = async () => {
       if (!conversationId || !isCustomer || traderId) return; // Don't fetch if we already have it
-      
+
       try {
         const apiUrl = import.meta.env.VITE_API_URL;
         const response = await fetch(`${apiUrl}/travel/chat-component/chat-summary`, {
@@ -212,16 +217,16 @@ const Chat = () => {
             'Content-Type': 'application/json'
           }
         });
-        
+
         if (response.ok) {
           const data = await response.json();
           console.log('Chat summary data for trader ID:', data);
-          
+
           // Find the conversation that matches our current conversationId
-          const conversation = data.conversations?.find((conv: any) => 
+          const conversation = data.conversations?.find((conv: any) =>
             conv.conversation_id === conversationId
           );
-          
+
           if (conversation?.trader_id) {
             console.log('Found trader ID from chat summary:', conversation.trader_id);
             setTraderId(conversation.trader_id);
@@ -231,7 +236,7 @@ const Chat = () => {
         console.error('Error fetching trader ID from chat summary:', error);
       }
     };
-    
+
     fetchTraderId();
   }, [conversationId, isCustomer, traderId]);
 
@@ -277,10 +282,10 @@ const Chat = () => {
   useEffect(() => {
     if (isPaymentFlow && chats.length > 0 && jobId && authToken) {
       console.log('Payment flow: Looking for existing conversation for job:', jobId);
-      
+
       // Look for existing conversation with this job_id
       const existingChat = chats.find(chat => chat.job_id === jobId);
-      
+
       if (existingChat) {
         console.log('Found existing conversation for job:', existingChat);
         // Redirect to the existing conversation
@@ -310,7 +315,7 @@ const Chat = () => {
       if (isPaymentFlow && !conversationId && jobId && authToken) {
         console.log('Payment flow: Creating new conversation for job:', jobId);
         setIsLoadingMessages(true);
-        
+
         try {
           const apiUrl = import.meta.env.VITE_API_URL;
           const createResponse = await fetch(`${apiUrl}/travel/chat-component/create-chat`, {
@@ -324,12 +329,12 @@ const Chat = () => {
               trader_id: currentUserId,
             }),
           });
-          
+
           if (createResponse.ok) {
             const createData = await createResponse.json();
             console.log('Created conversation:', createData);
             const newConversationId = createData.conversation?.conversation_id;
-            
+
             if (newConversationId) {
               // Redirect to the new conversation
               const newUrl = `/chat/${newConversationId}`;
@@ -347,18 +352,18 @@ const Chat = () => {
         }
         return;
       }
-      
+
       if (!conversationId || !authToken) {
         console.log('No conversationId or authToken, skipping message fetch', { conversationId, authToken: !!authToken });
         setIsLoadingMessages(false);
         return;
       }
-      
+
       console.log('Fetching messages for conversationId:', conversationId);
       setIsLoadingMessages(true);
       const apiUrl = import.meta.env.VITE_API_URL;
       const url = `${apiUrl}/travel/chat-component/${conversationId}`;
-      
+
       try {
         const response = await fetch(url, {
           method: 'GET',
@@ -367,11 +372,11 @@ const Chat = () => {
             'Content-Type': 'application/json',
           }
         });
-        
+
         if (response.ok) {
           const data = await response.json();
           console.log('Messages API response for conversation', conversationId, ':', data);
-          
+
           const transformedMessages = data.messages?.map(msg => ({
             id: msg.id,
             conversationId: msg.conversation_id,
@@ -380,16 +385,16 @@ const Chat = () => {
             createdAt: new Date(msg.created_at).getTime(),
             attachments: msg.attachments_json ? JSON.parse(msg.attachments_json) : []
           })).sort((a, b) => a.createdAt - b.createdAt) || []; // Sort in ascending order
-          
+
           console.log('Loaded', transformedMessages.length, 'messages for conversation:', conversationId);
-          
+
           setMessages(transformedMessages);
-          
+
           // Store conversation data if available
           if (data.conversation) {
             console.log('Setting conversation data:', data.conversation);
             setConversation(data.conversation);
-            
+
             // Update counterparty from conversation data if available and more complete
             if (data.conversation.counterparty) {
               console.log('Updating counterparty from conversation data:', data.conversation.counterparty);
@@ -415,7 +420,7 @@ const Chat = () => {
         setIsLoadingMessages(false);
       }
     };
-    
+
     fetchMessages();
   }, [conversationId, authToken, isPaymentFlow, jobId, currentUserId, navigate, isAuthenticated]);
 
@@ -439,7 +444,7 @@ const Chat = () => {
     if (messageParam && messageParam !== message) {
       console.log('Setting message from URL parameter:', messageParam);
       setMessage(messageParam);
-      
+
       // Clear the message parameter from the URL after setting it to state
       // to avoid re-triggering this effect
       const newSearchParams = new URLSearchParams(searchParams);
@@ -475,7 +480,7 @@ const Chat = () => {
       console.log('Cannot send message:', { message: textToSend, conversationId });
       return;
     }
-    
+
     // Use conversationId directly instead of trying to modify it
     const chatObj = {
       conversationId: conversationId,
@@ -497,9 +502,9 @@ const Chat = () => {
         },
         body: JSON.stringify(chatObj)
       });
-      
+
       console.log('Send message response:', response.status, response.statusText);
-      
+
       if (response.ok) {
         const responseData = await response.json();
         console.log('Message sent successfully:', responseData);
@@ -507,7 +512,7 @@ const Chat = () => {
         if (!messageText) {
           setMessage(''); // Clear the input after sending
         }
-        
+
         // Refresh messages after sending
         const refreshUrl = `${apiUrl}/travel/chat-component/${conversationId}`;
         const refreshResponse = await fetch(refreshUrl, {
@@ -517,7 +522,7 @@ const Chat = () => {
             'Content-Type': 'application/json',
           }
         });
-        
+
         if (refreshResponse.ok) {
           const refreshData = await refreshResponse.json();
           console.log('Refreshed messages:', refreshData);
@@ -557,7 +562,7 @@ const Chat = () => {
               <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
           </div>
-          
+
           {/* Center - Profile Capsule (only clickable for customers) */}
           <div className="flex-1 flex flex-col items-center justify-center px-2 sm:px-4 overflow-hidden">
             {counterparty && isCustomer ? (
@@ -590,7 +595,7 @@ const Chat = () => {
                       <User className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600" />
                     </div>
                   )}
-                  
+
                   {/* Name, Arrow, and Profession - Aligned */}
                   <div className="flex flex-col items-start min-w-0 gap-0.5">
                     <div className="flex items-baseline gap-1">
@@ -607,7 +612,7 @@ const Chat = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
                       </svg>
                     </div>
-                    
+
                     {/* Profession - consistent 16px line height, hidden on very small screens */}
                     {counterparty.job_title && (
                       <span className="hidden sm:inline text-sm text-gray-500 truncate max-w-[200px] sm:max-w-[260px] pb-1" style={{ lineHeight: '16px' }}>
@@ -616,7 +621,7 @@ const Chat = () => {
                     )}
                   </div>
                 </button>
-                
+
                 {/* Hint text - visible for homeowners */}
                 <p className="text-xs sm:text-sm text-gray-600 italic mt-1 text-center px-2 max-w-[90%] mx-auto leading-relaxed">
                   💡 You can click the trader's name above to view their profile
@@ -653,7 +658,7 @@ const Chat = () => {
               </h1>
             )}
           </div>
-          
+
           {/* Right side - Mobile Conversations Button */}
           <div className="flex items-center gap-2 flex-shrink-0">
             <Button
@@ -668,7 +673,7 @@ const Chat = () => {
             </Button>
           </div>
         </div>
-        
+
         {/* Hairline divider - separated and light */}
         <div className="pt-2">
           <div className="h-px bg-[#E5E7EB]"></div>
@@ -689,7 +694,7 @@ const Chat = () => {
                   </span>
                 </div>
               )}
-              
+
               {/* Budget */}
               {(jobBudget || formatBudget(jobBudget)) && (
                 <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
@@ -697,7 +702,7 @@ const Chat = () => {
                   {formatBudget(jobBudget)}
                 </Badge>
               )}
-              
+
               {/* Urgency */}
               {(jobUrgency || formatUrgency(jobUrgency)) && (
                 <Badge variant="secondary" className="bg-orange-100 text-orange-800 border-orange-200">
@@ -705,14 +710,14 @@ const Chat = () => {
                   {formatUrgency(jobUrgency)}
                 </Badge>
               )}
-              
+
               {/* Category */}
               {jobCategory && (
                 <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">
                   {jobCategory}
                 </Badge>
               )}
-              
+
               {/* Job ID for reference */}
               {jobId && (
                 <span className="text-blue-600 text-xs font-mono">
@@ -738,14 +743,14 @@ const Chat = () => {
 
         {/* Mobile Sidebar Drawer */}
         <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-          <SheetContent 
-            side="left" 
+          <SheetContent
+            side="left"
             className="w-[85vw] max-w-sm p-0 border-r"
             onOpenAutoFocus={(e) => e.preventDefault()}
             onCloseAutoFocus={(e) => e.preventDefault()}
           >
             <Sidebar
-              conversation={conversation} 
+              conversation={conversation}
               counterparty={legacyCounterparty}
               authToken={authToken}
               currentConversationId={conversationId}
@@ -812,7 +817,7 @@ const Chat = () => {
                       </div>
                       <h3 className="font-semibold text-xl text-foreground mb-3">No messages yet</h3>
                       <p className="text-muted-foreground text-base mb-6 leading-relaxed">
-                        {counterparty?.name 
+                        {counterparty?.name
                           ? `Start a conversation with ${counterparty.name}. Send a message below to get started.`
                           : 'Send a message below to start the conversation.'
                         }
@@ -869,7 +874,7 @@ const Chat = () => {
                   disabled={!conversationId}
                   className="flex-1 px-4 py-3 bg-background rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed text-sm transition-all min-h-[44px]"
                 />
-                <Button 
+                <Button
                   onClick={() => handleSendMessage()}
                   disabled={!message.trim() || !conversationId}
                   className="rounded-xl min-h-[44px] min-w-[44px] flex items-center justify-center"
