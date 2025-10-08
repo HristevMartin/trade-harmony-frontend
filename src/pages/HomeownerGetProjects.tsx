@@ -103,7 +103,7 @@ const HomeownerGetProjects = () => {
     total_posted: number;
     total_cancelled: number;
   } | null>(null);
-  
+
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [traders, setTraders] = useState<TraderConversation[]>([]);
@@ -113,7 +113,7 @@ const HomeownerGetProjects = () => {
   const [hoveredRating, setHoveredRating] = useState(0);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  
+
   const navigate = useNavigate();
   const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -139,16 +139,16 @@ const HomeownerGetProjects = () => {
         let response = await fetch(`${apiUrl}/travel/get-all-client-status-projects`, {
           credentials: 'include',
         });
-        
+
         if (!response.ok) {
           console.error('API response not ok:', response.status, response.statusText);
           return;
         }
-        
+
         const data = await response.json();
         console.log('Homeowner stats API response:', data);
         setShowStatusProjects(data.projects);
-        
+
         if (data.success) {
           const stats = {
             completed_jobs: data.completed_jobs || 0,
@@ -169,25 +169,25 @@ const HomeownerGetProjects = () => {
   }, [apiUrl]);
 
   useEffect(() => {
-     const apiFetchRequest=  async () => {
+    const apiFetchRequest = async () => {
       try {
-        
+
         const response = await fetch(`${apiUrl}/travel/get-trader-completed-job`, {
           credentials: 'include',
         });
-        
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
         console.log('Trader completed jobs:', data);
 
       } catch (error) {
         console.error('Error fetching projects:', error);
       }
-     }
-     apiFetchRequest();
+    }
+    apiFetchRequest();
   }, []);
 
   useEffect(() => {
@@ -460,7 +460,7 @@ const HomeownerGetProjects = () => {
     const isCompleted = project.status === 'completed';
     openConfirmModal(
       isCompleted ? "Delete Job" : "Cancel Job",
-      isCompleted 
+      isCompleted
         ? "Are you sure you want to delete this job? This action cannot be undone."
         : "Are you sure you want to cancel this job? This will close the job and stop receiving applications.",
       () => {
@@ -480,11 +480,11 @@ const HomeownerGetProjects = () => {
     setSelectedProject(project);
     setShowRatingModal(true);
     setLoadingTraders(true);
-    
+
     try {
       console.log('Fetching traders for project:', project.project_id);
       console.log('API URL:', `${apiUrl}/travel/get-trader-completed-job`);
-      
+
       const response = await fetch(`${apiUrl}/travel/get-trader-completed-job`, {
         credentials: 'include',
         headers: {
@@ -498,33 +498,33 @@ const HomeownerGetProjects = () => {
 
       const data = await response.json();
       console.log('Trader completed jobs response:', data);
-      
+
       if (data.success && Array.isArray(data.chats)) {
         const filteredTraders = data.chats.filter(
           (chat: TraderConversation) => chat.job_id === project.project_id
         );
-        
+
         const uniqueTraders = filteredTraders.reduce((acc: TraderConversation[], current: TraderConversation) => {
           const existingTrader = acc.find(trader => trader.trader_id === current.trader_id);
-          
+
           if (!existingTrader) {
             acc.push(current);
           } else {
             const currentMessages = parseInt(current.message_count) || 0;
             const existingMessages = parseInt(existingTrader.message_count) || 0;
-            
+
             if (currentMessages > existingMessages) {
               const index = acc.indexOf(existingTrader);
               acc[index] = current;
             }
           }
-          
+
           return acc;
         }, []);
-        
+
         console.log(`Found ${filteredTraders.length} conversations, deduplicated to ${uniqueTraders.length} unique traders for this job`);
         setTraders(uniqueTraders);
-        
+
         if (uniqueTraders.length === 1) {
           setSelectedTrader(uniqueTraders[0]);
         }
@@ -532,7 +532,7 @@ const HomeownerGetProjects = () => {
         console.error('Invalid response format:', data);
         setTraders([]);
       }
-      
+
     } catch (err) {
       console.error("Error fetching traders:", err);
       setTraders([]);
@@ -948,7 +948,7 @@ const HomeownerGetProjects = () => {
 
                     {/* Action Buttons */}
                     <div className="space-y-3">
-                      {/* Primary Actions */}
+                      {/* Primary Actions Row */}
                       <div className="grid grid-cols-2 gap-3">
                         <Button
                           onClick={() => navigate(`/jobs/${project.project_id}`)}
@@ -960,29 +960,19 @@ const HomeownerGetProjects = () => {
                           View Details
                         </Button>
 
-                        <Button
-                          onClick={() => navigate(`/edit-job/${project?.project_id}`)}
-                          variant="outline"
-                          className="h-11 px-4 rounded-xl border-border hover:bg-muted/50 text-sm font-medium transition-all"
-                          aria-label={`Edit ${project.job_title}`}
-                        >
-                          <Edit className="w-4 h-4 mr-2" />
-                          Edit Job
-                        </Button>
-                      </div>
-
-                      {/* Secondary Actions */}
-                      <div className="grid grid-cols-2 gap-3">
-                        {project.status !== 'completed' ? (
+                        {project.status !== 'completed' && (
                           <Button
-                            onClick={() => handleMarkComplete(project)}
-                            className="h-11 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl transition-all"
-                            aria-label={`Mark ${project.job_title} as complete`}
+                            onClick={() => navigate(`/edit-job/${project?.project_id}`)}
+                            variant="outline"
+                            className="h-11 px-4 rounded-xl border-border hover:bg-muted/50 text-sm font-medium transition-all"
+                            aria-label={`Edit ${project.job_title}`}
                           >
-                            <CheckCircle className="w-4 h-4 mr-2" />
-                            Mark Complete
+                            <Edit className="w-4 h-4 mr-2" />
+                            Edit Job
                           </Button>
-                        ) : (
+                        )}
+
+                        {project.status === 'completed' && (
                           <Button
                             onClick={() => handleOpenRatingModal(project)}
                             className="h-11 px-4 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-xl transition-all"
@@ -990,6 +980,20 @@ const HomeownerGetProjects = () => {
                           >
                             <Star className="w-4 h-4 mr-2" />
                             Rate Trader
+                          </Button>
+                        )}
+                      </div>
+
+                      {/* Secondary Actions Row */}
+                      <div className="grid grid-cols-2 gap-3">
+                        {project.status !== 'completed' && (
+                          <Button
+                            onClick={() => handleMarkComplete(project)}
+                            className="h-11 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl transition-all"
+                            aria-label={`Mark ${project.job_title} as complete`}
+                          >
+                            <CheckCircle className="w-4 h-4 mr-2" />
+                            Mark Complete
                           </Button>
                         )}
 
@@ -1170,11 +1174,10 @@ const HomeownerGetProjects = () => {
                             aria-label={`Rate ${star} stars`}
                           >
                             <Star
-                              className={`w-10 h-10 transition-colors ${
-                                star <= (hoveredRating || rating)
+                              className={`w-10 h-10 transition-colors ${star <= (hoveredRating || rating)
                                   ? "text-[#FACC15] fill-[#FACC15]"
                                   : "text-muted-foreground"
-                              }`}
+                                }`}
                             />
                           </button>
                         ))}

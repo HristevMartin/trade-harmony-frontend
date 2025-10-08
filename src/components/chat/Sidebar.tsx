@@ -45,9 +45,13 @@ const Sidebar: React.FC<SidebarProps> = ({
   const { chats, isLoading, error, fetchChats } = useChats();
   const [showArchived, setShowArchived] = useState(false);
   const [completedJobs, setCompletedJobs] = useState<CompletedJob[]>([]);
-  
 
-  // Fetch completed jobs data
+  // Get current user from localStorage to determine if they're a trader
+  const authUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
+  const isTrader = !Array.isArray(authUser?.role)
+    ? authUser?.role === 'trader' || authUser?.role === 'TRADER' || authUser?.role === 'tradesperson' || authUser?.role === 'TRADESPERSON'
+    : authUser?.role?.includes('trader') || authUser?.role?.includes('TRADER') || authUser?.role?.includes('tradesperson') || authUser?.role?.includes('TRADESPERSON');
+
   useEffect(() => {
     const fetchCompletedJobs = async () => {
       if (!authToken) return;
@@ -230,7 +234,10 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
             <h4 className="font-semibold text-foreground text-lg mb-3">No conversations yet</h4>
             <p className="text-muted-foreground text-sm leading-relaxed max-w-sm mx-auto">
-              Your conversations will appear here when you start chatting with homeowners about projects.
+              {isTrader 
+                ? "Your conversations with homeowners will appear here when you start chatting about projects."
+                : "Your conversations will appear here when you start chatting with your contacts."
+              }
             </p>
           </div>
         ) : (
@@ -258,8 +265,17 @@ const Sidebar: React.FC<SidebarProps> = ({
                 return isCompleted;
               };
 
+              // Filter out "Unknown" conversations for traders
+              const filteredChats = chats.filter(chat => {
+                // If user is a trader, hide conversations with "Unknown" counterparty names
+                if (isTrader && chat.counterparty?.name === 'Unknown') {
+                  return false;
+                }
+                return true;
+              });
+
               // Group chats by trader_id
-              const groupedChats = chats.reduce((acc: { [key: string]: ChatItem[] }, chat) => {
+              const groupedChats = filteredChats.reduce((acc: { [key: string]: ChatItem[] }, chat) => {
                 const traderId = chat.counterparty?.id || 'unknown';
                 if (!acc[traderId]) {
                   acc[traderId] = [];

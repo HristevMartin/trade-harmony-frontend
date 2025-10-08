@@ -19,10 +19,11 @@ interface AuthModalProps {
     onSuccess: (authData: AuthData) => void;
     role?: string; // Optional role to specify user type (e.g., 'trader', 'customer')
     initialEmail?: string; // Optional initial email to prefill the form
+    defaultTab?: 'login' | 'register'; // Optional default tab to show
 }
 
-const AuthModal = ({ isOpen, onClose, onSuccess, role = 'customer', initialEmail }: AuthModalProps) => {
-    const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
+const AuthModal = ({ isOpen, onClose, onSuccess, role = 'customer', initialEmail, defaultTab = 'login' }: AuthModalProps) => {
+    const [activeTab, setActiveTab] = useState<'login' | 'register'>(defaultTab);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
@@ -38,6 +39,13 @@ const AuthModal = ({ isOpen, onClose, onSuccess, role = 'customer', initialEmail
             setFormData(prev => ({ ...prev, email: initialEmail }));
         }
     }, [initialEmail]);
+
+    // Reset to default tab when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            setActiveTab(defaultTab);
+        }
+    }, [isOpen, defaultTab]);
 
     const handleInputChange = (field: string, value: string) => {
         setFormData(prev => {
