@@ -2031,6 +2031,7 @@ const PostJob = () => {
                 }}
                 onSuccess={handleAuthSuccess}
                 initialEmail={formData.email}
+                defaultTab="register"
             />
         </>
     );

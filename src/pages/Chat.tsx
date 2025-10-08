@@ -119,27 +119,6 @@ const Chat = () => {
   }, []);
 
 
-  // parse sideBarOpen query param and auto-select latest conversation
-  const sideBarOpen = searchParams.get('sideBarOpen');
-  useEffect(() => {
-    if (sideBarOpen && !conversationId) {
-      // On mobile, open the sidebar sheet
-      setSidebarOpen(true);
-
-      if (chats.length > 0) {
-        // Find the most recent conversation and navigate to it
-        const latestConversation = chats
-          .slice()
-          .sort((a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime())[0];
-
-        if (latestConversation?.conversation_id) {
-          // Navigate to the latest conversation, removing the sideBarOpen param
-          navigate(`/chat/${latestConversation.conversation_id}`, { replace: true });
-        }
-      }
-      // If no chats, just keep the sidebar open to show "No conversations yet"
-    }
-  }, [sideBarOpen, chats, conversationId, navigate])
 
   // Get current user from localStorage
   const authUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
@@ -680,8 +659,8 @@ const Chat = () => {
         </div>
       </header>
 
-      {/* Job Info Header - Shows job context when available */}
-      {(isPaymentFlow || (conversationId && (jobBudget || jobUrgency || jobCategory || counterparty?.job_title))) && (
+      {/* Job Info Header - Shows job context when a chat is selected and has messages or is payment flow */}
+      {conversationId && !isLoadingMessages && messages.length > 0 && (conversation || counterparty) && (jobTitle || counterparty?.job_title || jobBudget || jobUrgency || jobCategory) && (
         <div className="flex-shrink-0 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100">
           <div className="px-4 sm:px-6 py-3">
             <div className="flex flex-wrap items-center gap-3 text-sm">
@@ -696,7 +675,7 @@ const Chat = () => {
               )}
 
               {/* Budget */}
-              {(jobBudget || formatBudget(jobBudget)) && (
+              {jobBudget && formatBudget(jobBudget) && (
                 <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
                   <DollarSign className="w-3 h-3 mr-1" />
                   {formatBudget(jobBudget)}
@@ -704,7 +683,7 @@ const Chat = () => {
               )}
 
               {/* Urgency */}
-              {(jobUrgency || formatUrgency(jobUrgency)) && (
+              {jobUrgency && formatUrgency(jobUrgency) && (
                 <Badge variant="secondary" className="bg-orange-100 text-orange-800 border-orange-200">
                   <Clock className="w-3 h-3 mr-1" />
                   {formatUrgency(jobUrgency)}
