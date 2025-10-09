@@ -86,7 +86,7 @@ const TradesPersonProfile = () => {
         const fetchTraders = async () => {
             // Only fetch ratings if we have trader profile data with userId
             // if (!traderProfile?.userId) return;
-            
+
             setLoadingRatings(true);
             setRatingsError(null);
             try {
@@ -482,10 +482,10 @@ const TradesPersonProfile = () => {
 
     const [isVerified, setIsVerified] = useState(false);
     const [checkingVerification, setCheckingVerification] = useState(false);
-    
+
     const checkTraderVerified = async (targetUserId: string) => {
         if (checkingVerification) return;
-        
+
         setCheckingVerification(true);
         try {
             const response = await fetch(`${apiUrl}/travel/check-verified-trader/${targetUserId}`, {
@@ -507,14 +507,15 @@ const TradesPersonProfile = () => {
     // Check verification status for homeowners viewing trader profiles
     useEffect(() => {
         const hasVerifiedProfessionalStatus2 = hasVerifiedProfessionalStatus();
-        
-        // If viewing someone else's profile (homeowner viewing trader) and trader doesn't have master role
+
         if (!isOwnProfile && nameId && !hasVerifiedProfessionalStatus2) {
             console.log('Checking verification for trader:', nameId);
             checkTraderVerified(nameId);
         } else if (hasVerifiedProfessionalStatus2) {
             // Trader has master role, so they're verified
             setIsVerified(true);
+            console.log('show me the userId', userId);
+            checkTraderVerified(userId);
         }
     }, [nameId, isOwnProfile]);
 
@@ -646,19 +647,17 @@ const TradesPersonProfile = () => {
                                         {traderProfile.primaryTrade} Specialist
                                     </Badge>
                                     {/* Verification Badge for Homeowners - Mobile */}
-                                    {!isOwnProfile && (
-                                        <Badge 
-                                            variant={isVerified ? "default" : "secondary"} 
-                                            className={`px-2 py-1 text-xs font-medium border-0 ${
-                                                isVerified 
-                                                    ? "bg-gradient-to-r from-green-500 to-green-600 text-white" 
-                                                    : "bg-gradient-to-r from-gray-400 to-gray-500 text-white"
+
+                                    <Badge
+                                        variant={isVerified ? "default" : "secondary"}
+                                        className={`px-2 py-1 text-xs font-medium border-0 ${isVerified
+                                            ? "bg-gradient-to-r from-green-500 to-green-600 text-white"
+                                            : "bg-gradient-to-r from-gray-400 to-gray-500 text-white"
                                             }`}
-                                        >
-                                            <CheckCircle className="h-3 w-3 mr-1" />
-                                            {checkingVerification ? "Checking..." : (isVerified ? "Verified" : "Unverified")}
-                                        </Badge>
-                                    )}
+                                    >
+                                        <CheckCircle className="h-3 w-3 mr-1" />
+                                        {checkingVerification ? "Checking..." : (isVerified ? "Verified" : "Unverified")}
+                                    </Badge>
                                     {ratingTraderRatingProfile?.rating !== undefined && ratingTraderRatingProfile?.rating > 0 && ratingTraderRatingProfile?.total_ratings > 0 && (
                                         <button
                                             onClick={() => {
@@ -738,6 +737,16 @@ const TradesPersonProfile = () => {
                                         <Badge variant="default" className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground border-0 px-4 py-2 text-base font-medium">
                                             {traderProfile.primaryTrade} Specialist
                                         </Badge>
+                                        <Badge
+                                            variant={isVerified ? "default" : "secondary"}
+                                            className={`px-3 py-2 text-sm font-medium border-0 ${isVerified
+                                                ? "bg-gradient-to-r from-green-500 to-green-600 text-white"
+                                                : "bg-gradient-to-r from-gray-400 to-gray-500 text-white"
+                                                }`}
+                                        >
+                                            <CheckCircle className="h-4 w-4 mr-1" />
+                                            {checkingVerification ? "Checking..." : (isVerified ? "Verified" : "Unverified")}
+                                        </Badge>
                                     </div>
                                 </div>
 
@@ -764,7 +773,7 @@ const TradesPersonProfile = () => {
                                             <div className="text-sm text-gray-600 group-hover:text-blue-600 transition-colors">
                                                 / 5
                                             </div>
-                                            <div className="hidden sm:block text-xs text-gray-500 group-hover:text-blue-500 transition-colors">
+                                            <div className="text-xs text-gray-500 group-hover:text-blue-500 transition-colors">
                                                 ({ratingTraderRatingProfile.total_ratings} reviews)
                                             </div>
                                         </button>
@@ -1486,10 +1495,10 @@ const TradesPersonProfile = () => {
                                         Customer Reviews
                                     </CardTitle>
                                     {!loadingRatings && ratingTraderRatingProfile?.total_ratings > 0 && (
-                                        <div className="group">
+                                        <div className="group w-full sm:w-auto flex justify-center sm:justify-end">
                                             <Badge
                                                 variant="secondary"
-                                                className="text-base px-4 py-2 gap-2 cursor-pointer hover:bg-secondary/80 transition-all duration-200 animate-in fade-in-50 slide-in-from-right-2"
+                                                className="text-sm sm:text-base px-3 sm:px-4 py-1.5 sm:py-2 gap-2 cursor-pointer hover:bg-secondary/80 transition-all duration-200 animate-in fade-in-50 slide-in-from-right-2"
                                                 onClick={scrollToReviews}
                                                 role="button"
                                                 tabIndex={0}
@@ -1497,7 +1506,9 @@ const TradesPersonProfile = () => {
                                                 title="Average rating from verified homeowners - Click to view reviews"
                                             >
                                                 <Star className="h-4 w-4 fill-[#FACC15] text-[#FACC15] transition-transform group-hover:scale-110" />
-                                                {Number(ratingTraderRatingProfile.rating || 0).toFixed(1)} / 5 · {ratingTraderRatingProfile.total_ratings} {ratingTraderRatingProfile.total_ratings === 1 ? 'review' : 'reviews'}
+                                                <span className="whitespace-nowrap">
+                                                    {Number(ratingTraderRatingProfile.rating || 0).toFixed(1)} / 5 · {ratingTraderRatingProfile.total_ratings} {ratingTraderRatingProfile.total_ratings === 1 ? 'review' : 'reviews'}
+                                                </span>
                                             </Badge>
                                         </div>
                                     )}
@@ -1606,8 +1617,8 @@ const TradesPersonProfile = () => {
                                                                         <Star
                                                                             key={starIndex}
                                                                             className={`h-4 w-4 transition-all duration-200 hover:scale-110 ${starIndex < review.rating
-                                                                                    ? 'text-[#FACC15] fill-current group-hover:drop-shadow-sm'
-                                                                                    : 'text-gray-300'
+                                                                                ? 'text-[#FACC15] fill-current group-hover:drop-shadow-sm'
+                                                                                : 'text-gray-300'
                                                                                 }`}
                                                                             aria-hidden="true"
                                                                         />
