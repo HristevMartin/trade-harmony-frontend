@@ -1222,22 +1222,68 @@ const TradesPersonProfile = () => {
                                 <Separator className="my-6" />
 
                                 <div>
-                                    <h4 className="font-semibold mb-4 text-lg">Certifications & Qualifications</h4>
-                                    <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-950/20 dark:to-blue-900/20 p-6 rounded-xl border border-blue-200 dark:border-blue-800">
-                                        <div className="flex items-start space-x-4">
-                                            <div className="bg-blue-500 p-2 rounded-lg">
-                                                <Award className="h-5 w-5 text-gray-800" />
-                                            </div>
-                                            <div>
-                                                <p className="font-medium text-blue-900 dark:text-blue-100 text-lg">
-                                                    {traderProfile.certifications || 'Professional Certification'}
-                                                </p>
-                                                <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                                                    Verified industry qualification
-                                                </p>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h4 className="font-semibold text-lg">Certifications & Qualifications</h4>
+                                        {isOwnProfile && editingField !== 'certifications' && (
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => {
+                                                    setEditingField('certifications');
+                                                    setTempData({ certifications: traderProfile.certifications || '' });
+                                                }}
+                                                className="border-primary/20 hover:bg-primary/5"
+                                            >
+                                                <Edit3 className="h-3 w-3 mr-2" />
+                                                Edit
+                                            </Button>
+                                        )}
+                                    </div>
+
+                                    {editingField === 'certifications' ? (
+                                        <div className="space-y-4">
+                                            <Textarea
+                                                value={tempData.certifications || ''}
+                                                onChange={(e) => setTempData({ ...tempData, certifications: e.target.value })}
+                                                placeholder="List your certifications, qualifications, and professional credentials..."
+                                                className="min-h-[100px] text-base"
+                                            />
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    size="sm"
+                                                    onClick={() => saveProfile('certifications', tempData.certifications)}
+                                                    disabled={saving}
+                                                >
+                                                    <Save className="h-3 w-3 mr-1" />
+                                                    Save Certifications
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={cancelEditing}
+                                                >
+                                                    <X className="h-3 w-3 mr-1" />
+                                                    Cancel
+                                                </Button>
                                             </div>
                                         </div>
-                                    </div>
+                                    ) : (
+                                        <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-950/20 dark:to-blue-900/20 p-6 rounded-xl border border-blue-200 dark:border-blue-800">
+                                            <div className="flex items-start space-x-4">
+                                                <div className="bg-blue-500 p-2 rounded-lg">
+                                                    <Award className="h-5 w-5 text-gray-800" />
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium text-blue-900 dark:text-blue-100 text-lg">
+                                                        {traderProfile.certifications || 'Professional Certification'}
+                                                    </p>
+                                                    <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                                                        {traderProfile.certifications ? 'Verified industry qualification' : 'Add your certifications to build trust with clients'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Certification Images */}
