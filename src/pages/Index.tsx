@@ -360,8 +360,8 @@ const Index = () => {
               transition={{ duration: 0.8 }}
                 className="font-bold leading-tight text-[clamp(1.8rem,5vw,3.2rem)] text-foreground mb-6 md:mb-8 max-w-4xl mx-auto"
             >
-                Post your job and connect with trusted tradespeople{" "}
-              <span className="text-trust-blue">near you</span>
+                Smarter Local Hiring —{" "}
+              <span className="text-trust-blue">Powered by AI and Real Verification</span>
             </motion.h1>
             
             <motion.p
@@ -370,7 +370,7 @@ const Index = () => {
               transition={{ duration: 0.8, delay: 0.2 }}
                 className="text-slate-600 text-[clamp(1rem,2.8vw,1.25rem)] mb-8 md:mb-10 max-w-3xl mx-auto leading-relaxed"
             >
-                It's free to post. Tradespeople apply to your job, and you choose the right one.
+                JobHub helps homeowners describe projects with AI, matches them with verified tradespeople nearby, and ensures every job is completed with trust and transparency.
             </motion.p>
             </div>
 
@@ -430,8 +430,8 @@ const Index = () => {
                       onClick={handlePostJob}
                     >
                       <span className="flex items-center justify-center">
-                        <span className="hidden lg:inline">Post Your Job Today</span>
-                        <span className="lg:hidden">Post Job</span>
+                        <span className="hidden lg:inline">Post a Job with AI</span>
+                        <span className="lg:hidden">Post Job with AI</span>
                         <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                       </span>
                 </Button>
@@ -453,7 +453,7 @@ const Index = () => {
                 onClick={handlePostJob}
               >
                 <span className="flex items-center justify-center">
-                  Post Your Job Today
+                  Post a Job with AI
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </span>
               </Button>
@@ -572,7 +572,7 @@ const Index = () => {
               transition={{ duration: 0.6 }}
             >
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">How JobHub Works</h2>
-              <p className="text-muted-foreground text-lg">Your complete journey from posting to hiring — powered by AI and built on trust</p>
+              <p className="text-muted-foreground text-lg">Smart AI assistance meets human verification — for your perfect match</p>
             </motion.div>
           </div>
           
@@ -584,26 +584,26 @@ const Index = () => {
               {[
                 {
                   icon: <ClipboardList className="h-10 w-10" />,
-                  title: "Post Your Job",
-                  description: "Describe your project with as much detail as you like. AI helps you complete missing details.",
+                  title: "Post Your Job with AI",
+                  description: "Describe your project naturally — our AI helps refine your post and adds missing details.",
                   color: "trust-blue"
                 },
                 {
                   icon: <Brain className="h-10 w-10" />,
-                  title: "AI Matches Jobs",
-                  description: "Our AI instantly finds the best-fit tradespeople based on skills, location, and reviews.",
+                  title: "AI Finds Perfect Matches",
+                  description: "We match you with tradespeople based on trade, distance, and verified experience.",
                   color: "trust-green"
                 },
                 {
                   icon: <Users className="h-10 w-10" />,
                   title: "Verified Pros Apply",
-                  description: "Only verified, insured tradespeople with proven track records can apply to your job.",
+                  description: "Only ID-verified and insured professionals can apply — no fake profiles.",
                   color: "accent-orange"
                 },
                 {
                   icon: <Handshake className="h-10 w-10" />,
-                  title: "Hire & Review",
-                  description: "Compare profiles, chat directly, hire confidently, and leave a verified review when done.",
+                  title: "Hire & Leave Reviews",
+                  description: "Chat securely, compare verified trades, and share real homeowner feedback.",
                   color: "trust-blue"
                 }
               ].map((step, index) => (
@@ -657,8 +657,9 @@ const Index = () => {
                 <Shield className="h-5 w-5" />
                 <span>Verified Network</span>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Why Verification Matters</h2>
-              <p className="text-muted-foreground text-lg">Every tradesperson on JobHub is thoroughly vetted — so you can hire with complete confidence</p>
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Smart Matching, Human-Verified</h2>
+              <p className="text-muted-foreground text-lg">Every tradesperson on JobHub is ID-verified, insured, and reviewed by real homeowners — ensuring genuine expertise on every project</p>
+              <p className="text-sm text-muted-foreground mt-2 italic">Our Verified Network ensures every match is safe, insured, and qualified.</p>
             </motion.div>
           </div>
           
@@ -722,7 +723,7 @@ const Index = () => {
                     <div className="bg-trust-green/10 rounded-full p-2">
                       <CheckCircle2 className="h-6 w-6 text-trust-green" />
                     </div>
-                    <h4 className="font-bold text-foreground text-lg">Zero Scammers</h4>
+                    <h4 className="font-bold text-foreground text-lg">Fraud-Free Hiring</h4>
                   </div>
                   <p className="text-muted-foreground text-sm leading-relaxed">
                     Our 5-step verification process eliminates fraudulent profiles before they ever reach you
@@ -734,7 +735,7 @@ const Index = () => {
                     <div className="bg-trust-blue/10 rounded-full p-2">
                       <Award className="h-6 w-6 text-trust-blue" />
                     </div>
-                    <h4 className="font-bold text-foreground text-lg">Quality Guaranteed</h4>
+                    <h4 className="font-bold text-foreground text-lg">Verified Quality Every Time</h4>
                   </div>
                   <p className="text-muted-foreground text-sm leading-relaxed">
                     Only tradespeople with proven skills and positive reviews can join our platform
@@ -746,7 +747,7 @@ const Index = () => {
                     <div className="bg-accent-orange/10 rounded-full p-2">
                       <Shield className="h-6 w-6 text-accent-orange" />
                     </div>
-                    <h4 className="font-bold text-foreground text-lg">Fully Insured Work</h4>
+                    <h4 className="font-bold text-foreground text-lg">Work Backed by Verified Insurance</h4>
                   </div>
                   <p className="text-muted-foreground text-sm leading-relaxed">
                     Every tradesperson carries verified insurance — your property and project are protected
@@ -793,8 +794,9 @@ const Index = () => {
                 <Brain className="h-5 w-5" />
                 <span>AI-Powered Matching</span>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Find Your Perfect Match, Instantly</h2>
-              <p className="text-muted-foreground text-lg">Our AI analyzes skills, location, reviews, and job history to connect you with the best tradespeople for your project</p>
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">AI Finds the Right Professional — Instantly</h2>
+              <p className="text-muted-foreground text-lg">Homeowners use AI to describe jobs clearly. Tradespeople get AI-powered job recommendations based on their radius, skills, and verified track record.</p>
+              <p className="text-sm text-muted-foreground mt-2 italic">AI learns from real project data to predict the best fit for your job.</p>
             </motion.div>
           </div>
           
@@ -935,7 +937,8 @@ const Index = () => {
                 <span>Verified Reviews</span>
               </div>
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Real Reviews from Real Homeowners</h2>
-              <p className="text-muted-foreground text-lg">Every review on JobHub comes from a verified homeowner who completed a project — no fake reviews, ever</p>
+              <p className="text-muted-foreground text-lg">Every review on JobHub is verified and tied to a completed project — ensuring 100% authentic feedback</p>
+              <p className="text-sm text-muted-foreground mt-2 italic">JobHub combines AI efficiency with real human trust — saving time for homeowners and tradespeople alike.</p>
             <div className="flex flex-wrap items-center justify-center gap-6 mt-6 mb-8">
               <div className="flex items-center gap-2 bg-trust-green/10 px-3 py-2 rounded-full border border-trust-green/20">
                   <Shield className="h-5 w-5 text-trust-green" aria-hidden="true" />
@@ -1060,15 +1063,15 @@ const Index = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
               <div className="group cursor-default bg-gradient-to-br from-card/80 to-card/60 p-6 rounded-2xl border border-primary/10 shadow-lg transition-all duration-300">
                 <div className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-200 mb-2 transition-transform group-hover:scale-110">30,000+</div>
-                <div className="text-muted-foreground font-medium">Happy Customers</div>
+                <div className="text-muted-foreground font-medium">Homeowners Helped</div>
               </div>
               <div className="group cursor-default bg-gradient-to-br from-card/80 to-card/60 p-6 rounded-2xl border border-secondary/10 shadow-lg transition-all duration-300">
                 <div className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-200 mb-2 transition-transform group-hover:scale-110">50,000+</div>
-                <div className="text-muted-foreground font-medium">Verified Tradespeople</div>
+                <div className="text-muted-foreground font-medium">Professionals Verified & Active</div>
               </div>
               <div className="group cursor-default bg-gradient-to-br from-card/80 to-card/60 p-6 rounded-2xl border border-accent/10 shadow-lg transition-all duration-300">
                 <div className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-200 mb-2 transition-transform group-hover:scale-110">99%</div>
-                <div className="text-muted-foreground font-medium">Customer Satisfaction</div>
+                <div className="text-muted-foreground font-medium">Satisfaction with Verified Jobs</div>
               </div>
             </div>
           </motion.div>
@@ -1163,10 +1166,10 @@ const Index = () => {
             transition={{ duration: 0.8 }}
           >
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6">
-            Over 50,000 tradespeople nationwide are ready to help.
+            Smarter jobs. Verified trades.
           </h2>
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-6 sm:mb-8 md:mb-10 opacity-90 leading-relaxed">
-              Join thousands of satisfied customers who found their perfect tradesperson through our platform
+              Start your next project with AI guidance and trusted professionals
           </p>
           <Button 
             size="lg" 
@@ -1174,7 +1177,7 @@ const Index = () => {
               onClick={handlePostJob}
           >
               <span className="flex items-center">
-            Post Your Job Today
+            Post a Job with AI
                 <ArrowRight className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6 group-hover:translate-x-1 transition-transform" />
               </span>
           </Button>
