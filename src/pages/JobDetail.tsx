@@ -77,6 +77,8 @@ const JobDetail = () => {
         total_posted: number;
         total_cancelled: number;
     } | null>(null);
+    const [homeOwnerVerified, setHomeOwnerVerified] = useState(false);
+    const [showVerificationModal, setShowVerificationModal] = useState(false);
 
     // Get AI job fit data for follow-up questions
     const { followUpQuestions } = useAiJobFit(jobData?.project_id || '');
@@ -279,6 +281,25 @@ const JobDetail = () => {
     }, [location, navigate]);
 
 
+    useEffect(() => {
+        const apiCall = async () => {
+            let apiResponse = await fetch(`${import.meta.env.VITE_API_URL}/travel/check-verified-homeowner/${id}`, {
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            let data = await apiResponse.json()
+            if (data.status === true) {
+                setHomeOwnerVerified(true)
+            } else {
+                setHomeOwnerVerified(false)
+            }
+        }
+        apiCall()
+    }, [id])
+
+
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('en-GB', {
             day: 'numeric',
@@ -427,6 +448,8 @@ const JobDetail = () => {
                     </div>
                 )}
 
+
+
                 <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8 py-4 md:py-6 lg:py-10">
                     {/* Header */}
                     <div className="mb-6 md:mb-8">
@@ -441,6 +464,26 @@ const JobDetail = () => {
                                 <HiArrowLeft className="w-4 h-4" />
                                 Back
                             </Button>
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <p className="text-slate-800 font-semibold text-base md:text-lg tracking-tight">{jobData.first_name}</p>
+                            {homeOwnerVerified ? (
+                                <Badge 
+                                    className="bg-green-50 text-green-700 border border-green-200 shadow-sm flex items-center gap-1.5 text-xs px-2.5 py-0.5 rounded-full font-medium hover:bg-green-100 transition-colors cursor-pointer"
+                                    onClick={() => setShowVerificationModal(true)}
+                                >
+                                    <HiCheckCircle className="w-4 h-4" />
+                                    Verified Client
+                                </Badge>
+                            ) : (
+                                <Badge 
+                                    className="bg-amber-50 text-amber-700 border border-amber-200 shadow-sm flex items-center gap-1.5 text-xs px-2.5 py-0.5 rounded-full font-medium hover:bg-amber-100 transition-colors cursor-pointer"
+                                    onClick={() => setShowVerificationModal(true)}
+                                >
+                                    <HiXMark className="w-4 h-4" />
+                                    Unverified
+                                </Badge>
+                            )}
                         </div>
 
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4">
@@ -523,6 +566,8 @@ const JobDetail = () => {
                             </div>
                         )}
                     </div>
+
+
 
                     {/* Apply for Job Banner - Desktop */}
                     {isTrader && !userPaid && paymentStatusLoaded && (
@@ -609,6 +654,7 @@ const JobDetail = () => {
                             />
                         </div>
                     )}
+
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 pb-24 md:pb-0">
                         {/* Main Content */}
@@ -702,6 +748,7 @@ const JobDetail = () => {
                                 </Card>
                             )}
                         </div>
+
 
                         {/* Sidebar */}
                         <div className="space-y-4 md:space-y-6">
@@ -874,6 +921,85 @@ const JobDetail = () => {
                     phone: jobData.phone
                 }}
             />
+
+            {/* Verification Modal */}
+            {showVerificationModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+                        {homeOwnerVerified ? (
+                            <>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                        <HiCheckCircle className="w-6 h-6 text-green-600" />
+                                    </div>
+                                    <h3 className="text-lg font-semibold text-slate-900">Verified Client</h3>
+                                </div>
+                                
+                                <div className="space-y-3 mb-6">
+                                    <p className="text-slate-600 text-sm leading-relaxed">
+                                        This homeowner has been internally verified by JobHub. Their identity and activity have been confirmed through our verification process.
+                                    </p>
+                                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                                        <div className="flex items-start gap-2">
+                                            <HiCheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                                            <div className="text-xs text-green-800">
+                                                <p className="font-medium mb-1">Verification includes:</p>
+                                                <ul className="space-y-1 text-xs">
+                                                    <li>• Identity confirmation</li>
+                                                    <li>• Activity validation</li>
+                                                    <li>• Platform compliance check</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <Button
+                                    onClick={() => setShowVerificationModal(false)}
+                                    className="w-full bg-green-600 hover:bg-green-700 text-white"
+                                >
+                                    Got it
+                                </Button>
+                            </>
+                        ) : (
+                            <>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                                        <HiXMark className="w-6 h-6 text-amber-600" />
+                                    </div>
+                                    <h3 className="text-lg font-semibold text-slate-900">Unverified Client</h3>
+                                </div>
+                                
+                                <div className="space-y-3 mb-6">
+                                    <p className="text-slate-600 text-sm leading-relaxed">
+                                        This homeowner has not been verified by JobHub yet. Their identity and activity have not been confirmed through our verification process.
+                                    </p>
+                                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                                        <div className="flex items-start gap-2">
+                                            <HiXMark className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                                            <div className="text-xs text-amber-800">
+                                                <p className="font-medium mb-1">Verification pending:</p>
+                                                <ul className="space-y-1 text-xs">
+                                                    <li>• Identity confirmation</li>
+                                                    <li>• Activity validation</li>
+                                                    <li>• Platform compliance check</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <Button
+                                    onClick={() => setShowVerificationModal(false)}
+                                    className="w-full bg-amber-600 hover:bg-amber-700 text-white"
+                                >
+                                    Got it
+                                </Button>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
         </>
     );
 };
