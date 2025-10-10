@@ -120,14 +120,6 @@ const Index = () => {
       service: "Plumbing"
     },
     {
-      text: "Posted my garden landscaping job and got amazing applications. Saved me time and money! The quality of work exceeded our expectations completely.",
-      name: "Emma Thompson",
-      location: "Birmingham",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      service: "Gardening"
-    },
-    {
       text: "Professional roofer completed our project ahead of schedule. Excellent communication throughout the entire process.",
       name: "Michael Brown",
       location: "Bristol",
@@ -278,7 +270,7 @@ const Index = () => {
               className="absolute bottom-32 left-12 w-28 h-28 xl:w-32 xl:h-32 rounded-full overflow-hidden opacity-25 border-4 border-accent-orange/20"
             >
                <img 
-                 src="https://www.truro-penwith.ac.uk/app/uploads/2022/12/Basic-car-mechanics.jpg" 
+                 src="https://media.istockphoto.com/id/472105032/photo/auto-mechanic-working-on-a-car-in-his-garage.jpg?s=612x612&w=0&k=20&c=EyooxvXg5ufoSyzocedNdPnKCuhKzbvFQ0__snVIwto=" 
                  alt="Digital platform interface on laptop screen"
                  className="w-full h-full object-cover"
                  loading="lazy"
