@@ -136,6 +136,11 @@
     padding-bottom: max(env(safe-area-inset-bottom), 0.75rem);
   }
 
+  /* Smooth scrolling for iOS */
+  .webkit-overflow-scrolling-touch {
+    -webkit-overflow-scrolling: touch;
+  }
+
   /* Chat mobile optimizations */
   @media (max-width: 640px) {
     .chat-drawer {

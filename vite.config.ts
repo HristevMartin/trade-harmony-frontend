@@ -8,7 +8,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
-    port: 8000,
+    port: 8080,
   },
   plugins: [
     react(),
@@ -17,6 +17,7 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,ttf,eot}'],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/api\./,

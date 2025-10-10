@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -64,6 +64,28 @@ const Chat = () => {
   // Session-based authentication instead of token
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authToken, setAuthToken] = useState<string | null>(null);
+
+  // Refs for dynamic height calculation
+  const headerRef = useRef<HTMLElement>(null);
+  const jobInfoRef = useRef<HTMLDivElement>(null);
+
+  // Update CSS variable for header height
+  const updateHeaderHeight = useCallback(() => {
+    const headerHeight = (headerRef.current?.offsetHeight || 0) + (jobInfoRef.current?.offsetHeight || 0);
+    document.documentElement.style.setProperty('--header-h', `${headerHeight}px`);
+  }, []);
+
+  // Update header height on mount, resize, and when job info changes
+  useEffect(() => {
+    updateHeaderHeight();
+    window.addEventListener('resize', updateHeaderHeight);
+    return () => window.removeEventListener('resize', updateHeaderHeight);
+  }, [updateHeaderHeight]);
+
+  // Update when job info visibility changes
+  useEffect(() => {
+    updateHeaderHeight();
+  }, [conversationId, isLoadingMessages, messages.length, conversation, counterparty, jobTitle, jobBudget, jobUrgency, jobCategory, updateHeaderHeight]);
 
   useEffect(() => {
     const checkAuthentication = async () => {
@@ -525,9 +547,9 @@ const Chat = () => {
   };
 
   return (
-    <div className="h-[100dvh] bg-background flex flex-col">
+    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
       {/* Header - Final refined design pass */}
-      <header className="flex-shrink-0 bg-background border-b border-border">
+      <header ref={headerRef} className="flex-shrink-0 bg-background border-b border-border z-10">
         <div className="flex items-center justify-between px-4 sm:px-6 py-2.5">
           {/* Left side - Back button */}
           <div className="flex items-center flex-shrink-0">
@@ -657,7 +679,7 @@ const Chat = () => {
 
       {/* Job Info Header - Shows job context when a chat is selected and has messages or is payment flow */}
       {conversationId && !isLoadingMessages && messages.length > 0 && (conversation || counterparty) && (jobTitle || counterparty?.job_title || jobBudget || jobUrgency || jobCategory) && (
-        <div className="flex-shrink-0 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100">
+        <div ref={jobInfoRef} className="flex-shrink-0 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100 z-10">
           <div className="px-4 sm:px-6 py-3">
             <div className="flex flex-wrap items-center gap-3 text-sm">
               {/* Job Title */}
@@ -705,7 +727,7 @@ const Chat = () => {
       )}
 
       {/* Main Content - Flex container for sidebar and chat */}
-      <div className="flex flex-1 overflow-hidden min-h-0">
+      <div className="flex flex-1 overflow-hidden" style={{ height: 'calc(100dvh - var(--header-h, 0px))' }}>
         {/* Desktop Sidebar */}
         <div className="hidden lg:block w-80 xl:w-96 flex-shrink-0 border-r border-border">
           <Sidebar
@@ -735,9 +757,9 @@ const Chat = () => {
         </Sheet>
 
         {/* Chat Content Area - Full height messaging layout */}
-        <div className="flex-1 flex flex-col min-w-0 bg-background">
+        <div className="flex-1 flex flex-col min-w-0 bg-background overflow-hidden">
           {/* Messages Container - Scrollable area */}
-          <div className="flex-1 overflow-y-auto overscroll-contain">
+          <div className="flex-1 overflow-y-auto overscroll-contain webkit-overflow-scrolling-touch">
             <div className="px-4 sm:px-6 py-6 min-h-full">
             {!conversationId && !isPaymentFlow ? (
               <div className="flex items-center justify-center min-h-full">
