@@ -525,9 +525,9 @@ const Chat = () => {
   };
 
   return (
-    <div className="h-screen bg-background flex flex-col overflow-hidden">
+    <div className="h-[100dvh] bg-background flex flex-col">
       {/* Header - Final refined design pass */}
-      <header className="flex-shrink-0 bg-background">
+      <header className="flex-shrink-0 bg-background border-b border-border">
         <div className="flex items-center justify-between px-4 sm:px-6 py-2.5">
           {/* Left side - Back button */}
           <div className="flex items-center flex-shrink-0">
@@ -653,10 +653,6 @@ const Chat = () => {
           </div>
         </div>
 
-        {/* Hairline divider - separated and light */}
-        <div className="pt-2">
-          <div className="h-px bg-[#E5E7EB]"></div>
-        </div>
       </header>
 
       {/* Job Info Header - Shows job context when a chat is selected and has messages or is payment flow */}
@@ -738,10 +734,11 @@ const Chat = () => {
           </SheetContent>
         </Sheet>
 
-        {/* Chat Content Area - Optimized layout */}
-        <div className="flex-1 flex flex-col min-w-0 bg-background overflow-hidden">
-          {/* Messages Container - Scrollable area with padding */}
-          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6">
+        {/* Chat Content Area - Full height messaging layout */}
+        <div className="flex-1 flex flex-col min-w-0 bg-background">
+          {/* Messages Container - Scrollable area */}
+          <div className="flex-1 overflow-y-auto overscroll-contain">
+            <div className="px-4 sm:px-6 py-6 min-h-full">
             {!conversationId && !isPaymentFlow ? (
               <div className="flex items-center justify-center min-h-full">
                 <div className="text-center max-w-md">
@@ -811,7 +808,7 @@ const Chat = () => {
                 </div>
               </div>
             ) : (
-              <div className="max-w-4xl mx-auto">
+              <div className="max-w-4xl mx-auto pb-4">
                 <MessageList
                   messages={messages}
                   conversation={conversation}
@@ -820,11 +817,12 @@ const Chat = () => {
                 />
               </div>
             )}
+            </div>
           </div>
 
-          {/* Follow-up Questions - Sticky above input */}
+          {/* Follow-up Questions - Fixed above input */}
           {conversationId && jobId && followUpQuestions.length > 0 && (
-            <div className="flex-shrink-0 border-t border-gray-100 bg-gray-50">
+            <div className="flex-shrink-0 border-t border-border bg-muted/30 backdrop-blur-sm">
               <div className="p-3 sm:p-4 max-w-4xl mx-auto">
                 <FollowUpQuestions
                   questions={followUpQuestions}
@@ -835,15 +833,15 @@ const Chat = () => {
             </div>
           )}
 
-          {/* Message Input - Fixed at bottom, always visible */}
-          <div className="flex-shrink-0 border-t border-border bg-background shadow-lg">
-            <div className="p-4 sm:p-5">
-              <div className="flex gap-3 max-w-4xl mx-auto bg-muted/30 rounded-2xl p-3 shadow-sm border border-border/50">
+          {/* Message Input - Fixed at bottom */}
+          <div className="flex-shrink-0 border-t border-border bg-background/95 backdrop-blur-sm shadow-[0_-2px_10px_rgba(0,0,0,0.05)] safe-area-inset-bottom">
+            <div className="p-3 sm:p-4">
+              <div className="flex gap-2 sm:gap-3 max-w-4xl mx-auto bg-muted/40 rounded-2xl p-2.5 sm:p-3 shadow-sm border border-border/50 transition-all focus-within:border-primary/50 focus-within:shadow-md">
                 <input
                   type="text"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  onKeyPress={(e) => {
+                  onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey && conversationId) {
                       e.preventDefault();
                       handleSendMessage();
@@ -851,15 +849,15 @@ const Chat = () => {
                   }}
                   placeholder={conversationId ? "Type your message..." : "Select a conversation to start chatting"}
                   disabled={!conversationId}
-                  className="flex-1 px-4 py-3 bg-background rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed text-sm transition-all min-h-[44px]"
+                  className="flex-1 bg-transparent outline-none text-sm sm:text-base text-foreground placeholder:text-muted-foreground disabled:opacity-50 px-2 min-h-[40px]"
                 />
                 <Button
+                  size="sm"
                   onClick={() => handleSendMessage()}
                   disabled={!message.trim() || !conversationId}
-                  className="rounded-xl min-h-[44px] min-w-[44px] flex items-center justify-center"
-                  size="icon"
+                  className="rounded-xl px-3 sm:px-4 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm disabled:opacity-50 transition-all hover:scale-105 active:scale-95 min-h-[40px]"
                 >
-                  <Send className="w-5 h-5" />
+                  <Send className="w-4 h-4" />
                 </Button>
               </div>
             </div>
