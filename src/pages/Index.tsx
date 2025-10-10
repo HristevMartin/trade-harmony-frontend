@@ -112,48 +112,48 @@ const Index = () => {
 
   const testimonials = [
     {
-      text: "Found an excellent electrician within hours. Professional service and fair pricing! The platform made it so easy to connect with skilled professionals.",
-      name: "Sarah Mitchell",
-      location: "Leeds",
+      text: "We've built something homeowners have been asking for — a platform that combines AI efficiency with genuine trust and verification.",
+      name: "JobHub Team",
+      location: "United Kingdom",
       avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
       rating: 5,
-      service: "Electrical Work"
+      service: "Our Mission"
     },
     {
-      text: "Amazing plumber fixed our emergency leak quickly. Highly recommend this platform! Saved us from a potential disaster.",
-      name: "John Davies",
-      location: "Manchester",
+      text: "Finding reliable trades shouldn't be a gamble. JobHub is a platform where every professional is verified and every match is smart.",
+      name: "JobHub Team",
+      location: "United Kingdom",
       avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
       rating: 5,
-      service: "Plumbing"
+      service: "Our Vision"
     },
     {
-      text: "Professional roofer completed our project ahead of schedule. Excellent communication throughout the entire process.",
-      name: "Michael Brown",
-      location: "Bristol",
+      text: "AI makes matching faster. Human verification makes it safer. Together, they create the home improvement platform homeowners deserve.",
+      name: "JobHub Team",
+      location: "United Kingdom",
       avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
       rating: 5,
-      service: "Roofing"
+      service: "Our Approach"
     },
     {
-      text: "The carpenter we found was incredibly skilled and attention to detail was outstanding. Will definitely use again!",
-      name: "Lisa Wilson",
-      location: "Liverpool",
+      text: "JobHub connects homeowners with a network of fully verified tradespeople across the UK. Every professional is ID-checked, insured, and reviewed.",
+      name: "JobHub Team",
+      location: "United Kingdom",
       avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
       rating: 5,
-      service: "Carpentry"
+      service: "Verified Network"
     }
   ];
 
   const recentActivities = [
-    { text: "Emma in", location: "Birmingham, UK", action: "posted a", service: "Carpentry job", time: "7 mins ago", icon: "✅" },
-    { text: "James in", location: "London, UK", action: "applied for an", service: "Electrical job", time: "3 mins ago", icon: "👷" },
-    { text: "Sarah in", location: "Leeds, UK", action: "posted a", service: "Plumbing job", time: "5 mins ago", icon: "✅" },
-    { text: "Mark in", location: "Manchester, UK", action: "applied for a", service: "Roofing job", time: "12 mins ago", icon: "👷" },
-    { text: "Anna in", location: "Liverpool, UK", action: "posted a", service: "Painting job", time: "8 mins ago", icon: "✅" },
-    { text: "Peter in", location: "Bristol, UK", action: "applied for a", service: "Gardening job", time: "15 mins ago", icon: "👷" },
-    { text: "Lisa in", location: "Newcastle, UK", action: "posted a", service: "Heating job", time: "4 mins ago", icon: "✅" },
-    { text: "David in", location: "Sheffield, UK", action: "applied for an", service: "Electrical job", time: "6 mins ago", icon: "👷" }
+    { text: "Now Live", location: "Across the UK", action: "connecting", service: "homeowners & trades", time: "", icon: "🚀" },
+    { text: "AI-powered", location: "Smart Matching", action: "finding you", service: "the right professional", time: "", icon: "🧠" },
+    { text: "100%", location: "Verified Network", action: "with", service: "ID & insurance checks", time: "", icon: "✅" },
+    { text: "Free to", location: "Post Jobs", action: "with", service: "no obligation", time: "", icon: "🎉" },
+    { text: "Secure", location: "In-Platform Chat", action: "for", service: "safe communication", time: "", icon: "💬" },
+    { text: "Trusted by", location: "Verified Trades", action: "across", service: "the UK", time: "", icon: "🏠" },
+    { text: "Join", location: "Today", action: "and post", service: "your first job", time: "", icon: "⭐" },
+    { text: "Available", location: "In Your Area", action: "connecting", service: "local professionals", time: "", icon: "📍" }
   ];
 
   // Auto-advance testimonial carousel
@@ -354,6 +354,17 @@ const Index = () => {
             
             {/* Hero Title Section */}
             <div  className="text-center">
+            {/* Trust Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="inline-flex items-center gap-2 bg-trust-green/10 text-trust-green px-3 py-1.5 sm:px-4 sm:py-2 rounded-full mb-4 sm:mb-6 font-semibold border border-trust-green/20 shadow-sm text-xs sm:text-sm md:text-base"
+            >
+              <span className="text-base sm:text-lg">💫</span>
+              <span>Built for UK homeowners — verified trades, powered by AI</span>
+            </motion.div>
+            
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -361,7 +372,7 @@ const Index = () => {
                 className="font-bold leading-tight text-[clamp(1.8rem,5vw,3.2rem)] text-foreground mb-6 md:mb-8 max-w-4xl mx-auto"
             >
                 Smarter Local Hiring —{" "}
-              <span className="text-trust-blue">Powered by AI and Real Verification</span>
+              <span className="text-trust-blue">Where Real Verification Meets AI</span>
             </motion.h1>
             
             <motion.p
@@ -370,7 +381,7 @@ const Index = () => {
               transition={{ duration: 0.8, delay: 0.2 }}
                 className="text-slate-600 text-[clamp(1rem,2.8vw,1.25rem)] mb-8 md:mb-10 max-w-3xl mx-auto leading-relaxed"
             >
-                JobHub helps homeowners describe projects with AI, matches them with verified tradespeople nearby, and ensures every job is completed with trust and transparency.
+                AI helps you post clearly. Verified local pros bring it to life.
             </motion.p>
             </div>
 
@@ -430,8 +441,8 @@ const Index = () => {
                       onClick={handlePostJob}
                     >
                       <span className="flex items-center justify-center">
-                        <span className="hidden lg:inline">Post a Job with AI</span>
-                        <span className="lg:hidden">Post Job with AI</span>
+                        <span className="hidden lg:inline">Post Job</span>
+                        <span className="lg:hidden">Post Job</span>
                         <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                       </span>
                 </Button>
@@ -484,17 +495,16 @@ const Index = () => {
             >
               <p 
                 role="note" 
-                aria-label="Social proof"
-                className="flex items-center justify-center gap-2 text-sm sm:text-base opacity-90"
+                aria-label="Trust indicators"
+                className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base opacity-90"
             >
-              <span className="text-foreground font-semibold">Excellent</span>
+              <span className="text-foreground font-semibold">Now live</span>
               <div className="flex">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-5 w-5 text-trust-green fill-current" />
+                  <Star key={i} className="h-4 w-4 sm:h-5 sm:w-5 text-trust-green fill-current" />
                 ))}
               </div>
-                <span className="text-muted-foreground">5,000+ reviews on</span>
-                <span className="text-trust-green font-bold">Trustpilot</span>
+                <span className="text-muted-foreground">Trusted by verified trades across the UK</span>
               </p>
             </motion.div>
 
@@ -505,7 +515,7 @@ const Index = () => {
               transition={{ duration: 0.6, delay: 0.8 }}
               className="text-center mt-6"
             >
-              <p className="text-muted-foreground text-sm font-medium">
+              <p className="text-muted-foreground text-xs sm:text-sm font-medium">
                 Free to post. No obligation.
               </p>
             </motion.div>
@@ -523,8 +533,8 @@ const Index = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
               >
-                <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">Popular Services</h2>
-                <p className="text-muted-foreground text-lg">Connect with trusted professionals for any home improvement project with our verified tradespeople network</p>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4 sm:mb-6">Popular Services</h2>
+                <p className="text-muted-foreground text-base sm:text-lg px-4">Find trusted, verified professionals for any home project</p>
               </motion.div>
           </div>
           
@@ -571,8 +581,8 @@ const Index = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">How JobHub Works</h2>
-              <p className="text-muted-foreground text-lg">Smart AI assistance meets human verification — for your perfect match</p>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">How JobHub Works</h2>
+              <p className="text-muted-foreground text-base sm:text-lg px-4">Smart AI assistance meets human verification — for your perfect match</p>
             </motion.div>
           </div>
           
@@ -585,25 +595,25 @@ const Index = () => {
                 {
                   icon: <ClipboardList className="h-10 w-10" />,
                   title: "Post Your Job with AI",
-                  description: "Describe your project naturally — our AI helps refine your post and adds missing details.",
+                  description: "Describe your project naturally. AI refines your post and fills in missing details.",
                   color: "trust-blue"
                 },
                 {
                   icon: <Brain className="h-10 w-10" />,
                   title: "AI Finds Perfect Matches",
-                  description: "We match you with tradespeople based on trade, distance, and verified experience.",
+                  description: "Get matched instantly with local trades based on distance, skills, and verified experience.",
                   color: "trust-green"
                 },
                 {
                   icon: <Users className="h-10 w-10" />,
                   title: "Verified Pros Apply",
-                  description: "Only ID-verified and insured professionals can apply — no fake profiles.",
+                  description: "Only ID-verified and insured professionals can apply — no fake profiles or spam.",
                   color: "accent-orange"
                 },
                 {
                   icon: <Handshake className="h-10 w-10" />,
                   title: "Hire & Leave Reviews",
-                  description: "Chat securely, compare verified trades, and share real homeowner feedback.",
+                  description: "Hire confidently and leave verified feedback after the job's done.",
                   color: "trust-blue"
                 }
               ].map((step, index) => (
@@ -657,9 +667,9 @@ const Index = () => {
                 <Shield className="h-5 w-5" />
                 <span>Verified Network</span>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Smart Matching, Human-Verified</h2>
-              <p className="text-muted-foreground text-lg">Every tradesperson on JobHub is ID-verified, insured, and reviewed by real homeowners — ensuring genuine expertise on every project</p>
-              <p className="text-sm text-muted-foreground mt-2 italic">Our Verified Network ensures every match is safe, insured, and qualified.</p>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">Smart Matching, Human-Verified</h2>
+              <p className="text-muted-foreground text-base sm:text-lg px-4">Every tradesperson on JobHub is ID-verified, insured, and reviewed by real homeowners — so you can hire with confidence.</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2 italic px-4">Our Verified Network ensures every match is safe, insured, and qualified.</p>
             </motion.div>
           </div>
           
@@ -672,17 +682,17 @@ const Index = () => {
               transition={{ duration: 0.6 }}
               className="rounded-2xl p-6 md:p-8 bg-gradient-to-br from-card via-card/95 to-card/90 border-2 border-trust-blue/20 shadow-xl"
             >
-              <h3 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-3">
-                <CheckCircle2 className="h-7 w-7 text-trust-green" />
+              <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                <CheckCircle2 className="h-6 w-6 sm:h-7 sm:w-7 text-trust-green" />
                 What We Verify
               </h3>
               
               <div className="space-y-4">
                 {[
-                  { icon: <Award className="h-5 w-5" />, title: "Professional Qualifications", desc: "Trade certifications and licenses checked" },
-                  { icon: <Shield className="h-5 w-5" />, title: "Insurance Coverage", desc: "Public liability and professional indemnity verified" },
-                  { icon: <CheckCircle2 className="h-5 w-5" />, title: "Identity Verification", desc: "Government ID and address confirmed" },
-                  { icon: <Star className="h-5 w-5" />, title: "Work History & Reviews", desc: "Real homeowner reviews from completed jobs" }
+                  { icon: <Award className="h-5 w-5" />, title: "Professional Qualifications", desc: "Trade certifications and licences verified" },
+                  { icon: <Shield className="h-5 w-5" />, title: "Insurance Coverage", desc: "Public liability and professional indemnity confirmed" },
+                  { icon: <CheckCircle2 className="h-5 w-5" />, title: "Identity Verification", desc: "Government ID and address validated" },
+                  { icon: <Star className="h-5 w-5" />, title: "Work History & Reviews", desc: "Real homeowner feedback from completed jobs" }
                 ].map((item, index) => (
                   <motion.div
                     key={index}
@@ -712,8 +722,8 @@ const Index = () => {
               transition={{ duration: 0.6 }}
               className="rounded-2xl p-6 md:p-8 bg-gradient-to-br from-trust-green/5 to-trust-blue/5 border-2 border-trust-green/20 shadow-xl"
             >
-              <h3 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-3">
-                <Shield className="h-7 w-7 text-trust-green" />
+              <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                <Shield className="h-6 w-6 sm:h-7 sm:w-7 text-trust-green" />
                 Your Protection
               </h3>
               
@@ -723,10 +733,10 @@ const Index = () => {
                     <div className="bg-trust-green/10 rounded-full p-2">
                       <CheckCircle2 className="h-6 w-6 text-trust-green" />
                     </div>
-                    <h4 className="font-bold text-foreground text-lg">Fraud-Free Hiring</h4>
+                    <h4 className="font-bold text-foreground text-base sm:text-lg">Our process keeps every project safe</h4>
                   </div>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    Our 5-step verification process eliminates fraudulent profiles before they ever reach you
+                  <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">
+                    Our comprehensive verification process eliminates fraudulent profiles before they ever reach you
                   </p>
                 </div>
                 
@@ -735,10 +745,10 @@ const Index = () => {
                     <div className="bg-trust-blue/10 rounded-full p-2">
                       <Award className="h-6 w-6 text-trust-blue" />
                     </div>
-                    <h4 className="font-bold text-foreground text-lg">Verified Quality Every Time</h4>
+                    <h4 className="font-bold text-foreground text-base sm:text-lg">Only proven trades with positive reviews make the cut</h4>
                   </div>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    Only tradespeople with proven skills and positive reviews can join our platform
+                  <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">
+                    Every professional on our platform has demonstrated skills and earned positive feedback
                   </p>
                 </div>
                 
@@ -747,10 +757,10 @@ const Index = () => {
                     <div className="bg-accent-orange/10 rounded-full p-2">
                       <Shield className="h-6 w-6 text-accent-orange" />
                     </div>
-                    <h4 className="font-bold text-foreground text-lg">Work Backed by Verified Insurance</h4>
+                    <h4 className="font-bold text-foreground text-base sm:text-lg">Every verified tradesperson carries valid insurance for your peace of mind</h4>
                   </div>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    Every tradesperson carries verified insurance — your property and project are protected
+                  <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">
+                    Comprehensive insurance coverage ensures your property and project are fully protected
                   </p>
                 </div>
               </div>
@@ -792,11 +802,11 @@ const Index = () => {
             >
               <div className="inline-flex items-center gap-2 bg-primary/20  border border-primary/30 px-4 py-2 rounded-full mb-6 font-semibold shadow-lg">
                 <Brain className="h-5 w-5" />
-                <span>AI-Powered Matching</span>
+                <span>Powered by AI — Matching You Instantly</span>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">AI Finds the Right Professional — Instantly</h2>
-              <p className="text-muted-foreground text-lg">Homeowners use AI to describe jobs clearly. Tradespeople get AI-powered job recommendations based on their radius, skills, and verified track record.</p>
-              <p className="text-sm text-muted-foreground mt-2 italic">AI learns from real project data to predict the best fit for your job.</p>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">AI Finds the Right Professional — Instantly</h2>
+              <p className="text-muted-foreground text-base sm:text-lg px-4">Homeowners describe their jobs with AI. JobHub recommends professionals based on skills, distance, and reputation.</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2 italic px-4">AI learns from completed projects to predict the best match for your job.</p>
             </motion.div>
           </div>
           
@@ -906,9 +916,9 @@ const Index = () => {
             className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8"
           >
             {[
-              { icon: <Brain className="h-8 w-8" />, title: "Smart Recommendations", desc: "AI learns from millions of successful job matches" },
+              { icon: <Brain className="h-8 w-8" />, title: "Smart Recommendations", desc: "AI trained to match jobs with the right professionals" },
               { icon: <TrendingUp className="h-8 w-8" />, title: "Saves You Time", desc: "No more sifting through hundreds of profiles manually" },
-              { icon: <Award className="h-8 w-8" />, title: "Better Outcomes", desc: "Higher satisfaction rates with AI-matched projects" }
+              { icon: <Award className="h-8 w-8" />, title: "Better Outcomes", desc: "Higher satisfaction rates through smarter matching" }
             ].map((benefit, index) => (
               <div key={index} className="text-center p-6 rounded-xl bg-card/80 border border-border/50 shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/20  mb-4 shadow-md border border-primary/20">
@@ -934,23 +944,23 @@ const Index = () => {
             >
               <div className="inline-flex items-center gap-2 bg-trust-green/10 text-trust-green px-4 py-2 rounded-full mb-6 font-semibold">
                 <MessageSquare className="h-5 w-5" />
-                <span>Verified Reviews</span>
+                <span>Our Mission</span>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Real Reviews from Real Homeowners</h2>
-              <p className="text-muted-foreground text-lg">Every review on JobHub is verified and tied to a completed project — ensuring 100% authentic feedback</p>
-              <p className="text-sm text-muted-foreground mt-2 italic">JobHub combines AI efficiency with real human trust — saving time for homeowners and tradespeople alike.</p>
-            <div className="flex flex-wrap items-center justify-center gap-6 mt-6 mb-8">
-              <div className="flex items-center gap-2 bg-trust-green/10 px-3 py-2 rounded-full border border-trust-green/20">
-                  <Shield className="h-5 w-5 text-trust-green" aria-hidden="true" />
-                  <span className="text-slate-700 dark:text-slate-300 text-sm font-medium">All Reviews Verified</span>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">Building Trust Through Transparency</h2>
+              <p className="text-muted-foreground text-base sm:text-lg px-4">AI meets human verification to connect homeowners with trusted, insured tradespeople.</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2 italic px-4">Every review is verified and linked to a completed project — no fake feedback, ever.</p>
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 mt-4 sm:mt-6 mb-6 sm:mb-8 px-4">
+              <div className="flex items-center gap-1.5 sm:gap-2 bg-trust-green/10 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full border border-trust-green/20">
+                  <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-trust-green" aria-hidden="true" />
+                  <span className="text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-medium">All Reviews Verified</span>
               </div>
-              <div className="flex items-center gap-2 bg-trust-blue/10 px-3 py-2 rounded-full border border-trust-blue/20">
-                  <CheckCircle2 className="h-5 w-5 text-trust-blue" aria-hidden="true" />
-                  <span className="text-slate-700 dark:text-slate-300 text-sm font-medium">Completed Jobs Only</span>
+              <div className="flex items-center gap-1.5 sm:gap-2 bg-trust-blue/10 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full border border-trust-blue/20">
+                  <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-trust-blue" aria-hidden="true" />
+                  <span className="text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-medium">Completed Jobs Only</span>
               </div>
-              <div className="flex items-center gap-2 bg-accent-orange/10 px-3 py-2 rounded-full border border-accent-orange/20">
-                  <Award className="h-5 w-5 text-accent-orange" aria-hidden="true" />
-                  <span className="text-slate-700 dark:text-slate-300 text-sm font-medium">Transparent Ratings</span>
+              <div className="flex items-center gap-1.5 sm:gap-2 bg-accent-orange/10 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full border border-accent-orange/20">
+                  <Award className="h-4 w-4 sm:h-5 sm:w-5 text-accent-orange" aria-hidden="true" />
+                  <span className="text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-medium">Transparent Ratings</span>
               </div>
             </div>
             </motion.div>
@@ -1060,18 +1070,18 @@ const Index = () => {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="flex justify-center"
           >
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-              <div className="group cursor-default bg-gradient-to-br from-card/80 to-card/60 p-6 rounded-2xl border border-primary/10 shadow-lg transition-all duration-300">
-                <div className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-200 mb-2 transition-transform group-hover:scale-110">30,000+</div>
-                <div className="text-muted-foreground font-medium">Homeowners Helped</div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 text-center px-4">
+              <div className="group cursor-default bg-gradient-to-br from-card/80 to-card/60 p-4 sm:p-6 rounded-2xl border border-primary/10 shadow-lg transition-all duration-300">
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-200 mb-2 transition-transform group-hover:scale-110">AI-Powered</div>
+                <div className="text-muted-foreground font-medium text-sm sm:text-base">Smart Job Matching</div>
               </div>
-              <div className="group cursor-default bg-gradient-to-br from-card/80 to-card/60 p-6 rounded-2xl border border-secondary/10 shadow-lg transition-all duration-300">
-                <div className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-200 mb-2 transition-transform group-hover:scale-110">50,000+</div>
-                <div className="text-muted-foreground font-medium">Professionals Verified & Active</div>
+              <div className="group cursor-default bg-gradient-to-br from-card/80 to-card/60 p-4 sm:p-6 rounded-2xl border border-secondary/10 shadow-lg transition-all duration-300">
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-200 mb-2 transition-transform group-hover:scale-110">100%</div>
+                <div className="text-muted-foreground font-medium text-sm sm:text-base">Verified Professionals</div>
               </div>
-              <div className="group cursor-default bg-gradient-to-br from-card/80 to-card/60 p-6 rounded-2xl border border-accent/10 shadow-lg transition-all duration-300">
-                <div className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-200 mb-2 transition-transform group-hover:scale-110">99%</div>
-                <div className="text-muted-foreground font-medium">Satisfaction with Verified Jobs</div>
+              <div className="group cursor-default bg-gradient-to-br from-card/80 to-card/60 p-4 sm:p-6 rounded-2xl border border-accent/10 shadow-lg transition-all duration-300">
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-200 mb-2 transition-transform group-hover:scale-110">Free</div>
+                <div className="text-muted-foreground font-medium text-sm sm:text-base">To Post Jobs</div>
               </div>
             </div>
           </motion.div>
@@ -1108,28 +1118,36 @@ const Index = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Frequently Asked Questions</h2>
-              <p className="text-muted-foreground text-lg">Everything you need to know about finding and hiring tradespeople on JobHub</p>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">Frequently Asked Questions</h2>
+              <p className="text-muted-foreground text-base sm:text-lg px-4">Everything you need to know about finding and hiring tradespeople on JobHub</p>
             </motion.div>
           </div>
           
           <div className="space-y-4">
             {[
               {
-                question: "What does 'verified' actually mean?",
-                answer: "Every tradesperson on JobHub goes through a 5-step verification: government ID check, trade qualifications review, insurance verification (public liability + professional indemnity), address confirmation, and references check. We also continuously monitor reviews and job completion rates."
+                question: "What does 'verified' mean on JobHub?",
+                answer: "Each tradesperson's ID, insurance, and qualifications are manually verified before joining. This includes government ID checks, trade certifications review, insurance confirmation, address validation, and reference verification."
               },
               {
-                question: "How does AI job matching work?",
-                answer: "Our AI analyzes your job description, location, urgency, and budget, then compares it against every tradesperson's skills, specializations, past project types, customer ratings, response time, and availability. You see only the best matches — typically 3-5 tradespeople with 85%+ fit scores."
+                question: "How does JobHub's AI match me with professionals?",
+                answer: "AI analyses skills, distance, and verified experience to recommend the best local matches. It compares your project requirements with each tradesperson's expertise, specialisations, location, and availability."
               },
               {
-                question: "Is posting a job really free?",
-                answer: "Yes! Posting jobs, receiving applications, messaging tradespeople, and reviewing profiles are 100% free for homeowners. You only pay the tradesperson directly for the work they complete — JobHub takes no commission or hidden fees from homeowners."
+                question: "Is it really free to post a job?",
+                answer: "Yes — posting a job is completely free, with no obligation to hire. Messaging tradespeople and reviewing profiles are also free for homeowners."
               },
               {
-                question: "Can I trust the reviews?",
-                answer: "Absolutely. Reviews can only be left by verified homeowners after a job is marked complete by both parties. We cross-check review authenticity, flag suspicious patterns, and allow tradespeople to respond. Fake reviews result in instant account bans."
+                question: "Are the reviews actually verified?",
+                answer: "Every review is linked to a completed job, ensuring feedback is 100% authentic. Reviews can only be left after both parties confirm project completion."
+              },
+              {
+                question: "How does JobHub's AI get smarter?",
+                answer: "Over time, AI learns from successful matches and feedback to improve accuracy and recommendations. It continuously refines its understanding of what makes a successful homeowner-tradesperson partnership."
+              },
+              {
+                question: "When did JobHub launch?",
+                answer: "JobHub is now live across the UK, connecting homeowners with verified local trades."
               }
             ].map((faq, index) => (
               <motion.details
@@ -1140,11 +1158,11 @@ const Index = () => {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className="group rounded-2xl bg-gradient-to-br from-card to-card/90 border-2 border-border/50 hover:border-primary/30 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
               >
-                <summary className="cursor-pointer p-6 font-bold text-foreground text-lg flex items-center justify-between list-none">
-                  <span className="flex-1">{faq.question}</span>
-                  <ChevronDown className="h-5 w-5 text-muted-foreground group-open:rotate-180 transition-transform duration-300 flex-shrink-0 ml-4" />
+                <summary className="cursor-pointer p-4 sm:p-6 font-bold text-foreground text-base sm:text-lg flex items-center justify-between list-none">
+                  <span className="flex-1 pr-2">{faq.question}</span>
+                  <ChevronDown className="h-5 w-5 text-muted-foreground group-open:rotate-180 transition-transform duration-300 flex-shrink-0" />
                 </summary>
-                <div className="px-6 pb-6 text-muted-foreground leading-relaxed border-t border-border/30 pt-4">
+                <div className="px-4 sm:px-6 pb-4 sm:pb-6 text-muted-foreground text-sm sm:text-base leading-relaxed border-t border-border/30 pt-4">
                   {faq.answer}
                 </div>
               </motion.details>
@@ -1166,10 +1184,10 @@ const Index = () => {
             transition={{ duration: 0.8 }}
           >
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6">
-            Smarter jobs. Verified trades.
+            Smarter Jobs. Verified Trades.
           </h2>
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-6 sm:mb-8 md:mb-10 opacity-90 leading-relaxed">
-              Start your next project with AI guidance and trusted professionals
+              Start your next project with AI guidance and trusted, verified professionals.
           </p>
           <Button 
             size="lg" 
@@ -1177,7 +1195,7 @@ const Index = () => {
               onClick={handlePostJob}
           >
               <span className="flex items-center">
-            Post a Job with AI
+            Post a Job
                 <ArrowRight className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6 group-hover:translate-x-1 transition-transform" />
               </span>
           </Button>
