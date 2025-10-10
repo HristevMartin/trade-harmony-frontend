@@ -849,7 +849,7 @@ const HomeownerGetProjects = () => {
               {projects.map((project) => (
                 <Card
                   key={project.id}
-                  className="group rounded-xl bg-card border border-border hover:border-border/60 hover:shadow-md transition-all duration-200 overflow-hidden"
+                  className="group rounded-xl bg-card border border-border shadow-sm hover:border-border/60 hover:shadow-lg transition-all duration-300 overflow-hidden"
                 >
                   <CardHeader className="p-6 pb-4">
                     {/* Status and ID Row */}
@@ -891,7 +891,7 @@ const HomeownerGetProjects = () => {
                           <img
                             src={project.image_urls[0]}
                             alt="Project"
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover transition-all duration-300 group-hover:opacity-80 group-hover:scale-105"
                             loading="lazy"
                           />
                           {project.image_count > 1 && (
@@ -1021,7 +1021,7 @@ const HomeownerGetProjects = () => {
             <Button
               onClick={() => navigate('/post-job')}
               size="lg"
-              className="rounded-full h-14 w-14 sm:h-16 sm:w-16 shadow-xl bg-trust-blue hover:bg-trust-blue/90 text-trust-blue-foreground hover:shadow-2xl transition-all transform hover:scale-110 mb-safe"
+              className="rounded-full h-14 w-14 sm:h-16 sm:w-16 shadow-xl bg-trust-blue hover:bg-trust-blue/90 text-trust-blue-foreground hover:shadow-2xl transition-all duration-200 transform hover:scale-110 active:scale-95 active:shadow-lg mb-safe"
             >
               <HiPlus className="w-6 h-6 sm:w-7 sm:h-7" />
             </Button>
