@@ -330,19 +330,19 @@ const Index = () => {
 
           {/* Subtle Tool Icons - Far Background */}
           <div className="hidden xl:block">
-            <div className="absolute top-1/4 left-1/6 opacity-10">
-              <div className="bg-trust-blue/10 p-2 rounded-full">
-                <Wrench className="h-4 w-4 text-trust-blue" />
+            <div className="absolute top-1/4 left-1/6 opacity-20">
+              <div className="bg-trust-blue/20 p-3 rounded-full shadow-lg border border-trust-blue/30">
+                <Wrench className="h-5 w-5 text-trust-blue" />
               </div>
             </div>
-            <div className="absolute top-3/4 right-1/6 opacity-10">
-              <div className="bg-trust-green/10 p-2 rounded-full">
-                <Hammer className="h-4 w-4 text-trust-green" />
+            <div className="absolute top-3/4 right-1/6 opacity-20">
+              <div className="bg-trust-green/20 p-3 rounded-full shadow-lg border border-trust-green/30">
+                <Hammer className="h-5 w-5 text-trust-green" />
               </div>
             </div>
-            <div className="absolute bottom-1/4 left-1/5 opacity-10">
-              <div className="bg-accent-orange/10 p-2 rounded-full">
-                <Zap className="h-4 w-4 text-accent-orange" />
+            <div className="absolute bottom-1/4 left-1/5 opacity-20">
+              <div className="bg-accent-orange/20 p-3 rounded-full shadow-lg border border-accent-orange/30">
+                <Zap className="h-5 w-5 text-accent-orange" />
               </div>
             </div>
           </div>
@@ -604,7 +604,7 @@ const Index = () => {
                   icon: <Handshake className="h-10 w-10" />,
                   title: "Hire & Review",
                   description: "Compare profiles, chat directly, hire confidently, and leave a verified review when done.",
-                  color: "primary"
+                  color: "trust-blue"
                 }
               ].map((step, index) => (
                 <motion.div
@@ -789,7 +789,7 @@ const Index = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-6 font-semibold">
+              <div className="inline-flex items-center gap-2 bg-primary/20  border border-primary/30 px-4 py-2 rounded-full mb-6 font-semibold shadow-lg">
                 <Brain className="h-5 w-5" />
                 <span>AI-Powered Matching</span>
               </div>
@@ -827,7 +827,7 @@ const Index = () => {
               },
               {
                 badge: "Not Suitable",
-                badgeColor: "muted",
+                badgeColor: "black",
                 score: "34%",
                 icon: <AlertCircle className="h-6 w-6" />,
                 title: "General Handyman",
@@ -908,12 +908,12 @@ const Index = () => {
               { icon: <TrendingUp className="h-8 w-8" />, title: "Saves You Time", desc: "No more sifting through hundreds of profiles manually" },
               { icon: <Award className="h-8 w-8" />, title: "Better Outcomes", desc: "Higher satisfaction rates with AI-matched projects" }
             ].map((benefit, index) => (
-              <div key={index} className="text-center p-6 rounded-xl bg-card/50 border border-border/50">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
+              <div key={index} className="text-center p-6 rounded-xl bg-card/80 border border-border/50 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/20  mb-4 shadow-md border border-primary/20">
                   {benefit.icon}
                 </div>
                 <h4 className="font-bold text-foreground mb-2">{benefit.title}</h4>
-                <p className="text-sm text-muted-foreground">{benefit.desc}</p>
+                <p className="text-sm text-slate-700 dark:text-slate-300">{benefit.desc}</p>
               </div>
             ))}
           </motion.div>
@@ -937,17 +937,17 @@ const Index = () => {
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Real Reviews from Real Homeowners</h2>
               <p className="text-muted-foreground text-lg">Every review on JobHub comes from a verified homeowner who completed a project — no fake reviews, ever</p>
             <div className="flex flex-wrap items-center justify-center gap-6 mt-6 mb-8">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 bg-trust-green/10 px-3 py-2 rounded-full border border-trust-green/20">
                   <Shield className="h-5 w-5 text-trust-green" aria-hidden="true" />
-                  <span className="text-muted-foreground text-sm font-medium">All Reviews Verified</span>
+                  <span className="text-slate-700 dark:text-slate-300 text-sm font-medium">All Reviews Verified</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 bg-trust-blue/10 px-3 py-2 rounded-full border border-trust-blue/20">
                   <CheckCircle2 className="h-5 w-5 text-trust-blue" aria-hidden="true" />
-                  <span className="text-muted-foreground text-sm font-medium">Completed Jobs Only</span>
+                  <span className="text-slate-700 dark:text-slate-300 text-sm font-medium">Completed Jobs Only</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 bg-accent-orange/10 px-3 py-2 rounded-full border border-accent-orange/20">
                   <Award className="h-5 w-5 text-accent-orange" aria-hidden="true" />
-                  <span className="text-muted-foreground text-sm font-medium">Transparent Ratings</span>
+                  <span className="text-slate-700 dark:text-slate-300 text-sm font-medium">Transparent Ratings</span>
               </div>
             </div>
             </motion.div>
