@@ -72,6 +72,16 @@ const TradesPersonOnboarding = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [isHomeOwner, setIsHomeOwner] = useState(() => {
+    const auth_user = localStorage.getItem('auth_user');
+    if (auth_user) {
+      let auth_user_parsed = JSON.parse(auth_user);
+      return auth_user_parsed.role.includes('customer') || auth_user_parsed.role.includes('CUSTOMER');
+    }
+    return false;
+  })
+
+  console.log('isHomeOwner', isHomeOwner);
 
   // Function to clear corrupted localStorage data
   const clearCorruptedData = useCallback(() => {
@@ -90,7 +100,7 @@ const TradesPersonOnboarding = () => {
         // Check for existing auth user to prefill
         const authUser = localStorage.getItem('auth_user');
         let prefillData = {};
-        
+
         if (authUser) {
           try {
             const userData = JSON.parse(authUser);
@@ -110,7 +120,7 @@ const TradesPersonOnboarding = () => {
         if (savedDraft) {
           try {
             const parsedDraft = JSON.parse(savedDraft);
-            
+
             // Validate the parsed draft has expected structure
             if (parsedDraft && typeof parsedDraft === 'object') {
               // Filter out any invalid or corrupted data
@@ -130,7 +140,7 @@ const TradesPersonOnboarding = () => {
                 portfolio: Array.isArray(parsedDraft.portfolio) ? [] : [], // Don't restore File objects
                 marketingConsent: Boolean(parsedDraft.marketingConsent)
               };
-              
+
               setFormData({ ...initialProDraft, ...prefillData, ...validDraft });
             } else {
               throw new Error('Invalid draft structure');
@@ -269,7 +279,7 @@ const TradesPersonOnboarding = () => {
 
   const validateStep = (step: number): boolean => {
     const fieldsToValidate: string[] = [];
-    
+
     switch (step) {
       case 1:
         fieldsToValidate.push('name', 'email');
@@ -311,7 +321,7 @@ const TradesPersonOnboarding = () => {
     if (errors.general && errors.general.includes('Customer accounts cannot register')) {
       return;
     }
-    
+
     if (validateStep(currentStep) && currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
@@ -322,7 +332,7 @@ const TradesPersonOnboarding = () => {
     if (errors.general && errors.general.includes('Customer accounts cannot register')) {
       return;
     }
-    
+
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
@@ -432,7 +442,7 @@ const TradesPersonOnboarding = () => {
   const checkUserRole = () => {
     const token = localStorage.getItem('access_token');
     const authUser = localStorage.getItem('auth_user');
-    
+
     if (!token || !authUser) {
       return { isValid: true, message: '' }; // Not authenticated, allow to proceed with auth modal
     }
@@ -465,13 +475,13 @@ const TradesPersonOnboarding = () => {
     }
 
     console.log('Saving tradesperson data after authentication...');
-    
+
     // Check authentication status with detailed logging
     const token = localStorage.getItem('access_token');
     const authUser = localStorage.getItem('auth_user');
-    
+
     console.log('Auth check in submitRegistration - Token:', token ? 'EXISTS' : 'MISSING', 'AuthUser:', authUser ? 'EXISTS' : 'MISSING');
-    
+
     if (!token || !authUser) {
       console.error('No authentication data found in submitRegistration');
       console.error('Token:', token);
@@ -481,13 +491,13 @@ const TradesPersonOnboarding = () => {
       setHasSubmitted(false);
       return;
     }
-    
+
     console.log('Authentication data confirmed, proceeding with API call');
 
     // Validate required fields before submission
     const requiredFields = ['name', 'email', 'primaryTrade', 'city', 'postcode'];
     const missingFields = requiredFields.filter(field => !formData[field as keyof ProDraft]);
-    
+
     if (missingFields.length > 0) {
       console.error('Missing required fields:', missingFields);
       setErrors({ general: `Missing required fields: ${missingFields.join(', ')}. Please complete all steps.` });
@@ -498,11 +508,11 @@ const TradesPersonOnboarding = () => {
 
     setIsSubmitting(true);
     setHasSubmitted(true);
-    
+
     try {
       // Create FormData for file upload (exactly like PostJob component)
       const formDataToSend = new FormData();
-      
+
       // Add basic tradesperson information - mimic PostJob's approach
       const tradespersonData = {
         name: formData.name,
@@ -561,7 +571,7 @@ const TradesPersonOnboarding = () => {
         certificationImagesCount: formData.certificationImages.length,
         hasToken: !!token
       });
-      
+
       // Debug: Log all FormData entries
       console.log('FormData entries:');
       for (let [key, value] of formDataToSend.entries()) {
@@ -571,7 +581,7 @@ const TradesPersonOnboarding = () => {
           console.log(`${key}:`, value);
         }
       }
-      
+
       const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/save-trader-project`, {
         method: 'POST',
         credentials: 'include',
@@ -584,11 +594,11 @@ const TradesPersonOnboarding = () => {
       if (response.ok) {
         const data = await response.json();
         console.log('Tradesperson data saved successfully:', data);
-        
+
         setIsCompleted(true);
         localStorage.removeItem('pro_onboarding_draft');
         console.log('Tradesperson registration flow completed');
-        
+
         // Redirect after showing success to the jobs page
         setTimeout(() => {
           navigate('/tradesperson/jobs');
@@ -596,7 +606,7 @@ const TradesPersonOnboarding = () => {
       } else {
         const errorText = await response.text();
         console.error('Failed to save tradesperson data:', response.status, 'Response:', errorText);
-        
+
         // Try to parse error response
         try {
           const errorJson = JSON.parse(errorText);
@@ -612,7 +622,7 @@ const TradesPersonOnboarding = () => {
       }
     } catch (error) {
       console.error('Error saving tradesperson data:', error);
-      
+
       // More specific error messages
       if (error.message.includes('NetworkError') || error.message.includes('fetch')) {
         setErrors({ general: 'Network error. Please check your internet connection and try again.' });
@@ -633,28 +643,28 @@ const TradesPersonOnboarding = () => {
   // Handle authentication success
   const handleAuthSuccess = useCallback((authData: { id: string; role: string; token: string; email?: string }) => {
     console.log('Authentication successful:', authData);
-    
+
     // Clear any previous errors
     setErrors(prev => ({ ...prev, general: '' }));
-    
+
     setShowAuthModal(false);
-    
+
     // Check if the authenticated user has the correct role
     const authUserRole = Array.isArray(authData.role) ? authData.role : [authData.role];
     if (authUserRole.includes('customer') || authUserRole.includes('CUSTOMER')) {
-      setErrors(prev => ({ 
-        ...prev, 
-        general: 'Customer accounts cannot register as tradespeople. Please create a new trader account or switch to a trader account to complete registration.' 
+      setErrors(prev => ({
+        ...prev,
+        general: 'Customer accounts cannot register as tradespeople. Please create a new trader account or switch to a trader account to complete registration.'
       }));
       setPendingRegistration(false);
       // Scroll to top to make the error message visible
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
-    
+
     // Always proceed with registration after successful auth
     setPendingRegistration(false);
-    
+
     // Directly call submitRegistration with the auth data we received
     console.log('Auth success - calling submitRegistration directly with provided auth data');
     submitRegistrationWithAuthData(authData);
@@ -669,11 +679,11 @@ const TradesPersonOnboarding = () => {
     }
 
     console.log('Saving tradesperson data with provided auth data...');
-    
+
     // Validate required fields before submission
     const requiredFields = ['name', 'email', 'primaryTrade', 'city', 'postcode'];
     const missingFields = requiredFields.filter(field => !formData[field as keyof ProDraft]);
-    
+
     if (missingFields.length > 0) {
       console.error('Missing required fields:', missingFields);
       console.log('Complete formData state:', formData);
@@ -682,14 +692,14 @@ const TradesPersonOnboarding = () => {
       setHasSubmitted(false);
       return;
     }
-    
+
     setIsSubmitting(true);
     setHasSubmitted(true);
-    
+
     try {
       // Create FormData for file upload
       const formDataToSend = new FormData();
-      
+
       // Add basic tradesperson information
       const tradespersonData = {
         name: formData.name,
@@ -746,7 +756,7 @@ const TradesPersonOnboarding = () => {
         hasToken: !!authData.token,
         userId: authData.id
       });
-      
+
       // Debug: Log all FormData entries
       console.log('FormData entries:');
       for (let [key, value] of formDataToSend.entries()) {
@@ -756,7 +766,7 @@ const TradesPersonOnboarding = () => {
           console.log(`${key}:`, value);
         }
       }
-      
+
       const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/save-trader-project`, {
         method: 'POST',
         credentials: 'include',
@@ -769,11 +779,11 @@ const TradesPersonOnboarding = () => {
       if (response.ok) {
         const data = await response.json();
         console.log('Tradesperson data saved successfully:', data);
-        
+
         setIsCompleted(true);
         localStorage.removeItem('pro_onboarding_draft');
         console.log('Tradesperson registration flow completed');
-        
+
         // Redirect after showing success to the jobs page
         setTimeout(() => {
           navigate('/tradesperson/jobs');
@@ -781,7 +791,7 @@ const TradesPersonOnboarding = () => {
       } else {
         const errorText = await response.text();
         console.error('Failed to save tradesperson data:', response.status, 'Response:', errorText);
-        
+
         // Try to parse error response
         try {
           const errorJson = JSON.parse(errorText);
@@ -797,7 +807,7 @@ const TradesPersonOnboarding = () => {
       }
     } catch (error) {
       console.error('Error saving tradesperson data:', error);
-      
+
       // More specific error messages
       if (error.message.includes('NetworkError') || error.message.includes('fetch')) {
         setErrors({ general: 'Network error. Please check your internet connection and try again.' });
@@ -856,7 +866,7 @@ const TradesPersonOnboarding = () => {
 
   const stepTitles = {
     1: 'Personal Details',
-    2: 'Services & Experience', 
+    2: 'Services & Experience',
     3: 'Location & Service Area',
     4: 'Portfolio & Consent'
   };
@@ -918,7 +928,7 @@ const TradesPersonOnboarding = () => {
 
   return (
     <div className="min-h-screen bg-background" onKeyDown={handleKeyDown}>
-      <div className="container mx-auto px-4 py-6 md:py-8" style={{maxWidth: '640px'}}>
+      <div className="container mx-auto px-4 py-6 md:py-8" style={{ maxWidth: '640px' }}>
         {/* Progress Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
@@ -929,21 +939,53 @@ const TradesPersonOnboarding = () => {
             </div>
           </div>
           <div className="space-y-2">
-            <Progress value={progressPercentage} className="h-2 bg-slate-200" style={{height: '8px'}} />
+            <Progress value={progressPercentage} className="h-2 bg-slate-200" style={{ height: '8px' }} />
             <div className="flex justify-center text-sm">
               <span className="font-medium text-foreground">{Math.round(progressPercentage)}% complete</span>
             </div>
           </div>
         </div>
 
+        {isHomeOwner && (
+          <div className="mb-6 rounded-xl border-2 border-amber-300 bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 p-5 shadow-lg">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-md">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-amber-900 mb-2">
+                  Homeowners Cannot Register as Tradespeople
+                </h3>
+                <p className="text-sm text-amber-800 leading-relaxed mb-4">
+                  You're currently logged in as a <strong>homeowner</strong>. To register as a tradesperson, you'll need to log out and create a separate tradesperson account.
+                </p>
+                <button
+                  onClick={() => {
+                    localStorage.removeItem('auth_user');
+                    window.location.href = '/auth';
+                  }}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-amber-600 text-amber-800 rounded-lg hover:bg-amber-50 hover:border-amber-700 hover:shadow-md transition-all font-semibold text-sm"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  Log Out & Register as Tradesperson
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Step Content */}
-        <Card className="mb-24 md:mb-8 border border-slate-200 shadow-sm" style={{borderRadius: '12px'}}>
+        <Card className="mb-24 md:mb-8 border border-slate-200 shadow-sm" style={{ borderRadius: '12px' }}>
           <CardHeader className="pb-6">
-            <CardTitle className="text-xl font-semibold text-foreground" style={{marginBottom: '8px'}}>
+            <CardTitle className="text-xl font-semibold text-foreground" style={{ marginBottom: '8px' }}>
               {stepTitles[currentStep as keyof typeof stepTitles]}
             </CardTitle>
           </CardHeader>
-          <CardContent style={{gap: '24px'}} className="space-y-6">
+          <CardContent style={{ gap: '24px' }} className="space-y-6">
             {/* General Error Display - Show on all steps */}
             {errors.general && (
               <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -998,7 +1040,7 @@ const TradesPersonOnboarding = () => {
                     onBlur={() => handleFieldBlur('name')}
                     placeholder="Enter your full name"
                     className={`h-12 text-base px-4 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:ring-offset-0 ${errors.name ? 'border-red-500 bg-red-50' : ''}`}
-                    style={{borderRadius: '12px', fontSize: '16px'}}
+                    style={{ borderRadius: '12px', fontSize: '16px' }}
                     aria-invalid={!!errors.name}
                     aria-describedby={errors.name ? 'name-error' : 'name-help'}
                   />
@@ -1019,7 +1061,7 @@ const TradesPersonOnboarding = () => {
                     onBlur={() => handleFieldBlur('email')}
                     placeholder="Enter your email address"
                     className={`h-12 text-base px-4 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:ring-offset-0 ${errors.email ? 'border-red-500 bg-red-50' : ''} ${isEmailFromAuth ? 'bg-slate-50' : ''}`}
-                    style={{borderRadius: '12px', fontSize: '16px'}}
+                    style={{ borderRadius: '12px', fontSize: '16px' }}
                     readOnly={!!isEmailFromAuth}
                     aria-invalid={!!errors.email}
                     aria-describedby={errors.email ? 'email-error' : 'email-help'}
@@ -1042,7 +1084,7 @@ const TradesPersonOnboarding = () => {
                     onChange={(e) => updateFormData('phone', e.target.value)}
                     placeholder="Enter your phone number"
                     className="h-12 text-base px-4 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:ring-offset-0"
-                    style={{borderRadius: '12px', fontSize: '16px'}}
+                    style={{ borderRadius: '12px', fontSize: '16px' }}
                     aria-describedby="phone-help"
                   />
                   <p id="phone-help" className="text-sm text-slate-500">Optional — for direct client contact</p>
@@ -1067,20 +1109,19 @@ const TradesPersonOnboarding = () => {
                     {serviceOptions.map((service) => {
                       const isPrimary = formData.primaryTrade === service;
                       const isSelected = isPrimary || formData.otherServices.includes(service);
-                      
+
                       return (
                         <button
                           key={service}
                           type="button"
                           onClick={() => handleServiceToggle(service)}
-                          className={`min-h-[44px] px-4 py-3 text-sm font-medium rounded-xl border-2 transition-all duration-200 relative focus:ring-2 focus:ring-blue-100 focus:ring-offset-0 ${
-                            isPrimary
+                          className={`min-h-[44px] px-4 py-3 text-sm font-medium rounded-xl border-2 transition-all duration-200 relative focus:ring-2 focus:ring-blue-100 focus:ring-offset-0 ${isPrimary
                               ? 'bg-blue-600 text-white border-blue-600 shadow-md'
                               : isSelected
-                              ? 'bg-blue-50 text-blue-700 border-blue-200'
-                              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300'
-                          }`}
-                          style={{minHeight: '44px'}}
+                                ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300'
+                            }`}
+                          style={{ minHeight: '44px' }}
                         >
                           {service}
                           {isPrimary && (
@@ -1113,7 +1154,7 @@ const TradesPersonOnboarding = () => {
                       onChange={(e) => updateFormData('experienceYears', e.target.value ? parseInt(e.target.value) : undefined)}
                       placeholder="e.g., 5"
                       className="h-12 text-base px-4 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:ring-offset-0"
-                      style={{borderRadius: '12px', fontSize: '16px', textAlign: 'right'}}
+                      style={{ borderRadius: '12px', fontSize: '16px', textAlign: 'right' }}
                       aria-describedby="experience-help"
                     />
                     <p id="experience-help" className="text-sm text-slate-500">0-50 years (optional)</p>
@@ -1129,7 +1170,7 @@ const TradesPersonOnboarding = () => {
                     placeholder="List any relevant certifications, qualifications, or training"
                     rows={3}
                     className="text-base px-4 py-3 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:ring-offset-0"
-                    style={{borderRadius: '12px', fontSize: '16px'}}
+                    style={{ borderRadius: '12px', fontSize: '16px' }}
                     aria-describedby="certifications-help"
                   />
                   <p id="certifications-help" className="text-sm text-slate-500">
@@ -1158,9 +1199,8 @@ const TradesPersonOnboarding = () => {
                       />
                       <Label
                         htmlFor="certification-upload"
-                        className={`cursor-pointer text-blue-600 hover:text-blue-700 font-medium ${
-                          formData.certificationImages.length >= 3 ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
+                        className={`cursor-pointer text-blue-600 hover:text-blue-700 font-medium ${formData.certificationImages.length >= 3 ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
                       >
                         {formData.certificationImages.length >= 3 ? 'Maximum 3 images reached' : 'Click to upload certification images'}
                       </Label>
@@ -1193,7 +1233,7 @@ const TradesPersonOnboarding = () => {
                         ))}
                       </div>
                     )}
-                    
+
                     {formData.certificationImages.length === 0 && (
                       <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
                         <p className="text-sm text-blue-700 text-center">
@@ -1219,7 +1259,7 @@ const TradesPersonOnboarding = () => {
                     onChange={(locationData) => {
                       updateFormData('city', locationData.location);
                       updateFormData('postcode', locationData.postcode);
-                      
+
                       // Clear errors when fields are updated
                       if (locationData.location && errors.city) {
                         setErrors(prev => {
@@ -1250,7 +1290,7 @@ const TradesPersonOnboarding = () => {
                       value={formData.radiusKm.toString()}
                       onValueChange={(value) => updateFormData('radiusKm', parseInt(value))}
                     >
-                      <SelectTrigger className="h-12 text-base border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:ring-offset-0" style={{borderRadius: '12px', fontSize: '16px'}}>
+                      <SelectTrigger className="h-12 text-base border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:ring-offset-0" style={{ borderRadius: '12px', fontSize: '16px' }}>
                         <SelectValue placeholder="Select service radius" />
                       </SelectTrigger>
                       <SelectContent>
@@ -1261,13 +1301,13 @@ const TradesPersonOnboarding = () => {
                         ))}
                       </SelectContent>
                     </Select>
-                    
+
                     <div className="flex items-center gap-2">
                       <div className="flex-1 h-px bg-slate-300"></div>
                       <span className="text-xs text-slate-500 font-medium">OR</span>
                       <div className="flex-1 h-px bg-slate-300"></div>
                     </div>
-                    
+
                     <div className="flex items-center gap-3">
                       <Input
                         id="customRadius"
@@ -1297,7 +1337,7 @@ const TradesPersonOnboarding = () => {
                         }}
                         placeholder="Enter custom radius"
                         className="h-12 text-base px-4 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:ring-offset-0"
-                        style={{borderRadius: '12px', fontSize: '16px'}}
+                        style={{ borderRadius: '12px', fontSize: '16px' }}
                         aria-describedby="radius-help"
                       />
                       <span className="text-base font-medium text-slate-700 whitespace-nowrap">miles</span>
@@ -1308,7 +1348,7 @@ const TradesPersonOnboarding = () => {
 
                 <div className="space-y-3">
                   <Label htmlFor="bio" className="text-base font-medium text-slate-900">
-                    Brief Bio 
+                    Brief Bio
                     <span className="text-sm text-slate-500 ml-2 font-normal">
                       {(formData.bio || '').length}/400
                     </span>
@@ -1320,7 +1360,7 @@ const TradesPersonOnboarding = () => {
                     placeholder="Tell potential clients about yourself and your work..."
                     rows={4}
                     className={`text-base px-4 py-3 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:ring-offset-0 ${(formData.bio || '').length >= 400 ? 'border-orange-300 bg-orange-50' : ''}`}
-                    style={{borderRadius: '12px', fontSize: '16px'}}
+                    style={{ borderRadius: '12px', fontSize: '16px' }}
                     aria-describedby="bio-help"
                   />
                   <p id="bio-help" className="text-sm text-slate-500">
@@ -1354,9 +1394,8 @@ const TradesPersonOnboarding = () => {
                       />
                       <Label
                         htmlFor="portfolio-upload"
-                        className={`cursor-pointer text-blue-600 hover:text-blue-700 font-medium ${
-                          formData.portfolio.length >= 5 ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
+                        className={`cursor-pointer text-blue-600 hover:text-blue-700 font-medium ${formData.portfolio.length >= 5 ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
                       >
                         {formData.portfolio.length >= 5 ? 'Maximum 5 images reached' : 'Click to upload portfolio images'}
                       </Label>
@@ -1392,7 +1431,7 @@ const TradesPersonOnboarding = () => {
                         ))}
                       </div>
                     )}
-                    
+
                     {formData.portfolio.length === 0 && (
                       <div className="mt-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
                         <p className="text-sm text-slate-500 text-center">
@@ -1412,7 +1451,7 @@ const TradesPersonOnboarding = () => {
                       onBlur={() => handleFieldBlur('marketingConsent')}
                       aria-invalid={!!errors.marketingConsent}
                       className="mt-1"
-                      style={{minWidth: '20px', minHeight: '20px'}}
+                      style={{ minWidth: '20px', minHeight: '20px' }}
                     />
                     <div className="space-y-2">
                       <Label
@@ -1437,14 +1476,14 @@ const TradesPersonOnboarding = () => {
         </Card>
 
         {/* Mobile Sticky Navigation */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-slate-200 p-4 md:hidden" style={{paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))'}}>
-          <div className="flex justify-between items-center gap-4" style={{maxWidth: '640px', margin: '0 auto'}}>
+        <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-slate-200 p-4 md:hidden" style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}>
+          <div className="flex justify-between items-center gap-4" style={{ maxWidth: '640px', margin: '0 auto' }}>
             <Button
               variant="outline"
               onClick={prevStep}
               disabled={currentStep === 1 || (errors.general && errors.general.includes('Customer accounts cannot register'))}
               className="flex items-center gap-2 h-12 px-6 border-slate-300 text-slate-700 hover:bg-slate-50"
-              style={{borderRadius: '12px', minHeight: '48px'}}
+              style={{ borderRadius: '12px', minHeight: '48px' }}
             >
               <ChevronLeft className="h-4 w-4" />
               Back
@@ -1453,9 +1492,9 @@ const TradesPersonOnboarding = () => {
             {currentStep < 4 ? (
               <Button
                 onClick={nextStep}
-                disabled={!isStepValid(currentStep) || (errors.general && errors.general.includes('Customer accounts cannot register'))}
+                disabled={!isStepValid(currentStep) || isHomeOwner || (errors.general && errors.general.includes('Customer accounts cannot register'))}
                 className="flex items-center gap-2 h-12 px-6 bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
-                style={{borderRadius: '12px', minHeight: '48px'}}
+                style={{ borderRadius: '12px', minHeight: '48px' }}
               >
                 Next
                 <ChevronRight className="h-4 w-4" />
@@ -1463,9 +1502,9 @@ const TradesPersonOnboarding = () => {
             ) : (
               <Button
                 onClick={completeRegistration}
-                disabled={!isStepValid(currentStep) || isSubmitting || (errors.general && errors.general.includes('Customer accounts cannot register'))}
+                disabled={!isStepValid(currentStep) || isSubmitting || isHomeOwner || (errors.general && errors.general.includes('Customer accounts cannot register'))}
                 className="h-12 px-6 bg-green-600 hover:bg-green-700 text-white shadow-sm"
-                style={{borderRadius: '12px', minHeight: '48px'}}
+                style={{ borderRadius: '12px', minHeight: '48px' }}
               >
                 {isSubmitting ? (
                   <div className="flex items-center gap-2">
@@ -1487,7 +1526,7 @@ const TradesPersonOnboarding = () => {
             onClick={prevStep}
             disabled={currentStep === 1 || (errors.general && errors.general.includes('Customer accounts cannot register'))}
             className="flex items-center gap-2 h-12 px-6 border-slate-300 text-slate-700 hover:bg-slate-50"
-            style={{borderRadius: '12px'}}
+            style={{ borderRadius: '12px' }}
           >
             <ChevronLeft className="h-4 w-4" />
             Back
@@ -1496,9 +1535,9 @@ const TradesPersonOnboarding = () => {
           {currentStep < 4 ? (
             <Button
               onClick={nextStep}
-              disabled={!isStepValid(currentStep) || (errors.general && errors.general.includes('Customer accounts cannot register'))}
+              disabled={!isStepValid(currentStep) || isHomeOwner || (errors.general && errors.general.includes('Customer accounts cannot register')) }
               className="flex items-center gap-2 h-12 px-6 bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
-              style={{borderRadius: '12px'}}
+              style={{ borderRadius: '12px' }}
             >
               Next
               <ChevronRight className="h-4 w-4" />
@@ -1506,9 +1545,9 @@ const TradesPersonOnboarding = () => {
           ) : (
             <Button
               onClick={completeRegistration}
-              disabled={!isStepValid(currentStep) || isSubmitting || (errors.general && errors.general.includes('Customer accounts cannot register'))}
+              disabled={!isStepValid(currentStep) || isSubmitting || isHomeOwner || (errors.general && errors.general.includes('Customer accounts cannot register'))}
               className="h-12 px-6 bg-green-600 hover:bg-green-700 text-white shadow-sm"
-              style={{borderRadius: '12px'}}
+              style={{ borderRadius: '12px' }}
             >
               {isSubmitting ? (
                 <div className="flex items-center gap-2">

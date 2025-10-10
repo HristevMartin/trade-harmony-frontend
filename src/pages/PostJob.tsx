@@ -160,7 +160,6 @@ const PostJob = () => {
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [pendingSubmission, setPendingSubmission] = useState(false);
     const [isAiGenerating, setIsAiGenerating] = useState(false);
-    const [aiSuggestion, setAiSuggestion] = useState('');
     const [showAiSuggestion, setShowAiSuggestion] = useState(false);
     const [showAiBriefInput, setShowAiBriefInput] = useState(false);
     const [aiBrief, setAiBrief] = useState('');
@@ -652,10 +651,9 @@ const PostJob = () => {
 
     // Check if authenticated user has correct role for posting jobs
     const checkUserRole = () => {
-        const token = localStorage.getItem('access_token');
         const authUser = localStorage.getItem('auth_user');
         
-        if (!token || !authUser) {
+        if (!authUser) {
             return { isValid: true, message: '' }; // Not authenticated, allow to proceed with auth modal
         }
 
@@ -671,9 +669,7 @@ const PostJob = () => {
             return { isValid: true, message: '' };
         } catch (error) {
             console.error('Error parsing user data:', error);
-            // If we can't parse user data, clear it and allow to proceed
             localStorage.removeItem('auth_user');
-            localStorage.removeItem('access_token');
             return { isValid: true, message: '' };
         }
     };

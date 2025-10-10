@@ -37,7 +37,7 @@ import type { JobDraft } from "@/lib/ai/placeholders";
 
 const Index = () => {
   const [postcode, setPostcode] = useState("");
-  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState("UK");
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
   const [touchStart, setTouchStart] = useState(0);
@@ -87,10 +87,6 @@ const Index = () => {
 
   const countries = [
     { name: "United Kingdom", code: "UK", flag: "🇬🇧" },
-    { name: "Bulgaria", code: "BG", flag: "🇧🇬" },
-    { name: "Germany", code: "DE", flag: "🇩🇪" },
-    { name: "France", code: "FR", flag: "🇫🇷" },
-    { name: "Spain", code: "ES", flag: "🇪🇸" },
   ];
 
   const services = [
@@ -401,12 +397,12 @@ const Index = () => {
                     <SelectContent>
                         {countries.map((country) => (
                           <SelectItem key={country.code} value={country.code}>
-                          <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2">
                               <span>{country.flag}</span>
                               <span>{country.name}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
+                            </div>
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -419,7 +415,7 @@ const Index = () => {
                       <Input
                         id="location-input"
                         type="text"
-                        placeholder="Location"
+                        placeholder="Postcode"
                         value={postcode}
                         onChange={(e) => setPostcode(e.target.value)}
                         className="w-full pl-10 h-12 min-h-[48px] text-base rounded-xl border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-colors bg-white"
@@ -478,15 +474,7 @@ const Index = () => {
               )}
             </motion.div>
 
-            {/* AI Job Assistant Launcher */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.7 }}
-              className="mt-6"
-            >
-              <AssistantLauncher onClick={() => setIsAssistantOpen(true)} />
-            </motion.div>
+         
 
             {/* Trustpilot Social Proof */}
             <motion.div
