@@ -31,7 +31,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import usePageTracking from "@/hooks/usePageTracking";
-import { AssistantLauncher } from "@/components/ai/AssistantLauncher";
 import { AiJobAssistant } from "@/components/ai/AiJobAssistant";
 import type { JobDraft } from "@/lib/ai/placeholders";
 
