@@ -1285,7 +1285,7 @@ const TradesPersonProfile = () => {
                                                                 <Button
                                                                     size="sm"
                                                                     variant="destructive"
-                                                                    className="absolute top-1 right-1 h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                                                    className="absolute top-1 right-1 h-5 w-5 p-0 bg-red-500 hover:bg-red-600 shadow-lg z-10"
                                                                     onClick={async () => {
                                                                         try {
                                                                             const updatedImages = traderProfile.certificationImages.filter((_, i) => i !== index);
@@ -1452,7 +1452,7 @@ const TradesPersonProfile = () => {
                                                         <Button
                                                             size="sm"
                                                             variant="destructive"
-                                                            className="absolute top-2 right-2 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                                            className="absolute top-2 right-2 h-6 w-6 p-0 bg-red-500 hover:bg-red-600 shadow-lg z-10"
                                                             onClick={async () => {
                                                                 try {
                                                                     const updatedImages = traderProfile.projectImages.filter((_, i) => i !== index);
