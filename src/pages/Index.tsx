@@ -805,8 +805,8 @@ const Index = () => {
                 <span>Powered by AI — Matching You Instantly</span>
               </div>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">AI Finds the Right Professional — Instantly</h2>
-              <p className="text-muted-foreground text-base sm:text-lg px-4">Homeowners describe their jobs with AI. JobHub recommends professionals based on skills, distance, and reputation.</p>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-2 italic px-4">AI learns from completed projects to predict the best match for your job.</p>
+              <p className="text-muted-foreground text-base sm:text-lg px-4">JobHub connects homeowners with verified local professionals based on trade and location — with AI helping every job post become more accurate and complete.</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2 italic px-4">Our AI continuously improves how local jobs and verified trades connect — making every match faster and more accurate over time.</p>
             </motion.div>
           </div>
           
@@ -816,38 +816,38 @@ const Index = () => {
               {
                 badge: "Perfect Fit",
                 badgeColor: "trust-green",
-                score: "98%",
+                score: "Verified local pro in your area, available for your trade type.",
                 icon: <CheckCircle2 className="h-6 w-6" />,
                 title: "Expert Plumber",
                 specialty: "Emergency Repairs",
                 distance: "2.1 miles away",
                 rating: 4.9,
                 jobs: 247,
-                reasons: ["Specializes in emergency work", "Excellent local reviews", "Available immediately"]
+                reasons: ["Verified in your postcode area", "Matches your trade type", "Available for new jobs"]
               },
               {
                 badge: "Good Match",
                 badgeColor: "trust-blue",
-                score: "82%",
+                score: "Trusted professional nearby — may cover your postcode range.",
                 icon: <TrendingUp className="h-6 w-6" />,
                 title: "Certified Electrician",
                 specialty: "Rewiring & Installations",
                 distance: "5.3 miles away",
                 rating: 4.7,
                 jobs: 189,
-                reasons: ["Strong track record", "Within your area", "Available this week"]
+                reasons: ["Within extended service area", "Verified trade credentials", "Good local reputation"]
               },
               {
                 badge: "Not Suitable",
                 badgeColor: "black",
-                score: "34%",
+                score: "Outside your selected postcode area or currently unavailable.",
                 icon: <AlertCircle className="h-6 w-6" />,
                 title: "General Handyman",
                 specialty: "Minor Home Repairs",
                 distance: "18.7 miles away",
                 rating: 4.3,
                 jobs: 56,
-                reasons: ["Outside service area", "Lacks required specialization", "Lower review score"]
+                reasons: ["Outside postcode coverage", "Currently unavailable", "Different trade specialty"]
               }
             ].map((match, index) => (
               <motion.div
@@ -868,7 +868,7 @@ const Index = () => {
                     {match.icon}
                     <span>{match.badge}</span>
                   </div>
-                  <div className={`text-2xl font-bold text-${match.badgeColor}`}>{match.score}</div>
+                  <div className={`text-xs text-${match.badgeColor} font-medium max-w-[120px] text-right leading-tight`}>{match.score}</div>
                 </div>
                 
                 {/* Profile summary */}
@@ -916,9 +916,9 @@ const Index = () => {
             className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8"
           >
             {[
-              { icon: <Brain className="h-8 w-8" />, title: "Smart Recommendations", desc: "AI trained to match jobs with the right professionals" },
-              { icon: <TrendingUp className="h-8 w-8" />, title: "Saves You Time", desc: "No more sifting through hundreds of profiles manually" },
-              { icon: <Award className="h-8 w-8" />, title: "Better Outcomes", desc: "Higher satisfaction rates through smarter matching" }
+              { icon: <Brain className="h-8 w-8" />, title: "AI-Assisted Job Posts", desc: "AI helps you create clearer, more detailed job descriptions" },
+              { icon: <TrendingUp className="h-8 w-8" />, title: "Location-Based Matching", desc: "Find verified professionals in your postcode area" },
+              { icon: <Award className="h-8 w-8" />, title: "Verified Trade Profiles", desc: "All professionals are ID-checked and trade-verified" }
             ].map((benefit, index) => (
               <div key={index} className="text-center p-6 rounded-xl bg-card/80 border border-border/50 shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/20  mb-4 shadow-md border border-primary/20">
@@ -928,6 +928,19 @@ const Index = () => {
                 <p className="text-sm text-slate-700 dark:text-slate-300">{benefit.desc}</p>
               </div>
             ))}
+          </motion.div>
+          
+          {/* Footer explanation */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            className="text-center mt-8"
+          >
+            <p className="text-xs text-muted-foreground italic max-w-2xl mx-auto px-4">
+              Matches are based on postcode proximity and verified trade profiles. AI assists in refining job posts for better accuracy.
+            </p>
           </motion.div>
         </div>
       </section>
