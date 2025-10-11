@@ -1076,26 +1076,36 @@ const Index = () => {
             </div>
           </div>
           
-          {/* Stats */}
+          {/* Summary Feature Cards */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="flex justify-center"
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto px-4"
           >
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 text-center px-4">
-              <div className="group cursor-default bg-gradient-to-br from-card/80 to-card/60 p-4 sm:p-6 rounded-2xl border border-primary/10 shadow-lg transition-all duration-300">
-                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-200 mb-2 transition-transform group-hover:scale-110">AI-Powered</div>
-                <div className="text-muted-foreground font-medium text-sm sm:text-base">Smart Job Matching</div>
+            <div className="text-center p-6 md:p-8 rounded-2xl bg-gradient-to-br from-card via-card/95 to-card/90 border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-300">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4 shadow-md border border-primary/20">
+                <Brain className="h-8 w-8 text-primary" />
               </div>
-              <div className="group cursor-default bg-gradient-to-br from-card/80 to-card/60 p-4 sm:p-6 rounded-2xl border border-secondary/10 shadow-lg transition-all duration-300">
-                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-200 mb-2 transition-transform group-hover:scale-110">100%</div>
-                <div className="text-muted-foreground font-medium text-sm sm:text-base">Verified Professionals</div>
+              <h3 className="text-xl font-bold text-foreground mb-3">AI-Assisted Matching</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">Faster, smarter job connections powered by intelligent automation.</p>
+            </div>
+            
+            <div className="text-center p-6 md:p-8 rounded-2xl bg-gradient-to-br from-card via-card/95 to-card/90 border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-300">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-trust-green/10 mb-4 shadow-md border border-trust-green/20">
+                <Shield className="h-8 w-8 text-trust-green" />
               </div>
-              <div className="group cursor-default bg-gradient-to-br from-card/80 to-card/60 p-4 sm:p-6 rounded-2xl border border-accent/10 shadow-lg transition-all duration-300">
-                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-200 mb-2 transition-transform group-hover:scale-110">Free</div>
-                <div className="text-muted-foreground font-medium text-sm sm:text-base">To Post Jobs</div>
+              <h3 className="text-xl font-bold text-foreground mb-3">Verified Professionals</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">Every tradesperson on JobHub is ID-checked, insured, and reviewed by real homeowners.</p>
+            </div>
+            
+            <div className="text-center p-6 md:p-8 rounded-2xl bg-gradient-to-br from-card via-card/95 to-card/90 border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-300">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-trust-blue/10 mb-4 shadow-md border border-trust-blue/20">
+                <CheckCircle2 className="h-8 w-8 text-trust-blue" />
               </div>
+              <h3 className="text-xl font-bold text-foreground mb-3">Free for Homeowners</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">Post your job at no cost — transparency from start to finish.</p>
             </div>
           </motion.div>
         </div>
