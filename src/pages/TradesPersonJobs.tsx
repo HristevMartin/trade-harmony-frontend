@@ -805,7 +805,12 @@ const TradesPersonJobs = () => {
       />
 
       {/* Desktop Filter Bar */}
-      <div className="desktop-filter-bar hidden md:block bg-white border-b border-gray-200/60 shadow-sm">
+      <motion.div 
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: [0.22, 0.61, 0.36, 1] }}
+        className="desktop-filter-bar hidden md:block bg-white/95 backdrop-blur-sm border-b border-gray-200/60 shadow-sm sticky top-0 z-40"
+      >
         <div className="container mx-auto px-4 max-w-6xl py-4">
           <div className="flex items-center justify-between gap-4">
             {/* Left side - Filter chips */}
@@ -1114,21 +1119,22 @@ const TradesPersonJobs = () => {
                 const isActive = filters.urgency === urgency;
                 
                 return (
-                  <button
+                  <motion.button
                     key={urgency}
+                    whileTap={{ scale: 0.97 }}
                     onClick={() => setFilters(prev => ({ 
                       ...prev, 
                       urgency: prev.urgency === urgency ? undefined : urgency 
                     }))}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-full border font-medium transition-all duration-200 ${
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-full border font-medium transition-all duration-150 ${
                       isActive 
                         ? getUrgencyColor(urgency)
-                        : 'bg-white hover:bg-gray-50 border-gray-200 hover:border-gray-300 shadow-sm text-gray-700'
+                        : 'bg-white hover:bg-gray-50 border-gray-200 hover:border-gray-300 shadow-sm text-gray-700 active:scale-[0.97]'
                     }`}
                   >
                     <Icon className="h-4 w-4" />
                     <span className="text-sm">{urgency}</span>
-                  </button>
+                  </motion.button>
                 );
               })}
             </div>
@@ -1202,7 +1208,7 @@ const TradesPersonJobs = () => {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Sticky Filter Bar - Shows when scrolling */}
       {showStickyFilter && (
@@ -1692,8 +1698,15 @@ const TradesPersonJobs = () => {
                   <div className="mb-6">
                     <h4 className="text-sm font-medium text-slate-700 mb-3">Categories</h4>
                     <div className="space-y-2">
-                      {filterOptions.categories.map(category => (
-                        <label key={category} className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg cursor-pointer">
+                      {filterOptions.categories.map((category, idx) => (
+                        <motion.label 
+                          key={category} 
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.2, delay: idx * 0.03 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg cursor-pointer transition-all duration-150 active:scale-[0.98]"
+                        >
                           <input
                             type="checkbox"
                             checked={filters.categories.includes(category)}
@@ -1707,7 +1720,7 @@ const TradesPersonJobs = () => {
                             className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                           />
                           <span className="text-sm text-slate-700">{category}</span>
-                        </label>
+                        </motion.label>
                       ))}
                     </div>
                   </div>
@@ -1716,8 +1729,15 @@ const TradesPersonJobs = () => {
                   <div className="mb-6">
                     <h4 className="text-sm font-medium text-slate-700 mb-3">Location</h4>
                     <div className="space-y-2">
-                      {filterOptions.locations.map(location => (
-                        <label key={location} className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg cursor-pointer">
+                      {filterOptions.locations.map((location, idx) => (
+                        <motion.label 
+                          key={location} 
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.2, delay: idx * 0.03 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg cursor-pointer transition-all duration-150 active:scale-[0.98]"
+                        >
                           <input
                             type="radio"
                             name="location"
@@ -1728,7 +1748,7 @@ const TradesPersonJobs = () => {
                             className="border-slate-300 text-indigo-600 focus:ring-indigo-500"
                           />
                           <span className="text-sm text-slate-700">{location}</span>
-                        </label>
+                        </motion.label>
                       ))}
                     </div>
                   </div>
@@ -1747,13 +1767,14 @@ const TradesPersonJobs = () => {
                         const Icon = getUrgencyIcon(urgency);
                         const isPressed = filters.urgency === urgency;
                         return (
-                          <button
+                          <motion.button
                             key={urgency}
+                            whileTap={{ scale: 0.97 }}
                             onClick={() => setFilters(prev => ({
                               ...prev,
                               urgency: prev.urgency === urgency ? undefined : urgency
                             }))}
-                            className={`inline-flex items-center gap-2 rounded-full px-4 h-10 transition-all ${isPressed
+                            className={`inline-flex items-center gap-2 rounded-full px-4 h-10 transition-all duration-150 active:scale-[0.97] ${isPressed
                                 ? 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200'
                                 : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                               }`}
@@ -1761,7 +1782,7 @@ const TradesPersonJobs = () => {
                           >
                             <Icon className="h-4 w-4" />
                             <span className="text-sm font-medium">{urgency}</span>
-                          </button>
+                          </motion.button>
                         );
                       })}
                     </div>
@@ -1775,9 +1796,10 @@ const TradesPersonJobs = () => {
                       </div>
                       IP-Based Location Filter
                     </h4>
-                    <button
+                    <motion.button
+                      whileTap={{ scale: 0.98 }}
                       onClick={() => setIpFilterEnabled(prev => !prev)}
-                      className={`w-full p-4 rounded-xl border-2 font-semibold transition-all flex items-center justify-between ${
+                      className={`w-full p-4 rounded-xl border-2 font-semibold transition-all duration-150 flex items-center justify-between active:scale-[0.98] ${
                         ipFilterEnabled
                           ? 'bg-purple-500 text-white border-purple-500 shadow-md'
                           : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
@@ -1802,7 +1824,7 @@ const TradesPersonJobs = () => {
                       >
                         {ipFilterEnabled ? 'ON' : 'OFF'}
                       </Badge>
-                    </button>
+                    </motion.button>
                     <p className="text-xs text-slate-500 mt-2 flex items-center gap-1">
                       <AlertCircle className="h-3 w-3" />
                       {ipFilterEnabled ? 'Radius filter is available when enabled' : 'Enable to use radius-based filtering'}
@@ -1888,35 +1910,43 @@ const TradesPersonJobs = () => {
                       {[
                         { key: 'budget_high', label: 'Highest Budget First' },
                         { key: 'budget_low', label: 'Lowest Budget First' },
-                      ].map(({ key, label }) => (
-                        <button
+                      ].map(({ key, label }, idx) => (
+                        <motion.button
                           key={key}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.2, delay: 0.15 + idx * 0.05 }}
+                          whileTap={{ scale: 0.98 }}
                           onClick={() => setSortBy(key as typeof sortBy)}
-                          className={`w-full text-left p-3 rounded-lg transition-all ${sortBy === key
+                          className={`w-full text-left p-3 rounded-lg transition-all duration-150 active:scale-[0.98] ${sortBy === key
                               ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200'
                               : 'hover:bg-slate-50 text-slate-700'
                             }`}
                         >
                           <span className="text-sm font-medium">{label}</span>
-                        </button>
+                        </motion.button>
                       ))}
                     </div>
                   </div>
 
                   <div className="space-y-3">
-                    <Button
-                      onClick={() => setShowMobileFilters(false)}
-                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white h-12 rounded-xl font-medium"
-                    >
-                      Apply
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowMobileFilters(false)}
-                      className="w-full h-12 rounded-xl font-medium border-slate-300 text-slate-700 hover:bg-slate-50"
-                    >
-                      Cancel
-                    </Button>
+                    <motion.div whileTap={{ scale: 0.98 }}>
+                      <Button
+                        onClick={() => setShowMobileFilters(false)}
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white h-12 rounded-xl font-medium transition-all duration-150 active:scale-[0.98] active:shadow-lg"
+                      >
+                        Apply
+                      </Button>
+                    </motion.div>
+                    <motion.div whileTap={{ scale: 0.98 }}>
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowMobileFilters(false)}
+                        className="w-full h-12 rounded-xl font-medium border-slate-300 text-slate-700 hover:bg-slate-50 transition-all duration-150 active:scale-[0.98]"
+                      >
+                        Cancel
+                      </Button>
+                    </motion.div>
                   </div>
                 </div>
               </motion.div>
@@ -2127,10 +2157,15 @@ const TradesPersonJobs = () => {
                     {visibleJobs.map((job, index) => (
                       <motion.div
                         key={job.project_id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
+                        initial={{ opacity: 0, y: 12 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
                         exit={{ opacity: 0, y: -20 }}
-                        transition={{ delay: index * 0.1 }}
+                        transition={{ 
+                          duration: 0.24, 
+                          delay: Math.min(index * 0.04, 0.24),
+                          ease: [0.22, 0.61, 0.36, 1]
+                        }}
                         whileHover={{ y: -2, transition: { duration: 0.2, ease: 'easeOut' } }}
                       >
                         <Card className="bg-white border border-gray-200/40 shadow-md hover:shadow-2xl hover:-translate-y-1 hover:border-gray-300/50 transition-all duration-200 group flex flex-col h-[480px] rounded-2xl overflow-hidden ring-1 ring-gray-100/50">
@@ -2171,12 +2206,23 @@ const TradesPersonJobs = () => {
                             {/* Top Badges Row */}
                             <div className="absolute top-3 left-3 right-3 flex items-start justify-between">
                               {/* Budget Badge - Prominent */}
-                              <div className="bg-white backdrop-blur-md text-gray-900 text-sm font-bold px-4 py-2 rounded-full shadow-lg border border-gray-200/50 ring-1 ring-white/50">
+                              <motion.div 
+                                initial={{ opacity: 0, scale: 0.92 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.18, delay: 0.1 }}
+                                className="bg-white backdrop-blur-md text-gray-900 text-sm font-bold px-4 py-2 rounded-full shadow-lg border border-gray-200/50 ring-1 ring-white/50"
+                              >
                                 {extractPriceOnly(job.budget)}
-                              </div>
+                              </motion.div>
 
                               {/* Urgency Badge */}
-                              <div className={`text-xs font-bold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-md border ${
+                              <motion.div 
+                                initial={{ opacity: 0, scale: 0.92 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.18, delay: 0.15 }}
+                                className={`text-xs font-bold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-md border ${
                                 formatUrgency(job.urgency) === 'ASAP'
                                   ? 'bg-red-500 text-white border-red-400/30 ring-1 ring-red-300/50'
                                   : formatUrgency(job.urgency) === 'This week'
@@ -2184,7 +2230,7 @@ const TradesPersonJobs = () => {
                                     : 'bg-blue-500 text-white border-blue-400/30 ring-1 ring-blue-300/50'
                               }`}>
                                 {formatUrgency(job.urgency)}
-                              </div>
+                              </motion.div>
                             </div>
                           </div>
 
@@ -2228,13 +2274,15 @@ const TradesPersonJobs = () => {
 
                           {/* Action Button */}
                           <div className="p-6 pt-4 bg-gray-50/50">
-                            <Button
-                              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md group-hover:bg-blue-700 group-hover:scale-[1.02]"
-                              onClick={() => navigate(`/jobs/${job.project_id}`)}
-                            >
-                              <Eye className="h-4 w-4 mr-2" />
-                              View Details
-                            </Button>
+                            <motion.div whileTap={{ scale: 0.98 }}>
+                              <Button
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:shadow-lg active:scale-[0.98] group-hover:bg-blue-700"
+                                onClick={() => navigate(`/jobs/${job.project_id}`)}
+                              >
+                                <Eye className="h-4 w-4 mr-2" />
+                                View Details
+                              </Button>
+                            </motion.div>
                           </div>
                         </Card>
                       </motion.div>
@@ -2260,7 +2308,7 @@ const TradesPersonJobs = () => {
                       onClick={handleLoadMore}
                       disabled={loadingMore}
                       variant="outline"
-                      className="border-gray-300 text-gray-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 px-8 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow-md"
+                      className="border-gray-300 text-gray-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 px-8 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow-md active:scale-[0.98]"
                     >
                       {loadingMore ? (
                         <RefreshCw className="h-4 w-4 animate-spin" />
