@@ -2168,10 +2168,10 @@ const TradesPersonJobs = () => {
                         }}
                         whileHover={{ y: -2, transition: { duration: 0.2, ease: 'easeOut' } }}
                       >
-                        <Card className="bg-white border border-gray-200/40 shadow-md hover:shadow-2xl hover:-translate-y-1 hover:border-gray-300/50 transition-all duration-200 group flex flex-col h-[480px] rounded-2xl overflow-hidden ring-1 ring-gray-100/50">
-                          {/* Job Image Section */}
-                          <div className="relative h-48 w-full bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
-                            {job.image_urls && job.image_urls.length > 0 ? (
+                        <Card className="bg-white border border-gray-200/40 shadow-md hover:shadow-2xl hover:-translate-y-1 hover:border-gray-300/50 transition-all duration-200 group flex flex-col h-[580px] rounded-2xl overflow-hidden ring-1 ring-gray-100/50">
+                          {/* Job Image Section - Fixed Height */}
+                          <div className="relative h-48 w-full flex-shrink-0 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
+                            {job.image_urls && job.image_urls.length > 0 && (
                               <>
                                 <img
                                   src={job.image_urls[0]}
@@ -2186,22 +2186,21 @@ const TradesPersonJobs = () => {
                                   }}
                                 />
                                 {/* Fallback for broken images */}
-                                <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 items-center justify-center hidden">
-                                  <div className="p-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-sm">
+                                <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 items-center justify-center hidden">
+                                  <div className="p-6 bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg">
                                     {getCategoryIcon(job.additional_data?.serviceCategory || job.service_category, 'lg')}
                                   </div>
                                 </div>
                               </>
-                            ) : null}
-                            {/* Placeholder when no image */}
-                            <div
-                              className={`absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center ${job.image_urls && job.image_urls.length > 0 ? 'hidden' : 'flex'
-                                }`}
-                            >
-                              <div className="p-5 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg">
-                                {getCategoryIcon(job.additional_data?.serviceCategory || job.service_category, 'lg')}
+                            )}
+                            {/* Placeholder when no image - More prominent background */}
+                            {(!job.image_urls || job.image_urls.length === 0) && (
+                              <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 flex items-center justify-center">
+                                <div className="p-6 bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg">
+                                  {getCategoryIcon(job.additional_data?.serviceCategory || job.service_category, 'lg')}
+                                </div>
                               </div>
-                            </div>
+                            )}
 
                             {/* Top Badges Row */}
                             <div className="absolute top-3 left-3 right-3 flex items-start justify-between">
@@ -2274,15 +2273,13 @@ const TradesPersonJobs = () => {
 
                           {/* Action Button */}
                           <div className="p-6 pt-4 bg-gray-50/50">
-                            <motion.div whileTap={{ scale: 0.98 }}>
-                              <Button
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:shadow-lg active:scale-[0.98] group-hover:bg-blue-700"
-                                onClick={() => navigate(`/jobs/${job.project_id}`)}
-                              >
-                                <Eye className="h-4 w-4 mr-2" />
-                                View Details
-                              </Button>
-                            </motion.div>
+                            <Button
+                              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:shadow-lg active:scale-[0.98] group-hover:bg-blue-700"
+                              onClick={() => navigate(`/jobs/${job.project_id}`)}
+                            >
+                              <Eye className="h-4 w-4 mr-2" />
+                              View Details
+                            </Button>
                           </div>
                         </Card>
                       </motion.div>
