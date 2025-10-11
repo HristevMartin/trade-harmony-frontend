@@ -112,7 +112,7 @@ const Index = () => {
 
   const testimonials = [
     {
-      text: "We've built something homeowners have been asking for — a platform that combines AI efficiency with genuine trust and verification.",
+      text: "We built JobHub because homeowners deserve better — a platform where AI efficiency meets genuine trust and real verification.",
       name: "JobHub Team",
       location: "United Kingdom",
       avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
@@ -120,7 +120,7 @@ const Index = () => {
       service: "Our Mission"
     },
     {
-      text: "Finding reliable trades shouldn't be a gamble. JobHub is a platform where every professional is verified and every match is smart.",
+      text: "Finding reliable trades shouldn't feel like rolling the dice. At JobHub, every professional is verified and every connection is made with care.",
       name: "JobHub Team",
       location: "United Kingdom",
       avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
@@ -128,7 +128,7 @@ const Index = () => {
       service: "Our Vision"
     },
     {
-      text: "AI makes matching faster. Human verification makes it safer. Together, they create the home improvement platform homeowners deserve.",
+      text: "AI helps us work faster, but human verification keeps everyone safer. Together, they create the trusted platform homeowners have been waiting for.",
       name: "JobHub Team",
       location: "United Kingdom",
       avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
@@ -136,7 +136,7 @@ const Index = () => {
       service: "Our Approach"
     },
     {
-      text: "JobHub connects homeowners with a network of fully verified tradespeople across the UK. Every professional is ID-checked, insured, and reviewed.",
+      text: "JobHub connects you with a network of fully verified tradespeople across the UK. Every professional is ID-checked, properly insured, and genuinely reviewed.",
       name: "JobHub Team",
       location: "United Kingdom",
       avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
@@ -959,21 +959,21 @@ const Index = () => {
                 <MessageSquare className="h-5 w-5" />
                 <span>Our Mission</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">Building Trust Through Transparency</h2>
-              <p className="text-muted-foreground text-base sm:text-lg px-4">AI meets human verification to connect homeowners with trusted, insured tradespeople.</p>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-2 italic px-4">Every review is verified and linked to a completed project — no fake feedback, ever.</p>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">Trust Built In — Through Real Verification</h2>
+              <p className="text-muted-foreground text-base sm:text-lg px-4">JobHub connects homeowners only with verified, insured professionals using both AI efficiency and human verification for your peace of mind.</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2 italic px-4">Every review comes from verified, completed jobs — no fake feedback, ever.</p>
             <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 mt-4 sm:mt-6 mb-6 sm:mb-8 px-4">
               <div className="flex items-center gap-1.5 sm:gap-2 bg-trust-green/10 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full border border-trust-green/20">
                   <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-trust-green" aria-hidden="true" />
-                  <span className="text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-medium">All Reviews Verified</span>
+                  <span className="text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-medium">Verified Reviews Only</span>
               </div>
               <div className="flex items-center gap-1.5 sm:gap-2 bg-trust-blue/10 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full border border-trust-blue/20">
                   <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-trust-blue" aria-hidden="true" />
-                  <span className="text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-medium">Completed Jobs Only</span>
+                  <span className="text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-medium">From Completed Jobs</span>
               </div>
               <div className="flex items-center gap-1.5 sm:gap-2 bg-accent-orange/10 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full border border-accent-orange/20">
                   <Award className="h-4 w-4 sm:h-5 sm:w-5 text-accent-orange" aria-hidden="true" />
-                  <span className="text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-medium">Transparent Ratings</span>
+                  <span className="text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-medium">Real Ratings You Can Trust</span>
               </div>
             </div>
             </motion.div>
