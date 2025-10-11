@@ -30,7 +30,8 @@ import {
   Hammer,
   Wrench,
   Paintbrush,
-  ChevronDown
+  ChevronDown,
+  Globe
 } from 'lucide-react';
 
 interface Job {
@@ -81,6 +82,7 @@ const TradesPersonJobs = () => {
   const [effectiveRadius, setEffectiveRadius] = useState<number | null>(null);
   const [requestedRadius, setRequestedRadius] = useState<number | null>(null);
   const [radiusAttempts, setRadiusAttempts] = useState(0);
+  const [ipFilterEnabled, setIpFilterEnabled] = useState(false);
   const { toast } = useToast();
 
   // Convert km to the nearest supported miles option used by the dropdown
@@ -221,7 +223,8 @@ const TradesPersonJobs = () => {
         }
 
         if (request.status === 200) {
-          const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/get-all-client-projects`, {
+          const toggleParam = ipFilterEnabled ? 'on' : 'off';
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/get-all-client-projects?toggle=${toggleParam}`, {
             credentials: 'include',
             headers: {
               'Content-Type': 'application/json',
@@ -318,7 +321,6 @@ const TradesPersonJobs = () => {
     }
   }, [showMobileFilters]);
 
-  // Handle scroll to show/hide sticky filter
   useEffect(() => {
     const handleScroll = () => {
       // Find the desktop filter element
@@ -509,7 +511,8 @@ const TradesPersonJobs = () => {
       try {
         setLoading(true);
 
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/get-all-client-projects`, {
+        const toggleParam = ipFilterEnabled ? 'on' : 'off';
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/get-all-client-projects?toggle=${toggleParam}`, {
           credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
@@ -555,8 +558,7 @@ const TradesPersonJobs = () => {
     };
 
     fetchJobs();
-  }, [toast]);
-
+  }, [toast, ipFilterEnabled]);
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
@@ -568,9 +570,6 @@ const TradesPersonJobs = () => {
     if (diffInHours < 48) return '1d ago';
     return `${Math.floor(diffInHours / 24)}d ago`;
   };
-
-
-
 
   const handleRetry = () => {
     setError(null);
@@ -604,7 +603,6 @@ const TradesPersonJobs = () => {
     };
     return <IconComponent className={`${sizeClasses[size]} text-slate-500`} />;
   };
-
 
   const LoadingSkeleton = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -641,7 +639,6 @@ const TradesPersonJobs = () => {
       ))}
     </div>
   );
-
 
   if (loading) {
     return (
@@ -808,7 +805,12 @@ const TradesPersonJobs = () => {
       />
 
       {/* Desktop Filter Bar */}
-      <div className="desktop-filter-bar hidden md:block bg-background border-b border-border/20 shadow-sm">
+      <motion.div 
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: [0.22, 0.61, 0.36, 1] }}
+        className="desktop-filter-bar hidden md:block bg-white/95 backdrop-blur-sm border-b border-gray-200/60 shadow-sm sticky top-0 z-40"
+      >
         <div className="container mx-auto px-4 max-w-6xl py-4">
           <div className="flex items-center justify-between gap-4">
             {/* Left side - Filter chips */}
@@ -817,10 +819,10 @@ const TradesPersonJobs = () => {
               <div className="relative" data-popover>
                 <button
                   onClick={() => setOpenPopovers(prev => ({ ...prev, category: !prev.category }))}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all ${
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all duration-200 ${
                     filters.categories.length > 0 
-                      ? 'bg-primary text-primary-foreground border-primary shadow-sm' 
-                      : 'bg-background hover:bg-muted border-border hover:border-border/60'
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-md hover:bg-blue-700 hover:shadow-lg' 
+                      : 'bg-white hover:bg-gray-50 border-gray-200 hover:border-gray-300 shadow-sm'
                   }`}
                 >
                   <Building2 className="h-4 w-4" />
@@ -831,7 +833,7 @@ const TradesPersonJobs = () => {
                   </span>
                   <ChevronDown className={`h-4 w-4 transition-transform ${openPopovers.category ? 'rotate-180' : ''}`} />
                   {filters.categories.length > 0 && (
-                    <Badge variant="secondary" className="bg-primary-foreground/20 text-primary-foreground text-xs px-1.5 py-0.5 h-5 ml-1">
+                    <Badge variant="secondary" className="bg-white/20 text-white text-xs px-2 py-0.5 h-5 ml-1 font-semibold">
                       {filters.categories.length}
                     </Badge>
                   )}
@@ -845,7 +847,7 @@ const TradesPersonJobs = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute top-full left-0 mt-2 bg-card border border-border/20 rounded-xl shadow-lg z-50 min-w-72 max-h-80"
+                      className="absolute top-full left-0 mt-2 bg-white border border-gray-200/60 rounded-xl shadow-xl z-50 min-w-72 max-h-80 ring-1 ring-gray-100"
                     >
                       <div className="p-4">
                         {/* Search Input */}
@@ -854,7 +856,7 @@ const TradesPersonJobs = () => {
                             placeholder="Search categories..."
                             value={searchTerms.category}
                             onChange={(e) => setSearchTerms(prev => ({ ...prev, category: e.target.value }))}
-                            className="h-9 text-sm border-border/40 focus:border-primary"
+                            className="h-9 text-sm border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             autoFocus
                           />
                         </div>
@@ -879,10 +881,10 @@ const TradesPersonJobs = () => {
                                       }));
                                     }
                                   }}
-                                  className={`p-3 rounded-lg text-sm font-medium text-left transition-all ${
+                                  className={`p-3 rounded-lg text-sm font-medium text-left transition-all duration-200 ${
                                     filters.categories.includes(category)
-                                      ? 'bg-primary text-primary-foreground'
-                                      : 'bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground'
+                                      ? 'bg-blue-600 text-white shadow-sm'
+                                      : 'bg-gray-50 hover:bg-gray-100 text-gray-700 hover:text-gray-900'
                                   }`}
                                 >
                                   {category}
@@ -913,10 +915,10 @@ const TradesPersonJobs = () => {
               <div className="relative" data-popover>
                 <button
                   onClick={() => setOpenPopovers(prev => ({ ...prev, location: !prev.location }))}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all ${
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all duration-200 ${
                     filters.locations.length > 0 
-                      ? 'bg-trust-green text-trust-green-foreground border-trust-green shadow-sm' 
-                      : 'bg-background hover:bg-muted border-border hover:border-border/60'
+                      ? 'bg-green-600 text-white border-green-600 shadow-md hover:bg-green-700 hover:shadow-lg' 
+                      : 'bg-white hover:bg-gray-50 border-gray-200 hover:border-gray-300 shadow-sm'
                   }`}
                 >
                   <MapPin className="h-4 w-4" />
@@ -927,7 +929,7 @@ const TradesPersonJobs = () => {
                   </span>
                   <ChevronDown className={`h-4 w-4 transition-transform ${openPopovers.location ? 'rotate-180' : ''}`} />
                   {filters.locations.length > 0 && (
-                    <Badge variant="secondary" className="bg-trust-green-foreground/20 text-trust-green-foreground text-xs px-1.5 py-0.5 h-5 ml-1">
+                    <Badge variant="secondary" className="bg-white/20 text-white text-xs px-2 py-0.5 h-5 ml-1 font-semibold">
                       {filters.locations.length}
                     </Badge>
                   )}
@@ -941,7 +943,7 @@ const TradesPersonJobs = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute top-full left-0 mt-2 bg-card border border-border/20 rounded-xl shadow-lg z-50 min-w-64 max-h-80"
+                      className="absolute top-full left-0 mt-2 bg-white border border-gray-200/60 rounded-xl shadow-xl z-50 min-w-64 max-h-80 ring-1 ring-gray-100"
                     >
                       <div className="p-4">
                         {/* Search Input */}
@@ -950,7 +952,7 @@ const TradesPersonJobs = () => {
                             placeholder="Search locations..."
                             value={searchTerms.location}
                             onChange={(e) => setSearchTerms(prev => ({ ...prev, location: e.target.value }))}
-                            className="h-9 text-sm border-border/40 focus:border-primary"
+                            className="h-9 text-sm border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             autoFocus
                           />
                         </div>
@@ -976,10 +978,10 @@ const TradesPersonJobs = () => {
                                     }
                                     setOpenPopovers(prev => ({ ...prev, location: false }));
                                   }}
-                                  className={`w-full p-3 rounded-lg text-sm font-medium text-left transition-all ${
+                                  className={`w-full p-3 rounded-lg text-sm font-medium text-left transition-all duration-200 ${
                                     filters.locations.includes(location)
-                                      ? 'bg-trust-green text-trust-green-foreground'
-                                      : 'bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground'
+                                      ? 'bg-green-600 text-white shadow-sm'
+                                      : 'bg-gray-50 hover:bg-gray-100 text-gray-700 hover:text-gray-900'
                                   }`}
                                 >
                                   {location}
@@ -1009,23 +1011,27 @@ const TradesPersonJobs = () => {
               {/* Radius Filter */}
               <div className="relative" data-popover>
                 <button
-                  onClick={() => setOpenPopovers(prev => ({ ...prev, radius: !prev.radius }))}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all ${
-                    filters.radius && filters.radius !== 25
-                      ? 'bg-primary text-primary-foreground border-primary shadow-sm' 
-                      : 'bg-background hover:bg-muted border-border hover:border-border/60'
+                  onClick={() => ipFilterEnabled && setOpenPopovers(prev => ({ ...prev, radius: !prev.radius }))}
+                  disabled={!ipFilterEnabled}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all duration-200 ${
+                    !ipFilterEnabled
+                      ? 'bg-gray-100 text-gray-400 border-gray-200 opacity-60 cursor-not-allowed'
+                      : filters.radius && filters.radius !== 25
+                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-md hover:bg-indigo-700 hover:shadow-lg' 
+                      : 'bg-white hover:bg-gray-50 border-gray-200 hover:border-gray-300 shadow-sm'
                   }`}
+                  title={!ipFilterEnabled ? 'Enable IP Filter to adjust radius' : ''}
                 >
                   <MapPin className="h-4 w-4" />
                   <span className="text-sm">
                     Within {filters.radius || 25} miles
                     {userPostcode && (
-                      <span className={`ml-1 ${filters.radius && filters.radius !== 25 ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>from {userPostcode}</span>
+                      <span className={`ml-1 ${filters.radius && filters.radius !== 25 ? 'text-white/70' : 'text-gray-500'}`}>from {userPostcode}</span>
                     )}
                   </span>
                   <ChevronDown className={`h-4 w-4 transition-transform ${openPopovers.radius ? 'rotate-180' : ''}`} />
-                  {filters.radius && filters.radius !== 25 && (
-                    <Badge variant="secondary" className="bg-primary-foreground/20 text-primary-foreground text-xs px-1.5 py-0.5 h-5 ml-1">
+                  {filters.radius && filters.radius !== 25 && ipFilterEnabled && (
+                    <Badge variant="secondary" className="bg-white/20 text-white text-xs px-2 py-0.5 h-5 ml-1 font-semibold">
                       {filters.radius}mi
                     </Badge>
                   )}
@@ -1039,7 +1045,7 @@ const TradesPersonJobs = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute top-full left-0 mt-2 bg-card border border-border/20 rounded-xl shadow-lg z-50 min-w-64"
+                      className="absolute top-full left-0 mt-2 bg-white border border-gray-200/60 rounded-xl shadow-xl z-50 min-w-64 ring-1 ring-gray-100"
                     >
                       <div className="p-4">
                         <div className="space-y-2">
@@ -1050,16 +1056,16 @@ const TradesPersonJobs = () => {
                                 handleRadiusChange(radius);
                                 setOpenPopovers(prev => ({ ...prev, radius: false }));
                               }}
-                              className={`w-full p-3 text-left text-sm font-medium rounded-lg transition-all ${
+                              className={`w-full p-3 text-left text-sm font-medium rounded-lg transition-all duration-200 ${
                                 (filters.radius || 25) === radius
-                                  ? 'bg-primary text-primary-foreground'
-                                  : 'bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground'
+                                  ? 'bg-indigo-600 text-white shadow-sm'
+                                  : 'bg-gray-50 hover:bg-gray-100 text-gray-700 hover:text-gray-900'
                               }`}
                               disabled={loadingPostcode}
                             >
                               Within {radius} miles
                               {(filters.radius || 25) === radius && userPostcode && (
-                                <span className="text-primary-foreground/70 ml-1">from {userPostcode}</span>
+                                <span className="text-white/70 ml-1">from {userPostcode}</span>
                               )}
                             </button>
                           ))}
@@ -1069,6 +1075,30 @@ const TradesPersonJobs = () => {
                   )}
                 </AnimatePresence>
               </div>
+
+              {/* IP Filter Toggle */}
+              <button
+                onClick={() => setIpFilterEnabled(prev => !prev)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all duration-200 ${
+                  ipFilterEnabled
+                    ? 'bg-purple-600 text-white border-purple-600 shadow-md hover:bg-purple-700 hover:shadow-lg' 
+                    : 'bg-white hover:bg-gray-50 border-gray-200 hover:border-gray-300 shadow-sm'
+                }`}
+                title={ipFilterEnabled ? 'IP Filtration: ON' : 'IP Filtration: OFF'}
+              >
+                <Globe className="h-4 w-4" />
+                <span className="text-sm">Distance Filter</span>
+                <Badge 
+                  variant="secondary" 
+                  className={`text-xs px-2 py-0.5 h-5 ml-1 font-semibold ${
+                    ipFilterEnabled 
+                      ? 'bg-white/20 text-white' 
+                      : 'bg-gray-200 text-gray-600'
+                  }`}
+                >
+                  {ipFilterEnabled ? 'ON' : 'OFF'}
+                </Badge>
+              </button>
 
               {/* Urgency Filter Chips */}
               {filterOptions.urgencies.map((urgency) => {
@@ -1080,30 +1110,31 @@ const TradesPersonJobs = () => {
                 };
 
                 const getUrgencyColor = (urgencyLabel: string) => {
-                  if (urgencyLabel === 'ASAP') return 'bg-red-500 text-white border-red-500';
-                  if (urgencyLabel === 'This week') return 'bg-amber-500 text-white border-amber-500';
-                  return 'bg-blue-500 text-white border-blue-500';
+                  if (urgencyLabel === 'ASAP') return 'bg-red-500 text-white border-red-500 shadow-md hover:bg-red-600 hover:shadow-lg';
+                  if (urgencyLabel === 'This week') return 'bg-amber-500 text-white border-amber-500 shadow-md hover:bg-amber-600 hover:shadow-lg';
+                  return 'bg-blue-500 text-white border-blue-500 shadow-md hover:bg-blue-600 hover:shadow-lg';
                 };
 
                 const Icon = getUrgencyIcon(urgency);
                 const isActive = filters.urgency === urgency;
                 
                 return (
-                  <button
+                  <motion.button
                     key={urgency}
+                    whileTap={{ scale: 0.97 }}
                     onClick={() => setFilters(prev => ({ 
                       ...prev, 
                       urgency: prev.urgency === urgency ? undefined : urgency 
                     }))}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all ${
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-full border font-medium transition-all duration-150 ${
                       isActive 
-                        ? getUrgencyColor(urgency) + ' shadow-sm'
-                        : 'bg-background hover:bg-muted border-border hover:border-border/60'
+                        ? getUrgencyColor(urgency)
+                        : 'bg-white hover:bg-gray-50 border-gray-200 hover:border-gray-300 shadow-sm text-gray-700 active:scale-[0.97]'
                     }`}
                   >
                     <Icon className="h-4 w-4" />
                     <span className="text-sm">{urgency}</span>
-                  </button>
+                  </motion.button>
                 );
               })}
             </div>
@@ -1114,7 +1145,7 @@ const TradesPersonJobs = () => {
               <div className="relative" data-popover>
                 <button
                   onClick={() => setOpenPopovers(prev => ({ ...prev, sort: !prev.sort }))}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all bg-background hover:bg-muted border-border hover:border-border/60 min-w-[180px]"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all duration-200 bg-white hover:bg-gray-50 border-gray-200 hover:border-gray-300 shadow-sm min-w-[180px]"
                 >
                   <PoundSterling className="h-4 w-4 flex-shrink-0" />
                   <span className="text-sm whitespace-nowrap flex-1 text-left">
@@ -1177,7 +1208,7 @@ const TradesPersonJobs = () => {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Sticky Filter Bar - Shows when scrolling */}
       {showStickyFilter && (
@@ -1549,7 +1580,7 @@ const TradesPersonJobs = () => {
         </AnimatePresence>
       </div>
 
-      <div className="min-h-screen bg-gradient-to-br from-background via-muted/5 to-background">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
         <div className="container mx-auto px-4 max-w-6xl py-8">
           {/* Hero Section */}
           <motion.div
@@ -1571,45 +1602,48 @@ const TradesPersonJobs = () => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.1 }}
-                className="bg-gradient-to-br from-card to-card/80 rounded-2xl p-6 border-0 shadow-xl"
+                whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                className="bg-white rounded-2xl p-6 border border-gray-200/40 shadow-lg hover:shadow-xl transition-all duration-200 ring-1 ring-gray-100/50"
               >
-                <div className="flex items-center justify-center mb-3">
-                  <div className="p-3 bg-gradient-to-r from-primary to-primary/80 rounded-2xl shadow-lg">
-                    <Briefcase className="h-6 w-6 text-primary-foreground" />
+                <div className="flex items-center justify-center mb-4">
+                  <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-md">
+                    <Briefcase className="h-6 w-6 text-white" />
                   </div>
                 </div>
-                <div className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-1">{allFilteredJobs.length}</div>
-                <div className="text-sm text-muted-foreground font-medium">Active Jobs</div>
+                <div className="text-3xl font-bold text-gray-800 mb-1">{allFilteredJobs.length}</div>
+                <div className="text-sm text-gray-600 font-medium">Active Jobs</div>
               </motion.div>
 
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.2 }}
-                className="bg-gradient-to-br from-card to-card/80 rounded-2xl p-6 border-0 shadow-xl"
+                whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                className="bg-white rounded-2xl p-6 border border-gray-200/40 shadow-lg hover:shadow-xl transition-all duration-200 ring-1 ring-gray-100/50"
               >
-                <div className="flex items-center justify-center mb-3">
-                  <div className="p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-2xl shadow-lg">
+                <div className="flex items-center justify-center mb-4">
+                  <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-md">
                     <CheckCircle className="h-6 w-6 text-white" />
                   </div>
                 </div>
-                <div className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-1">95%</div>
-                <div className="text-sm text-muted-foreground font-medium">Success Rate</div>
+                <div className="text-3xl font-bold text-gray-800 mb-1">95%</div>
+                <div className="text-sm text-gray-600 font-medium">Success Rate</div>
               </motion.div>
 
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.3 }}
-                className="bg-gradient-to-br from-card to-card/80 rounded-2xl p-6 border-0 shadow-xl"
+                whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                className="bg-white rounded-2xl p-6 border border-gray-200/40 shadow-lg hover:shadow-xl transition-all duration-200 ring-1 ring-gray-100/50"
               >
-                <div className="flex items-center justify-center mb-3">
-                  <div className="p-3 bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl shadow-lg">
+                <div className="flex items-center justify-center mb-4">
+                  <div className="p-3 bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl shadow-md">
                     <Clock className="h-6 w-6 text-white" />
                   </div>
                 </div>
-                <div className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-1">24h</div>
-                <div className="text-sm text-muted-foreground font-medium">Avg Response</div>
+                <div className="text-3xl font-bold text-gray-800 mb-1">24h</div>
+                <div className="text-sm text-gray-600 font-medium">Avg Response</div>
               </motion.div>
             </div>
           </motion.div>
@@ -1664,8 +1698,15 @@ const TradesPersonJobs = () => {
                   <div className="mb-6">
                     <h4 className="text-sm font-medium text-slate-700 mb-3">Categories</h4>
                     <div className="space-y-2">
-                      {filterOptions.categories.map(category => (
-                        <label key={category} className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg cursor-pointer">
+                      {filterOptions.categories.map((category, idx) => (
+                        <motion.label 
+                          key={category} 
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.2, delay: idx * 0.03 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg cursor-pointer transition-all duration-150 active:scale-[0.98]"
+                        >
                           <input
                             type="checkbox"
                             checked={filters.categories.includes(category)}
@@ -1679,7 +1720,7 @@ const TradesPersonJobs = () => {
                             className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                           />
                           <span className="text-sm text-slate-700">{category}</span>
-                        </label>
+                        </motion.label>
                       ))}
                     </div>
                   </div>
@@ -1688,8 +1729,15 @@ const TradesPersonJobs = () => {
                   <div className="mb-6">
                     <h4 className="text-sm font-medium text-slate-700 mb-3">Location</h4>
                     <div className="space-y-2">
-                      {filterOptions.locations.map(location => (
-                        <label key={location} className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg cursor-pointer">
+                      {filterOptions.locations.map((location, idx) => (
+                        <motion.label 
+                          key={location} 
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.2, delay: idx * 0.03 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg cursor-pointer transition-all duration-150 active:scale-[0.98]"
+                        >
                           <input
                             type="radio"
                             name="location"
@@ -1700,7 +1748,7 @@ const TradesPersonJobs = () => {
                             className="border-slate-300 text-indigo-600 focus:ring-indigo-500"
                           />
                           <span className="text-sm text-slate-700">{location}</span>
-                        </label>
+                        </motion.label>
                       ))}
                     </div>
                   </div>
@@ -1719,13 +1767,14 @@ const TradesPersonJobs = () => {
                         const Icon = getUrgencyIcon(urgency);
                         const isPressed = filters.urgency === urgency;
                         return (
-                          <button
+                          <motion.button
                             key={urgency}
+                            whileTap={{ scale: 0.97 }}
                             onClick={() => setFilters(prev => ({
                               ...prev,
                               urgency: prev.urgency === urgency ? undefined : urgency
                             }))}
-                            className={`inline-flex items-center gap-2 rounded-full px-4 h-10 transition-all ${isPressed
+                            className={`inline-flex items-center gap-2 rounded-full px-4 h-10 transition-all duration-150 active:scale-[0.97] ${isPressed
                                 ? 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200'
                                 : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                               }`}
@@ -1733,10 +1782,53 @@ const TradesPersonJobs = () => {
                           >
                             <Icon className="h-4 w-4" />
                             <span className="text-sm font-medium">{urgency}</span>
-                          </button>
+                          </motion.button>
                         );
                       })}
                     </div>
+                  </div>
+
+                  {/* Mobile IP Filter Toggle */}
+                  <div className="mb-6">
+                    <h4 className="text-sm font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                      <div className="p-1.5 bg-purple-100 rounded-full">
+                        <Globe className="h-3.5 w-3.5 text-purple-600" />
+                      </div>
+                      IP-Based Location Filter
+                    </h4>
+                    <motion.button
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setIpFilterEnabled(prev => !prev)}
+                      className={`w-full p-4 rounded-xl border-2 font-semibold transition-all duration-150 flex items-center justify-between active:scale-[0.98] ${
+                        ipFilterEnabled
+                          ? 'bg-purple-500 text-white border-purple-500 shadow-md'
+                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Globe className="h-5 w-5" />
+                        <div className="text-left">
+                          <div className="text-sm font-semibold">IP Location Filtering</div>
+                          <div className={`text-xs mt-0.5 ${ipFilterEnabled ? 'text-purple-100' : 'text-slate-500'}`}>
+                            {ipFilterEnabled ? 'Jobs filtered by your IP location' : 'Show all jobs regardless of location'}
+                          </div>
+                        </div>
+                      </div>
+                      <Badge 
+                        variant="secondary" 
+                        className={`text-xs px-3 py-1 font-bold ${
+                          ipFilterEnabled 
+                            ? 'bg-white/20 text-white' 
+                            : 'bg-slate-200 text-slate-700'
+                        }`}
+                      >
+                        {ipFilterEnabled ? 'ON' : 'OFF'}
+                      </Badge>
+                    </motion.button>
+                    <p className="text-xs text-slate-500 mt-2 flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      {ipFilterEnabled ? 'Radius filter is available when enabled' : 'Enable to use radius-based filtering'}
+                    </p>
                   </div>
 
                   {/* Professional Mobile Radius Filter */}
@@ -1746,8 +1838,13 @@ const TradesPersonJobs = () => {
                         <MapPin className="h-3.5 w-3.5 text-blue-600" />
                       </div>
                       Search Radius
+                      {!ipFilterEnabled && (
+                        <Badge variant="secondary" className="text-xs px-2 py-0.5 bg-slate-200 text-slate-600">
+                          Disabled
+                        </Badge>
+                      )}
                     </h4>
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100">
+                    <div className={`bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100 ${!ipFilterEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
                           <span className="text-sm text-blue-700 font-medium">Current radius:</span>
@@ -1766,8 +1863,13 @@ const TradesPersonJobs = () => {
                       </div>
                       <div className="relative" data-mobile-radius>
                         <button
-                          onClick={() => setMobileRadiusOpen(!mobileRadiusOpen)}
-                          className="w-full p-4 border-2 border-blue-200 rounded-xl text-sm font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-blue-900 shadow-sm flex items-center justify-between"
+                          onClick={() => ipFilterEnabled && setMobileRadiusOpen(!mobileRadiusOpen)}
+                          disabled={!ipFilterEnabled}
+                          className={`w-full p-4 border-2 rounded-xl text-sm font-semibold focus:outline-none text-blue-900 shadow-sm flex items-center justify-between ${
+                            ipFilterEnabled
+                              ? 'bg-white border-blue-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                              : 'bg-slate-100 border-slate-200 cursor-not-allowed'
+                          }`}
                         >
                           <span>Within {filters.radius || 25} miles{(filters.radius || 25) === 25 ? '' : ''}</span>
                           <ChevronDown className={`h-4 w-4 text-blue-600 transition-transform duration-200 ${mobileRadiusOpen ? 'rotate-180' : ''}`} />
@@ -1794,9 +1896,9 @@ const TradesPersonJobs = () => {
                           </div>
                         )}
                       </div>
-                      <p className="text-xs text-blue-600 mt-2 flex items-center gap-1">
+                      <p className={`text-xs mt-2 flex items-center gap-1 ${ipFilterEnabled ? 'text-blue-600' : 'text-slate-400'}`}>
                         <AlertCircle className="h-3 w-3" />
-                        Jobs within your selected radius will be shown
+                        {ipFilterEnabled ? 'Jobs within your selected radius will be shown' : 'Enable IP Filter to use radius-based filtering'}
                       </p>
                     </div>
                   </div>
@@ -1808,35 +1910,43 @@ const TradesPersonJobs = () => {
                       {[
                         { key: 'budget_high', label: 'Highest Budget First' },
                         { key: 'budget_low', label: 'Lowest Budget First' },
-                      ].map(({ key, label }) => (
-                        <button
+                      ].map(({ key, label }, idx) => (
+                        <motion.button
                           key={key}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.2, delay: 0.15 + idx * 0.05 }}
+                          whileTap={{ scale: 0.98 }}
                           onClick={() => setSortBy(key as typeof sortBy)}
-                          className={`w-full text-left p-3 rounded-lg transition-all ${sortBy === key
+                          className={`w-full text-left p-3 rounded-lg transition-all duration-150 active:scale-[0.98] ${sortBy === key
                               ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200'
                               : 'hover:bg-slate-50 text-slate-700'
                             }`}
                         >
                           <span className="text-sm font-medium">{label}</span>
-                        </button>
+                        </motion.button>
                       ))}
                     </div>
                   </div>
 
                   <div className="space-y-3">
-                    <Button
-                      onClick={() => setShowMobileFilters(false)}
-                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white h-12 rounded-xl font-medium"
-                    >
-                      Apply
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowMobileFilters(false)}
-                      className="w-full h-12 rounded-xl font-medium border-slate-300 text-slate-700 hover:bg-slate-50"
-                    >
-                      Cancel
-                    </Button>
+                    <motion.div whileTap={{ scale: 0.98 }}>
+                      <Button
+                        onClick={() => setShowMobileFilters(false)}
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white h-12 rounded-xl font-medium transition-all duration-150 active:scale-[0.98] active:shadow-lg"
+                      >
+                        Apply
+                      </Button>
+                    </motion.div>
+                    <motion.div whileTap={{ scale: 0.98 }}>
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowMobileFilters(false)}
+                        className="w-full h-12 rounded-xl font-medium border-slate-300 text-slate-700 hover:bg-slate-50 transition-all duration-150 active:scale-[0.98]"
+                      >
+                        Cancel
+                      </Button>
+                    </motion.div>
                   </div>
                 </div>
               </motion.div>
@@ -2042,20 +2152,25 @@ const TradesPersonJobs = () => {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-7">
                   <AnimatePresence>
                     {visibleJobs.map((job, index) => (
                       <motion.div
                         key={job.project_id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
+                        initial={{ opacity: 0, y: 12 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
                         exit={{ opacity: 0, y: -20 }}
-                        transition={{ delay: index * 0.1 }}
+                        transition={{ 
+                          duration: 0.24, 
+                          delay: Math.min(index * 0.04, 0.24),
+                          ease: [0.22, 0.61, 0.36, 1]
+                        }}
                         whileHover={{ y: -2, transition: { duration: 0.2, ease: 'easeOut' } }}
                       >
-                        <Card className="bg-white border border-slate-200/60 shadow-sm hover:shadow-xl hover:border-slate-300/60 transition-all duration-300 group flex flex-col h-[480px] rounded-2xl overflow-hidden">
+                        <Card className="bg-white border border-gray-200/40 shadow-md hover:shadow-2xl hover:-translate-y-1 hover:border-gray-300/50 transition-all duration-200 group flex flex-col h-[480px] rounded-2xl overflow-hidden ring-1 ring-gray-100/50">
                           {/* Job Image Section */}
-                          <div className="relative h-44 w-full bg-gradient-to-br from-slate-50 to-slate-100 overflow-hidden">
+                          <div className="relative h-48 w-full bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
                             {job.image_urls && job.image_urls.length > 0 ? (
                               <>
                                 <img
@@ -2071,7 +2186,7 @@ const TradesPersonJobs = () => {
                                   }}
                                 />
                                 {/* Fallback for broken images */}
-                                <div className="absolute inset-0 bg-gradient-to-br from-slate-100 to-slate-200 items-center justify-center hidden">
+                                <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 items-center justify-center hidden">
                                   <div className="p-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-sm">
                                     {getCategoryIcon(job.additional_data?.serviceCategory || job.service_category, 'lg')}
                                   </div>
@@ -2080,10 +2195,10 @@ const TradesPersonJobs = () => {
                             ) : null}
                             {/* Placeholder when no image */}
                             <div
-                              className={`absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center ${job.image_urls && job.image_urls.length > 0 ? 'hidden' : 'flex'
+                              className={`absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center ${job.image_urls && job.image_urls.length > 0 ? 'hidden' : 'flex'
                                 }`}
                             >
-                              <div className="p-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-sm">
+                              <div className="p-5 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg">
                                 {getCategoryIcon(job.additional_data?.serviceCategory || job.service_category, 'lg')}
                               </div>
                             </div>
@@ -2091,66 +2206,83 @@ const TradesPersonJobs = () => {
                             {/* Top Badges Row */}
                             <div className="absolute top-3 left-3 right-3 flex items-start justify-between">
                               {/* Budget Badge - Prominent */}
-                              <div className="bg-white/95 backdrop-blur-sm text-slate-900 text-sm font-bold px-3 py-2 rounded-lg shadow-md border border-white/50">
+                              <motion.div 
+                                initial={{ opacity: 0, scale: 0.92 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.18, delay: 0.1 }}
+                                className="bg-white backdrop-blur-md text-gray-900 text-sm font-bold px-4 py-2 rounded-full shadow-lg border border-gray-200/50 ring-1 ring-white/50"
+                              >
                                 {extractPriceOnly(job.budget)}
-                              </div>
+                              </motion.div>
 
                               {/* Urgency Badge */}
-                              <div className={`text-xs font-bold px-3 py-1.5 rounded-lg shadow-md backdrop-blur-sm border ${
+                              <motion.div 
+                                initial={{ opacity: 0, scale: 0.92 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.18, delay: 0.15 }}
+                                className={`text-xs font-bold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-md border ${
                                 formatUrgency(job.urgency) === 'ASAP'
-                                  ? 'bg-red-500/95 text-white border-red-400/50'
+                                  ? 'bg-red-500 text-white border-red-400/30 ring-1 ring-red-300/50'
                                   : formatUrgency(job.urgency) === 'This week'
-                                    ? 'bg-amber-500/95 text-white border-amber-400/50'
-                                    : 'bg-blue-500/95 text-white border-blue-400/50'
+                                    ? 'bg-amber-500 text-white border-amber-400/30 ring-1 ring-amber-300/50'
+                                    : 'bg-blue-500 text-white border-blue-400/30 ring-1 ring-blue-300/50'
                               }`}>
                                 {formatUrgency(job.urgency)}
-                              </div>
+                              </motion.div>
                             </div>
                           </div>
 
                           {/* Card Content */}
-                          <div className="flex-1 p-5 flex flex-col">
+                          <div className="flex-1 p-6 flex flex-col divide-y divide-gray-100">
                             {/* Header - Category & Time */}
-                            <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center justify-between pb-4">
                               <div className="flex items-center gap-2">
                                 {getCategoryIcon(job.additional_data?.serviceCategory || job.service_category, 'sm')}
-                                <span className="text-xs text-slate-500 font-medium uppercase tracking-wide">
+                                <span className="text-xs text-gray-600 font-semibold uppercase tracking-wider">
                                   {job.additional_data?.serviceCategory || job.service_category}
                                 </span>
                               </div>
-                              <span className="text-xs text-slate-400 font-medium">
+                              <span className="text-xs text-gray-500 font-medium">
                                 {formatTimeAgo(job.created_at)}
                               </span>
                             </div>
 
                             {/* Job Title - Prominent */}
-                            <h3 className="text-lg font-bold text-slate-900 line-clamp-2 leading-tight mb-3 min-h-[3.5rem] group-hover:text-blue-700 transition-colors">
-                              {job.job_title}
-                            </h3>
+                            <div className="pt-4 pb-3">
+                              <h3 className="text-lg font-bold text-gray-800 line-clamp-2 leading-snug mb-3 min-h-[3.5rem] group-hover:text-blue-600 transition-colors">
+                                {job.job_title}
+                              </h3>
 
-                            {/* Location */}
-                            <div className="flex items-center gap-2 mb-4">
-                              <MapPin className="h-4 w-4 text-slate-400 flex-shrink-0" />
-                              <span className="text-sm text-slate-500 font-medium truncate">
-                                {job.additional_data?.nuts || job.nuts || job.location}
-                              </span>
+                              {/* Location */}
+                              <div className="flex items-start gap-2">
+                                <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                                <div className="flex-1">
+                                  <span className="text-sm text-gray-700 font-medium line-clamp-1">
+                                    {job.additional_data?.nuts || job.nuts || job.location}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
 
                             {/* Description - Truncated */}
-                            <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed mb-4 flex-1">
+                            <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed pt-4 pb-2 flex-1">
                               {job.job_description}
                             </p>
                           </div>
 
                           {/* Action Button */}
-                          <div className="p-5 pt-0">
-                            <Button
-                              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md group-hover:bg-blue-700"
-                              onClick={() => navigate(`/jobs/${job.project_id}`)}
-                            >
-                              <Eye className="h-4 w-4 mr-2" />
-                              View Details
-                            </Button>
+                          <div className="p-6 pt-4 bg-gray-50/50">
+                            <motion.div whileTap={{ scale: 0.98 }}>
+                              <Button
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:shadow-lg active:scale-[0.98] group-hover:bg-blue-700"
+                                onClick={() => navigate(`/jobs/${job.project_id}`)}
+                              >
+                                <Eye className="h-4 w-4 mr-2" />
+                                View Details
+                              </Button>
+                            </motion.div>
                           </div>
                         </Card>
                       </motion.div>
@@ -2160,14 +2292,14 @@ const TradesPersonJobs = () => {
 
                 {/* Load More Button - Only show if there are more jobs to load */}
                 {displayedJobsCount < allFilteredJobs.length && (
-                  <div className="flex flex-col items-center mt-12 space-y-4">
+                  <div className="flex flex-col items-center mt-12 space-y-5">
                     <div className="text-center">
-                      <p className="text-sm text-slate-600 mb-2">
+                      <p className="text-sm text-gray-700 font-medium mb-3">
                         Showing {visibleJobs.length} of {allFilteredJobs.length} jobs
                       </p>
-                      <div className="w-full bg-slate-200 rounded-full h-2 max-w-xs mx-auto">
+                      <div className="w-full bg-gray-200 rounded-full h-2.5 max-w-xs mx-auto shadow-inner">
                         <div
-                          className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                          className="bg-gradient-to-r from-blue-600 to-blue-500 h-2.5 rounded-full transition-all duration-300 shadow-sm"
                           style={{ width: `${(visibleJobs.length / allFilteredJobs.length) * 100}%` }}
                         ></div>
                       </div>
@@ -2176,7 +2308,7 @@ const TradesPersonJobs = () => {
                       onClick={handleLoadMore}
                       disabled={loadingMore}
                       variant="outline"
-                      className="border-slate-300 text-slate-700 hover:bg-slate-50 px-8 py-3 rounded-lg font-medium transition-colors flex items-center gap-2"
+                      className="border-gray-300 text-gray-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 px-8 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow-md active:scale-[0.98]"
                     >
                       {loadingMore ? (
                         <RefreshCw className="h-4 w-4 animate-spin" />
@@ -2191,10 +2323,12 @@ const TradesPersonJobs = () => {
                 {/* Show completion message when all jobs are loaded */}
                 {displayedJobsCount >= allFilteredJobs.length && allFilteredJobs.length > 6 && (
                   <div className="flex justify-center mt-12">
-                    <div className="text-center py-6 px-8 bg-slate-50 rounded-xl border border-slate-200">
-                      <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-3" />
-                      <p className="text-slate-700 font-medium">You've seen all available jobs!</p>
-                      <p className="text-sm text-slate-500 mt-1">
+                    <div className="text-center py-8 px-10 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border border-green-200/50 shadow-md">
+                      <div className="inline-flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mb-4">
+                        <CheckCircle className="h-6 w-6 text-green-600" />
+                      </div>
+                      <p className="text-gray-800 font-semibold text-lg mb-1">You've seen all available jobs!</p>
+                      <p className="text-sm text-gray-600 font-medium">
                         {allFilteredJobs.length} jobs total
                       </p>
                     </div>
