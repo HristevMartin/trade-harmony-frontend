@@ -51,6 +51,7 @@ const Index = () => {
   const [touchEnd, setTouchEnd] = useState(0);
   const [user, setUser] = useState<any>(null);
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
   const navigate = useNavigate();
   usePageTracking('home');
@@ -1133,7 +1134,7 @@ const Index = () => {
 
       {/* FAQ Section */}
       <section className="py-8 md:py-14 bg-gradient-to-br from-muted/20 via-background to-muted/20">
-        <div className="space-y-6 md:space-y-10 max-w-4xl mx-auto">
+        <div className="space-y-6 md:space-y-10 max-w-3xl mx-auto px-4 sm:px-6">
           <div className="text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -1142,7 +1143,7 @@ const Index = () => {
               transition={{ duration: 0.6 }}
             >
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">Frequently Asked Questions</h2>
-              <p className="text-muted-foreground text-base sm:text-lg px-4">Everything you need to know about finding and hiring tradespeople on JobHub</p>
+              <p className="text-muted-foreground text-base sm:text-lg">Everything you need to know about finding and hiring tradespeople on JobHub</p>
             </motion.div>
           </div>
           
@@ -1150,79 +1151,79 @@ const Index = () => {
             {[
               {
                 question: "What does 'verified' mean on JobHub?",
-                answer: "Each tradesperson's ID, insurance, and qualifications are manually verified before joining. This includes government ID checks, trade certifications review, insurance confirmation, address validation, and reference verification."
+                answer: "Each tradesperson's ID, insurance, and qualifications are manually verified before joining. This includes government ID checks, trade certifications review, insurance confirmation, address validation, and reference verification.",
+                icon: <CheckCircle2 className="h-5 w-5 text-trust-green" />
               },
               {
                 question: "How does JobHub's AI match me with professionals?",
-                answer: "AI analyses skills, distance, and verified experience to recommend the best local matches. It compares your project requirements with each tradesperson's expertise, specialisations, location, and availability."
+                answer: "AI analyses skills, distance, and verified experience to recommend the best local matches. It compares your project requirements with each tradesperson's expertise, specialisations, location, and availability.",
+                icon: <Brain className="h-5 w-5 text-primary" />
               },
               {
                 question: "Is it really free to post a job?",
-                answer: "Yes — posting a job is completely free, with no obligation to hire. Messaging tradespeople and reviewing profiles are also free for homeowners."
+                answer: "Yes — posting a job is completely free, with no obligation to hire. Messaging tradespeople and reviewing profiles are also free for homeowners.",
+                icon: <CheckCircle2 className="h-5 w-5 text-trust-blue" />
               },
               {
                 question: "Are the reviews actually verified?",
-                answer: "Every review is linked to a completed job, ensuring feedback is 100% authentic. Reviews can only be left after both parties confirm project completion."
+                answer: "Every review is linked to a completed job, ensuring feedback is 100% authentic. Reviews can only be left after both parties confirm project completion.",
+                icon: <MessageSquare className="h-5 w-5 text-accent-orange" />
               },
               {
                 question: "How does JobHub's AI get smarter?",
-                answer: "Over time, AI learns from successful matches and feedback to improve accuracy and recommendations. It continuously refines its understanding of what makes a successful homeowner-tradesperson partnership."
-              },
-              {
-                question: "When did JobHub launch?",
-                answer: "JobHub is now live across the UK, connecting homeowners with verified local trades."
+                answer: "Over time, AI learns from successful matches and feedback to improve accuracy and recommendations. It continuously refines its understanding of what makes a successful homeowner-tradesperson partnership.",
+                icon: <Brain className="h-5 w-5 text-primary" />
               }
-            ].map((faq, index) => (
-              <motion.details
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="group rounded-2xl bg-gradient-to-br from-card to-card/90 border-2 border-border/50 hover:border-primary/30 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
-              >
-                <summary className="cursor-pointer p-4 sm:p-6 font-bold text-foreground text-base sm:text-lg flex items-center justify-between list-none">
-                  <span className="flex-1 pr-2">{faq.question}</span>
-                  <ChevronDown className="h-5 w-5 text-muted-foreground group-open:rotate-180 transition-transform duration-300 flex-shrink-0" />
-                </summary>
-                <div className="px-4 sm:px-6 pb-4 sm:pb-6 text-muted-foreground text-sm sm:text-base leading-relaxed border-t border-border/30 pt-4">
-                  {faq.answer}
-                </div>
-              </motion.details>
-            ))}
+            ].map((faq, index) => {
+              const isOpen = openFaqIndex === index;
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className={`rounded-2xl bg-white border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-300 ease-in-out overflow-hidden ${
+                    isOpen ? 'bg-slate-50' : 'hover:bg-gray-50'
+                  }`}
+                >
+                  <button
+                    onClick={() => setOpenFaqIndex(isOpen ? null : index)}
+                    className="w-full text-left p-4 sm:p-6 min-h-[56px] flex items-center justify-between cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 transition-colors duration-300"
+                    aria-expanded={isOpen}
+                    aria-controls={`faq-answer-${index}`}
+                  >
+                    <div className="flex items-center gap-3 flex-1 pr-2">
+                      {faq.icon}
+                      <span className="font-semibold text-gray-900 text-base sm:text-lg">{faq.question}</span>
+                    </div>
+                    <ChevronDown 
+                      className={`h-5 w-5 text-muted-foreground transition-transform duration-300 ease-in-out flex-shrink-0 ${
+                        isOpen ? 'rotate-180' : ''
+                      }`} 
+                    />
+                  </button>
+                  
+                  <motion.div
+                    id={`faq-answer-${index}`}
+                    initial={false}
+                    animate={{
+                      height: isOpen ? 'auto' : 0,
+                      opacity: isOpen ? 1 : 0
+                    }}
+                    transition={{ duration: 0.3, ease: 'easeInOut' }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-gray-200">
+                      <div className="pt-4 text-muted-foreground text-sm sm:text-base leading-relaxed">
+                        {faq.answer}
+                      </div>
+                    </div>
+                  </motion.div>
+                </motion.div>
+              );
+            })}
           </div>
-        </div>
-      </section>
-
-      {/* Mid-page CTA Band */}
-      <section className="py-8 md:py-14 mb-8 md:mb-14 bg-gradient-to-r from-primary via-primary to-primary/90 text-primary-foreground relative overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJtMzYgMzQgNi0yIDYgMi02IDJ6bTAgNGwzLTEgMy0xIDMgMSAzIDEtNiAyem0wLTEwIDMtMSAzIDEtNiAyem0wLTQgMy0xIDMgMS02IDJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
-        
-        <div className="text-center relative z-10 space-y-6 md:space-y-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6">
-            Smarter Jobs. Verified Trades.
-          </h2>
-            <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-6 sm:mb-8 md:mb-10 opacity-90 leading-relaxed">
-              Start your next project with AI guidance and trusted, verified professionals.
-          </p>
-          <Button 
-            size="lg" 
-              className="bg-accent-orange hover:bg-accent-orange/90 text-white px-4 py-3 text-[15px] sm:text-lg sm:px-10 sm:py-6 h-auto min-h-[44px] font-semibold group transition-all duration-300 shadow-xl hover:shadow-2xl w-full sm:w-auto"
-              onClick={handlePostJob}
-          >
-              <span className="flex items-center">
-            Post a Job
-                <ArrowRight className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6 group-hover:translate-x-1 transition-transform" />
-              </span>
-          </Button>
-          </motion.div>
         </div>
       </section>
 
