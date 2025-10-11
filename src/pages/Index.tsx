@@ -573,7 +573,7 @@ const Index = () => {
       )}
 
       {/* How It Works Section */}
-      <section className="py-8 md:py-14 bg-gradient-to-br from-secondary/5 via-muted/30 to-secondary/10">
+      <section  className="py-8 md:py-14 bg-gradient-to-br from-secondary/5 via-muted/30 to-secondary/10">
         <div className="space-y-6 md:space-y-10">
           <div className="text-center max-w-3xl mx-auto">
             <motion.div
@@ -595,13 +595,13 @@ const Index = () => {
                 {
                   icon: <ClipboardList className="h-10 w-10" />,
                   title: "Post Your Job with AI",
-                  description: "Describe your project naturally. AI refines your post and fills in missing details.",
+                  description: "Describe your project naturally. AI helps you refine your post and fill in missing details automatically.",
                   color: "trust-blue"
                 },
                 {
                   icon: <Brain className="h-10 w-10" />,
                   title: "AI Finds Perfect Matches",
-                  description: "Get matched instantly with local trades based on distance, skills, and verified experience.",
+                  description: "AI helps suggest local trades that best fit your job based on trade type and verified experience.",
                   color: "trust-green"
                 },
                 {
@@ -668,8 +668,8 @@ const Index = () => {
                 <span>Verified Network</span>
               </div>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">Smart Matching, Human-Verified</h2>
-              <p className="text-muted-foreground text-base sm:text-lg px-4">Every tradesperson on JobHub is ID-verified, insured, and reviewed by real homeowners — so you can hire with confidence.</p>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-2 italic px-4">Our Verified Network ensures every match is safe, insured, and qualified.</p>
+              <p className="text-muted-foreground text-base sm:text-lg px-4">Every tradesperson on JobHub is ID-verified and uploads proof of insurance and qualifications, which are verified before approval — so you can hire with confidence.</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2 italic px-4">Our Verified Network ensures every match is safe and qualified through our verification process.</p>
             </motion.div>
           </div>
           
@@ -689,8 +689,8 @@ const Index = () => {
               
               <div className="space-y-4">
                 {[
-                  { icon: <Award className="h-5 w-5" />, title: "Professional Qualifications", desc: "Trade certifications and licences verified" },
-                  { icon: <Shield className="h-5 w-5" />, title: "Insurance Coverage", desc: "Public liability and professional indemnity confirmed" },
+                  { icon: <Award className="h-5 w-5" />, title: "Professional Qualifications", desc: "Trades upload proof of qualifications and certifications, which are verified before approval" },
+                  { icon: <Shield className="h-5 w-5" />, title: "Insurance Coverage", desc: "Trades upload proof of insurance, which is verified before approval" },
                   { icon: <CheckCircle2 className="h-5 w-5" />, title: "Identity Verification", desc: "Government ID and address validated" },
                   { icon: <Star className="h-5 w-5" />, title: "Work History & Reviews", desc: "Real homeowner feedback from completed jobs" }
                 ].map((item, index) => (
