@@ -30,7 +30,8 @@ import {
   Hammer,
   Wrench,
   Paintbrush,
-  ChevronDown
+  ChevronDown,
+  Globe
 } from 'lucide-react';
 
 interface Job {
@@ -81,6 +82,7 @@ const TradesPersonJobs = () => {
   const [effectiveRadius, setEffectiveRadius] = useState<number | null>(null);
   const [requestedRadius, setRequestedRadius] = useState<number | null>(null);
   const [radiusAttempts, setRadiusAttempts] = useState(0);
+  const [ipFilterEnabled, setIpFilterEnabled] = useState(false);
   const { toast } = useToast();
 
   // Convert km to the nearest supported miles option used by the dropdown
@@ -221,7 +223,8 @@ const TradesPersonJobs = () => {
         }
 
         if (request.status === 200) {
-          const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/get-all-client-projects`, {
+          const toggleParam = ipFilterEnabled ? 'on' : 'off';
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/get-all-client-projects?toggle=${toggleParam}`, {
             credentials: 'include',
             headers: {
               'Content-Type': 'application/json',
@@ -318,7 +321,6 @@ const TradesPersonJobs = () => {
     }
   }, [showMobileFilters]);
 
-  // Handle scroll to show/hide sticky filter
   useEffect(() => {
     const handleScroll = () => {
       // Find the desktop filter element
@@ -509,7 +511,8 @@ const TradesPersonJobs = () => {
       try {
         setLoading(true);
 
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/get-all-client-projects`, {
+        const toggleParam = ipFilterEnabled ? 'on' : 'off';
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/get-all-client-projects?toggle=${toggleParam}`, {
           credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
@@ -555,8 +558,7 @@ const TradesPersonJobs = () => {
     };
 
     fetchJobs();
-  }, [toast]);
-
+  }, [toast, ipFilterEnabled]);
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
@@ -568,9 +570,6 @@ const TradesPersonJobs = () => {
     if (diffInHours < 48) return '1d ago';
     return `${Math.floor(diffInHours / 24)}d ago`;
   };
-
-
-
 
   const handleRetry = () => {
     setError(null);
@@ -604,7 +603,6 @@ const TradesPersonJobs = () => {
     };
     return <IconComponent className={`${sizeClasses[size]} text-slate-500`} />;
   };
-
 
   const LoadingSkeleton = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -641,7 +639,6 @@ const TradesPersonJobs = () => {
       ))}
     </div>
   );
-
 
   if (loading) {
     return (
@@ -1009,12 +1006,16 @@ const TradesPersonJobs = () => {
               {/* Radius Filter */}
               <div className="relative" data-popover>
                 <button
-                  onClick={() => setOpenPopovers(prev => ({ ...prev, radius: !prev.radius }))}
+                  onClick={() => ipFilterEnabled && setOpenPopovers(prev => ({ ...prev, radius: !prev.radius }))}
+                  disabled={!ipFilterEnabled}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all ${
-                    filters.radius && filters.radius !== 25
+                    !ipFilterEnabled
+                      ? 'bg-muted text-muted-foreground border-border opacity-60 cursor-not-allowed'
+                      : filters.radius && filters.radius !== 25
                       ? 'bg-primary text-primary-foreground border-primary shadow-sm' 
                       : 'bg-background hover:bg-muted border-border hover:border-border/60'
                   }`}
+                  title={!ipFilterEnabled ? 'Enable IP Filter to adjust radius' : ''}
                 >
                   <MapPin className="h-4 w-4" />
                   <span className="text-sm">
@@ -1024,7 +1025,7 @@ const TradesPersonJobs = () => {
                     )}
                   </span>
                   <ChevronDown className={`h-4 w-4 transition-transform ${openPopovers.radius ? 'rotate-180' : ''}`} />
-                  {filters.radius && filters.radius !== 25 && (
+                  {filters.radius && filters.radius !== 25 && ipFilterEnabled && (
                     <Badge variant="secondary" className="bg-primary-foreground/20 text-primary-foreground text-xs px-1.5 py-0.5 h-5 ml-1">
                       {filters.radius}mi
                     </Badge>
@@ -1069,6 +1070,30 @@ const TradesPersonJobs = () => {
                   )}
                 </AnimatePresence>
               </div>
+
+              {/* IP Filter Toggle */}
+              <button
+                onClick={() => setIpFilterEnabled(prev => !prev)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all ${
+                  ipFilterEnabled
+                    ? 'bg-purple-500 text-white border-purple-500 shadow-sm' 
+                    : 'bg-background hover:bg-muted border-border hover:border-border/60'
+                }`}
+                title={ipFilterEnabled ? 'IP Filtration: ON' : 'IP Filtration: OFF'}
+              >
+                <Globe className="h-4 w-4" />
+                <span className="text-sm">Distance Filter</span>
+                <Badge 
+                  variant="secondary" 
+                  className={`text-xs px-2 py-0.5 h-5 ml-1 ${
+                    ipFilterEnabled 
+                      ? 'bg-white/20 text-white' 
+                      : 'bg-muted-foreground/20 text-muted-foreground'
+                  }`}
+                >
+                  {ipFilterEnabled ? 'ON' : 'OFF'}
+                </Badge>
+              </button>
 
               {/* Urgency Filter Chips */}
               {filterOptions.urgencies.map((urgency) => {
@@ -1739,6 +1764,48 @@ const TradesPersonJobs = () => {
                     </div>
                   </div>
 
+                  {/* Mobile IP Filter Toggle */}
+                  <div className="mb-6">
+                    <h4 className="text-sm font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                      <div className="p-1.5 bg-purple-100 rounded-full">
+                        <Globe className="h-3.5 w-3.5 text-purple-600" />
+                      </div>
+                      IP-Based Location Filter
+                    </h4>
+                    <button
+                      onClick={() => setIpFilterEnabled(prev => !prev)}
+                      className={`w-full p-4 rounded-xl border-2 font-semibold transition-all flex items-center justify-between ${
+                        ipFilterEnabled
+                          ? 'bg-purple-500 text-white border-purple-500 shadow-md'
+                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Globe className="h-5 w-5" />
+                        <div className="text-left">
+                          <div className="text-sm font-semibold">IP Location Filtering</div>
+                          <div className={`text-xs mt-0.5 ${ipFilterEnabled ? 'text-purple-100' : 'text-slate-500'}`}>
+                            {ipFilterEnabled ? 'Jobs filtered by your IP location' : 'Show all jobs regardless of location'}
+                          </div>
+                        </div>
+                      </div>
+                      <Badge 
+                        variant="secondary" 
+                        className={`text-xs px-3 py-1 font-bold ${
+                          ipFilterEnabled 
+                            ? 'bg-white/20 text-white' 
+                            : 'bg-slate-200 text-slate-700'
+                        }`}
+                      >
+                        {ipFilterEnabled ? 'ON' : 'OFF'}
+                      </Badge>
+                    </button>
+                    <p className="text-xs text-slate-500 mt-2 flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      {ipFilterEnabled ? 'Radius filter is available when enabled' : 'Enable to use radius-based filtering'}
+                    </p>
+                  </div>
+
                   {/* Professional Mobile Radius Filter */}
                   <div className="mb-6">
                     <h4 className="text-sm font-semibold text-slate-800 mb-4 flex items-center gap-2">
@@ -1746,8 +1813,13 @@ const TradesPersonJobs = () => {
                         <MapPin className="h-3.5 w-3.5 text-blue-600" />
                       </div>
                       Search Radius
+                      {!ipFilterEnabled && (
+                        <Badge variant="secondary" className="text-xs px-2 py-0.5 bg-slate-200 text-slate-600">
+                          Disabled
+                        </Badge>
+                      )}
                     </h4>
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100">
+                    <div className={`bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100 ${!ipFilterEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
                           <span className="text-sm text-blue-700 font-medium">Current radius:</span>
@@ -1766,8 +1838,13 @@ const TradesPersonJobs = () => {
                       </div>
                       <div className="relative" data-mobile-radius>
                         <button
-                          onClick={() => setMobileRadiusOpen(!mobileRadiusOpen)}
-                          className="w-full p-4 border-2 border-blue-200 rounded-xl text-sm font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-blue-900 shadow-sm flex items-center justify-between"
+                          onClick={() => ipFilterEnabled && setMobileRadiusOpen(!mobileRadiusOpen)}
+                          disabled={!ipFilterEnabled}
+                          className={`w-full p-4 border-2 rounded-xl text-sm font-semibold focus:outline-none text-blue-900 shadow-sm flex items-center justify-between ${
+                            ipFilterEnabled
+                              ? 'bg-white border-blue-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                              : 'bg-slate-100 border-slate-200 cursor-not-allowed'
+                          }`}
                         >
                           <span>Within {filters.radius || 25} miles{(filters.radius || 25) === 25 ? '' : ''}</span>
                           <ChevronDown className={`h-4 w-4 text-blue-600 transition-transform duration-200 ${mobileRadiusOpen ? 'rotate-180' : ''}`} />
@@ -1794,9 +1871,9 @@ const TradesPersonJobs = () => {
                           </div>
                         )}
                       </div>
-                      <p className="text-xs text-blue-600 mt-2 flex items-center gap-1">
+                      <p className={`text-xs mt-2 flex items-center gap-1 ${ipFilterEnabled ? 'text-blue-600' : 'text-slate-400'}`}>
                         <AlertCircle className="h-3 w-3" />
-                        Jobs within your selected radius will be shown
+                        {ipFilterEnabled ? 'Jobs within your selected radius will be shown' : 'Enable IP Filter to use radius-based filtering'}
                       </p>
                     </div>
                   </div>
