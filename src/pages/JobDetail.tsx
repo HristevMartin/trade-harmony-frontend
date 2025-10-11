@@ -529,10 +529,12 @@ const JobDetail = () => {
                             </div>
                         </div>
 
-                        {/* Competition Indicator */}
+                        {/* Job Status for Traders */}
                         {isTrader && !userPaid && paymentStatusLoaded && (
                             <div className="mt-3">
-                                <CompetitionIndicator id={id || ''} />
+                                <Badge className="bg-green-100 text-green-800 border-green-200 px-3 py-1.5 text-sm font-medium">
+                                    Job Open — Accepting Applicants
+                                </Badge>
                             </div>
                         )}
 
