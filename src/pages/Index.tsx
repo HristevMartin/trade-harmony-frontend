@@ -1,4 +1,3 @@
-
 import { 
   Wrench, 
   Zap, 
@@ -400,7 +399,7 @@ const Index = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-                className="text-slate-600 text-[clamp(1rem,2.8vw,1.25rem)] mb-8 md:mb-10 max-w-3xl mx-auto leading-relaxed"
+                className="text-slate-600 text-[clamp(1rem,2.8vw,1.25rem)] mb-3 sm:mb-5 max-w-3xl mx-auto leading-relaxed"
             >
                 AI helps you post clearly. Verified local pros bring it to life.
             </motion.p>
@@ -411,9 +410,10 @@ const Index = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="mt-6"
+              className="mt-3"
             >
-              <div className="bg-gradient-to-br from-card/95 via-card/90 to-card/85 backdrop-blur-xl shadow-2xl ring-1 ring-primary/10 rounded-2xl p-4 sm:p-5 md:p-6 border border-primary/5">
+              <div className="bg-gradient-to-b from-sky-50/60 to-transparent rounded-2xl p-1">
+                <div className="bg-gradient-to-br from-card/95 via-card/90 to-card/85 backdrop-blur-xl shadow-2xl ring-1 ring-primary/10 rounded-2xl p-4 sm:p-5 md:p-6 border border-primary/5">
                 <div className="space-y-4 md:space-y-0 md:flex md:gap-3">
                   {/* Country Dropdown */}
                 <div className="flex-1">
@@ -470,6 +470,7 @@ const Index = () => {
               </div>
                 </div>
               </div>
+            </div>
             </motion.div>
 
             {/* Mobile CTA Button - Shows under form on mobile */}
@@ -481,7 +482,7 @@ const Index = () => {
             >
               <Button 
                 size="lg" 
-                className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground w-full min-h-[48px] px-6 py-3 text-base font-semibold rounded-xl transition-all duration-300 shadow-xl hover:shadow-2xl group"
+                className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground w-full h-12 sm:w-auto px-6 py-3 text-base font-semibold rounded-xl transition-all duration-300 shadow-xl hover:shadow-2xl hover:shadow-lg hover:-translate-y-0.5 group"
                 onClick={handlePostJob}
               >
                 <span className="flex items-center justify-center">
@@ -495,7 +496,7 @@ const Index = () => {
                 <Button 
                   size="lg" 
                   onClick={() => navigate('/tradesperson/onboarding')}
-                  className="bg-trust-blue hover:bg-trust-blue/90 text-white w-full min-h-[48px] px-6 py-3 text-base font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl group"
+                  className="bg-trust-blue hover:bg-trust-blue/90 text-white w-full h-12 sm:w-auto px-6 py-3 text-base font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-lg hover:-translate-y-0.5 group"
                 >
                   <span className="flex items-center justify-center">
                     Join as Tradesperson
@@ -568,7 +569,7 @@ const Index = () => {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
                   <Card 
-                    className="rounded-2xl p-4 sm:p-6 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group border-2 border-primary/10 hover:border-primary/30 bg-gradient-to-br from-card via-card/95 to-card/80 backdrop-blur-sm"
+                    className="rounded-2xl p-4 sm:p-6 shadow-lg hover:shadow-2xl hover:scale-[1.02] transition-transform duration-300 cursor-pointer group border-2 border-primary/10 hover:border-primary/30 bg-gradient-to-br from-card via-card/95 to-card/80 backdrop-blur-sm"
                     onClick={() => handleServiceClick(service.slug)}
                     onKeyPress={(e) => handleServiceKeyPress(e, service.slug)}
                     role="button"
@@ -577,10 +578,10 @@ const Index = () => {
                     <CardContent className="p-0 text-center relative overflow-hidden">
                       <div className={`${service.color} mb-3 transition-all duration-300 relative z-10 flex justify-center`}>
                         <div className="w-8 h-8" aria-hidden="true">
-                      {service.icon}
-                    </div>
+                          {service.icon}
+                        </div>
                       </div>
-                      <h3 className="font-semibold text-sm sm:text-base text-foreground group-hover:text-trust-blue transition-colors relative z-10">{service.name}</h3>
+                      <h3 className="font-semibold text-sm sm:text-base leading-tight text-foreground group-hover:text-trust-blue transition-colors relative z-10">{service.name}</h3>
                       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <Sparkles className="h-3 w-3 text-trust-blue" />
                       </div>
@@ -646,7 +647,7 @@ const Index = () => {
                   transition={{ duration: 0.5, delay: index * 0.15 }}
                   className="relative"
                 >
-                  <div className="rounded-2xl p-6 bg-gradient-to-br from-card via-card/95 to-card/90 ring-2 ring-primary/10 text-center group shadow-xl hover:shadow-2xl transition-all duration-300 border border-primary/5 h-full">
+                  <div className="rounded-2xl py-6 px-6 bg-gradient-to-br from-card via-card/95 to-card/90 ring-2 ring-primary/10 text-center group shadow-xl hover:shadow-2xl transition-all duration-300 border border-primary/5 h-full min-h-[220px] sm:min-h-0">
                     {/* Step number badge */}
                     <div className={`bg-${step.color} text-white rounded-full w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center mx-auto mb-4 text-base font-bold shadow-lg group-hover:scale-110 transition-all duration-300`}>
                       {index + 1}
@@ -674,6 +675,9 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Mobile divider */}
+      <hr className="my-6 border-gray-200 sm:hidden" />
+      
       {/* Verified Network Section */}
       <section className="py-8 md:py-14 bg-background">
         <div className="space-y-6 md:space-y-10">
@@ -689,7 +693,7 @@ const Index = () => {
                 <span>Verified Network</span>
               </div>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">Smart Matching, Human-Verified</h2>
-              <p className="text-muted-foreground text-base sm:text-lg px-4">Every tradesperson on JobHub is ID-verified and uploads proof of insurance and qualifications, which are verified before approval — so you can hire with confidence.</p>
+              <p className="text-muted-foreground text-base sm:text-lg px-4">Every tradesperson on JobHub is <span className="font-semibold">ID-verified</span> and uploads proof of <span className="font-semibold">insurance</span> and qualifications, which are verified before approval — so you can <span className="font-semibold">hire with confidence</span>.</p>
               <p className="text-xs sm:text-sm text-muted-foreground mt-2 italic px-4">Our Verified Network ensures every match is safe and qualified through our verification process.</p>
             </motion.div>
           </div>
@@ -811,6 +815,9 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Mobile divider */}
+      <hr className="my-6 border-gray-200 sm:hidden" />
+
       {/* AI Job Matching Section */}
       <section className="py-8 md:py-14 bg-gradient-to-br from-primary/5 via-background to-secondary/5">
         <div className="space-y-6 md:space-y-10">
@@ -826,6 +833,9 @@ const Index = () => {
                 <span>Powered by AI — Matching You Instantly</span>
               </div>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">AI Finds the Right Professional — Instantly</h2>
+              <p className="mt-2 text-sm text-gray-500 sm:hidden">
+                AI learns from verified matches — getting smarter with every connection.
+              </p>
               <p className="text-muted-foreground text-base sm:text-lg px-4">JobHub connects homeowners with verified local professionals based on trade and location — with AI helping every job post become more accurate and complete.</p>
               <p className="text-xs sm:text-sm text-muted-foreground mt-2 italic px-4">Our AI continuously improves how local jobs and verified trades connect — making every match faster and more accurate over time.</p>
             </motion.div>
@@ -884,8 +894,8 @@ const Index = () => {
                 } transition-all duration-300 hover:shadow-2xl`}
               >
                 {/* Match badge */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`inline-flex items-center gap-2 bg-${match.badgeColor}/10 text-${match.badgeColor} px-3 py-1.5 rounded-full text-sm font-bold`}>
+                <div className="flex flex-wrap items-center gap-2 mb-4">
+                  <div className={`inline-flex items-center gap-2 bg-${match.badgeColor}/10 text-${match.badgeColor} px-3 py-1.5 rounded-full text-sm font-bold whitespace-nowrap`}>
                     {match.icon}
                     <span>{match.badge}</span>
                   </div>
@@ -967,7 +977,7 @@ const Index = () => {
       </section>
 
       {/* Social Proof & Trust Section */}
-      <section className="py-8 md:py-14 bg-background">
+      <section className="py-8 sm:py-12 bg-background">
         <div className="space-y-6 md:space-y-10">
           <div className="text-center max-w-3xl mx-auto">
             <motion.div
@@ -1081,16 +1091,17 @@ const Index = () => {
             </button>
             
             {/* Dots Indicator */}
-            <div className="flex justify-center mt-6 sm:mt-8 gap-3">
+            <div className="flex justify-center mt-6 sm:mt-8 gap-2 py-2 px-4 sm:px-0">
               {testimonials.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentTestimonial(index)}
-                  className={`w-3 h-3 rounded-full transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-trust-blue/50 focus:ring-offset-2 ${
+                  className={`h-2.5 w-2.5 rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-trust-blue/50 focus:ring-offset-2 ${
                     index === currentTestimonial 
-                      ? 'bg-trust-blue scale-125 shadow-sm' 
-                      : 'bg-trust-blue/30 hover:bg-trust-blue/50'
+                      ? 'bg-gray-500' 
+                      : 'bg-gray-300'
                   }`}
+                  aria-current={index === currentTestimonial ? 'true' : 'false'}
                   aria-label={`Go to testimonial ${index + 1}`}
                 />
               ))}
@@ -1253,15 +1264,20 @@ const Index = () => {
       <AnimatePresence>
         {showScrollTop && (
           <motion.button
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
             onClick={scrollToTop}
-            className="fixed bottom-6 right-6 z-50 md:hidden bg-black hover:bg-primary/90 text-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
+            className="fixed bottom-6 right-6 z-50 md:hidden 
+                      bg-gradient-to-br from-primary to-indigo-600 
+                      text-white p-4 rounded-2xl shadow-lg shadow-primary/30 
+                      backdrop-blur-md hover:scale-105 
+                      transition-all duration-300 
+                      focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
             aria-label="Scroll to top"
           >
-            <ArrowUp className="h-6 w-6" />
+            <ArrowUp className="h-5 w-5" />
           </motion.button>
         )}
       </AnimatePresence>
