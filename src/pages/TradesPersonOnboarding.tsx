@@ -1574,6 +1574,7 @@ const TradesPersonOnboarding = () => {
           onSuccess={handleAuthSuccess}
           initialEmail={formData.email}
           role="trader"
+          defaultTab="register"
         />
       </div>
     </div>

@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import MobileHeader from "@/components/MobileHeader";
@@ -10,6 +9,7 @@ import PaidUserBanner from "@/components/PaidUserBanner";
 import CompetitionIndicator from "@/components/CompetitionIndicator";
 import AiJobFitCard from "@/components/AiJobFitCard";
 import FollowUpQuestions from "@/components/FollowUpQuestions";
+import JobAssistantMiniChat from "@/components/JobAssistantMiniChat";
 import { useAiJobFit } from "@/hooks/useAiJobFit";
 import {
     HiMapPin,
@@ -486,6 +486,30 @@ const JobDetail = () => {
                             )}
                         </div>
 
+                        {/* Verification Info Message - Only for homeowners */}
+                        {!isTrader && !homeOwnerVerified && (
+                            <div className="mt-4 mb-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl shadow-sm">
+                                <div className="flex items-start gap-3">
+                                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <HiInformationCircle className="w-4 h-4 text-blue-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h4 className="text-blue-900 font-semibold mb-2 text-sm">Want to get verified?</h4>
+                                        <p className="text-blue-700 text-sm leading-relaxed mb-3">
+                                            Verified clients get more applications from trusted tradespeople and build stronger trust with professionals.
+                                        </p>
+                                        <Button 
+                                            variant="outline" 
+                                            size="sm"
+                                            className="bg-white/80 border-blue-300 text-blue-700 hover:bg-blue-100 hover:border-blue-400 text-xs font-medium"
+                                        >
+                                            Start Verification Process
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4">
                             {/* <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                                 <Button
@@ -518,21 +542,27 @@ const JobDetail = () => {
                         <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-slate-900 mb-3 md:mb-4 leading-tight">
                             {jobData.job_title}
                         </h1>
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-slate-600 text-sm sm:text-base">
-                            <div className="flex items-center gap-1">
-                                <HiMapPin className="w-4 h-4 flex-shrink-0" />
-                                <span className="truncate">{getCountryFlag(jobData.additional_data.country)} {jobData.additional_data.location}</span>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-slate-600 text-sm sm:text-base mb-2">
+                            <div className="flex items-center gap-2">
+                                <div className="w-5 h-5 bg-slate-100 rounded-full flex items-center justify-center">
+                                    <HiMapPin className="w-3 h-3 text-slate-600" />
+                                </div>
+                                <span className="truncate font-medium">{getCountryFlag(jobData.additional_data.country)} {jobData.additional_data.location}</span>
                             </div>
-                            <div className="flex items-center gap-1">
-                                <HiCalendar className="w-4 h-4 flex-shrink-0" />
+                            <div className="flex items-center gap-2">
+                                <div className="w-5 h-5 bg-slate-100 rounded-full flex items-center justify-center">
+                                    <HiCalendar className="w-3 h-3 text-slate-600" />
+                                </div>
                                 <span className="truncate">Posted {formatDate(jobData.created_at)}</span>
                             </div>
                         </div>
 
-                        {/* Competition Indicator */}
+                        {/* Job Status for Traders */}
                         {isTrader && !userPaid && paymentStatusLoaded && (
                             <div className="mt-3">
-                                <CompetitionIndicator id={id || ''} />
+                                <Badge className="bg-green-100 text-green-800 border-green-200 px-3 py-1.5 text-sm font-medium">
+                                    Job Open — Accepting Applicants
+                                </Badge>
                             </div>
                         )}
 
@@ -999,6 +1029,15 @@ const JobDetail = () => {
                         )}
                     </div>
                 </div>
+            )}
+
+            {/* Job Assistant Mini Chat */}
+            {jobData && !isTrader && (
+                <JobAssistantMiniChat
+                    jobId={id || ''}
+                    title={jobData.job_title}
+                    postcode={jobData.additional_data.location}
+                />
             )}
         </>
     );

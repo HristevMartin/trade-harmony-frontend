@@ -1,4 +1,3 @@
-
 import { 
   Wrench, 
   Zap, 
@@ -29,7 +28,8 @@ import {
   Users,
   MessageSquare,
   ChevronDown,
-  AlertCircle
+  AlertCircle,
+  ArrowUp
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -51,6 +51,8 @@ const Index = () => {
   const [touchEnd, setTouchEnd] = useState(0);
   const [user, setUser] = useState<any>(null);
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   const navigate = useNavigate();
   usePageTracking('home');
@@ -112,7 +114,7 @@ const Index = () => {
 
   const testimonials = [
     {
-      text: "We've built something homeowners have been asking for — a platform that combines AI efficiency with genuine trust and verification.",
+      text: "We built JobHub because homeowners deserve better — a platform where AI efficiency meets genuine trust and real verification.",
       name: "JobHub Team",
       location: "United Kingdom",
       avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
@@ -120,7 +122,7 @@ const Index = () => {
       service: "Our Mission"
     },
     {
-      text: "Finding reliable trades shouldn't be a gamble. JobHub is a platform where every professional is verified and every match is smart.",
+      text: "Finding reliable trades shouldn't feel like rolling the dice. At JobHub, every professional is verified and every connection is made with care.",
       name: "JobHub Team",
       location: "United Kingdom",
       avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
@@ -128,7 +130,7 @@ const Index = () => {
       service: "Our Vision"
     },
     {
-      text: "AI makes matching faster. Human verification makes it safer. Together, they create the home improvement platform homeowners deserve.",
+      text: "AI helps us work faster, but human verification keeps everyone safer. Together, they create the trusted platform homeowners have been waiting for.",
       name: "JobHub Team",
       location: "United Kingdom",
       avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
@@ -136,7 +138,7 @@ const Index = () => {
       service: "Our Approach"
     },
     {
-      text: "JobHub connects homeowners with a network of fully verified tradespeople across the UK. Every professional is ID-checked, insured, and reviewed.",
+      text: "JobHub connects you with a network of fully verified tradespeople across the UK. Every professional is ID-checked, properly insured, and genuinely reviewed.",
       name: "JobHub Team",
       location: "United Kingdom",
       avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
@@ -165,6 +167,17 @@ const Index = () => {
       return () => clearInterval(interval);
     }
   }, [isHovering, testimonials.length]);
+
+  // Show/hide scroll to top button based on scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      setShowScrollTop(scrollTop > 400);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handlePrevTestimonial = () => {
     setCurrentTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length);
@@ -204,6 +217,13 @@ const Index = () => {
     console.log('show me postcode', postcode);
     navigate(`/post-job?country=${selectedCountry}&postcode=${postcode}`);
   }
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
 
   // Handle service tile click
   const handleServiceClick = (serviceSlug: string) => {
@@ -379,7 +399,7 @@ const Index = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-                className="text-slate-600 text-[clamp(1rem,2.8vw,1.25rem)] mb-8 md:mb-10 max-w-3xl mx-auto leading-relaxed"
+                className="text-slate-600 text-[clamp(1rem,2.8vw,1.25rem)] mb-3 sm:mb-5 max-w-3xl mx-auto leading-relaxed"
             >
                 AI helps you post clearly. Verified local pros bring it to life.
             </motion.p>
@@ -390,9 +410,10 @@ const Index = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="mt-6"
+              className="mt-3"
             >
-              <div className="bg-gradient-to-br from-card/95 via-card/90 to-card/85 backdrop-blur-xl shadow-2xl ring-1 ring-primary/10 rounded-2xl p-4 sm:p-5 md:p-6 border border-primary/5">
+              <div className="bg-gradient-to-b from-sky-50/60 to-transparent rounded-2xl p-1">
+                <div className="bg-gradient-to-br from-card/95 via-card/90 to-card/85 backdrop-blur-xl shadow-2xl ring-1 ring-primary/10 rounded-2xl p-4 sm:p-5 md:p-6 border border-primary/5">
                 <div className="space-y-4 md:space-y-0 md:flex md:gap-3">
                   {/* Country Dropdown */}
                 <div className="flex-1">
@@ -449,6 +470,7 @@ const Index = () => {
               </div>
                 </div>
               </div>
+            </div>
             </motion.div>
 
             {/* Mobile CTA Button - Shows under form on mobile */}
@@ -460,7 +482,7 @@ const Index = () => {
             >
               <Button 
                 size="lg" 
-                className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground w-full min-h-[48px] px-6 py-3 text-base font-semibold rounded-xl transition-all duration-300 shadow-xl hover:shadow-2xl group"
+                className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground w-full h-12 sm:w-auto px-6 py-3 text-base font-semibold rounded-xl transition-all duration-300 shadow-xl hover:shadow-2xl hover:shadow-lg hover:-translate-y-0.5 group"
                 onClick={handlePostJob}
               >
                 <span className="flex items-center justify-center">
@@ -474,7 +496,7 @@ const Index = () => {
                 <Button 
                   size="lg" 
                   onClick={() => navigate('/tradesperson/onboarding')}
-                  className="bg-trust-blue hover:bg-trust-blue/90 text-white w-full min-h-[48px] px-6 py-3 text-base font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl group"
+                  className="bg-trust-blue hover:bg-trust-blue/90 text-white w-full h-12 sm:w-auto px-6 py-3 text-base font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-lg hover:-translate-y-0.5 group"
                 >
                   <span className="flex items-center justify-center">
                     Join as Tradesperson
@@ -547,7 +569,7 @@ const Index = () => {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
                   <Card 
-                    className="rounded-2xl p-4 sm:p-6 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group border-2 border-primary/10 hover:border-primary/30 bg-gradient-to-br from-card via-card/95 to-card/80 backdrop-blur-sm"
+                    className="rounded-2xl p-4 sm:p-6 shadow-lg hover:shadow-2xl hover:scale-[1.02] transition-transform duration-300 cursor-pointer group border-2 border-primary/10 hover:border-primary/30 bg-gradient-to-br from-card via-card/95 to-card/80 backdrop-blur-sm"
                     onClick={() => handleServiceClick(service.slug)}
                     onKeyPress={(e) => handleServiceKeyPress(e, service.slug)}
                     role="button"
@@ -556,10 +578,10 @@ const Index = () => {
                     <CardContent className="p-0 text-center relative overflow-hidden">
                       <div className={`${service.color} mb-3 transition-all duration-300 relative z-10 flex justify-center`}>
                         <div className="w-8 h-8" aria-hidden="true">
-                      {service.icon}
-                    </div>
+                          {service.icon}
+                        </div>
                       </div>
-                      <h3 className="font-semibold text-sm sm:text-base text-foreground group-hover:text-trust-blue transition-colors relative z-10">{service.name}</h3>
+                      <h3 className="font-semibold text-sm sm:text-base leading-tight text-foreground group-hover:text-trust-blue transition-colors relative z-10">{service.name}</h3>
                       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <Sparkles className="h-3 w-3 text-trust-blue" />
                       </div>
@@ -573,7 +595,7 @@ const Index = () => {
       )}
 
       {/* How It Works Section */}
-      <section className="py-8 md:py-14 bg-gradient-to-br from-secondary/5 via-muted/30 to-secondary/10">
+      <section  className="py-8 md:py-14 bg-gradient-to-br from-secondary/5 via-muted/30 to-secondary/10">
         <div className="space-y-6 md:space-y-10">
           <div className="text-center max-w-3xl mx-auto">
             <motion.div
@@ -595,13 +617,13 @@ const Index = () => {
                 {
                   icon: <ClipboardList className="h-10 w-10" />,
                   title: "Post Your Job with AI",
-                  description: "Describe your project naturally. AI refines your post and fills in missing details.",
+                  description: "Describe your project naturally. AI helps you refine your post and fill in missing details automatically.",
                   color: "trust-blue"
                 },
                 {
                   icon: <Brain className="h-10 w-10" />,
                   title: "AI Finds Perfect Matches",
-                  description: "Get matched instantly with local trades based on distance, skills, and verified experience.",
+                  description: "AI helps suggest local trades that best fit your job based on trade type and verified experience.",
                   color: "trust-green"
                 },
                 {
@@ -625,7 +647,7 @@ const Index = () => {
                   transition={{ duration: 0.5, delay: index * 0.15 }}
                   className="relative"
                 >
-                  <div className="rounded-2xl p-6 bg-gradient-to-br from-card via-card/95 to-card/90 ring-2 ring-primary/10 text-center group shadow-xl hover:shadow-2xl transition-all duration-300 border border-primary/5 h-full">
+                  <div className="rounded-2xl py-6 px-6 bg-gradient-to-br from-card via-card/95 to-card/90 ring-2 ring-primary/10 text-center group shadow-xl hover:shadow-2xl transition-all duration-300 border border-primary/5 h-full min-h-[220px] sm:min-h-0">
                     {/* Step number badge */}
                     <div className={`bg-${step.color} text-white rounded-full w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center mx-auto mb-4 text-base font-bold shadow-lg group-hover:scale-110 transition-all duration-300`}>
                       {index + 1}
@@ -653,6 +675,9 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Mobile divider */}
+      <hr className="my-6 border-gray-200 sm:hidden" />
+      
       {/* Verified Network Section */}
       <section className="py-8 md:py-14 bg-background">
         <div className="space-y-6 md:space-y-10">
@@ -668,8 +693,8 @@ const Index = () => {
                 <span>Verified Network</span>
               </div>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">Smart Matching, Human-Verified</h2>
-              <p className="text-muted-foreground text-base sm:text-lg px-4">Every tradesperson on JobHub is ID-verified, insured, and reviewed by real homeowners — so you can hire with confidence.</p>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-2 italic px-4">Our Verified Network ensures every match is safe, insured, and qualified.</p>
+              <p className="text-muted-foreground text-base sm:text-lg px-4">Every tradesperson on JobHub is <span className="font-semibold">ID-verified</span> and uploads proof of <span className="font-semibold">insurance</span> and qualifications, which are verified before approval — so you can <span className="font-semibold">hire with confidence</span>.</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2 italic px-4">Our Verified Network ensures every match is safe and qualified through our verification process.</p>
             </motion.div>
           </div>
           
@@ -689,8 +714,8 @@ const Index = () => {
               
               <div className="space-y-4">
                 {[
-                  { icon: <Award className="h-5 w-5" />, title: "Professional Qualifications", desc: "Trade certifications and licences verified" },
-                  { icon: <Shield className="h-5 w-5" />, title: "Insurance Coverage", desc: "Public liability and professional indemnity confirmed" },
+                  { icon: <Award className="h-5 w-5" />, title: "Professional Qualifications", desc: "Trades upload proof of qualifications and certifications, which are verified before approval" },
+                  { icon: <Shield className="h-5 w-5" />, title: "Insurance Coverage", desc: "Trades upload proof of insurance, which is verified before approval" },
                   { icon: <CheckCircle2 className="h-5 w-5" />, title: "Identity Verification", desc: "Government ID and address validated" },
                   { icon: <Star className="h-5 w-5" />, title: "Work History & Reviews", desc: "Real homeowner feedback from completed jobs" }
                 ].map((item, index) => (
@@ -790,6 +815,9 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Mobile divider */}
+      <hr className="my-6 border-gray-200 sm:hidden" />
+
       {/* AI Job Matching Section */}
       <section className="py-8 md:py-14 bg-gradient-to-br from-primary/5 via-background to-secondary/5">
         <div className="space-y-6 md:space-y-10">
@@ -805,8 +833,11 @@ const Index = () => {
                 <span>Powered by AI — Matching You Instantly</span>
               </div>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">AI Finds the Right Professional — Instantly</h2>
-              <p className="text-muted-foreground text-base sm:text-lg px-4">Homeowners describe their jobs with AI. JobHub recommends professionals based on skills, distance, and reputation.</p>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-2 italic px-4">AI learns from completed projects to predict the best match for your job.</p>
+              <p className="mt-2 text-sm text-gray-500 sm:hidden">
+                AI learns from verified matches — getting smarter with every connection.
+              </p>
+              <p className="text-muted-foreground text-base sm:text-lg px-4">JobHub connects homeowners with verified local professionals based on trade and location — with AI helping every job post become more accurate and complete.</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2 italic px-4">Our AI continuously improves how local jobs and verified trades connect — making every match faster and more accurate over time.</p>
             </motion.div>
           </div>
           
@@ -816,38 +847,38 @@ const Index = () => {
               {
                 badge: "Perfect Fit",
                 badgeColor: "trust-green",
-                score: "98%",
+                score: "Verified local pro in your area, available for your trade type.",
                 icon: <CheckCircle2 className="h-6 w-6" />,
                 title: "Expert Plumber",
                 specialty: "Emergency Repairs",
                 distance: "2.1 miles away",
                 rating: 4.9,
                 jobs: 247,
-                reasons: ["Specializes in emergency work", "Excellent local reviews", "Available immediately"]
+                reasons: ["Verified in your postcode area", "Matches your trade type", "Available for new jobs"]
               },
               {
                 badge: "Good Match",
                 badgeColor: "trust-blue",
-                score: "82%",
+                score: "Trusted professional nearby — may cover your postcode range.",
                 icon: <TrendingUp className="h-6 w-6" />,
                 title: "Certified Electrician",
                 specialty: "Rewiring & Installations",
                 distance: "5.3 miles away",
                 rating: 4.7,
                 jobs: 189,
-                reasons: ["Strong track record", "Within your area", "Available this week"]
+                reasons: ["Within extended service area", "Verified trade credentials", "Good local reputation"]
               },
               {
                 badge: "Not Suitable",
                 badgeColor: "black",
-                score: "34%",
+                score: "Outside your selected postcode area or currently unavailable.",
                 icon: <AlertCircle className="h-6 w-6" />,
                 title: "General Handyman",
                 specialty: "Minor Home Repairs",
                 distance: "18.7 miles away",
                 rating: 4.3,
                 jobs: 56,
-                reasons: ["Outside service area", "Lacks required specialization", "Lower review score"]
+                reasons: ["Outside postcode coverage", "Currently unavailable", "Different trade specialty"]
               }
             ].map((match, index) => (
               <motion.div
@@ -863,12 +894,12 @@ const Index = () => {
                 } transition-all duration-300 hover:shadow-2xl`}
               >
                 {/* Match badge */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`inline-flex items-center gap-2 bg-${match.badgeColor}/10 text-${match.badgeColor} px-3 py-1.5 rounded-full text-sm font-bold`}>
+                <div className="flex flex-wrap items-center gap-2 mb-4">
+                  <div className={`inline-flex items-center gap-2 bg-${match.badgeColor}/10 text-${match.badgeColor} px-3 py-1.5 rounded-full text-sm font-bold whitespace-nowrap`}>
                     {match.icon}
                     <span>{match.badge}</span>
                   </div>
-                  <div className={`text-2xl font-bold text-${match.badgeColor}`}>{match.score}</div>
+                  <div className={`text-xs text-${match.badgeColor} font-medium max-w-[120px] text-right leading-tight`}>{match.score}</div>
                 </div>
                 
                 {/* Profile summary */}
@@ -916,9 +947,9 @@ const Index = () => {
             className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8"
           >
             {[
-              { icon: <Brain className="h-8 w-8" />, title: "Smart Recommendations", desc: "AI trained to match jobs with the right professionals" },
-              { icon: <TrendingUp className="h-8 w-8" />, title: "Saves You Time", desc: "No more sifting through hundreds of profiles manually" },
-              { icon: <Award className="h-8 w-8" />, title: "Better Outcomes", desc: "Higher satisfaction rates through smarter matching" }
+              { icon: <Brain className="h-8 w-8" />, title: "AI-Assisted Job Posts", desc: "AI helps you create clearer, more detailed job descriptions" },
+              { icon: <TrendingUp className="h-8 w-8" />, title: "Location-Based Matching", desc: "Find verified professionals in your postcode area" },
+              { icon: <Award className="h-8 w-8" />, title: "Verified Trade Profiles", desc: "All professionals are ID-checked and trade-verified" }
             ].map((benefit, index) => (
               <div key={index} className="text-center p-6 rounded-xl bg-card/80 border border-border/50 shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/20  mb-4 shadow-md border border-primary/20">
@@ -929,11 +960,24 @@ const Index = () => {
               </div>
             ))}
           </motion.div>
+          
+          {/* Footer explanation */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            className="text-center mt-8"
+          >
+            <p className="text-xs text-muted-foreground italic max-w-2xl mx-auto px-4">
+              Matches are based on postcode proximity and verified trade profiles. AI assists in refining job posts for better accuracy.
+            </p>
+          </motion.div>
         </div>
       </section>
 
       {/* Social Proof & Trust Section */}
-      <section className="py-8 md:py-14 bg-background">
+      <section className="py-8 sm:py-12 bg-background">
         <div className="space-y-6 md:space-y-10">
           <div className="text-center max-w-3xl mx-auto">
             <motion.div
@@ -946,21 +990,21 @@ const Index = () => {
                 <MessageSquare className="h-5 w-5" />
                 <span>Our Mission</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">Building Trust Through Transparency</h2>
-              <p className="text-muted-foreground text-base sm:text-lg px-4">AI meets human verification to connect homeowners with trusted, insured tradespeople.</p>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-2 italic px-4">Every review is verified and linked to a completed project — no fake feedback, ever.</p>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">Trust Built In — Through Real Verification</h2>
+              <p className="text-muted-foreground text-base sm:text-lg px-4">JobHub connects homeowners only with verified, insured professionals using both AI efficiency and human verification for your peace of mind.</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2 italic px-4">Every review comes from verified, completed jobs — no fake feedback, ever.</p>
             <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 mt-4 sm:mt-6 mb-6 sm:mb-8 px-4">
               <div className="flex items-center gap-1.5 sm:gap-2 bg-trust-green/10 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full border border-trust-green/20">
                   <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-trust-green" aria-hidden="true" />
-                  <span className="text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-medium">All Reviews Verified</span>
+                  <span className="text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-medium">Verified Reviews Only</span>
               </div>
               <div className="flex items-center gap-1.5 sm:gap-2 bg-trust-blue/10 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full border border-trust-blue/20">
                   <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-trust-blue" aria-hidden="true" />
-                  <span className="text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-medium">Completed Jobs Only</span>
+                  <span className="text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-medium">From Completed Jobs</span>
               </div>
               <div className="flex items-center gap-1.5 sm:gap-2 bg-accent-orange/10 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full border border-accent-orange/20">
                   <Award className="h-4 w-4 sm:h-5 sm:w-5 text-accent-orange" aria-hidden="true" />
-                  <span className="text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-medium">Transparent Ratings</span>
+                  <span className="text-slate-700 dark:text-slate-300 text-xs sm:text-sm font-medium">Real Ratings You Can Trust</span>
               </div>
             </div>
             </motion.div>
@@ -1047,42 +1091,53 @@ const Index = () => {
             </button>
             
             {/* Dots Indicator */}
-            <div className="flex justify-center mt-6 sm:mt-8 gap-3">
+            <div className="flex justify-center mt-6 sm:mt-8 gap-2 py-2 px-4 sm:px-0">
               {testimonials.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentTestimonial(index)}
-                  className={`w-3 h-3 rounded-full transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-trust-blue/50 focus:ring-offset-2 ${
+                  className={`h-2.5 w-2.5 rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-trust-blue/50 focus:ring-offset-2 ${
                     index === currentTestimonial 
-                      ? 'bg-trust-blue scale-125 shadow-sm' 
-                      : 'bg-trust-blue/30 hover:bg-trust-blue/50'
+                      ? 'bg-gray-500' 
+                      : 'bg-gray-300'
                   }`}
+                  aria-current={index === currentTestimonial ? 'true' : 'false'}
                   aria-label={`Go to testimonial ${index + 1}`}
                 />
               ))}
             </div>
           </div>
           
-          {/* Stats */}
+          {/* Summary Feature Cards */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="flex justify-center"
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto px-4"
           >
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 text-center px-4">
-              <div className="group cursor-default bg-gradient-to-br from-card/80 to-card/60 p-4 sm:p-6 rounded-2xl border border-primary/10 shadow-lg transition-all duration-300">
-                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-200 mb-2 transition-transform group-hover:scale-110">AI-Powered</div>
-                <div className="text-muted-foreground font-medium text-sm sm:text-base">Smart Job Matching</div>
+            <div className="text-center p-6 md:p-8 rounded-2xl bg-gradient-to-br from-card via-card/95 to-card/90 border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-300">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4 shadow-md border border-primary/20">
+                <Brain className="h-8 w-8 text-primary" />
               </div>
-              <div className="group cursor-default bg-gradient-to-br from-card/80 to-card/60 p-4 sm:p-6 rounded-2xl border border-secondary/10 shadow-lg transition-all duration-300">
-                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-200 mb-2 transition-transform group-hover:scale-110">100%</div>
-                <div className="text-muted-foreground font-medium text-sm sm:text-base">Verified Professionals</div>
+              <h3 className="text-xl font-bold text-foreground mb-3">AI-Assisted Matching</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">Faster, smarter job connections powered by intelligent automation.</p>
+            </div>
+            
+            <div className="text-center p-6 md:p-8 rounded-2xl bg-gradient-to-br from-card via-card/95 to-card/90 border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-300">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-trust-green/10 mb-4 shadow-md border border-trust-green/20">
+                <Shield className="h-8 w-8 text-trust-green" />
               </div>
-              <div className="group cursor-default bg-gradient-to-br from-card/80 to-card/60 p-4 sm:p-6 rounded-2xl border border-accent/10 shadow-lg transition-all duration-300">
-                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-200 mb-2 transition-transform group-hover:scale-110">Free</div>
-                <div className="text-muted-foreground font-medium text-sm sm:text-base">To Post Jobs</div>
+              <h3 className="text-xl font-bold text-foreground mb-3">Verified Professionals</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">Every tradesperson on JobHub is ID-checked, insured, and reviewed by real homeowners.</p>
+            </div>
+            
+            <div className="text-center p-6 md:p-8 rounded-2xl bg-gradient-to-br from-card via-card/95 to-card/90 border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-300">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-trust-blue/10 mb-4 shadow-md border border-trust-blue/20">
+                <CheckCircle2 className="h-8 w-8 text-trust-blue" />
               </div>
+              <h3 className="text-xl font-bold text-foreground mb-3">Free for Homeowners</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">Post your job at no cost — transparency from start to finish.</p>
             </div>
           </motion.div>
         </div>
@@ -1110,7 +1165,7 @@ const Index = () => {
 
       {/* FAQ Section */}
       <section className="py-8 md:py-14 bg-gradient-to-br from-muted/20 via-background to-muted/20">
-        <div className="space-y-6 md:space-y-10 max-w-4xl mx-auto">
+        <div className="space-y-6 md:space-y-10 max-w-3xl mx-auto px-4 sm:px-6">
           <div className="text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -1119,7 +1174,7 @@ const Index = () => {
               transition={{ duration: 0.6 }}
             >
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">Frequently Asked Questions</h2>
-              <p className="text-muted-foreground text-base sm:text-lg px-4">Everything you need to know about finding and hiring tradespeople on JobHub</p>
+              <p className="text-muted-foreground text-base sm:text-lg">Everything you need to know about finding and hiring tradespeople on JobHub</p>
             </motion.div>
           </div>
           
@@ -1127,83 +1182,105 @@ const Index = () => {
             {[
               {
                 question: "What does 'verified' mean on JobHub?",
-                answer: "Each tradesperson's ID, insurance, and qualifications are manually verified before joining. This includes government ID checks, trade certifications review, insurance confirmation, address validation, and reference verification."
+                answer: "Each tradesperson's ID, insurance, and qualifications are manually verified before joining. This includes government ID checks, trade certifications review, insurance confirmation, address validation, and reference verification.",
+                icon: <CheckCircle2 className="h-5 w-5 text-trust-green" />
               },
               {
                 question: "How does JobHub's AI match me with professionals?",
-                answer: "AI analyses skills, distance, and verified experience to recommend the best local matches. It compares your project requirements with each tradesperson's expertise, specialisations, location, and availability."
+                answer: "AI analyses skills, distance, and verified experience to recommend the best local matches. It compares your project requirements with each tradesperson's expertise, specialisations, location, and availability.",
+                icon: <Brain className="h-5 w-5 text-primary" />
               },
               {
                 question: "Is it really free to post a job?",
-                answer: "Yes — posting a job is completely free, with no obligation to hire. Messaging tradespeople and reviewing profiles are also free for homeowners."
+                answer: "Yes — posting a job is completely free, with no obligation to hire. Messaging tradespeople and reviewing profiles are also free for homeowners.",
+                icon: <CheckCircle2 className="h-5 w-5 text-trust-blue" />
               },
               {
                 question: "Are the reviews actually verified?",
-                answer: "Every review is linked to a completed job, ensuring feedback is 100% authentic. Reviews can only be left after both parties confirm project completion."
+                answer: "Every review is linked to a completed job, ensuring feedback is 100% authentic. Reviews can only be left after both parties confirm project completion.",
+                icon: <MessageSquare className="h-5 w-5 text-accent-orange" />
               },
               {
                 question: "How does JobHub's AI get smarter?",
-                answer: "Over time, AI learns from successful matches and feedback to improve accuracy and recommendations. It continuously refines its understanding of what makes a successful homeowner-tradesperson partnership."
-              },
-              {
-                question: "When did JobHub launch?",
-                answer: "JobHub is now live across the UK, connecting homeowners with verified local trades."
+                answer: "Over time, AI learns from successful matches and feedback to improve accuracy and recommendations. It continuously refines its understanding of what makes a successful homeowner-tradesperson partnership.",
+                icon: <Brain className="h-5 w-5 text-primary" />
               }
-            ].map((faq, index) => (
-              <motion.details
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="group rounded-2xl bg-gradient-to-br from-card to-card/90 border-2 border-border/50 hover:border-primary/30 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
-              >
-                <summary className="cursor-pointer p-4 sm:p-6 font-bold text-foreground text-base sm:text-lg flex items-center justify-between list-none">
-                  <span className="flex-1 pr-2">{faq.question}</span>
-                  <ChevronDown className="h-5 w-5 text-muted-foreground group-open:rotate-180 transition-transform duration-300 flex-shrink-0" />
-                </summary>
-                <div className="px-4 sm:px-6 pb-4 sm:pb-6 text-muted-foreground text-sm sm:text-base leading-relaxed border-t border-border/30 pt-4">
-                  {faq.answer}
-                </div>
-              </motion.details>
-            ))}
+            ].map((faq, index) => {
+              const isOpen = openFaqIndex === index;
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className={`rounded-2xl bg-white border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-300 ease-in-out overflow-hidden ${
+                    isOpen ? 'bg-slate-50' : 'hover:bg-gray-50'
+                  }`}
+                >
+                  <button
+                    onClick={() => setOpenFaqIndex(isOpen ? null : index)}
+                    className="w-full text-left p-4 sm:p-6 min-h-[56px] flex items-center justify-between cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 transition-colors duration-300"
+                    aria-expanded={isOpen}
+                    aria-controls={`faq-answer-${index}`}
+                  >
+                    <div className="flex items-center gap-3 flex-1 pr-2">
+                      {faq.icon}
+                      <span className="font-semibold text-gray-900 text-base sm:text-lg">{faq.question}</span>
+                    </div>
+                    <ChevronDown 
+                      className={`h-5 w-5 text-muted-foreground transition-transform duration-300 ease-in-out flex-shrink-0 ${
+                        isOpen ? 'rotate-180' : ''
+                      }`} 
+                    />
+                  </button>
+                  
+                  <motion.div
+                    id={`faq-answer-${index}`}
+                    initial={false}
+                    animate={{
+                      height: isOpen ? 'auto' : 0,
+                      opacity: isOpen ? 1 : 0
+                    }}
+                    transition={{ duration: 0.3, ease: 'easeInOut' }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-gray-200">
+                      <div className="pt-4 text-muted-foreground text-sm sm:text-base leading-relaxed">
+                        {faq.answer}
+                      </div>
+                    </div>
+                  </motion.div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* Mid-page CTA Band */}
-      <section className="py-8 md:py-14 mb-8 md:mb-14 bg-gradient-to-r from-primary via-primary to-primary/90 text-primary-foreground relative overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJtMzYgMzQgNi0yIDYgMi02IDJ6bTAgNGwzLTEgMy0xIDMgMSAzIDEtNiAyem0wLTEwIDMtMSAzIDEtNiAyem0wLTQgMy0xIDMgMS02IDJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
-        
-        <div className="text-center relative z-10 space-y-6 md:space-y-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6">
-            Smarter Jobs. Verified Trades.
-          </h2>
-            <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-6 sm:mb-8 md:mb-10 opacity-90 leading-relaxed">
-              Start your next project with AI guidance and trusted, verified professionals.
-          </p>
-          <Button 
-            size="lg" 
-              className="bg-accent-orange hover:bg-accent-orange/90 text-white px-4 py-3 text-[15px] sm:text-lg sm:px-10 sm:py-6 h-auto min-h-[44px] font-semibold group transition-all duration-300 shadow-xl hover:shadow-2xl w-full sm:w-auto"
-              onClick={handlePostJob}
-          >
-              <span className="flex items-center">
-            Post a Job
-                <ArrowRight className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6 group-hover:translate-x-1 transition-transform" />
-              </span>
-          </Button>
-          </motion.div>
-        </div>
-      </section>
-
       </div>
+
+      {/* Scroll to Top Button - Mobile Only */}
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            onClick={scrollToTop}
+            className="fixed bottom-6 right-6 z-50 md:hidden 
+                      bg-gradient-to-br from-primary to-indigo-600 
+                      text-white p-4 rounded-2xl shadow-lg shadow-primary/30 
+                      backdrop-blur-md hover:scale-105 
+                      transition-all duration-300 
+                      focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
+            aria-label="Scroll to top"
+          >
+            <ArrowUp className="h-5 w-5" />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* AI Job Assistant Modal */}
       <AiJobAssistant 
