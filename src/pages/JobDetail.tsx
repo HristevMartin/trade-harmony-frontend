@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import MobileHeader from "@/components/MobileHeader";
@@ -10,6 +9,7 @@ import PaidUserBanner from "@/components/PaidUserBanner";
 import CompetitionIndicator from "@/components/CompetitionIndicator";
 import AiJobFitCard from "@/components/AiJobFitCard";
 import FollowUpQuestions from "@/components/FollowUpQuestions";
+import JobAssistantMiniChat from "@/components/JobAssistantMiniChat";
 import { useAiJobFit } from "@/hooks/useAiJobFit";
 import {
     HiMapPin,
@@ -1029,6 +1029,15 @@ const JobDetail = () => {
                         )}
                     </div>
                 </div>
+            )}
+
+            {/* Job Assistant Mini Chat */}
+            {jobData && !isTrader && (
+                <JobAssistantMiniChat
+                    jobId={id || ''}
+                    title={jobData.job_title}
+                    postcode={jobData.additional_data.location}
+                />
             )}
         </>
     );
