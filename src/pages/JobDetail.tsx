@@ -1037,6 +1037,7 @@ const JobDetail = () => {
                     jobId={id || ''}
                     title={jobData.job_title}
                     postcode={jobData.additional_data.location}
+                    serviceCategory={jobData.additional_data.serviceCategory}
                 />
             )}
         </>
