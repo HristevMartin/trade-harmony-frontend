@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { HiXMark, HiPaperAirplane, HiChatBubbleLeftRight, HiArrowPath, HiMapPin, HiCheckBadge, HiStar } from 'react-icons/hi2';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { toast } from 'sonner';
+import { HiXMark, HiPaperAirplane, HiChatBubbleLeftRight, HiArrowPath, HiMapPin, HiCheckBadge, HiStar, HiEnvelope } from 'react-icons/hi2';
 
 interface TraderSuggestion {
     traderId: string;
@@ -32,9 +34,17 @@ interface JobAssistantMiniChatProps {
     jobId: string;
     title: string;
     postcode: string;
+    serviceCategory?: string;
 }
 
-export default function JobAssistantMiniChat({ jobId, title, postcode }: JobAssistantMiniChatProps) {
+interface QuickAction {
+    id: string;
+    icon: string;
+    label: string;
+    message: string | null; // null means just focus input
+}
+
+export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCategory }: JobAssistantMiniChatProps) {
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([]);
@@ -71,21 +81,62 @@ export default function JobAssistantMiniChat({ jobId, title, postcode }: JobAssi
         localStorage.setItem(`chat-${jobId}`, JSON.stringify([seedMessage]));
     };
 
-    const quickActions = [
-        'Notify nearby pros',
-        'See suggested pros',
-        'Edit job',
-        'What happens next?'
+    // Format trade category to plural form
+    const formatTradeName = (trade: string): string => {
+        const tradeMap: { [key: string]: string } = {
+            'Electrical': 'Electricians',
+            'Plumbing': 'Plumbers',
+            'Carpentry': 'Carpenters',
+            'Painting': 'Painters',
+            'Roofing': 'Roofers',
+            'Heating': 'Heating Engineers',
+            'Landscaping': 'Landscapers',
+            'Building': 'Builders',
+            'Tiling': 'Tilers',
+            'Plastering': 'Plasterers',
+            'Flooring': 'Flooring Specialists',
+            'Kitchen': 'Kitchen Fitters',
+            'Bathroom': 'Bathroom Fitters',
+            'Decorating': 'Decorators',
+            'Glazing': 'Glaziers',
+            'Fencing': 'Fencing Contractors',
+            'Paving': 'Paving Contractors',
+        };
+        
+        return tradeMap[trade] || trade;
+    };
+
+    // Generate dynamic quick actions based on service category
+    const formattedCategory = serviceCategory ? formatTradeName(serviceCategory) : 'Professionals';
+    const quickActions: QuickAction[] = [
+        {
+            id: 'find-trade',
+            icon: '🔍',
+            label: `Find ${formattedCategory}`,
+            message: `Show me ${formattedCategory.toLowerCase()} near me`
+        },
+        {
+            id: 'change-trade',
+            icon: '🔄',
+            label: 'Find a different trader',
+            message: null // null means just focus input
+        }
     ];
 
-    const handleQuickAction = async (action: string) => {
+    const handleQuickAction = async (action: QuickAction) => {
         if (isLoading) return;
+
+        // If action has no message (e.g., "Ask a Question"), just focus input
+        if (!action.message) {
+            inputRef.current?.focus();
+            return;
+        }
 
         // Add user message
         const userMessage: Message = {
             id: crypto.randomUUID(),
             role: 'user',
-            text: action,
+            text: action.message,
             createdAt: new Date().toISOString(),
         };
 
@@ -102,7 +153,7 @@ export default function JobAssistantMiniChat({ jobId, title, postcode }: JobAssi
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    message: action,
+                    message: action.message,
                     jobId: jobId,
                     jobTitle: title,
                     location: postcode
@@ -246,6 +297,88 @@ export default function JobAssistantMiniChat({ jobId, title, postcode }: JobAssi
         navigate(`/tradesperson-profile/${traderId}`);
     };
 
+    const handleNotifyTrader = async (trader: TraderSuggestion) => {
+        console.log('=============================================');
+        console.log('Notifying trader by email...');
+        console.log('=============================================');
+
+        try {
+            // Get homeowner information from localStorage
+            const authUser = localStorage.getItem('auth_user');
+            let homeownerInfo = null;
+            if (authUser) {
+                try {
+                    homeownerInfo = JSON.parse(authUser);
+                } catch (err) {
+                    console.error('Error parsing auth user:', err);
+                }
+            }
+
+            const payload = {
+                // Trader Information
+                trader: {
+                    traderId: trader.traderId,
+                    name: trader.name,
+                    email: trader.email,
+                    trade: trader.trade,
+                    city: trader.city,
+                    postcode: trader.postcode,
+                    distanceKm: trader.distanceKm,
+                    experienceYears: trader.experienceYears,
+                    verified: trader.verified,
+                    badges: trader.badges
+                },
+                // Job Information
+                job: {
+                    jobId: jobId,
+                    title: title,
+                    location: postcode,
+                    serviceCategory: serviceCategory || 'N/A'
+                },
+                // Homeowner Information
+                homeowner: homeownerInfo ? {
+                    id: homeownerInfo.id,
+                    name: homeownerInfo.name || homeownerInfo.first_name || 'Homeowner',
+                    email: homeownerInfo.email
+                } : null
+            };
+
+            console.log('Payload being sent:', JSON.stringify(payload, null, 2));
+
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/ai/notify-trader-by-email-from-chat`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                throw new Error(`API call failed with status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Success! Response:', data);
+            console.log('=============================================');
+            
+            // Show success feedback to user
+            toast.success(`Notification sent to ${trader.name}!`, {
+                description: `Email successfully sent to ${trader.trade} trader.`,
+                duration: 4000,
+            });
+        } catch (error) {
+            console.error('Error notifying trader:', error);
+            console.log('=============================================');
+            
+            // Show error feedback to user
+            toast.error(`Failed to notify ${trader.name}`, {
+                description: 'Please try again or contact support.',
+                duration: 4000,
+            });
+        }
+    };
+
     const renderMessage = (msg: Message) => {
         // Extract plain text without markdown formatting for display
         const plainText = msg.text
@@ -281,19 +414,11 @@ export default function JobAssistantMiniChat({ jobId, title, postcode }: JobAssi
                                 onClick={() => handleTraderClick(trader.traderId)}
                             >
                                 <div className="flex gap-3">
-                                    {/* Trader image */}
+                                    {/* Trader avatar */}
                                     <div className="flex-shrink-0">
-                                        {trader.image ? (
-                                            <img
-                                                src={trader.image}
-                                                alt={trader.name}
-                                                className="w-14 h-14 rounded-full object-cover border-2 border-slate-200"
-                                            />
-                                        ) : (
-                                            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-lg">
-                                                {trader.name.charAt(0).toUpperCase()}
-                                            </div>
-                                        )}
+                                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-lg border-2 border-slate-200">
+                                            {trader.name.charAt(0).toUpperCase()}
+                                        </div>
                                     </div>
 
                                     {/* Trader info */}
@@ -309,7 +434,7 @@ export default function JobAssistantMiniChat({ jobId, title, postcode }: JobAssi
 
                                         {/* Trade and experience */}
                                         <p className="text-xs text-slate-600 mb-2">
-                                            {trader.trade} • {trader.experienceYears} years exp
+                                            {formatTradeName(trader.trade)} • {trader.experienceYears} years exp
                                         </p>
 
                                         {/* Location */}
@@ -338,18 +463,19 @@ export default function JobAssistantMiniChat({ jobId, title, postcode }: JobAssi
                                     </div>
                                 </div>
 
-                                {/* View profile CTA */}
+                                {/* Notify via email CTA */}
                                 <div className="mt-2 pt-2 border-t border-slate-100">
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        className="w-full text-xs h-7 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                        className="w-full text-xs h-7 text-blue-600 hover:text-blue-700 hover:bg-blue-50 flex items-center justify-center gap-1.5"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            handleTraderClick(trader.traderId);
+                                            handleNotifyTrader(trader);
                                         }}
                                     >
-                                        View Profile →
+                                        <HiEnvelope className="w-3.5 h-3.5" />
+                                        Notify via Email
                                     </Button>
                                 </div>
                             </Card>
@@ -362,13 +488,27 @@ export default function JobAssistantMiniChat({ jobId, title, postcode }: JobAssi
 
     if (!isOpen) {
         return (
-            <Button
-                onClick={() => setIsOpen(true)}
-                className="fixed bottom-6 right-6 z-50 rounded-full w-14 h-14 shadow-lg bg-blue-600 hover:bg-blue-700 text-white p-0"
-                aria-label="Open job assistant chat"
-            >
-                <HiChatBubbleLeftRight className="w-6 h-6" />
-            </Button>
+            <div className="fixed bottom-6 right-6 z-50">
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            onClick={() => setIsOpen(true)}
+                            className="relative rounded-full w-14 h-14 shadow-lg bg-blue-600 hover:bg-blue-700 text-white p-0"
+                            aria-label="Open AI job assistant chat"
+                        >
+                            <HiChatBubbleLeftRight className="w-6 h-6" />
+                            {/* AI Badge */}
+                            <span className="absolute -top-1 -right-1 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-md">
+                                AI
+                            </span>
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="left" className="bg-slate-900 text-white">
+                        <p className="font-medium">AI Job Assistant</p>
+                        <p className="text-xs text-slate-300">Get instant help finding traders</p>
+                    </TooltipContent>
+                </Tooltip>
+            </div>
         );
     }
 
@@ -416,16 +556,18 @@ export default function JobAssistantMiniChat({ jobId, title, postcode }: JobAssi
                         
                         {/* Quick Action Chips - Show only if first message */}
                         {messages.length === 1 && !isLoading && (
-                            <div className="px-2 pb-2">
-                                <div className="flex flex-wrap gap-2">
+                            <div className="px-2 pb-3">
+                                <p className="text-xs text-slate-500 mb-2 px-2">Quick actions:</p>
+                                <div className="flex flex-col gap-2">
                                     {quickActions.map((action) => (
                                         <button
-                                            key={action}
+                                            key={action.id}
                                             onClick={() => handleQuickAction(action)}
-                                            className="px-3 py-1.5 text-xs font-medium bg-white border border-slate-300 text-slate-700 rounded-full hover:bg-slate-50 hover:border-blue-400 hover:text-blue-600 transition-colors disabled:opacity-50"
+                                            className="flex items-center gap-2 px-4 py-3 min-h-[44px] text-sm font-medium bg-white border border-slate-300 text-slate-700 rounded-xl hover:bg-blue-50 hover:border-blue-400 hover:text-blue-600 hover:shadow-sm transition-all disabled:opacity-50 text-left"
                                             disabled={isLoading}
                                         >
-                                            {action}
+                                            <span className="text-lg flex-shrink-0">{action.icon}</span>
+                                            <span className="flex-1">{action.label}</span>
                                         </button>
                                     ))}
                                 </div>
@@ -520,16 +662,18 @@ export default function JobAssistantMiniChat({ jobId, title, postcode }: JobAssi
                         
                         {/* Quick Action Chips - Show only if first message */}
                         {messages.length === 1 && !isLoading && (
-                            <div className="px-2 pb-2">
-                                <div className="flex flex-wrap gap-2">
+                            <div className="px-2 pb-3">
+                                <p className="text-xs text-slate-500 mb-2 px-2">Quick actions:</p>
+                                <div className="flex flex-col gap-2">
                                     {quickActions.map((action) => (
                                         <button
-                                            key={action}
+                                            key={action.id}
                                             onClick={() => handleQuickAction(action)}
-                                            className="px-3 py-1.5 text-xs font-medium bg-white border border-slate-300 text-slate-700 rounded-full hover:bg-slate-50 hover:border-blue-400 hover:text-blue-600 transition-colors disabled:opacity-50"
+                                            className="flex items-center gap-2 px-4 py-3 min-h-[44px] text-sm font-medium bg-white border border-slate-300 text-slate-700 rounded-xl hover:bg-blue-50 hover:border-blue-400 hover:text-blue-600 hover:shadow-sm transition-all disabled:opacity-50 text-left"
                                             disabled={isLoading}
                                         >
-                                            {action}
+                                            <span className="text-lg flex-shrink-0">{action.icon}</span>
+                                            <span className="flex-1">{action.label}</span>
                                         </button>
                                     ))}
                                 </div>
