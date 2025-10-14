@@ -40,6 +40,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import usePageTracking from "@/hooks/usePageTracking";
 import { AiJobAssistant } from "@/components/ai/AiJobAssistant";
+import JobAssistantMiniChat from "@/components/JobAssistantMiniChat";
 import type { JobDraft } from "@/lib/ai/placeholders";
 
 const Index = () => {
@@ -370,7 +371,7 @@ const Index = () => {
         
         {/* Main Content Container - Centered with Safe Margins */}
         <div className="relative z-10 flex flex-col justify-center min-h-[80vh] lg:min-h-[85vh] py-12 md:py-16">
-          <div className="max-w-5xl mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
             
             {/* Hero Title Section */}
             <div  className="text-center">
@@ -379,10 +380,10 @@ const Index = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 bg-trust-green/10 text-trust-green px-3 py-1.5 sm:px-4 sm:py-2 rounded-full mb-4 sm:mb-6 font-semibold border border-trust-green/20 shadow-sm text-xs sm:text-sm md:text-base"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-trust-green/15 via-trust-blue/10 to-primary/10 backdrop-blur-sm text-trust-green px-4 py-2 sm:px-5 sm:py-2.5 rounded-full mb-4 sm:mb-6 font-semibold border border-trust-green/30 shadow-lg hover:shadow-xl transition-all duration-300 text-xs sm:text-sm md:text-base ring-1 ring-white/20"
             >
-              <span className="text-base sm:text-lg">💫</span>
-              <span>Built for UK homeowners — verified trades, powered by AI</span>
+              <span className="text-lg sm:text-xl">💫</span>
+              <span className="bg-gradient-to-r from-trust-green to-trust-blue bg-clip-text text-transparent font-bold">Built for UK homeowners — verified trades, powered by AI</span>
             </motion.div>
             
             <motion.h1
@@ -629,7 +630,7 @@ const Index = () => {
                 {
                   icon: <Users className="h-10 w-10" />,
                   title: "Verified Pros Apply",
-                  description: "Only ID-verified and insured professionals can apply — no fake profiles or spam.",
+                  description: "Verified and insured professionals prioritized",
                   color: "accent-orange"
                 },
                 {
@@ -770,7 +771,7 @@ const Index = () => {
                     <div className="bg-trust-blue/10 rounded-full p-2">
                       <Award className="h-6 w-6 text-trust-blue" />
                     </div>
-                    <h4 className="font-bold text-foreground text-base sm:text-lg">Only proven trades with positive reviews make the cut</h4>
+                    <h4 className="font-bold text-foreground text-base sm:text-lg">Proven trades with verification badges stand out</h4>
                   </div>
                   <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">
                     Every professional on our platform has demonstrated skills and earned positive feedback
@@ -1288,6 +1289,9 @@ const Index = () => {
         onClose={() => setIsAssistantOpen(false)}
         onUseDraft={handleUseDraft}
       />
+
+      {/* Home Chat Assistant */}
+      <JobAssistantMiniChat variant="home" />
     </div>
   );
 };
