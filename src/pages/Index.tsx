@@ -123,7 +123,7 @@ const Index = () => {
       service: "Our Mission"
     },
     {
-      text: "Finding reliable trades shouldn't feel like rolling the dice. At JobHub, every professional is verified and every connection is made with care.",
+      text: "Finding reliable trades shouldn't feel like rolling the dice. At JobHub, verified professionals stand out with badges, and every connection is made with care.",
       name: "JobHub Team",
       location: "United Kingdom",
       avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
@@ -139,7 +139,7 @@ const Index = () => {
       service: "Our Approach"
     },
     {
-      text: "JobHub connects you with a network of fully verified tradespeople across the UK. Every professional is ID-checked, properly insured, and genuinely reviewed.",
+      text: "JobHub's AI chatbot helps you find suitable tradespeople instantly. Verified professionals upload qualifications and insurance, giving you confidence in your hiring decisions.",
       name: "JobHub Team",
       location: "United Kingdom",
       avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
@@ -151,7 +151,7 @@ const Index = () => {
   const recentActivities = [
     { text: "Now Live", location: "Across the UK", action: "connecting", service: "homeowners & trades", time: "", icon: "🚀" },
     { text: "AI-powered", location: "Smart Matching", action: "finding you", service: "the right professional", time: "", icon: "🧠" },
-    { text: "100%", location: "Verified Network", action: "with", service: "ID & insurance checks", time: "", icon: "✅" },
+    { text: "Verification", location: "Available", action: "with", service: "qualification & insurance review", time: "", icon: "✅" },
     { text: "Free to", location: "Post Jobs", action: "with", service: "no obligation", time: "", icon: "🎉" },
     { text: "Secure", location: "In-Platform Chat", action: "for", service: "safe communication", time: "", icon: "💬" },
     { text: "Trusted by", location: "Verified Trades", action: "across", service: "the UK", time: "", icon: "🏠" },
@@ -693,9 +693,9 @@ const Index = () => {
                 <Shield className="h-5 w-5" />
                 <span>Verified Network</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">Smart Matching, Human-Verified</h2>
-              <p className="text-muted-foreground text-base sm:text-lg px-4">Every tradesperson on JobHub is <span className="font-semibold">ID-verified</span> and uploads proof of <span className="font-semibold">insurance</span> and qualifications, which are verified before approval — so you can <span className="font-semibold">hire with confidence</span>.</p>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-2 italic px-4">Our Verified Network ensures every match is safe and qualified through our verification process.</p>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">Smart Matching with Verified Badges</h2>
+              <p className="text-muted-foreground text-base sm:text-lg px-4">Tradespeople can get <span className="font-semibold">verified</span> by uploading <span className="font-semibold">qualifications and insurance</span>, which are reviewed before approval. <span className="font-semibold">Verified badges</span> help you identify thoroughly checked professionals.</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2 italic px-4">Verification is optional but recommended — verified professionals are prioritized in AI search results and receive more opportunities.</p>
             </motion.div>
           </div>
           
@@ -717,7 +717,7 @@ const Index = () => {
                 {[
                   { icon: <Award className="h-5 w-5" />, title: "Professional Qualifications", desc: "Trades upload proof of qualifications and certifications, which are verified before approval" },
                   { icon: <Shield className="h-5 w-5" />, title: "Insurance Coverage", desc: "Trades upload proof of insurance, which is verified before approval" },
-                  { icon: <CheckCircle2 className="h-5 w-5" />, title: "Identity Verification", desc: "Government ID and address validated" },
+                  { icon: <CheckCircle2 className="h-5 w-5" />, title: "Account Verification", desc: "Profile completeness and authenticity checked" },
                   { icon: <Star className="h-5 w-5" />, title: "Work History & Reviews", desc: "Real homeowner feedback from completed jobs" }
                 ].map((item, index) => (
                   <motion.div
@@ -759,10 +759,10 @@ const Index = () => {
                     <div className="bg-trust-green/10 rounded-full p-2">
                       <CheckCircle2 className="h-6 w-6 text-trust-green" />
                     </div>
-                    <h4 className="font-bold text-foreground text-base sm:text-lg">Our process keeps every project safe</h4>
+                    <h4 className="font-bold text-foreground text-base sm:text-lg">AI chatbot finds the right professionals for you</h4>
                   </div>
                   <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">
-                    Our comprehensive verification process eliminates fraudulent profiles before they ever reach you
+                    No endless scrolling — just ask our AI and we'll show you the best matches you can invite directly
                   </p>
                 </div>
                 
@@ -771,10 +771,10 @@ const Index = () => {
                     <div className="bg-trust-blue/10 rounded-full p-2">
                       <Award className="h-6 w-6 text-trust-blue" />
                     </div>
-                    <h4 className="font-bold text-foreground text-base sm:text-lg">Proven trades with verification badges stand out</h4>
+                    <h4 className="font-bold text-foreground text-base sm:text-lg">Verified badges help you identify trusted professionals</h4>
                   </div>
                   <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">
-                    Every professional on our platform has demonstrated skills and earned positive feedback
+                    Verification is optional — verified professionals upload qualifications and insurance, which are reviewed before badge approval
                   </p>
                 </div>
                 
@@ -783,10 +783,10 @@ const Index = () => {
                     <div className="bg-accent-orange/10 rounded-full p-2">
                       <Shield className="h-6 w-6 text-accent-orange" />
                     </div>
-                    <h4 className="font-bold text-foreground text-base sm:text-lg">Every verified tradesperson carries valid insurance for your peace of mind</h4>
+                    <h4 className="font-bold text-foreground text-base sm:text-lg">Reviews are verified and tied to completed jobs</h4>
                   </div>
                   <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">
-                    Comprehensive insurance coverage ensures your property and project are fully protected
+                    No fake reviews possible — only homeowners who completed jobs can leave feedback
                   </p>
                 </div>
               </div>
@@ -802,9 +802,9 @@ const Index = () => {
             className="flex flex-wrap justify-center items-center gap-6 md:gap-12 py-6 px-4 bg-gradient-to-r from-trust-blue/5 via-trust-green/5 to-trust-blue/5 rounded-2xl border border-border/50"
           >
             {[
-              { icon: <Shield className="h-6 w-6" />, text: "100% Verified" },
-              { icon: <Award className="h-6 w-6" />, text: "Licensed & Insured" },
-              { icon: <CheckCircle2 className="h-6 w-6" />, text: "Background Checked" },
+              { icon: <Shield className="h-6 w-6" />, text: "Verification Available" },
+              { icon: <Award className="h-6 w-6" />, text: "Verified Pros Prioritized" },
+              { icon: <MessageSquare className="h-6 w-6" />, text: "AI Chatbot Matching" },
               { icon: <Star className="h-6 w-6" />, text: "Reviewed by Real Homeowners" }
             ].map((badge, index) => (
               <div key={index} className="flex items-center gap-2 text-foreground font-semibold">
@@ -837,8 +837,8 @@ const Index = () => {
               <p className="mt-2 text-sm text-gray-500 sm:hidden">
                 AI learns from verified matches — getting smarter with every connection.
               </p>
-              <p className="text-muted-foreground text-base sm:text-lg px-4">JobHub connects homeowners with verified local professionals based on trade and location — with AI helping every job post become more accurate and complete.</p>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-2 italic px-4">Our AI continuously improves how local jobs and verified trades connect — making every match faster and more accurate over time.</p>
+              <p className="text-muted-foreground text-base sm:text-lg px-4">Use our AI chatbot to find suitable tradespeople based on trade, location, and experience. Click 'Notify Trader' to send email invitations, and professionals decide whether to apply.</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2 italic px-4">No profile browsing needed — AI shows you the best matches and verified professionals are prioritized in suggestions.</p>
             </motion.div>
           </div>
           
@@ -949,8 +949,8 @@ const Index = () => {
           >
             {[
               { icon: <Brain className="h-8 w-8" />, title: "AI-Assisted Job Posts", desc: "AI helps you create clearer, more detailed job descriptions" },
-              { icon: <TrendingUp className="h-8 w-8" />, title: "Location-Based Matching", desc: "Find verified professionals in your postcode area" },
-              { icon: <Award className="h-8 w-8" />, title: "Verified Trade Profiles", desc: "All professionals are ID-checked and trade-verified" }
+              { icon: <TrendingUp className="h-8 w-8" />, title: "Location-Based Matching", desc: "Find suitable professionals in your postcode area" },
+              { icon: <Shield className="h-8 w-8" />, title: "Verified Badges Available", desc: "Verification is optional — verified professionals upload qualifications and insurance for added trust" }
             ].map((benefit, index) => (
               <div key={index} className="text-center p-6 rounded-xl bg-card/80 border border-border/50 shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/20  mb-4 shadow-md border border-primary/20">
@@ -991,9 +991,9 @@ const Index = () => {
                 <MessageSquare className="h-5 w-5" />
                 <span>Our Mission</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">Trust Built In — Through Real Verification</h2>
-              <p className="text-muted-foreground text-base sm:text-lg px-4">JobHub connects homeowners only with verified, insured professionals using both AI efficiency and human verification for your peace of mind.</p>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-2 italic px-4">Every review comes from verified, completed jobs — no fake feedback, ever.</p>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 sm:mb-4">Trust Built In — Through Verified Reviews</h2>
+              <p className="text-muted-foreground text-base sm:text-lg px-4">JobHub uses AI to connect homeowners with suitable tradespeople. Verified professionals upload qualifications and insurance for added trust.</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2 italic px-4">Every review comes from completed jobs — no fake feedback, ever. Both verified and unverified users can leave reviews.</p>
             <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 mt-4 sm:mt-6 mb-6 sm:mb-8 px-4">
               <div className="flex items-center gap-1.5 sm:gap-2 bg-trust-green/10 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full border border-trust-green/20">
                   <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-trust-green" aria-hidden="true" />
@@ -1129,8 +1129,8 @@ const Index = () => {
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-trust-green/10 mb-4 shadow-md border border-trust-green/20">
                 <Shield className="h-8 w-8 text-trust-green" />
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-3">Verified Professionals</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">Every tradesperson on JobHub is ID-checked, insured, and reviewed by real homeowners.</p>
+              <h3 className="text-xl font-bold text-foreground mb-3">Verified Badges Available</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">Verification is optional — verified professionals upload qualifications and insurance for review — verification badges help you identify them.</p>
             </div>
             
             <div className="text-center p-6 md:p-8 rounded-2xl bg-gradient-to-br from-card via-card/95 to-card/90 border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-300">
@@ -1183,7 +1183,7 @@ const Index = () => {
             {[
               {
                 question: "What does 'verified' mean on JobHub?",
-                answer: "Each tradesperson's ID, insurance, and qualifications are manually verified before joining. This includes government ID checks, trade certifications review, insurance confirmation, address validation, and reference verification.",
+                answer: "Verification is optional for tradespeople. Verified professionals upload qualifications and insurance, which are manually reviewed before a verification badge is awarded. This includes trade certifications review, insurance confirmation, and profile completeness checks.",
                 icon: <CheckCircle2 className="h-5 w-5 text-trust-green" />
               },
               {
