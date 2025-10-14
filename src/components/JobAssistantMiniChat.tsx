@@ -31,9 +31,10 @@ interface Message {
 }
 
 interface JobAssistantMiniChatProps {
-    jobId: string;
-    title: string;
-    postcode: string;
+    variant?: 'home' | 'job';
+    jobId?: string;
+    title?: string;
+    postcode?: string;
     serviceCategory?: string;
 }
 
@@ -44,7 +45,7 @@ interface QuickAction {
     message: string | null; // null means just focus input
 }
 
-export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCategory }: JobAssistantMiniChatProps) {
+export default function JobAssistantMiniChat({ variant = 'job', jobId, title, postcode, serviceCategory }: JobAssistantMiniChatProps) {
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([]);
@@ -55,9 +56,9 @@ export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCa
 
     // Initialize with seed message
     useEffect(() => {
-        const storageKey = `chat-${jobId}`;
+        const storageKey = variant === 'home' ? 'chat-home' : `chat-${jobId}`;
         const stored = localStorage.getItem(storageKey);
-        
+
         if (stored) {
             try {
                 setMessages(JSON.parse(stored));
@@ -68,17 +69,30 @@ export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCa
         } else {
             initializeSeedMessage();
         }
-    }, [jobId]);
+    }, [variant, jobId, title, postcode]);
 
     const initializeSeedMessage = () => {
+        const text = variant === 'home'
+            ? `Hi! 👋 I'm the JobHub Platform Assistant.
+
+                I can help you with:
+                - How JobHub works and our AI features
+                - Our verification process for traders
+                - Pricing (it's FREE for homeowners!)
+                - Finding the right tradesperson
+
+                What would you like to know?`
+            : `Hi, I'm the JOB Hub AI Agent. Your job '${title}' in ${postcode} is live. How can I help you today?`;
+
         const seedMessage: Message = {
             id: crypto.randomUUID(),
             role: 'assistant',
-            text: `Hi, I'm the JOB Hub AI Agent. Your job '${title}' in ${postcode} is live. How can I help you today?`,
+            text,
             createdAt: new Date().toISOString(),
         };
         setMessages([seedMessage]);
-        localStorage.setItem(`chat-${jobId}`, JSON.stringify([seedMessage]));
+        const storageKey = variant === 'home' ? 'chat-home' : `chat-${jobId}`;
+        localStorage.setItem(storageKey, JSON.stringify([seedMessage]));
     };
 
     // Format trade category to plural form
@@ -102,26 +116,53 @@ export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCa
             'Fencing': 'Fencing Contractors',
             'Paving': 'Paving Contractors',
         };
-        
+
         return tradeMap[trade] || trade;
     };
 
-    // Generate dynamic quick actions based on service category
+    // Generate dynamic quick actions based on service category and variant
     const formattedCategory = serviceCategory ? formatTradeName(serviceCategory) : 'Professionals';
-    const quickActions: QuickAction[] = [
-        {
-            id: 'find-trade',
-            icon: '🔍',
-            label: `Find ${formattedCategory}`,
-            message: `Show me ${formattedCategory.toLowerCase()} near me`
-        },
-        {
-            id: 'change-trade',
-            icon: '🔄',
-            label: 'Find a different trader',
-            message: null // null means just focus input
-        }
-    ];
+    const quickActions: QuickAction[] = variant === 'home'
+        ? [
+            {
+                id: 'how-homeowners',
+                icon: '🏠',
+                label: 'How does it work for homeowners?',
+                message: 'How does JobHub work for homeowners?'
+            },
+            {
+                id: 'how-traders',
+                icon: '🔧',
+                label: 'How does it work for traders?',
+                message: 'How does JobHub work for tradespeople?'
+            },
+            {
+                id: 'verification',
+                icon: '✅',
+                label: 'What about verification?',
+                message: 'How does JobHub verify tradespeople?'
+            },
+            {
+                id: 'pricing',
+                icon: '💰',
+                label: 'What does it cost?',
+                message: 'What does JobHub cost? Is it free for homeowners?'
+            }
+        ]
+        : [
+            {
+                id: 'find-trade',
+                icon: '🔍',
+                label: `Find ${formattedCategory}`,
+                message: `Show me ${formattedCategory.toLowerCase()} near me`
+            },
+            {
+                id: 'change-trade',
+                icon: '🔄',
+                label: 'Find a different trader',
+                message: null // null means just focus input
+            }
+        ];
 
     const handleQuickAction = async (action: QuickAction) => {
         if (isLoading) return;
@@ -142,11 +183,17 @@ export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCa
 
         const updatedMessages = [...messages, userMessage];
         setMessages(updatedMessages);
-        localStorage.setItem(`chat-${jobId}`, JSON.stringify(updatedMessages));
+        const storageKey = variant === 'home' ? 'chat-home' : `chat-${jobId}`;
+        localStorage.setItem(storageKey, JSON.stringify(updatedMessages));
         setIsLoading(true);
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/ai/homeowner-chat`, {
+            // Use different endpoint for home screen vs job-specific chat
+            const endpoint = variant === 'home'
+                ? `${import.meta.env.VITE_API_URL}/travel/ai/general-chat`
+                : `${import.meta.env.VITE_API_URL}/travel/ai/homeowner-chat`;
+
+            const response = await fetch(endpoint, {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
@@ -154,9 +201,9 @@ export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCa
                 },
                 body: JSON.stringify({
                     message: action.message,
-                    jobId: jobId,
-                    jobTitle: title,
-                    location: postcode
+                    jobId: jobId || 'home',
+                    jobTitle: title || 'General inquiry',
+                    location: postcode || 'UK'
                 }),
             });
 
@@ -165,7 +212,7 @@ export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCa
             }
 
             const data = await response.json();
-            
+
             // Add assistant response
             const assistantMessage: Message = {
                 id: crypto.randomUUID(),
@@ -178,10 +225,10 @@ export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCa
 
             const finalMessages = [...updatedMessages, assistantMessage];
             setMessages(finalMessages);
-            localStorage.setItem(`chat-${jobId}`, JSON.stringify(finalMessages));
+            localStorage.setItem(storageKey, JSON.stringify(finalMessages));
         } catch (error) {
             console.error('Error sending message:', error);
-            
+
             // Add error message
             const errorMessage: Message = {
                 id: crypto.randomUUID(),
@@ -192,7 +239,7 @@ export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCa
 
             const finalMessages = [...updatedMessages, errorMessage];
             setMessages(finalMessages);
-            localStorage.setItem(`chat-${jobId}`, JSON.stringify(finalMessages));
+            localStorage.setItem(storageKey, JSON.stringify(finalMessages));
         } finally {
             setIsLoading(false);
         }
@@ -224,12 +271,18 @@ export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCa
 
         const updatedMessages = [...messages, userMessage];
         setMessages(updatedMessages);
-        localStorage.setItem(`chat-${jobId}`, JSON.stringify(updatedMessages));
+        const storageKey = variant === 'home' ? 'chat-home' : `chat-${jobId}`;
+        localStorage.setItem(storageKey, JSON.stringify(updatedMessages));
         setInputValue('');
         setIsLoading(true);
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/ai/homeowner-chat`, {
+            // Use different endpoint for home screen vs job-specific chat
+            const endpoint = variant === 'home'
+                ? `${import.meta.env.VITE_API_URL}/travel/ai/general-chat`
+                : `${import.meta.env.VITE_API_URL}/travel/ai/homeowner-chat`;
+
+            const response = await fetch(endpoint, {
                 method: 'POST',
                 credentials: 'include',
                 headers: {
@@ -237,9 +290,9 @@ export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCa
                 },
                 body: JSON.stringify({
                     message: trimmedInput,
-                    jobId: jobId,
-                    jobTitle: title,
-                    location: postcode
+                    jobId: jobId || 'home',
+                    jobTitle: title || 'General inquiry',
+                    location: postcode || 'UK'
                 }),
             });
 
@@ -248,7 +301,7 @@ export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCa
             }
 
             const data = await response.json();
-            
+
             // Add assistant response
             const assistantMessage: Message = {
                 id: crypto.randomUUID(),
@@ -261,10 +314,10 @@ export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCa
 
             const finalMessages = [...updatedMessages, assistantMessage];
             setMessages(finalMessages);
-            localStorage.setItem(`chat-${jobId}`, JSON.stringify(finalMessages));
+            localStorage.setItem(storageKey, JSON.stringify(finalMessages));
         } catch (error) {
             console.error('Error sending message:', error);
-            
+
             // Add error message
             const errorMessage: Message = {
                 id: crypto.randomUUID(),
@@ -275,7 +328,7 @@ export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCa
 
             const finalMessages = [...updatedMessages, errorMessage];
             setMessages(finalMessages);
-            localStorage.setItem(`chat-${jobId}`, JSON.stringify(finalMessages));
+            localStorage.setItem(storageKey, JSON.stringify(finalMessages));
         } finally {
             setIsLoading(false);
         }
@@ -361,7 +414,7 @@ export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCa
             const data = await response.json();
             console.log('Success! Response:', data);
             console.log('=============================================');
-            
+
             // Show success feedback to user
             toast.success(`Notification sent to ${trader.name}!`, {
                 description: `Email successfully sent to ${trader.trade} trader.`,
@@ -370,7 +423,7 @@ export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCa
         } catch (error) {
             console.error('Error notifying trader:', error);
             console.log('=============================================');
-            
+
             // Show error feedback to user
             toast.error(`Failed to notify ${trader.name}`, {
                 description: 'Please try again or contact support.',
@@ -384,7 +437,6 @@ export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCa
         const plainText = msg.text
             .replace(/!\[.*?\]\(.*?\)/g, '') // Remove markdown images
             .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold formatting
-            .split('\n\n')[0] // Take only first paragraph (before trader list)
             .trim();
 
         return (
@@ -392,19 +444,18 @@ export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCa
                 {/* Main message text */}
                 <div className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div
-                        className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                            msg.role === 'user'
+                        className={`max-w-[80%] rounded-2xl px-4 py-3 ${msg.role === 'user'
                                 ? 'bg-blue-600 text-white'
                                 : 'bg-slate-100 text-slate-900'
-                        }`}
+                            }`}
                     >
-                        <p className="text-sm leading-relaxed">{plainText || msg.text}</p>
+                        <p className="text-sm leading-relaxed whitespace-pre-line">{plainText}</p>
                         <span className="text-xs opacity-60 mt-1 block">just now</span>
                     </div>
                 </div>
 
-                {/* Trader suggestion cards */}
-                {msg.suggestions && msg.suggestions.length > 0 && (
+                {/* Trader suggestion cards - ONLY for job variant */}
+                {variant === 'job' && msg.suggestions && msg.suggestions.length > 0 && (
                     <div className="space-y-2 pl-2">
                         <p className="text-xs font-medium text-slate-600 px-2">Suggested Traders:</p>
                         {msg.suggestions.map((trader) => (
@@ -504,8 +555,15 @@ export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCa
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent side="left" className="bg-slate-900 text-white">
-                        <p className="font-medium">AI Job Assistant</p>
-                        <p className="text-xs text-slate-300">Get instant help finding traders</p>
+                        <p className="font-medium">
+                            {variant === 'home' ? 'Platform Assistant' : 'AI Job Assistant'}
+                        </p>
+                        <p className="text-xs text-slate-300">
+                            {variant === 'home'
+                                ? 'Ask about JobHub features'
+                                : 'Get instant help finding traders'
+                            }
+                        </p>
                     </TooltipContent>
                 </Tooltip>
             </div>
@@ -523,7 +581,9 @@ export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCa
                             <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                                 <HiChatBubbleLeftRight className="w-4 h-4 text-blue-600" />
                             </div>
-                            <h3 className="font-semibold text-slate-900">Job Assistant</h3>
+                            <h3 className="font-semibold text-slate-900">
+                                {variant === 'home' ? 'Platform Assistant' : 'Job Assistant'}
+                            </h3>
                         </div>
                         <div className="flex items-center gap-2">
                             {messages.length > 1 && (
@@ -553,7 +613,7 @@ export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCa
                     {/* Messages */}
                     <div className="flex-1 overflow-y-auto p-4 space-y-3" role="log" aria-live="polite">
                         {messages.map((msg) => renderMessage(msg))}
-                        
+
                         {/* Quick Action Chips - Show only if first message */}
                         {messages.length === 1 && !isLoading && (
                             <div className="px-2 pb-3">
@@ -573,7 +633,7 @@ export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCa
                                 </div>
                             </div>
                         )}
-                        
+
                         {/* Loading indicator */}
                         {isLoading && (
                             <div className="flex justify-start">
@@ -589,7 +649,7 @@ export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCa
                                 </div>
                             </div>
                         )}
-                        
+
                         <div ref={messagesEndRef} />
                     </div>
 
@@ -629,7 +689,9 @@ export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCa
                             <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                                 <HiChatBubbleLeftRight className="w-4 h-4 text-blue-600" />
                             </div>
-                            <h3 className="font-semibold text-slate-900">Job Assistant</h3>
+                            <h3 className="font-semibold text-slate-900">
+                                {variant === 'home' ? 'Platform Assistant' : 'Job Assistant'}
+                            </h3>
                         </div>
                         <div className="flex items-center gap-2">
                             {messages.length > 1 && (
@@ -659,7 +721,7 @@ export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCa
                     {/* Messages */}
                     <div className="flex-1 overflow-y-auto p-4 space-y-3" role="log" aria-live="polite">
                         {messages.map((msg) => renderMessage(msg))}
-                        
+
                         {/* Quick Action Chips - Show only if first message */}
                         {messages.length === 1 && !isLoading && (
                             <div className="px-2 pb-3">
@@ -679,7 +741,7 @@ export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCa
                                 </div>
                             </div>
                         )}
-                        
+
                         {/* Loading indicator */}
                         {isLoading && (
                             <div className="flex justify-start">
@@ -695,7 +757,7 @@ export default function JobAssistantMiniChat({ jobId, title, postcode, serviceCa
                                 </div>
                             </div>
                         )}
-                        
+
                         <div ref={messagesEndRef} />
                     </div>
 
