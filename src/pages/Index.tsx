@@ -115,36 +115,36 @@ const Index = () => {
 
   const testimonials = [
     {
-      text: "We built JobHub because homeowners deserve better — a platform where AI efficiency meets genuine trust and real verification.",
-      name: "JobHub Team",
-      location: "United Kingdom",
+      text: "Posted my job and had two verified electricians respond within hours. Proper chat system meant no dodgy phone calls.",
+      name: "Sarah L.",
+      location: "Hackney, London",
       avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
       rating: 5,
-      service: "Our Mission"
+      service: "Verified Homeowner"
     },
     {
-      text: "Finding reliable trades shouldn't feel like rolling the dice. At JobHub, verified professionals stand out with badges, and every connection is made with care.",
-      name: "JobHub Team",
-      location: "United Kingdom",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+      text: "Been getting steady work through JobHub for three months now. The verification badge really helps customers trust me straight away.",
+      name: "James M.",
+      location: "Croydon, London",
+      avatar: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=150&h=150&fit=crop&crop=face",
       rating: 5,
-      service: "Our Vision"
+      service: "Verified Tradesperson"
     },
     {
-      text: "AI helps us work faster, but human verification keeps everyone safer. Together, they create the trusted platform homeowners have been waiting for.",
-      name: "JobHub Team",
-      location: "United Kingdom",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+      text: "Much better than those other sites where you don't know who's legit. The verified badges and reviews gave me confidence choosing a plumber.",
+      name: "Emma R.",
+      location: "Islington, London",
+      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
       rating: 5,
-      service: "Our Approach"
+      service: "Verified Homeowner"
     },
     {
-      text: "JobHub's AI chatbot helps you find suitable tradespeople instantly. Verified professionals upload qualifications and insurance, giving you confidence in your hiring decisions.",
-      name: "JobHub Team",
-      location: "United Kingdom",
-      avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
+      text: "No more paying for leads that go nowhere. JobHub only charges when both sides agree, which is fair for everyone.",
+      name: "David P.",
+      location: "Wandsworth, London",
+      avatar: "https://images.unsplash.com/photo-1504593811423-6dd665756598?w=150&h=150&fit=crop&crop=face",
       rating: 5,
-      service: "Verified Network"
+      service: "Verified Tradesperson"
     }
   ];
 
