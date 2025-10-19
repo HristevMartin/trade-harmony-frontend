@@ -45,6 +45,19 @@ interface QuickAction {
     message: string | null; // null means just focus input
 }
 
+// Fallback UUID generator for older mobile browsers (iOS Safari < 15.4, Android WebView < 92)
+const generateUUID = (): string => {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        return crypto.randomUUID();
+    }
+    // RFC4122 version 4 compliant UUID fallback
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+};
+
 export default function JobAssistantMiniChat({ variant = 'job', jobId, title, postcode, serviceCategory }: JobAssistantMiniChatProps) {
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
@@ -85,7 +98,7 @@ export default function JobAssistantMiniChat({ variant = 'job', jobId, title, po
             : `Hi, I'm the JOB Hub AI Agent. Your job '${title}' in ${postcode} is live. How can I help you today?`;
 
         const seedMessage: Message = {
-            id: crypto.randomUUID(),
+            id: generateUUID(),
             role: 'assistant',
             text,
             createdAt: new Date().toISOString(),
@@ -175,7 +188,7 @@ export default function JobAssistantMiniChat({ variant = 'job', jobId, title, po
 
         // Add user message
         const userMessage: Message = {
-            id: crypto.randomUUID(),
+            id: generateUUID(),
             role: 'user',
             text: action.message,
             createdAt: new Date().toISOString(),
@@ -215,7 +228,7 @@ export default function JobAssistantMiniChat({ variant = 'job', jobId, title, po
 
             // Add assistant response
             const assistantMessage: Message = {
-                id: crypto.randomUUID(),
+                id: generateUUID(),
                 role: 'assistant',
                 text: data.reply || data.response || data.message || 'Sorry, I could not process that request.',
                 createdAt: new Date().toISOString(),
@@ -231,7 +244,7 @@ export default function JobAssistantMiniChat({ variant = 'job', jobId, title, po
 
             // Add error message
             const errorMessage: Message = {
-                id: crypto.randomUUID(),
+                id: generateUUID(),
                 role: 'assistant',
                 text: 'Sorry, I encountered an error. Please try again.',
                 createdAt: new Date().toISOString(),
@@ -263,7 +276,7 @@ export default function JobAssistantMiniChat({ variant = 'job', jobId, title, po
 
         // Add user message
         const userMessage: Message = {
-            id: crypto.randomUUID(),
+            id: generateUUID(),
             role: 'user',
             text: trimmedInput,
             createdAt: new Date().toISOString(),
@@ -304,7 +317,7 @@ export default function JobAssistantMiniChat({ variant = 'job', jobId, title, po
 
             // Add assistant response
             const assistantMessage: Message = {
-                id: crypto.randomUUID(),
+                id: generateUUID(),
                 role: 'assistant',
                 text: data.reply || data.response || data.message || 'Sorry, I could not process that request.',
                 createdAt: new Date().toISOString(),
@@ -320,7 +333,7 @@ export default function JobAssistantMiniChat({ variant = 'job', jobId, title, po
 
             // Add error message
             const errorMessage: Message = {
-                id: crypto.randomUUID(),
+                id: generateUUID(),
                 role: 'assistant',
                 text: 'Sorry, I encountered an error. Please try again.',
                 createdAt: new Date().toISOString(),

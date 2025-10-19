@@ -1,14 +1,21 @@
-
-// src/hooks/usePageTracking.js
+// src/hooks/usePageTracking.tsx
 import { useEffect } from 'react';
 
 const usePageTracking = (pageName = 'home') => {
   useEffect(() => {
     const trackPageVisit = async () => {
+      // Check if API URL is configured
+      const apiUrl = import.meta.env.VITE_API_URL;
+      
+      if (!apiUrl) {
+        console.warn('VITE_API_URL not configured, skipping page tracking');
+        return;
+      }
+
       try {
         console.log(`Tracking page visit: ${pageName}`);
         
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/track-visit`, {
+        const response = await fetch(`${apiUrl}/travel/track-visit`, {
           method: 'POST',
           credentials: 'include',
           headers: {
@@ -29,7 +36,8 @@ const usePageTracking = (pageName = 'home') => {
           console.warn('Tracking failed:', response.status);
         }
       } catch (error) {
-        console.error('Tracking error:', error);
+        // Silent fail - tracking should never break the app
+        console.error('Tracking error (non-critical):', error);
       }
     };
 
