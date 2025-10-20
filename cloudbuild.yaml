@@ -25,7 +25,7 @@ steps:
     args:
       - '-c'
       - |
-        git clone https://$$GITHUB_TOKEN@github.com/HristevMartin/constructionPlatformInfra.git /workspace/infra
+        git clone https://$GITHUB_TOKEN@github.com/HristevMartin/terraformConstructionWebPlatform.git /workspace/infra
     secretEnv: ['GITHUB_TOKEN']
     id: 'clone-infra-repo'
 
@@ -81,55 +81,65 @@ steps:
     id: 'update-terraform-vars'
     waitFor: ['debug-structure']
 
-  # Step 6: Initialize Terraform
+  # Step 7: Initialize Terraform
   - name: 'hashicorp/terraform:1.6'
     entrypoint: 'sh'
     args:
       - '-c'
       - |
-        cd /workspace/infra/prod
+        # Find the directory containing terraform.tfvars
+        cd /workspace/infra
+        TFVARS_DIR=$(find . -name "terraform.tfvars" -type f | head -1 | xargs dirname)
+        echo "Found terraform directory at: $TFVARS_DIR"
+        cd $TFVARS_DIR
         terraform init -input=false
     id: 'terraform-init'
     waitFor: ['update-terraform-vars']
 
-  # Step 7: Validate Terraform
+  # Step 8: Validate Terraform
   - name: 'hashicorp/terraform:1.6'
     entrypoint: 'sh'
     args:
       - '-c'
       - |
-        cd /workspace/infra/prod
+        cd /workspace/infra
+        TFVARS_DIR=$(find . -name "terraform.tfvars" -type f | head -1 | xargs dirname)
+        cd $TFVARS_DIR
         terraform validate
     id: 'terraform-validate'
     waitFor: ['terraform-init']
 
-  # Step 8: Plan Terraform changes
+  # Step 9: Plan Terraform changes
   - name: 'hashicorp/terraform:1.6'
     entrypoint: 'sh'
     args:
       - '-c'
       - |
-        cd /workspace/infra/prod
+        cd /workspace/infra
+        TFVARS_DIR=$(find . -name "terraform.tfvars" -type f | head -1 | xargs dirname)
+        cd $TFVARS_DIR
         terraform plan -target=module.frontend_simple -out=tfplan -input=false
         echo "=== Terraform Plan Summary ==="
         terraform show -no-color tfplan
     id: 'terraform-plan'
     waitFor: ['terraform-validate']
 
-  # Step 9: Apply Terraform changes (deploy to Cloud Run)
+  # Step 10: Apply Terraform changes (deploy to Cloud Run)
   - name: 'hashicorp/terraform:1.6'
     entrypoint: 'sh'
     args:
       - '-c'
       - |
-        cd /workspace/infra/prod
+        cd /workspace/infra
+        TFVARS_DIR=$(find . -name "terraform.tfvars" -type f | head -1 | xargs dirname)
+        cd $TFVARS_DIR
         terraform apply -auto-approve -input=false tfplan
         echo "=== Deployment Complete ==="
         terraform output -json
     id: 'terraform-apply'
     waitFor: ['terraform-plan']
 
-  # Step 10: Verify deployment
+  # Step 11: Verify deployment
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
     args:
