@@ -86,11 +86,10 @@ steps:
     args:
       - -c
       - |
-        # Find the directory containing terraform.tfvars
         cd /workspace/infra
-        TFVARS_DIR=$$(find . -name "terraform.tfvars" -type f | head -1 | xargs dirname)
+        TFVARS_DIR="$$(find . -name 'terraform.tfvars' -type f | head -1 | xargs dirname)"
         echo "Found terraform directory at: $$TFVARS_DIR"
-        cd $$TFVARS_DIR
+        cd "$$TFVARS_DIR"
         terraform init -input=false
     id: 'terraform-init'
     waitFor: ['update-terraform-vars']
@@ -102,8 +101,8 @@ steps:
       - -c
       - |
         cd /workspace/infra
-        TFVARS_DIR=$$(find . -name "terraform.tfvars" -type f | head -1 | xargs dirname)
-        cd $$TFVARS_DIR
+        TFVARS_DIR="$$(find . -name 'terraform.tfvars' -type f | head -1 | xargs dirname)"
+        cd "$$TFVARS_DIR"
         terraform validate
     id: 'terraform-validate'
     waitFor: ['terraform-init']
@@ -115,8 +114,8 @@ steps:
       - -c
       - |
         cd /workspace/infra
-        TFVARS_DIR=$$(find . -name "terraform.tfvars" -type f | head -1 | xargs dirname)
-        cd $$TFVARS_DIR
+        TFVARS_DIR="$$(find . -name 'terraform.tfvars' -type f | head -1 | xargs dirname)"
+        cd "$$TFVARS_DIR"
         terraform plan -target=module.frontend_simple -out=tfplan -input=false
         echo "=== Terraform Plan Summary ==="
         terraform show -no-color tfplan
@@ -130,8 +129,8 @@ steps:
       - -c
       - |
         cd /workspace/infra
-        TFVARS_DIR=$$(find . -name "terraform.tfvars" -type f | head -1 | xargs dirname)
-        cd $$TFVARS_DIR
+        TFVARS_DIR="$$(find . -name 'terraform.tfvars' -type f | head -1 | xargs dirname)"
+        cd "$$TFVARS_DIR"
         terraform apply -auto-approve -input=false tfplan
         echo "=== Deployment Complete ==="
         terraform output -json
