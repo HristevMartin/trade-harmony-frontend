@@ -4,88 +4,127 @@ steps:
     args:
       - 'build'
       - '-t'
-      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REPO}/trade-harmony-frontend:${SHORT_SHA}'
+      - 'europe-west1-docker.pkg.dev/regal-framework-475315-m1/docker-repo/ub-travel-services-frontend:${SHORT_SHA}'
       - '-t'
-      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REPO}/trade-harmony-frontend:latest'
+      - 'europe-west1-docker.pkg.dev/regal-framework-475315-m1/docker-repo/ub-travel-services-frontend:latest'
       - '.'
     id: 'build-image'
 
-  # Step 2: Push the Docker image to Artifact Registry
+  # Step 2: Push both tags to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REPO}/trade-harmony-frontend:${SHORT_SHA}'
-    id: 'push-image-sha'
-
-  - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'push'
-      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REPO}/trade-harmony-frontend:latest'
-    id: 'push-image-latest'
+      - '--all-tags'
+      - 'europe-west1-docker.pkg.dev/regal-framework-475315-m1/docker-repo/ub-travel-services-frontend'
+    id: 'push-images'
+    waitFor: ['build-image']
 
   # Step 3: Clone the Terraform infrastructure repository
   - name: 'gcr.io/cloud-builders/git'
+    entrypoint: 'bash'
     args:
-      - 'clone'
-      - 'https://github.com/HristevMartin/constructionPlatformInfra.git'
-      - '/workspace/infra'
-    id: 'clone-infra-repo'
+      - '-c'
+      - |
+        git clone https://$$GITHUB_TOKEN@github.com/HristevMartin/constructionPlatformInfra.git /workspace/infra
     secretEnv: ['GITHUB_TOKEN']
+    id: 'clone-infra-repo'
 
-  # Step 4: Update the Terraform variable with new image
+  # Step 4: Configure git
+  - name: 'gcr.io/cloud-builders/git'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        cd /workspace/infra
+        git config user.email "cloudbuild@gcp.com"
+        git config user.name "Cloud Build"
+    id: 'configure-git'
+    waitFor: ['clone-infra-repo']
+
+  # Step 5: Update the Terraform variable with new image
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
         cd /workspace/infra
-        # Update the tfvars file with the new image
-        sed -i "s|frontend_simple_image_name.*|frontend_simple_image_name = \"${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REPO}/trade-harmony-frontend:${SHORT_SHA}\"|g" environments/prod/terraform.tfvars
         
-        # Show the change
-        echo "Updated terraform.tfvars:"
-        cat environments/prod/terraform.tfvars
+        # Update the image in terraform.tfvars
+        NEW_IMAGE="europe-west1-docker.pkg.dev/regal-framework-475315-m1/docker-repo/ub-travel-services-frontend:${SHORT_SHA}"
+        
+        # Update terraform.tfvars file
+        sed -i "s|frontend_simple_image_name = \".*\"|frontend_simple_image_name = \"$${NEW_IMAGE}\"|g" environments/prod/terraform.tfvars
+        
+        echo "=== Updated terraform.tfvars ==="
+        grep frontend_simple_image_name environments/prod/terraform.tfvars
     id: 'update-terraform-vars'
+    waitFor: ['configure-git', 'push-image-latest']
 
-  # Step 5: Initialize Terraform
+  # Step 6: Initialize Terraform
   - name: 'hashicorp/terraform:1.6'
     entrypoint: 'sh'
     args:
       - '-c'
       - |
         cd /workspace/infra/environments/prod
-        terraform init
+        terraform init -input=false
     id: 'terraform-init'
+    waitFor: ['update-terraform-vars']
 
-  # Step 6: Plan Terraform changes
+  # Step 7: Validate Terraform
   - name: 'hashicorp/terraform:1.6'
     entrypoint: 'sh'
     args:
       - '-c'
       - |
         cd /workspace/infra/environments/prod
-        terraform plan -target=module.frontend_simple -out=tfplan
+        terraform validate
+    id: 'terraform-validate'
+    waitFor: ['terraform-init']
+
+  # Step 8: Plan Terraform changes
+  - name: 'hashicorp/terraform:1.6'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        cd /workspace/infra/environments/prod
+        terraform plan -target=module.frontend_simple -out=tfplan -input=false
+        echo "=== Terraform Plan Summary ==="
+        terraform show -no-color tfplan
     id: 'terraform-plan'
+    waitFor: ['terraform-validate']
 
-  # Step 7: Apply Terraform changes (deploy to Cloud Run)
+  # Step 9: Apply Terraform changes (deploy to Cloud Run)
   - name: 'hashicorp/terraform:1.6'
     entrypoint: 'sh'
     args:
       - '-c'
       - |
         cd /workspace/infra/environments/prod
-        terraform apply -auto-approve tfplan
+        terraform apply -auto-approve -input=false tfplan
+        echo "=== Deployment Complete ==="
+        terraform output -json
     id: 'terraform-apply'
+    waitFor: ['terraform-plan']
 
-# Substitution variables
-substitutions:
-  _REGION: 'europe-west2'  # Change to your region
-  _ARTIFACT_REPO: 'trade-harmony-images'  # Your Artssifact Regsistry repo name
+  # Step 10: Verify deployment
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "=== Cloud Run Service Status ==="
+        gcloud run services describe trade-harmony-frontend-simple \
+          --region=europe-west1 \
+          --format="table(status.url,status.conditions[0].type,status.conditions[0].status)"
+    id: 'verify-deployment'
+    waitFor: ['terraform-apply']
 
 # Use Secret Manager for GitHub token
 availableSecrets:
   secretManager:
-    - versionName: projects/${PROJECT_ID}/secrets/github-token/versions/latest
+    - versionName: projects/regal-framework-475315-m1/secrets/github-token/versions/latest
       env: 'GITHUB_TOKEN'
 
 options:
