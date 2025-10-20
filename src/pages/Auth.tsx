@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, EyeOff, Loader2, Mail, Lock, User, ArrowLeft } from "lucide-react";
+import { markRecentLogin } from "@/lib/fetch-interceptor";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -139,20 +140,17 @@ const Auth = () => {
 
       if (response.ok) {
         if (activeTab === 'forgot-password') {
-          // Handle forgot password success
           setForgotPasswordSent(true);
         } else {
-          // Store authentication data
-          // localStorage.setItem('access_token', data.token);
           localStorage.setItem('auth_user', JSON.stringify({ 
             id: data.id, 
             role: data.role, 
           }));
           
-          // Dispatch custom event to notify other components of auth change
+          markRecentLogin();
+          
           window.dispatchEvent(new Event('authChange'));
           
-          // Redirect to next page if specified, otherwise home page
           const nextPath = searchParams.get('next') || '/';
           navigate(nextPath);
         }

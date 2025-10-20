@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HiXMark, HiEye, HiEyeSlash } from "react-icons/hi2";
 import { X } from "lucide-react";
+import { markRecentLogin } from "@/lib/fetch-interceptor";
 
 interface AuthData {
     id: string;
@@ -133,24 +134,22 @@ const AuthModal = ({ isOpen, onClose, onSuccess, role = 'customer', initialEmail
             const data = await response.json();
 
             if (response.ok) {
-                // Save auth data to localStorage
                 localStorage.setItem("auth_user", JSON.stringify({
                     id: data.id,
                     role: data.role,
                 }));
 
-                // Dispatch custom event to notify other components of auth change
+                markRecentLogin();
+
                 window.dispatchEvent(new Event('authChange'));
 
-                // Call success callback
                 onSuccess({
                     id: data.id,
                     role: data.role,
-                    token: data.token || '', // Add token field
+                    token: data.token || '',
                     email: data.email,
                 });
 
-                // Reset form and close modal
                 setFormData({ email: '', password: '', confirmPassword: '' });
                 onClose();
             } else {
