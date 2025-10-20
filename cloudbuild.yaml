@@ -21,19 +21,19 @@ steps:
 
   # Step 3: Clone the Terraform infrastructure repository
   - name: 'gcr.io/cloud-builders/git'
+    secretEnv: ['GITHUB_TOKEN']
     entrypoint: 'bash'
     args:
-      - '-c'
+      - -c
       - |
-        git clone https://$GITHUB_TOKEN@github.com/HristevMartin/terraformConstructionWebPlatform.git /workspace/infra
-    secretEnv: ['GITHUB_TOKEN']
+        git clone https://$$GITHUB_TOKEN@github.com/HristevMartin/constructionPlatformInfra.git /workspace/infra
     id: 'clone-infra-repo'
 
   # Step 4: Configure git
   - name: 'gcr.io/cloud-builders/git'
     entrypoint: 'bash'
     args:
-      - '-c'
+      - -c
       - |
         cd /workspace/infra
         git config user.email "cloudbuild@gcp.com"
@@ -45,7 +45,7 @@ steps:
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
     args:
-      - '-c'
+      - -c
       - |
         echo "=== Listing /workspace/infra structure ==="
         ls -la /workspace/infra/
@@ -62,22 +62,22 @@ steps:
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
     args:
-      - '-c'
+      - -c
       - |
         cd /workspace/infra
         
         # Find the terraform.tfvars file
-        TFVARS_FILE=$(find . -name "terraform.tfvars" | head -1)
-        echo "Found terraform.tfvars at: $TFVARS_FILE"
+        TFVARS_FILE=$$(find . -name "terraform.tfvars" | head -1)
+        echo "Found terraform.tfvars at: $$TFVARS_FILE"
         
         # Update the image in terraform.tfvars
         NEW_IMAGE="europe-west1-docker.pkg.dev/regal-framework-475315-m1/docker-repo/ub-travel-services-frontend:${SHORT_SHA}"
         
         # Update terraform.tfvars file
-        sed -i "s|frontend_simple_image_name = \".*\"|frontend_simple_image_name = \"${NEW_IMAGE}\"|g" $TFVARS_FILE
+        sed -i "s|frontend_simple_image_name = \".*\"|frontend_simple_image_name = \"$$NEW_IMAGE\"|g" $$TFVARS_FILE
         
         echo "=== Updated terraform.tfvars ==="
-        grep frontend_simple_image_name $TFVARS_FILE
+        grep frontend_simple_image_name $$TFVARS_FILE
     id: 'update-terraform-vars'
     waitFor: ['debug-structure']
 
@@ -85,13 +85,13 @@ steps:
   - name: 'hashicorp/terraform:1.6'
     entrypoint: 'sh'
     args:
-      - '-c'
+      - -c
       - |
         # Find the directory containing terraform.tfvars
         cd /workspace/infra
-        TFVARS_DIR=$(find . -name "terraform.tfvars" -type f | head -1 | xargs dirname)
-        echo "Found terraform directory at: $TFVARS_DIR"
-        cd $TFVARS_DIR
+        TFVARS_DIR=$$(find . -name "terraform.tfvars" -type f | head -1 | xargs dirname)
+        echo "Found terraform directory at: $$TFVARS_DIR"
+        cd $$TFVARS_DIR
         terraform init -input=false
     id: 'terraform-init'
     waitFor: ['update-terraform-vars']
@@ -100,11 +100,11 @@ steps:
   - name: 'hashicorp/terraform:1.6'
     entrypoint: 'sh'
     args:
-      - '-c'
+      - -c
       - |
         cd /workspace/infra
-        TFVARS_DIR=$(find . -name "terraform.tfvars" -type f | head -1 | xargs dirname)
-        cd $TFVARS_DIR
+        TFVARS_DIR=$$(find . -name "terraform.tfvars" -type f | head -1 | xargs dirname)
+        cd $$TFVARS_DIR
         terraform validate
     id: 'terraform-validate'
     waitFor: ['terraform-init']
@@ -113,11 +113,11 @@ steps:
   - name: 'hashicorp/terraform:1.6'
     entrypoint: 'sh'
     args:
-      - '-c'
+      - -c
       - |
         cd /workspace/infra
-        TFVARS_DIR=$(find . -name "terraform.tfvars" -type f | head -1 | xargs dirname)
-        cd $TFVARS_DIR
+        TFVARS_DIR=$$(find . -name "terraform.tfvars" -type f | head -1 | xargs dirname)
+        cd $$TFVARS_DIR
         terraform plan -target=module.frontend_simple -out=tfplan -input=false
         echo "=== Terraform Plan Summary ==="
         terraform show -no-color tfplan
@@ -128,11 +128,11 @@ steps:
   - name: 'hashicorp/terraform:1.6'
     entrypoint: 'sh'
     args:
-      - '-c'
+      - -c
       - |
         cd /workspace/infra
-        TFVARS_DIR=$(find . -name "terraform.tfvars" -type f | head -1 | xargs dirname)
-        cd $TFVARS_DIR
+        TFVARS_DIR=$$(find . -name "terraform.tfvars" -type f | head -1 | xargs dirname)
+        cd $$TFVARS_DIR
         terraform apply -auto-approve -input=false tfplan
         echo "=== Deployment Complete ==="
         terraform output -json
@@ -143,7 +143,7 @@ steps:
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
     args:
-      - '-c'
+      - -c
       - |
         echo "=== Cloud Run Service Status ==="
         gcloud run services describe trade-harmony-frontend-simple \
