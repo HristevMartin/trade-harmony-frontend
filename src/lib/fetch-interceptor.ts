@@ -5,8 +5,10 @@ let loginTimestamp = 0;
 export const markRecentLogin = () => {
   justLoggedIn = true;
   loginTimestamp = Date.now();
+  console.log('🟢 markRecentLogin called at', new Date().toISOString());
   setTimeout(() => { 
-    justLoggedIn = false; 
+    justLoggedIn = false;
+    console.log('⏰ justLoggedIn flag cleared after 8s');
   }, 8000);
 };
 
@@ -17,6 +19,16 @@ const interceptedFetch = async (url: RequestInfo | URL, options?: RequestInit): 
   const apiBase = import.meta.env.VITE_API_URL as string | undefined;
   const isApiRequest = apiBase ? urlString.startsWith(apiBase) : urlString.startsWith('/');
   
+  // Log API requests
+  if (isApiRequest) {
+    console.log('🌐 API Request:', {
+      url: urlString,
+      method: options?.method || 'GET',
+      credentials: options?.credentials,
+      hasBody: !!options?.body
+    });
+  }
+  
   const enhancedOptions: RequestInit = {
     ...options,
     credentials: isApiRequest ? 'include' : (options?.credentials || 'same-origin')
@@ -25,33 +37,52 @@ const interceptedFetch = async (url: RequestInfo | URL, options?: RequestInit): 
   // Call the original fetch with enhanced options
   const response = await originalFetch(url, enhancedOptions);
   
+  // Log response
+  if (isApiRequest) {
+    console.log('📥 API Response:', {
+      url: urlString,
+      status: response.status,
+      statusText: response.statusText,
+      headers: {
+        'set-cookie': response.headers.get('set-cookie'),
+        'content-type': response.headers.get('content-type')
+      }
+    });
+  }
+  
   if (isApiRequest && response.status === 401) {
     const timeSinceLogin = Date.now() - loginTimestamp;
-    const hasCookies = document.cookie.includes('session') || document.cookie.length > 0;
+    const allCookies = document.cookie;
     
-    console.log('🔴 401 Response:', {
+    console.log('🔴 401 Response Detected:', {
       url: urlString,
       justLoggedIn,
       timeSinceLogin,
-      hasCookies,
-      cookieCount: document.cookie.split(';').filter(c => c.trim()).length,
+      allCookies,
+      cookiesList: allCookies.split(';').map(c => c.trim()),
       currentPath: window.location.pathname
     });
     
     if (justLoggedIn || timeSinceLogin < 8000) {
-      console.log('⏳ Skipping redirect - recent login');
+      console.log('⏳ Skipping redirect - recent login (time since login:', timeSinceLogin, 'ms)');
       return response;
     }
     
     try {
       if (apiBase) {
+        console.log('🔍 Checking session validity...');
         const sessionCheck = await originalFetch(`${apiBase}/travel/auth/session`, {
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           cache: 'no-store'
         });
+        
+        console.log('📊 Session check response:', sessionCheck.status);
+        
         if (sessionCheck.ok) {
           const sessionData = await sessionCheck.json();
+          console.log('📊 Session data:', sessionData);
+          
           if (sessionData && sessionData.authenticated) {
             console.log('✅ Session valid after 401. Suppressing redirect.');
             return response;
@@ -59,11 +90,12 @@ const interceptedFetch = async (url: RequestInfo | URL, options?: RequestInit): 
         }
       }
     } catch (e) {
-      console.log('⚠️ Session re-check failed, proceeding to redirect');
+      console.log('⚠️ Session re-check failed:', e);
     }
     
     const currentPath = window.location.pathname;
     if (currentPath !== '/auth') {
+      console.log('⏱️ Waiting 200ms before redirect...');
       await new Promise(resolve => setTimeout(resolve, 200));
       
       const currentPathWithQuery = window.location.pathname + window.location.search;
@@ -79,5 +111,7 @@ const interceptedFetch = async (url: RequestInfo | URL, options?: RequestInit): 
 
 // Override the global fetch
 window.fetch = interceptedFetch;
+
+console.log('🔧 Fetch interceptor installed. API Base:', import.meta.env.VITE_API_URL);
 
 export { interceptedFetch as fetch };
