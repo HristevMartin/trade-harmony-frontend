@@ -41,7 +41,24 @@ steps:
     id: 'configure-git'
     waitFor: ['clone-infra-repo']
 
-  # Step 5: Update the Terraform variable with new image
+  # Step 5: Debug - List directory structure
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "=== Listing /workspace/infra structure ==="
+        ls -la /workspace/infra/
+        echo ""
+        echo "=== Looking for terraform.tfvars files ==="
+        find /workspace/infra -name "terraform.tfvars" -type f
+        echo ""
+        echo "=== Directory tree ==="
+        find /workspace/infra -type d | head -20
+    id: 'debug-structure'
+    waitFor: ['configure-git', 'push-images']
+
+  # Step 6: Update the Terraform variable with new image
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
     args:
@@ -49,16 +66,20 @@ steps:
       - |
         cd /workspace/infra
         
+        # Find the terraform.tfvars file
+        TFVARS_FILE=$(find . -name "terraform.tfvars" | head -1)
+        echo "Found terraform.tfvars at: $TFVARS_FILE"
+        
         # Update the image in terraform.tfvars
         NEW_IMAGE="europe-west1-docker.pkg.dev/regal-framework-475315-m1/docker-repo/ub-travel-services-frontend:${SHORT_SHA}"
         
-        # Update terraform.tfvars file (correct path: prod/terraform.tfvars)
-        sed -i "s|frontend_simple_image_name = \".*\"|frontend_simple_image_name = \"$${NEW_IMAGE}\"|g" prod/terraform.tfvars
+        # Update terraform.tfvars file
+        sed -i "s|frontend_simple_image_name = \".*\"|frontend_simple_image_name = \"${NEW_IMAGE}\"|g" $TFVARS_FILE
         
         echo "=== Updated terraform.tfvars ==="
-        grep frontend_simple_image_name prod/terraform.tfvars
+        grep frontend_simple_image_name $TFVARS_FILE
     id: 'update-terraform-vars'
-    waitFor: ['configure-git', 'push-images']
+    waitFor: ['debug-structure']
 
   # Step 6: Initialize Terraform
   - name: 'hashicorp/terraform:1.6'
