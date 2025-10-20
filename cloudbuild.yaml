@@ -58,7 +58,7 @@ steps:
         echo "=== Updated terraform.tfvars ==="
         grep frontend_simple_image_name environments/prod/terraform.tfvars
     id: 'update-terraform-vars'
-    waitFor: ['configure-git', 'push-image-latest']
+    waitFor: ['configure-git', 'push-images']
 
   # Step 6: Initialize Terraform
   - name: 'hashicorp/terraform:1.6'
