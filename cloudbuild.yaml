@@ -52,11 +52,11 @@ steps:
         # Update the image in terraform.tfvars
         NEW_IMAGE="europe-west1-docker.pkg.dev/regal-framework-475315-m1/docker-repo/ub-travel-services-frontend:${SHORT_SHA}"
         
-        # Update terraform.tfvars file
-        sed -i "s|frontend_simple_image_name = \".*\"|frontend_simple_image_name = \"$${NEW_IMAGE}\"|g" environments/prod/terraform.tfvars
+        # Update terraform.tfvars file (correct path: prod/terraform.tfvars)
+        sed -i "s|frontend_simple_image_name = \".*\"|frontend_simple_image_name = \"$${NEW_IMAGE}\"|g" prod/terraform.tfvars
         
         echo "=== Updated terraform.tfvars ==="
-        grep frontend_simple_image_name environments/prod/terraform.tfvars
+        grep frontend_simple_image_name prod/terraform.tfvars
     id: 'update-terraform-vars'
     waitFor: ['configure-git', 'push-images']
 
@@ -66,7 +66,7 @@ steps:
     args:
       - '-c'
       - |
-        cd /workspace/infra/environments/prod
+        cd /workspace/infra/prod
         terraform init -input=false
     id: 'terraform-init'
     waitFor: ['update-terraform-vars']
@@ -77,7 +77,7 @@ steps:
     args:
       - '-c'
       - |
-        cd /workspace/infra/environments/prod
+        cd /workspace/infra/prod
         terraform validate
     id: 'terraform-validate'
     waitFor: ['terraform-init']
@@ -88,7 +88,7 @@ steps:
     args:
       - '-c'
       - |
-        cd /workspace/infra/environments/prod
+        cd /workspace/infra/prod
         terraform plan -target=module.frontend_simple -out=tfplan -input=false
         echo "=== Terraform Plan Summary ==="
         terraform show -no-color tfplan
@@ -101,7 +101,7 @@ steps:
     args:
       - '-c'
       - |
-        cd /workspace/infra/environments/prod
+        cd /workspace/infra/prod
         terraform apply -auto-approve -input=false tfplan
         echo "=== Deployment Complete ==="
         terraform output -json
@@ -121,7 +121,7 @@ steps:
     id: 'verify-deployment'
     waitFor: ['terraform-apply']
 
-# Use Secret Manager for GitHub tsokens
+# Use Secret Manager for GitHub token
 availableSecrets:
   secretManager:
     - versionName: projects/regal-framework-475315-m1/secrets/github-token/versions/latest
