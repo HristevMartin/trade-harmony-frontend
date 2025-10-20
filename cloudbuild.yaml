@@ -80,7 +80,7 @@ steps:
 # Substitution variables
 substitutions:
   _REGION: 'europe-west2'  # Change to your region
-  _ARTIFACT_REPO: 'trade-harmony-images'  # Your Artifact Regsistry repo name
+  _ARTIFACT_REPO: 'trade-harmony-images'  # Your Artsifact Regsistry repo name
 
 # Use Secret Manager for GitHub token
 availableSecrets:
