@@ -152,7 +152,7 @@ steps:
     id: 'verify-deployment'
     waitFor: ['terraform-apply']
 
-# Use Secrest Manager for GitHub token
+# Use Secret Manager for GitHub token
 availableSecrets:
   secretManager:
     - versionName: projects/regal-framework-475315-m1/secrets/github-token/versions/latest
