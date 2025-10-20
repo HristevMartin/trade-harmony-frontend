@@ -67,17 +67,17 @@ steps:
         cd /workspace/infra
         
         # Find the terraform.tfvars file
-        TFVARS_FILE=$$(find . -name "terraform.tfvars" | head -1)
-        echo "Found terraform.tfvars at: $$TFVARS_FILE"
+        TFVARS_FILE="$(find . -name 'terraform.tfvars' -type f | head -1)"
+        echo "Found terraform.tfvars at: $TFVARS_FILE"
         
         # Update the image in terraform.tfvars
         NEW_IMAGE="europe-west1-docker.pkg.dev/regal-framework-475315-m1/docker-repo/ub-travel-services-frontend:${SHORT_SHA}"
         
         # Update terraform.tfvars file
-        sed -i "s|frontend_simple_image_name = \".*\"|frontend_simple_image_name = \"$$NEW_IMAGE\"|g" $$TFVARS_FILE
+        sed -i "s|frontend_simple_image_name = \".*\"|frontend_simple_image_name = \"$NEW_IMAGE\"|g" "$TFVARS_FILE"
         
         echo "=== Updated terraform.tfvars ==="
-        grep frontend_simple_image_name $$TFVARS_FILE
+        cat "$TFVARS_FILE" | grep frontend_simple_image_name
     id: 'update-terraform-vars'
     waitFor: ['debug-structure']
 
