@@ -596,7 +596,7 @@ const Index = () => {
       )}
 
       {/* How It Works Section */}
-      <section  className="py-8 md:py-14 bg-gradient-to-br from-secondary/5 via-muted/30 to-secondary/10">
+      <section id="how-it-works" className="py-8 md:py-14 bg-gradient-to-br from-secondary/5 via-muted/30 to-secondary/10">
         <div className="space-y-6 md:space-y-10">
           <div className="text-center max-w-3xl mx-auto">
             <motion.div
@@ -1270,7 +1270,7 @@ const Index = () => {
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
             onClick={scrollToTop}
-            className="fixed bottom-6 right-6 z-50 md:hidden 
+            className="fixed bottom-6 left-6 z-40 md:hidden 
                       bg-gradient-to-br from-primary to-indigo-600 
                       text-white p-4 rounded-2xl shadow-lg shadow-primary/30 
                       backdrop-blur-md hover:scale-105 
