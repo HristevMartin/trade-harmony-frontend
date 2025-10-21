@@ -3,6 +3,10 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
+      - '--build-arg'
+      - 'VITE_API_URL=https://ab.reasonlabsapi.com'
+      - '--build-arg'
+      - 'VITE_STRIPE_PUBLIC_KEY=${_STRIPE_PUBLIC_KEY}'
       - '-t'
       - 'europe-west1-docker.pkg.dev/regal-framework-475315-m1/docker-repo/ub-travel-services-frontend:${SHORT_SHA}'
       - '-t'
