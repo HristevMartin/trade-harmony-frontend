@@ -58,7 +58,7 @@ steps:
     id: 'debug-structure'
     waitFor: ['configure-git', 'push-images']
 
-  # Step 6: Create terraform.tfvars with new image
+# Step 6: Create terraform.tfvars with new image
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
     args:
@@ -73,11 +73,11 @@ steps:
         project_id                     = "regal-framework-475315-m1"
         region                         = "europe-west1"
         mongo_region                   = "europe-west1"
-        frontend_simple_image_name     = "$NEW_IMAGE"
+        frontend_simple_image_name     = "$$NEW_IMAGE"
         EOF
         
         echo "=== Created terraform.tfvars ==="
-        echo "Frontend image: $NEW_IMAGE"
+        echo "Frontend image: $$NEW_IMAGE"
         cat terraform.tfvars
     id: 'create-terraform-vars'
     waitFor: ['debug-structure']
