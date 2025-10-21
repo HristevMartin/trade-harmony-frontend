@@ -4,7 +4,7 @@ steps:
     args:
       - 'build'
       - '--build-arg'
-      - 'VITE_API_URL=https://ab.reasonlabsapi.com'
+      - 'VITE_API_URL=https://api.find-tradespeople.com'
       - '--build-arg'
       - 'VITE_STRIPE_PUBLIC_KEY=${_STRIPE_PUBLIC_KEY}'
       - '-t'
