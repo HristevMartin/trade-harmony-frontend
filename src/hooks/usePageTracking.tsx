@@ -8,12 +8,16 @@ const usePageTracking = (pageName = 'home') => {
       const apiUrl = import.meta.env.VITE_API_URL;
       
       if (!apiUrl) {
-        console.warn('VITE_API_URL not configured, skipping page tracking');
+        if (import.meta.env.DEV) {
+          console.warn('[Page Tracking] VITE_API_URL not configured, skipping page tracking');
+        }
         return;
       }
 
       try {
-        console.log(`Tracking page visit: ${pageName}`);
+        if (import.meta.env.DEV) {
+          console.log(`[Page Tracking] Tracking page visit: ${pageName} to ${apiUrl}/travel/track-visit`);
+        }
         
         const response = await fetch(`${apiUrl}/travel/track-visit`, {
           method: 'POST',
@@ -31,13 +35,19 @@ const usePageTracking = (pageName = 'home') => {
 
         if (response.ok) {
           const result = await response.json();
-          console.log('Tracking successful:', result);
+          if (import.meta.env.DEV) {
+            console.log('[Page Tracking] Tracking successful:', result);
+          }
         } else {
-          console.warn('Tracking failed:', response.status);
+          if (import.meta.env.DEV) {
+            console.warn('[Page Tracking] Tracking failed:', response.status, response.statusText);
+          }
         }
       } catch (error) {
         // Silent fail - tracking should never break the app
-        console.error('Tracking error (non-critical):', error);
+        if (import.meta.env.DEV) {
+          console.error('[Page Tracking] Error (non-critical):', error);
+        }
       }
     };
 
