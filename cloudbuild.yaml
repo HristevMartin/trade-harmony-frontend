@@ -58,7 +58,7 @@ steps:
     id: 'debug-structure'
     waitFor: ['configure-git', 'push-images']
 
-# Step 6: Create terraform.tfvars with new image
+  # Step 6: Create terraform.tfvars with new image
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
     args:
@@ -66,7 +66,7 @@ steps:
       - |
         cd /workspace/infra/prod
         
-        # Create terraform.tfvars with only the frontend image
+        # Create terraform.tfvars with all required variables
         NEW_IMAGE="europe-west1-docker.pkg.dev/regal-framework-475315-m1/docker-repo/ub-travel-services-frontend:${SHORT_SHA}"
         
         cat > terraform.tfvars <<EOF
@@ -74,6 +74,11 @@ steps:
         region                         = "europe-west1"
         mongo_region                   = "europe-west1"
         frontend_simple_image_name     = "$$NEW_IMAGE"
+        backend_image_name             = "europe-west1-docker.pkg.dev/regal-framework-475315-m1/docker-repo/ub-travel-services-backend:v-fd4ee42-1760800964"
+        secret_key                     = "dummy-value-not-used-for-frontend"
+        sendgrid_api_key               = "dummy-value-not-used-for-frontend"
+        stripe_secret_key              = "dummy-value-not-used-for-frontend"
+        OPENAI_API_KEY                 = "dummy-value-not-used-for-frontend"
         EOF
         
         echo "=== Created terraform.tfvars ==="
