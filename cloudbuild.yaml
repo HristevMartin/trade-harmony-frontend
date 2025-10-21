@@ -58,26 +58,28 @@ steps:
     id: 'debug-structure'
     waitFor: ['configure-git', 'push-images']
 
-  # Step 6: Update the Terraform variable with new image
+  # Step 6: Create terraform.tfvars with new image
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
     args:
       - -c
       - |
-        cd /workspace/infra
+        cd /workspace/infra/prod
         
-        # Find terraform.tfvars dynamically
-        TFVARS_FILE="$$(find . -name 'terraform.tfvars' -type f | head -1)"
-        echo "Found terraform.tfvars at: $$TFVARS_FILE"
-        
+        # Create terraform.tfvars with only the frontend image
         NEW_IMAGE="europe-west1-docker.pkg.dev/regal-framework-475315-m1/docker-repo/ub-travel-services-frontend:${SHORT_SHA}"
         
-        # Update the terraform.tfvars file
-        sed -i "s|frontend_simple_image_name = \".*\"|frontend_simple_image_name = \"$$NEW_IMAGE\"|g" "$$TFVARS_FILE"
+        cat > terraform.tfvars <<EOF
+        project_id                     = "regal-framework-475315-m1"
+        region                         = "europe-west1"
+        mongo_region                   = "europe-west1"
+        frontend_simple_image_name     = "$NEW_IMAGE"
+        EOF
         
-        echo "=== Updated terraform.tfvars ==="
-        grep frontend_simple_image_name "$$TFVARS_FILE"
-    id: 'update-terraform-vars'
+        echo "=== Created terraform.tfvars ==="
+        echo "Frontend image: $NEW_IMAGE"
+        cat terraform.tfvars
+    id: 'create-terraform-vars'
     waitFor: ['debug-structure']
 
   # Step 7: Initialize Terraform
@@ -86,13 +88,10 @@ steps:
     args:
       - -c
       - |
-        cd /workspace/infra
-        TFVARS_DIR="$$(find . -name 'terraform.tfvars' -type f | head -1 | xargs dirname)"
-        echo "Found terraform directory at: $$TFVARS_DIR"
-        cd "$$TFVARS_DIR"
+        cd /workspace/infra/prod
         terraform init -input=false
     id: 'terraform-init'
-    waitFor: ['update-terraform-vars']
+    waitFor: ['create-terraform-vars']
 
   # Step 8: Validate Terraform
   - name: 'hashicorp/terraform:1.6'
@@ -100,9 +99,7 @@ steps:
     args:
       - -c
       - |
-        cd /workspace/infra
-        TFVARS_DIR="$$(find . -name 'terraform.tfvars' -type f | head -1 | xargs dirname)"
-        cd "$$TFVARS_DIR"
+        cd /workspace/infra/prod
         terraform validate
     id: 'terraform-validate'
     waitFor: ['terraform-init']
@@ -113,9 +110,7 @@ steps:
     args:
       - -c
       - |
-        cd /workspace/infra
-        TFVARS_DIR="$$(find . -name 'terraform.tfvars' -type f | head -1 | xargs dirname)"
-        cd "$$TFVARS_DIR"
+        cd /workspace/infra/prod
         terraform plan -target=module.frontend_simple -out=tfplan -input=false
         echo "=== Terraform Plan Summary ==="
         terraform show -no-color tfplan
@@ -128,9 +123,7 @@ steps:
     args:
       - -c
       - |
-        cd /workspace/infra
-        TFVARS_DIR="$$(find . -name 'terraform.tfvars' -type f | head -1 | xargs dirname)"
-        cd "$$TFVARS_DIR"
+        cd /workspace/infra/prod
         terraform apply -auto-approve -input=false tfplan
         echo "=== Deployment Complete ==="
         terraform output -json
