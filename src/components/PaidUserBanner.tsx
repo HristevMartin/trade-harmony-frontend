@@ -35,24 +35,30 @@ const PaidUserBanner: React.FC<PaidUserBannerProps> = ({
   console.log('show me the authToken', authToken);
 
   const handleOpenFullChat = async () => {
-    try {
-      console.log('show me the jobId', jobId);
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/chat-component/get-conversation-by-id/${jobId}`, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
+    // Use the onOpenChat prop if provided, otherwise use default behavior
+    if (onOpenChat) {
+      onOpenChat();
+    } else {
+      // Fallback to internal implementation
+      try {
+        console.log('show me the jobId', jobId);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/chat-component/get-conversation-by-id/${jobId}`, {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch conversation');
         }
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch conversation');
+        const data = await response.json();
+        console.log('show me the data', data);
+        navigate(`/chat/${data.conversation.conversation_id}`);
+      } catch (error) {
+        console.error('Error opening chat:', error);
+        // Fallback to simple navigation
+        navigate(`/chat?job_id=${jobId}`);
       }
-      const data = await response.json();
-      console.log('show me the data', data);
-      navigate(`/chat/${data.conversation.conversation_id}`);
-    } catch (error) {
-      console.error('Error opening chat:', error);
-      // Fallback to simple navigation
-      // window.location.href = '/chat';
     }
   };
 

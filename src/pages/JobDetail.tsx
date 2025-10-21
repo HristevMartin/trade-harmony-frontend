@@ -659,8 +659,26 @@ const JobDetail = () => {
                                     email: jobData.email,
                                     phone: jobData.phone
                                 }}
-                                onOpenChat={() => {
-
+                                onOpenChat={async () => {
+                                    try {
+                                        console.log('Opening chat for job:', id);
+                                        const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/chat-component/get-conversation-by-id/${id}`, {
+                                            credentials: 'include',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                            }
+                                        });
+                                        if (!response.ok) {
+                                            throw new Error('Failed to fetch conversation');
+                                        }
+                                        const data = await response.json();
+                                        console.log('Got conversation data:', data);
+                                        navigate(`/chat/${data.conversation.conversation_id}`);
+                                    } catch (error) {
+                                        console.error('Error opening chat:', error);
+                                        // Fallback: navigate to chat with job ID
+                                        navigate(`/chat?job_id=${id}`);
+                                    }
                                 }}
                             />
                         )

@@ -29,9 +29,12 @@ import TestChatModal from "./pages/TestChatModal";
 import Chat from "./pages/Chat";
 import ResetPassword from "./pages/ResetPassword";
 import RateTraders from "./pages/RateTraders";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import PWAUpdateNotification from "./components/PWAUpdateNotification";
 import PWAInstallPopup from "./components/PWAInstallPopup";
 import usePWAInstallPopup from "./hooks/usePWAInstallPopup";
+import CookieConsent from "./components/CookieConsent";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +45,14 @@ const ConditionalFooter = () => {
   return !isChatPage ? <Footer /> : null;
 };
 
+const ConditionalCookieConsent = () => {
+  const location = useLocation();
+  const isLegalPage = location.pathname === '/privacy' || location.pathname === '/terms';
+  
+  // Don't show banner on privacy/terms pages to avoid redundancy
+  return !isLegalPage ? <CookieConsent /> : null;
+};
+
 const App = () => {
   const { isPopupOpen, canInstall, hidePopup, triggerInstall } = usePWAInstallPopup();
 
@@ -50,16 +61,17 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <PWAUpdateNotification />
+        {/* <PWAUpdateNotification />
         <PWAInstallPopup
           isOpen={isPopupOpen}
           onClose={hidePopup}
           onInstall={triggerInstall}
           canInstall={canInstall}
-        />
+        /> */}
         <StripeProvider>
         <BrowserRouter>
           <Navbar />
+          <ConditionalCookieConsent />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/service-providers" element={<ServiceProviders />} />
@@ -67,6 +79,8 @@ const App = () => {
             <Route path="/project/:id" element={<ProjectDetail />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/post-job" element={<PostJob />} />
             <Route path="*" element={<NotFound />} />
@@ -84,6 +98,7 @@ const App = () => {
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/rate-traders/:jobId" element={<RateTraders />} />
           </Routes>
+          
           <ConditionalFooter />
         </BrowserRouter>
       </StripeProvider>
