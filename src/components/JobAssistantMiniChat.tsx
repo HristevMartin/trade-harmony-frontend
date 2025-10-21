@@ -561,10 +561,6 @@ export default function JobAssistantMiniChat({ variant = 'job', jobId, title, po
                             aria-label="Open AI job assistant chat"
                         >
                             <HiChatBubbleLeftRight className="w-6 h-6" />
-                            {/* AI Badge */}
-                            <span className="absolute -top-1 -right-1 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-md">
-                                AI
-                            </span>
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent side="left" className="bg-slate-900 text-white">
