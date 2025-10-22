@@ -4,11 +4,11 @@ WORKDIR /app
 
 # Accept build arguments
 ARG VITE_API_URL
-ARG VITE_STRIPE_PUBLIC_KEY
+ARG VITE_STRIPE_PK
 
 # Set them as environment variables for the build
 ENV VITE_API_URL=$VITE_API_URL
-ENV VITE_STRIPE_PUBLIC_KEY=$VITE_STRIPE_PUBLIC_KEY
+ENV VITE_STRIPE_PK=$VITE_STRIPE_PK
 
 COPY package*.json ./
 RUN npm ci
