@@ -356,10 +356,10 @@ const JobDetail = () => {
     if (loading || (isTrader && !paymentStatusLoaded)) {
         return (
             <>
-                <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+                <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                     <div className="text-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                        <p className="text-slate-600">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-jobhub-blue mx-auto mb-4"></div>
+                        <p className="text-gray-600">
                             {loading ? 'Loading job details...' : 'Checking application status...'}
                         </p>
                     </div>
@@ -371,11 +371,11 @@ const JobDetail = () => {
     if (error || !jobData) {
         return (
             <>
-                <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+                <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                     <div className="text-center">
-                        <h1 className="text-2xl font-bold text-slate-900 mb-4">Job Not Found</h1>
-                        <p className="text-slate-600 mb-6">{error || 'The job you are looking for does not exist.'}</p>
-                        <Button onClick={() => navigate('/')} className="bg-blue-600 hover:bg-blue-700">
+                        <h1 className="text-2xl font-bold text-gray-900 mb-4">Job Not Found</h1>
+                        <p className="text-gray-600 mb-6">{error || 'The job you are looking for does not exist.'}</p>
+                        <Button onClick={() => navigate('/')} className="bg-jobhub-blue hover:bg-jobhub-blue/90">
                             <HiArrowLeft className="w-4 h-4 mr-2" />
                             Go Home
                         </Button>
@@ -388,15 +388,15 @@ const JobDetail = () => {
     return (
         <>
 
-            <div className="min-h-screen bg-slate-50">
+            <div className="min-h-screen bg-gray-50">
                 {/* Edit Success Banner */}
                 {showEditSuccess && (
-                    <div className="bg-green-50 border-b border-green-200">
+                    <div className="bg-jobhub-successBg border-b border-emerald-200">
                         <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8 py-3 md:py-4">
                             <div className="flex items-start sm:items-center gap-3">
-                                <HiCheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 flex-shrink-0 mt-0.5 sm:mt-0" />
+                                <HiCheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600 flex-shrink-0 mt-0.5 sm:mt-0" />
                                 <div className="flex-1">
-                                    <p className="text-green-800 font-medium text-sm sm:text-base leading-tight">
+                                    <p className="text-emerald-800 font-medium text-sm sm:text-base leading-tight">
                                         Your job has been updated.
                                     </p>
                                 </div>
@@ -404,7 +404,7 @@ const JobDetail = () => {
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => setShowEditSuccess(false)}
-                                    className="flex-shrink-0 text-green-600 hover:text-green-800 hover:bg-green-100 p-1 h-auto"
+                                    className="flex-shrink-0 text-emerald-600 hover:text-emerald-800 hover:bg-emerald-100 p-1 h-auto"
                                 >
                                     <HiXMark className="w-4 h-4" />
                                 </Button>
@@ -415,12 +415,12 @@ const JobDetail = () => {
 
                 {/* Original Success Banner (for newly posted jobs) */}
                 {showPostSuccess && (
-                    <div className="bg-green-50 border-b border-green-200">
+                    <div className="bg-jobhub-successBg border-b border-emerald-200">
                         <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8 py-3 md:py-4">
                             <div className="flex items-start sm:items-center gap-3">
-                                <HiCheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 flex-shrink-0 mt-0.5 sm:mt-0" />
+                                <HiCheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600 flex-shrink-0 mt-0.5 sm:mt-0" />
                                 <div className="flex-1">
-                                    <p className="text-green-800 font-medium text-sm sm:text-base leading-tight">
+                                    <p className="text-emerald-800 font-medium text-sm sm:text-base leading-tight">
                                         Your job has been posted! Local tradespeople will be notified shortly.
                                     </p>
                                 </div>
@@ -428,7 +428,7 @@ const JobDetail = () => {
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => setShowPostSuccess(false)}
-                                    className="flex-shrink-0 text-green-600 hover:text-green-800 hover:bg-green-100 p-1 h-auto"
+                                    className="flex-shrink-0 text-emerald-600 hover:text-emerald-800 hover:bg-emerald-100 p-1 h-auto"
                                 >
                                     <HiXMark className="w-4 h-4" />
                                 </Button>
@@ -438,7 +438,7 @@ const JobDetail = () => {
                                     variant="outline"
                                     size="sm"
                                     onClick={() => navigate('/')}
-                                    className="flex items-center justify-center gap-2 bg-white/50 hover:bg-white border-green-200 text-sm w-full sm:w-auto"
+                                    className="flex items-center justify-center gap-2 bg-white/50 hover:bg-white border-emerald-200 text-sm w-full sm:w-auto"
                                 >
                                     <HiHome className="w-4 h-4" />
                                     Back to Home
@@ -466,10 +466,10 @@ const JobDetail = () => {
                             </Button>
                         </div>
                         <div className="flex items-center gap-2 flex-wrap">
-                            <p className="text-slate-800 font-semibold text-base md:text-lg tracking-tight">{jobData.first_name}</p>
+                            <p className="text-gray-900 font-semibold text-base md:text-lg tracking-tight">{jobData.first_name}</p>
                             {homeOwnerVerified ? (
                                 <Badge 
-                                    className="bg-green-50 text-green-700 border border-green-200 shadow-sm flex items-center gap-1.5 text-xs px-2.5 py-0.5 rounded-full font-medium hover:bg-green-100 transition-colors cursor-pointer"
+                                    className="bg-jobhub-successBg text-emerald-700 border border-emerald-200 flex items-center gap-1.5 text-xs px-2.5 py-0.5 rounded-full font-medium hover:bg-emerald-100 transition-colors cursor-pointer"
                                     onClick={() => setShowVerificationModal(true)}
                                 >
                                     <HiCheckCircle className="w-4 h-4" />
@@ -477,7 +477,7 @@ const JobDetail = () => {
                                 </Badge>
                             ) : (
                                 <Badge 
-                                    className="bg-amber-50 text-amber-700 border border-amber-200 shadow-sm flex items-center gap-1.5 text-xs px-2.5 py-0.5 rounded-full font-medium hover:bg-amber-100 transition-colors cursor-pointer"
+                                    className="bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1.5 text-xs px-2.5 py-0.5 rounded-full font-medium hover:bg-amber-100 transition-colors cursor-pointer"
                                     onClick={() => setShowVerificationModal(true)}
                                 >
                                     <HiXMark className="w-4 h-4" />
@@ -488,20 +488,20 @@ const JobDetail = () => {
 
                         {/* Verification Info Message - Only for homeowners */}
                         {!isTrader && !homeOwnerVerified && (
-                            <div className="mt-4 mb-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl shadow-sm">
+                            <div className="mt-4 mb-4 p-4 bg-jobhub-infoBg border border-blue-200 rounded-xl">
                                 <div className="flex items-start gap-3">
                                     <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                        <HiInformationCircle className="w-4 h-4 text-blue-600" />
+                                        <HiInformationCircle className="w-4 h-4 text-jobhub-blue" />
                                     </div>
                                     <div className="flex-1">
-                                        <h4 className="text-blue-900 font-semibold mb-2 text-sm">Want to get verified?</h4>
-                                        <p className="text-blue-700 text-sm leading-relaxed mb-3">
+                                        <h4 className="text-gray-900 font-semibold mb-2 text-sm">Want to get verified?</h4>
+                                        <p className="text-gray-700 text-sm leading-relaxed mb-3">
                                             Verified clients get more applications from trusted tradespeople and build stronger trust with professionals.
                                         </p>
                                         <Button 
                                             variant="outline" 
                                             size="sm"
-                                            className="bg-white/80 border-blue-300 text-blue-700 hover:bg-blue-100 hover:border-blue-400 text-xs font-medium"
+                                            className="bg-white border-jobhub-blue text-jobhub-blue hover:bg-jobhub-blue/5 text-xs font-medium"
                                         >
                                             Start Verification Process
                                         </Button>
@@ -530,7 +530,7 @@ const JobDetail = () => {
                             {!isTrader && (
                                 <Button
                                     onClick={() => navigate(`/edit-job/${id}`)}
-                                    className="hidden sm:flex items-center gap-2 bg-blue-600 hover:bg-blue-700 w-fit"
+                                    className="hidden sm:flex items-center gap-2 bg-jobhub-blue hover:bg-jobhub-blue/90 w-fit"
                                     size="sm"
                                 >
                                     <HiPencilSquare className="w-4 h-4" />
@@ -539,19 +539,19 @@ const JobDetail = () => {
                             )}
                         </div>
 
-                        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-slate-900 mb-3 md:mb-4 leading-tight">
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-gray-900 mb-3 md:mb-4 leading-tight">
                             {jobData.job_title}
                         </h1>
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-slate-600 text-sm sm:text-base mb-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-gray-600 text-sm sm:text-base mb-2">
                             <div className="flex items-center gap-2">
-                                <div className="w-5 h-5 bg-slate-100 rounded-full flex items-center justify-center">
-                                    <HiMapPin className="w-3 h-3 text-slate-600" />
+                                <div className="w-5 h-5 bg-gray-100 rounded-full flex items-center justify-center">
+                                    <HiMapPin className="w-3 h-3 text-gray-600" />
                                 </div>
                                 <span className="truncate font-medium">{getCountryFlag(jobData.additional_data.country)} {jobData.additional_data.location}</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <div className="w-5 h-5 bg-slate-100 rounded-full flex items-center justify-center">
-                                    <HiCalendar className="w-3 h-3 text-slate-600" />
+                                <div className="w-5 h-5 bg-gray-100 rounded-full flex items-center justify-center">
+                                    <HiCalendar className="w-3 h-3 text-gray-600" />
                                 </div>
                                 <span className="truncate">Posted {formatDate(jobData.created_at)}</span>
                             </div>
@@ -560,7 +560,7 @@ const JobDetail = () => {
                         {/* Job Status for Traders */}
                         {isTrader && !userPaid && paymentStatusLoaded && (
                             <div className="mt-3">
-                                <Badge className="bg-green-100 text-green-800 border-green-200 px-3 py-1.5 text-sm font-medium">
+                                <Badge className="bg-jobhub-successBg text-emerald-700 border-emerald-200 px-3 py-1.5 text-sm font-medium">
                                     Job Open — Accepting Applicants
                                 </Badge>
                             </div>
@@ -569,27 +569,39 @@ const JobDetail = () => {
                         {/* Job Statistics - For Traders */}
                         {isTrader && jobStats && (
                             <div className="mt-4">
-                                <Card className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-4 md:p-5">
-                                    <h3 className="text-sm font-semibold text-slate-700 mb-3">Homeowner's Job Activity</h3>
+                                <Card className="rounded-2xl bg-white shadow-sm border border-gray-200 p-4 md:p-5">
+                                    <h3 className="text-sm font-semibold text-gray-900 mb-3">Homeowner's Job Activity</h3>
                                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                        <div className="text-center p-3 bg-green-50 rounded-xl border border-green-200">
-                                            <div className="text-2xl font-bold text-green-700">{jobStats.completed_jobs}</div>
-                                            <div className="text-xs text-green-600 font-medium mt-1">Completed</div>
+                                        <div className="text-center p-3 bg-white rounded-xl border-2 border-emerald-200">
+                                            <div className="w-8 h-8 bg-jobhub-successBg rounded-full flex items-center justify-center mx-auto mb-2">
+                                                <HiCheckCircle className="w-5 h-5 text-emerald-600" />
+                                            </div>
+                                            <div className="text-2xl font-bold text-gray-900">{jobStats.completed_jobs}</div>
+                                            <div className="text-xs text-gray-600 font-medium mt-1">Completed</div>
                                         </div>
-                                        <div className="text-center p-3 bg-blue-50 rounded-xl border border-blue-200">
-                                            <div className="text-2xl font-bold text-blue-700">{jobStats.in_progress_jobs}</div>
-                                            <div className="text-xs text-blue-600 font-medium mt-1">Active</div>
+                                        <div className="text-center p-3 bg-white rounded-xl border-2 border-blue-200">
+                                            <div className="w-8 h-8 bg-jobhub-infoBg rounded-full flex items-center justify-center mx-auto mb-2">
+                                                <HiClock className="w-5 h-5 text-jobhub-blue" />
+                                            </div>
+                                            <div className="text-2xl font-bold text-gray-900">{jobStats.in_progress_jobs}</div>
+                                            <div className="text-xs text-gray-600 font-medium mt-1">Active</div>
                                         </div>
-                                        <div className="text-center p-3 bg-red-50 rounded-xl border border-red-200">
-                                            <div className="text-2xl font-bold text-red-700">{jobStats.total_cancelled}</div>
-                                            <div className="text-xs text-red-600 font-medium mt-1">Cancelled</div>
+                                        <div className="text-center p-3 bg-white rounded-xl border-2 border-red-200">
+                                            <div className="w-8 h-8 bg-jobhub-dangerBg rounded-full flex items-center justify-center mx-auto mb-2">
+                                                <HiXMark className="w-5 h-5 text-red-600" />
+                                            </div>
+                                            <div className="text-2xl font-bold text-gray-900">{jobStats.total_cancelled}</div>
+                                            <div className="text-xs text-gray-600 font-medium mt-1">Cancelled</div>
                                         </div>
-                                        <div className="text-center p-3 bg-slate-50 rounded-xl border border-slate-200">
-                                            <div className="text-2xl font-bold text-slate-700">{jobStats.total_posted}</div>
-                                            <div className="text-xs text-slate-600 font-medium mt-1">Total Jobs</div>
+                                        <div className="text-center p-3 bg-white rounded-xl border-2 border-gray-200">
+                                            <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                                <HiWrenchScrewdriver className="w-5 h-5 text-gray-600" />
+                                            </div>
+                                            <div className="text-2xl font-bold text-gray-900">{jobStats.total_posted}</div>
+                                            <div className="text-xs text-gray-600 font-medium mt-1">Total Jobs</div>
                                         </div>
                                     </div>
-                                    <p className="text-xs text-slate-500 mt-3 text-center">
+                                    <p className="text-xs text-gray-500 mt-3 text-center">
                                         This shows the homeowner's job history on our platform
                                     </p>
                                 </Card>
@@ -604,14 +616,14 @@ const JobDetail = () => {
                         <>
                             {/* Desktop Banner */}
                             <div className="hidden md:block mb-6 md:mb-8">
-                                <Card className="rounded-2xl bg-gradient-to-br from-[#1E4FFB] via-blue-600 to-blue-700 border-0 p-6 md:p-8 shadow-xl hover:shadow-2xl transition-all duration-300 relative overflow-hidden">
+                                <Card className="rounded-2xl bg-gradient-to-br from-jobhub-blue/95 to-jobhub-blue border border-jobhub-blue/20 p-6 md:p-8 shadow-lg transition-all duration-300 relative overflow-hidden">
                                     {/* Subtle decorative gradient overlay */}
                                     <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none"></div>
                                     
                                     <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                                         <div className="text-white space-y-3">
                                             <h3 className="text-xl md:text-2xl font-bold leading-tight">Ready to apply for this job?</h3>
-                                            <p className="text-blue-100/80 text-sm leading-relaxed flex items-center gap-2">
+                                            <p className="text-blue-50 text-sm leading-relaxed flex items-center gap-2">
                                                 <HiCheckCircle className="w-4 h-4 flex-shrink-0" />
                                                 <span>We verify every job to protect your spend.</span>
                                             </p>
@@ -619,14 +631,14 @@ const JobDetail = () => {
                                         <div className="flex flex-col items-center lg:items-end gap-2.5">
                                             <Button
                                                 onClick={() => setShowPayToApplyModal(true)}
-                                                className="bg-white text-[#1E4FFB] hover:bg-blue-50 font-bold px-8 py-4 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-200 min-h-[48px] whitespace-nowrap border-2 border-white hover:border-blue-100 hover:scale-105"
+                                                className="bg-white text-jobhub-blue hover:bg-gray-50 font-bold px-8 py-4 text-lg rounded-full shadow-subtle hover:shadow-lift transition-all duration-200 min-h-[48px] whitespace-nowrap border border-white hover:scale-105"
                                                 size="lg"
                                                 aria-label="Apply for this job securely"
                                             >
                                                 <HiLockClosed className="w-5 h-5 mr-2" />
                                                 Apply for £5
                                             </Button>
-                                            <p className="text-blue-100/70 text-xs text-center lg:text-right font-normal">
+                                            <p className="text-blue-100 text-xs text-center lg:text-right font-normal">
                                                 Secure payment powered by Stripe
                                             </p>
                                         </div>
@@ -635,24 +647,24 @@ const JobDetail = () => {
                             </div>
 
                             {/* Mobile Sticky CTA */}
-                            <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t-2 border-slate-200 p-4 pb-safe shadow-2xl">
+                            <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 p-4 pb-safe shadow-lg">
                                 <div className="space-y-3">
                                     <div className="text-center">
-                                        <p className="text-slate-900 font-bold text-base leading-tight mb-1">Ready to apply for this job?</p>
-                                        <p className="text-slate-500 text-xs mt-1.5 flex items-center justify-center gap-1.5">
-                                            <HiCheckCircle className="w-3.5 h-3.5 text-green-600 flex-shrink-0" />
+                                        <p className="text-gray-900 font-bold text-base leading-tight mb-1">Ready to apply for this job?</p>
+                                        <p className="text-gray-600 text-xs mt-1.5 flex items-center justify-center gap-1.5">
+                                            <HiCheckCircle className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
                                             <span>We verify every job to protect your spend.</span>
                                         </p>
                                     </div>
                                     <Button
                                         onClick={() => setShowPayToApplyModal(true)}
-                                        className="w-full bg-[#1E4FFB] hover:bg-blue-700 text-white font-bold px-6 py-3.5 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 min-h-[48px] active:scale-95"
+                                        className="w-full bg-jobhub-blue hover:bg-jobhub-blue/90 text-white font-bold px-6 py-3.5 rounded-full shadow-subtle hover:shadow-lift transition-all duration-200 min-h-[48px] active:scale-95"
                                         aria-label="Apply for this job securely"
                                     >
                                         <HiLockClosed className="w-5 h-5 mr-2" />
                                         Apply for £5
                                     </Button>
-                                    <p className="text-slate-400 text-xs text-center font-normal">
+                                    <p className="text-gray-500 text-xs text-center font-normal">
                                         Secure payment powered by Stripe
                                     </p>
                                 </div>
@@ -720,12 +732,12 @@ const JobDetail = () => {
                         {/* Main Content */}
                         <div className="lg:col-span-2 space-y-4 md:space-y-6">
                             {/* What Happens Next Info Card */}
-                            <Card className="rounded-2xl bg-blue-50 border-blue-200 p-4 md:p-6">
+                            <Card className="rounded-2xl bg-jobhub-infoBg border border-blue-200 p-4 md:p-6">
                                 <div className="flex items-start gap-3">
-                                    <HiInformationCircle className="w-5 h-5 md:w-6 md:h-6 text-blue-600 flex-shrink-0 mt-0.5" />
+                                    <HiInformationCircle className="w-5 h-5 md:w-6 md:h-6 text-jobhub-blue flex-shrink-0 mt-0.5" />
                                     <div>
-                                        <h3 className="font-semibold text-blue-900 mb-2 text-sm md:text-base">What happens next?</h3>
-                                        <div className="space-y-1 md:space-y-2 text-xs md:text-sm text-blue-800">
+                                        <h3 className="font-semibold text-gray-900 mb-2 text-sm md:text-base">What happens next?</h3>
+                                        <div className="space-y-1 md:space-y-2 text-xs md:text-sm text-gray-700">
                                             {isTrader ? (
                                                 <>
                                                     <p>• Contact the homeowner to discuss the job</p>
@@ -743,38 +755,38 @@ const JobDetail = () => {
                                 </div>
                             </Card>
                             {/* Job Details */}
-                            <Card className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-4 md:p-6 transition-shadow hover:shadow-md">
+                            <Card className="rounded-2xl bg-white shadow-sm border border-gray-200 p-4 md:p-6">
                                 <div className="flex items-center gap-2 mb-3 md:mb-4">
-                                    <HiWrenchScrewdriver className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
-                                    <h2 className="text-base md:text-lg font-semibold text-slate-800">Job Details</h2>
+                                    <HiWrenchScrewdriver className="w-4 h-4 md:w-5 md:h-5 text-jobhub-blue" />
+                                    <h2 className="text-base md:text-lg font-semibold text-gray-900">Job Details</h2>
                                 </div>
 
                                 <div className="space-y-3 md:space-y-4">
                                     <div>
-                                        <h3 className="font-semibold text-slate-800 mb-1 text-sm md:text-base">Service Category</h3>
-                                        <p className="text-slate-600 text-sm md:text-base">{jobData.additional_data.serviceCategory}</p>
+                                        <h3 className="font-semibold text-gray-900 mb-1 text-sm md:text-base">Service Category</h3>
+                                        <p className="text-gray-600 text-sm md:text-base">{jobData.additional_data.serviceCategory}</p>
                                     </div>
 
                                     <div>
-                                        <h3 className="font-semibold text-slate-800 mb-1 text-sm md:text-base">Description</h3>
-                                        <p className="text-slate-600 leading-relaxed text-sm md:text-base">{jobData.job_description}</p>
+                                        <h3 className="font-semibold text-gray-900 mb-1 text-sm md:text-base">Description</h3>
+                                        <p className="text-gray-600 leading-relaxed text-sm md:text-base">{jobData.job_description}</p>
                                     </div>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                                         <div>
-                                            <h3 className="font-semibold text-slate-800 mb-1 flex items-center gap-1 text-sm md:text-base">
+                                            <h3 className="font-semibold text-gray-900 mb-1 flex items-center gap-1 text-sm md:text-base">
                                                 <HiCurrencyPound className="w-4 h-4" />
                                                 Budget
                                             </h3>
-                                            <p className="text-slate-600 text-sm md:text-base">{formatBudget(jobData.budget)}</p>
+                                            <p className="text-gray-600 text-sm md:text-base">{formatBudget(jobData.budget)}</p>
                                         </div>
 
                                         <div>
-                                            <h3 className="font-semibold text-slate-800 mb-1 flex items-center gap-1 text-sm md:text-base">
+                                            <h3 className="font-semibold text-gray-900 mb-1 flex items-center gap-1 text-sm md:text-base">
                                                 <HiClock className="w-4 h-4" />
                                                 Urgency
                                             </h3>
-                                            <p className="text-slate-600 text-sm md:text-base">{formatUrgency(jobData.urgency)}</p>
+                                            <p className="text-gray-600 text-sm md:text-base">{formatUrgency(jobData.urgency)}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -782,10 +794,10 @@ const JobDetail = () => {
 
                             {/* Photos */}
                             {jobData.image_urls && jobData.image_urls.length > 0 && (
-                                <Card className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-4 md:p-6 transition-shadow hover:shadow-md">
+                                <Card className="rounded-2xl bg-white shadow-sm border border-gray-200 p-4 md:p-6">
                                     <div className="flex items-center gap-2 mb-3 md:mb-4">
-                                        <HiCamera className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
-                                        <h2 className="text-base md:text-lg font-semibold text-slate-800">
+                                        <HiCamera className="w-4 h-4 md:w-5 md:h-5 text-jobhub-blue" />
+                                        <h2 className="text-base md:text-lg font-semibold text-gray-900">
                                             Photos ({jobData.image_count})
                                         </h2>
                                     </div>
@@ -794,7 +806,7 @@ const JobDetail = () => {
                                         {jobData.image_urls.map((imageUrl, index) => (
                                             <div
                                                 key={index}
-                                                className="relative aspect-square overflow-hidden rounded-xl ring-1 ring-slate-200 bg-slate-50 cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all"
+                                                className="relative aspect-square overflow-hidden rounded-xl border border-gray-200 bg-gray-50 cursor-pointer hover:border-jobhub-blue hover:shadow-lift transition-all"
                                                 onClick={() => setSelectedImageIndex(index)}
                                             >
                                                 <img
@@ -814,81 +826,81 @@ const JobDetail = () => {
                         <div className="space-y-4 md:space-y-6">
                             {/* Contact Information - Hidden for traders */}
                             {!isTrader && (
-                                <Card className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-4 md:p-6 transition-shadow hover:shadow-md">
+                                <Card className="rounded-2xl bg-white shadow-sm border border-gray-200 p-4 md:p-6">
                                     <div className="flex items-center gap-2 mb-3 md:mb-4">
-                                        <HiUserCircle className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
-                                        <h2 className="text-base md:text-lg font-semibold text-slate-800">Contact Information</h2>
+                                        <HiUserCircle className="w-4 h-4 md:w-5 md:h-5 text-jobhub-blue" />
+                                        <h2 className="text-base md:text-lg font-semibold text-gray-900">Contact Information</h2>
                                     </div>
 
                                     <div className="space-y-3 md:space-y-4">
                                         <div>
-                                            <h3 className="font-semibold text-slate-800 mb-1 text-sm md:text-base">Name</h3>
-                                            <p className="text-slate-600 text-sm md:text-base">{jobData.first_name}</p>
+                                            <h3 className="font-semibold text-gray-900 mb-1 text-sm md:text-base">Name</h3>
+                                            <p className="text-gray-600 text-sm md:text-base">{jobData.first_name}</p>
                                         </div>
 
                                         <div>
-                                            <h3 className="font-semibold text-slate-800 mb-1 flex items-center gap-1 text-sm md:text-base">
+                                            <h3 className="font-semibold text-gray-900 mb-1 flex items-center gap-1 text-sm md:text-base">
                                                 <HiEnvelope className="w-4 h-4" />
                                                 Email
                                             </h3>
-                                            <p className="text-slate-600 text-sm md:text-base break-all">{jobData.email}</p>
+                                            <p className="text-gray-600 text-sm md:text-base break-all">{jobData.email}</p>
                                         </div>
 
                                         {jobData.phone && (
                                             <div>
-                                                <h3 className="font-semibold text-slate-800 mb-1 flex items-center gap-1 text-sm md:text-base">
+                                                <h3 className="font-semibold text-gray-900 mb-1 flex items-center gap-1 text-sm md:text-base">
                                                     <HiPhone className="w-4 h-4" />
                                                     Phone
                                                 </h3>
-                                                <p className="text-slate-600 text-sm md:text-base">{jobData.phone}</p>
+                                                <p className="text-gray-600 text-sm md:text-base">{jobData.phone}</p>
                                             </div>
                                         )}
 
                                         <div>
-                                            <h3 className="font-semibold text-slate-800 mb-1 text-sm md:text-base">Preferred Contact</h3>
-                                            <p className="text-slate-600 capitalize text-sm md:text-base">{jobData.contact_method}</p>
+                                            <h3 className="font-semibold text-gray-900 mb-1 text-sm md:text-base">Preferred Contact</h3>
+                                            <p className="text-gray-600 capitalize text-sm md:text-base">{jobData.contact_method}</p>
                                         </div>
                                     </div>
                                 </Card>
                             )}
 
                             {/* Location */}
-                            <Card className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-4 md:p-6 transition-shadow hover:shadow-md">
+                            <Card className="rounded-2xl bg-white shadow-sm border border-gray-200 p-4 md:p-6">
                                 <div className="flex items-center gap-2 mb-3 md:mb-4">
-                                    <HiMapPin className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
-                                    <h2 className="text-base md:text-lg font-semibold text-slate-800">Location</h2>
+                                    <HiMapPin className="w-4 h-4 md:w-5 md:h-5 text-jobhub-blue" />
+                                    <h2 className="text-base md:text-lg font-semibold text-gray-900">Location</h2>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <p className="text-slate-600 text-sm md:text-base">
+                                    <p className="text-gray-600 text-sm md:text-base">
                                         {getCountryFlag(jobData.additional_data.country)} {jobData.additional_data.location}
                                     </p>
                                     {jobData.additional_data.postcode && (
-                                        <p className="text-slate-600 text-sm md:text-base font-medium">
+                                        <p className="text-gray-600 text-sm md:text-base font-medium">
                                             {jobData.additional_data.postcode}
                                         </p>
                                     )}
-                                    <p className="text-xs md:text-sm text-slate-500">
+                                    <p className="text-xs md:text-sm text-gray-500">
                                         Country: {jobData.additional_data.country}
                                     </p>
                                 </div>
                             </Card>
 
                             {/* Job Meta */}
-                            <Card className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-4 md:p-6 transition-shadow hover:shadow-md">
-                                <h2 className="text-base md:text-lg font-semibold text-slate-800 mb-3 md:mb-4">Job Information</h2>
+                            <Card className="rounded-2xl bg-white shadow-sm border border-gray-200 p-4 md:p-6">
+                                <h2 className="text-base md:text-lg font-semibold text-gray-900 mb-3 md:mb-4">Job Information</h2>
 
                                 <div className="space-y-3 text-xs md:text-sm">
                                     <div className="flex justify-between items-start">
-                                        <span className="text-slate-500 flex-shrink-0">Created:</span>
-                                        <span className="text-slate-900 text-right ml-2">{formatDate(jobData.created_at)}</span>
+                                        <span className="text-gray-500 flex-shrink-0">Created:</span>
+                                        <span className="text-gray-900 text-right ml-2">{formatDate(jobData.created_at)}</span>
                                     </div>
                                     <div className="flex justify-between items-start">
-                                        <span className="text-slate-500 flex-shrink-0">Updated:</span>
-                                        <span className="text-slate-900 text-right ml-2">{formatDate(jobData.updated_at)}</span>
+                                        <span className="text-gray-500 flex-shrink-0">Updated:</span>
+                                        <span className="text-gray-900 text-right ml-2">{formatDate(jobData.updated_at)}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-slate-500">Status:</span>
+                                        <span className="text-gray-500">Status:</span>
                                         <Badge className={`${getStatusColor(jobData.status)} border-0 text-xs`}>
                                             {jobData.status.charAt(0).toUpperCase() + jobData.status.slice(1)}
                                         </Badge>
@@ -939,26 +951,26 @@ const JobDetail = () => {
             )}
 
             {/* Mobile Sticky Footer */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-slate-200 shadow-2xl p-4 sm:hidden"
+            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg p-4 sm:hidden"
                 style={{ paddingBottom: 'env(safe-area-inset-bottom, 16px)' }}>
                 {isTrader && !userPaid && paymentStatusLoaded && (
                     <div className="space-y-3">
                         <div className="text-center">
-                            <p className="text-slate-900 font-bold text-base leading-tight mb-1">Ready to apply for this job?</p>
-                            <p className="text-slate-500 text-xs mt-1.5 flex items-center justify-center gap-1.5">
-                                <HiCheckCircle className="w-3.5 h-3.5 text-green-600 flex-shrink-0" />
+                            <p className="text-gray-900 font-bold text-base leading-tight mb-1">Ready to apply for this job?</p>
+                            <p className="text-gray-600 text-xs mt-1.5 flex items-center justify-center gap-1.5">
+                                <HiCheckCircle className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
                                 <span>We verify every job to protect your spend.</span>
                             </p>
                         </div>
                         <Button
                             onClick={() => setShowPayToApplyModal(true)}
-                            className="w-full bg-[#1E4FFB] hover:bg-blue-700 text-white font-bold px-6 py-3.5 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 min-h-[48px] active:scale-95"
+                            className="w-full bg-jobhub-blue hover:bg-jobhub-blue/90 text-white font-bold px-6 py-3.5 rounded-full shadow-subtle hover:shadow-lift transition-all duration-200 min-h-[48px] active:scale-95"
                             aria-label="Apply for this job securely"
                         >
                             <HiLockClosed className="w-5 h-5 mr-2" />
                             Apply for £5
                         </Button>
-                        <p className="text-slate-400 text-xs text-center font-normal">
+                        <p className="text-gray-500 text-xs text-center font-normal">
                             Secure payment powered by Stripe
                         </p>
                     </div>
@@ -968,7 +980,7 @@ const JobDetail = () => {
                 {!isTrader && (
                     <Button
                         onClick={() => navigate(`/edit-job/${id}`)}
-                        className="w-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center gap-2 min-h-[44px]"
+                        className="w-full bg-jobhub-blue hover:bg-jobhub-blue/90 flex items-center justify-center gap-2 min-h-[44px]"
                     >
                         <HiPencilSquare className="w-4 h-4" />
                         Edit Job
@@ -996,20 +1008,20 @@ const JobDetail = () => {
                         {homeOwnerVerified ? (
                             <>
                                 <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                                        <HiCheckCircle className="w-6 h-6 text-green-600" />
+                                    <div className="w-10 h-10 bg-jobhub-successBg rounded-full flex items-center justify-center">
+                                        <HiCheckCircle className="w-6 h-6 text-emerald-600" />
                                     </div>
-                                    <h3 className="text-lg font-semibold text-slate-900">Verified Client</h3>
+                                    <h3 className="text-lg font-semibold text-gray-900">Verified Client</h3>
                                 </div>
                                 
                                 <div className="space-y-3 mb-6">
-                                    <p className="text-slate-600 text-sm leading-relaxed">
+                                    <p className="text-gray-600 text-sm leading-relaxed">
                                         This homeowner has been internally verified by JobHub. Their identity and activity have been confirmed through our verification process.
                                     </p>
-                                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                                    <div className="bg-jobhub-successBg border border-emerald-200 rounded-lg p-3">
                                         <div className="flex items-start gap-2">
-                                            <HiCheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                                            <div className="text-xs text-green-800">
+                                            <HiCheckCircle className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                                            <div className="text-xs text-emerald-800">
                                                 <p className="font-medium mb-1">Verification includes:</p>
                                                 <ul className="space-y-1 text-xs">
                                                     <li>• Identity confirmation</li>
@@ -1023,7 +1035,7 @@ const JobDetail = () => {
                                 
                                 <Button
                                     onClick={() => setShowVerificationModal(false)}
-                                    className="w-full bg-green-600 hover:bg-green-700 text-white"
+                                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
                                 >
                                     Got it
                                 </Button>
@@ -1034,11 +1046,11 @@ const JobDetail = () => {
                                     <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
                                         <HiXMark className="w-6 h-6 text-amber-600" />
                                     </div>
-                                    <h3 className="text-lg font-semibold text-slate-900">Unverified Client</h3>
+                                    <h3 className="text-lg font-semibold text-gray-900">Unverified Client</h3>
                                 </div>
                                 
                                 <div className="space-y-3 mb-6">
-                                    <p className="text-slate-600 text-sm leading-relaxed">
+                                    <p className="text-gray-600 text-sm leading-relaxed">
                                         This homeowner has not been verified by JobHub yet. Their identity and activity have not been confirmed through our verification process.
                                     </p>
                                     <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
