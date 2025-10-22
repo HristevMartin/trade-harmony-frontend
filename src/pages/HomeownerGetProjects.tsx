@@ -263,12 +263,12 @@ const HomeownerGetProjects = () => {
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'pending': return 'bg-amber-50 text-amber-700 border border-amber-200';
-      case 'active': return 'bg-green-50 text-green-700 border border-green-200';
-      case 'completed': return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+      case 'pending': return 'bg-amber-50/50 text-amber-700 border border-amber-200/60';
+      case 'active': return 'bg-blue-50/50 text-blue-700 border border-blue-200/60';
+      case 'completed': return 'bg-green-50/50 text-green-700 border border-green-200/60';
       case 'cancelled':
-      case 'closed': return 'bg-gray-50 text-gray-600 border border-gray-200';
-      default: return 'bg-gray-50 text-gray-600 border border-gray-200';
+      case 'closed': return 'bg-gray-50 text-gray-500 border border-gray-200';
+      default: return 'bg-gray-50 text-gray-500 border border-gray-200';
     }
   };
 
@@ -622,57 +622,57 @@ const HomeownerGetProjects = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
+      <div className="min-h-screen bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10 w-full">
           <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6 sm:space-y-8">
             {/* Spinner */}
             <div className="flex items-center justify-center">
-              <RefreshCw className="h-8 w-8 sm:h-10 sm:w-10 text-trust-blue animate-spin" />
+              <RefreshCw className="h-8 w-8 sm:h-10 sm:w-10 text-[#1d4ed8] animate-spin" />
             </div>
 
             {/* Loading text */}
             <div className="text-center space-y-2 px-4">
-              <h2 className="text-xl sm:text-2xl font-semibold text-foreground">Loading Your Jobs</h2>
-              <p className="text-sm sm:text-base text-muted-foreground">Please wait while we fetch your projects...</p>
+              <h2 className="text-xl sm:text-2xl font-semibold text-gray-900">Loading Your Jobs</h2>
+              <p className="text-sm sm:text-base text-gray-500">Please wait while we fetch your projects...</p>
             </div>
 
             {/* Skeleton cards */}
             <div className="w-full max-w-6xl px-4">
               <div className="animate-pulse space-y-8">
-                <div className="h-8 bg-muted rounded-md w-1/3 mx-auto"></div>
+                <div className="h-8 bg-gray-100 rounded-md w-1/3 mx-auto"></div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {[1, 2, 3].map((i) => (
-                    <Card key={i} className="rounded-xl border border-border">
+                    <Card key={i} className="rounded-2xl border border-gray-100 shadow-sm">
                       <CardHeader className="p-6 pb-4">
                         <div className="flex items-center justify-between mb-4">
-                          <div className="h-6 bg-muted rounded-lg w-20"></div>
-                          <div className="h-4 bg-muted rounded w-16"></div>
+                          <div className="h-6 bg-gray-100 rounded-lg w-20"></div>
+                          <div className="h-4 bg-gray-100 rounded w-16"></div>
                         </div>
-                        <div className="h-6 bg-muted rounded w-3/4 mb-3"></div>
-                        <div className="h-4 bg-muted rounded w-full mb-2"></div>
-                        <div className="h-4 bg-muted rounded w-2/3 mb-4"></div>
-                        <div className="h-12 bg-muted rounded-lg"></div>
+                        <div className="h-6 bg-gray-100 rounded w-3/4 mb-3"></div>
+                        <div className="h-4 bg-gray-100 rounded w-full mb-2"></div>
+                        <div className="h-4 bg-gray-100 rounded w-2/3 mb-4"></div>
+                        <div className="h-12 bg-gray-50 rounded-lg"></div>
                       </CardHeader>
                       <CardContent className="p-6 pt-0">
-                        <div className="h-32 bg-muted rounded-lg mb-6"></div>
+                        <div className="h-32 bg-gray-100 rounded-lg mb-6"></div>
                         <div className="grid grid-cols-2 gap-4 mb-6">
                           <div className="space-y-3">
-                            <div className="h-4 bg-muted rounded w-full"></div>
-                            <div className="h-4 bg-muted rounded w-3/4"></div>
+                            <div className="h-4 bg-gray-100 rounded w-full"></div>
+                            <div className="h-4 bg-gray-100 rounded w-3/4"></div>
                           </div>
                           <div className="space-y-3">
-                            <div className="h-4 bg-muted rounded w-full"></div>
-                            <div className="h-4 bg-muted rounded w-3/4"></div>
+                            <div className="h-4 bg-gray-100 rounded w-full"></div>
+                            <div className="h-4 bg-gray-100 rounded w-3/4"></div>
                           </div>
                         </div>
                         <div className="space-y-3">
                           <div className="grid grid-cols-2 gap-3">
-                            <div className="h-11 bg-muted rounded-xl"></div>
-                            <div className="h-11 bg-muted rounded-xl"></div>
+                            <div className="h-11 bg-gray-100 rounded-xl"></div>
+                            <div className="h-11 bg-gray-100 rounded-xl"></div>
                           </div>
                           <div className="grid grid-cols-2 gap-3">
-                            <div className="h-11 bg-muted rounded-xl"></div>
-                            <div className="h-11 bg-muted rounded-xl"></div>
+                            <div className="h-11 bg-gray-100 rounded-xl"></div>
+                            <div className="h-11 bg-gray-100 rounded-xl"></div>
                           </div>
                         </div>
                       </CardContent>
@@ -689,19 +689,19 @@ const HomeownerGetProjects = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
+      <div className="min-h-screen bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10 w-full">
           <div className="flex items-center justify-center min-h-[60vh]">
-            <Card className="w-full max-w-md mx-auto shadow-lg border-destructive/20">
+            <Card className="w-full max-w-md mx-auto shadow-sm border border-red-100">
               <CardContent className="p-6 sm:p-8 text-center">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 bg-destructive/10 rounded-full flex items-center justify-center">
-                  <HiPhoto className="w-6 h-6 sm:w-8 sm:h-8 text-destructive" />
+                <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 bg-red-50 rounded-full flex items-center justify-center">
+                  <HiPhoto className="w-6 h-6 sm:w-8 sm:h-8 text-red-600" />
                 </div>
-                <h2 className="text-lg sm:text-xl font-semibold text-destructive mb-2 sm:mb-3">Something went wrong</h2>
-                <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6 leading-relaxed">{error}</p>
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 sm:mb-3">Something went wrong</h2>
+                <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 leading-relaxed">{error}</p>
                 <Button
                   onClick={() => window.location.reload()}
-                  className="bg-trust-blue hover:bg-trust-blue/90 text-trust-blue-foreground w-full sm:w-auto"
+                  className="bg-[#1d4ed8] hover:bg-[#1e40af] text-white w-full sm:w-auto"
                 >
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Try Again
@@ -717,7 +717,7 @@ const HomeownerGetProjects = () => {
   return (
     <>
       {/* Mobile Header - Sticky */}
-      <div className="sm:hidden sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+      <div className="sm:hidden sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
         <div className="flex items-center h-14 px-4">
           {/* Back Arrow - 44px tap target */}
           <button
@@ -728,12 +728,12 @@ const HomeownerGetProjects = () => {
                 navigate('/');
               }
             }}
-            className="flex items-center justify-center w-11 h-11 -ml-2 mr-3 rounded-lg hover:bg-muted transition-colors touch-manipulation"
+            className="flex items-center justify-center w-11 h-11 -ml-2 mr-3 rounded-lg hover:bg-gray-50 transition-colors touch-manipulation"
             style={{ minWidth: '44px', minHeight: '44px' }}
             aria-label="Go back"
           >
             <svg
-              className="w-5 h-5 text-foreground"
+              className="w-5 h-5 text-gray-900"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -748,16 +748,16 @@ const HomeownerGetProjects = () => {
           </button>
 
           {/* Single Title */}
-          <h1 className="text-lg font-semibold text-foreground">My Projects</h1>
+          <h1 className="text-lg font-semibold text-gray-900">My Projects</h1>
         </div>
       </div>
-      <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
+      <div className="min-h-screen bg-gray-50">
         {/* Success Toast */}
         {showSuccess && (
-          <div className="fixed top-6 right-6 z-50 bg-trust-green/10 border border-trust-green/20 rounded-xl p-4 shadow-lg backdrop-blur-sm">
+          <div className="fixed top-6 right-6 z-50 bg-green-50 border border-green-200 rounded-xl p-4 shadow-lg">
             <div className="flex items-center gap-3">
-              <CheckCircle className="w-5 h-5 text-trust-green" />
-              <span className="text-trust-green font-medium">{successMessage}</span>
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <span className="text-green-700 font-medium">{successMessage}</span>
             </div>
           </div>
         )}
@@ -765,13 +765,13 @@ const HomeownerGetProjects = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-12">
           {/* Header Section - Desktop Only */}
           <div className="text-center mb-8 sm:mb-12 hidden sm:block">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground mb-3 sm:mb-4">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-gray-900 mb-3 sm:mb-4">
               My Projects
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-4 max-w-2xl mx-auto px-4">
+            <p className="text-base sm:text-lg text-gray-600 mb-4 max-w-2xl mx-auto px-4">
               Here are your projects. Edit details, mark complete, or delete anytime.
             </p>
-            <p className="text-sm text-muted-foreground/80 mb-6 sm:mb-8 max-w-xl mx-auto px-4">
+            <p className="text-sm text-gray-500 mb-6 sm:mb-8 max-w-xl mx-auto px-4">
               Track applications, communicate with tradespeople, and manage your home improvement journey.
             </p>
 
@@ -779,7 +779,7 @@ const HomeownerGetProjects = () => {
             <div className="hidden sm:block">
               <Button
                 onClick={() => navigate('/post-job')}
-                className="bg-trust-blue hover:bg-trust-blue/90 text-trust-blue-foreground px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+                className="bg-[#1d4ed8] hover:bg-[#1e40af] text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg shadow-sm hover:shadow transition-all"
                 size="lg"
               >
                 <HiPlus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
@@ -791,30 +791,30 @@ const HomeownerGetProjects = () => {
           {/* Homeowner Statistics */}
           {homeownerStats && (
             <div className="mb-8">
-              <Card className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-4 md:p-5">
-                <h3 className="text-sm font-semibold text-slate-700 mb-3">Your Job Activity</h3>
+              <Card className="rounded-2xl bg-white shadow-sm border border-gray-100 p-4 md:p-5">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Your Job Activity</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div className="text-center p-3 bg-green-50 rounded-xl border border-green-200">
-                    <div className="text-2xl font-bold text-green-700">{homeownerStats.completed_jobs}</div>
-                    <div className="text-xs text-green-600 font-medium mt-1">Completed</div>
+                  <div className="text-center p-4 bg-[#E6F4EA]/30 rounded-xl border border-green-100">
+                    <div className="text-2xl font-bold text-gray-900">{homeownerStats.completed_jobs}</div>
+                    <div className="text-xs text-gray-600 font-medium mt-1">Completed</div>
                   </div>
-                  <div className="text-center p-3 bg-blue-50 rounded-xl border border-blue-200">
-                    <div className="text-2xl font-bold text-blue-700">{homeownerStats.in_progress_jobs}</div>
-                    <div className="text-xs text-blue-600 font-medium mt-1">In Progress</div>
+                  <div className="text-center p-4 bg-[#E8F0FE]/30 rounded-xl border border-blue-100">
+                    <div className="text-2xl font-bold text-gray-900">{homeownerStats.in_progress_jobs}</div>
+                    <div className="text-xs text-gray-600 font-medium mt-1">In Progress</div>
                   </div>
-                  <div className="text-center p-3 bg-red-50 rounded-xl border border-red-200">
-                    <div className="text-2xl font-bold text-red-700">{homeownerStats.total_cancelled}</div>
-                    <div className="text-xs text-red-600 font-medium mt-1">Cancelled</div>
+                  <div className="text-center p-4 bg-[#FDECEA]/30 rounded-xl border border-red-100">
+                    <div className="text-2xl font-bold text-gray-900">{homeownerStats.total_cancelled}</div>
+                    <div className="text-xs text-gray-600 font-medium mt-1">Cancelled</div>
                   </div>
-                  <div className="text-center p-3 bg-slate-50 rounded-xl border border-slate-200">
-                    <div className="text-2xl font-bold text-slate-700">{homeownerStats.total_posted}</div>
-                    <div className="text-xs text-slate-600 font-medium mt-1">Total Posted</div>
+                  <div className="text-center p-4 bg-[#F4F6F8]/50 rounded-xl border border-gray-100">
+                    <div className="text-2xl font-bold text-gray-900">{homeownerStats.total_posted}</div>
+                    <div className="text-xs text-gray-600 font-medium mt-1">Total Posted</div>
                   </div>
                 </div>
-                <p className="text-xs text-slate-500 mt-3 text-center">
+                <p className="text-xs text-gray-500 mt-4 text-center">
                   Overview of your job activity on our platform
                 </p>
-                <p className="text-xs text-slate-600 mt-2 text-center font-medium">
+                <p className="text-xs text-gray-600 mt-2 text-center font-medium">
                   Tip: Complete or close jobs to improve your reliability rating.
                 </p>
               </Card>
@@ -824,18 +824,18 @@ const HomeownerGetProjects = () => {
           {/* Projects Grid */}
           {projects.length === 0 ? (
             <div className="flex justify-center px-4">
-              <Card className="w-full max-w-lg shadow-lg border border-border/50 bg-gradient-to-br from-card via-card to-card/80">
+              <Card className="w-full max-w-lg shadow-sm border border-gray-100 bg-white">
                 <CardContent className="p-8 sm:p-12 text-center">
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-6 bg-gradient-to-br from-primary/10 to-primary/5 rounded-full flex items-center justify-center">
-                    <HiPhoto className="w-10 h-10 sm:w-12 sm:h-12 text-primary/70" />
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-6 bg-gray-50 rounded-full flex items-center justify-center">
+                    <HiPhoto className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400" />
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-semibold mb-3 text-foreground">No projects yet</h3>
-                  <p className="text-muted-foreground mb-8 text-base leading-relaxed max-w-sm mx-auto">
+                  <h3 className="text-xl sm:text-2xl font-semibold mb-3 text-gray-900">No projects yet</h3>
+                  <p className="text-gray-600 mb-8 text-base leading-relaxed max-w-sm mx-auto">
                     Post your first job and connect with trusted tradespeople in your area.
                   </p>
                   <Button
                     onClick={() => navigate('/post-job')}
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105 w-full sm:w-auto"
+                    className="bg-[#1d4ed8] hover:bg-[#1e40af] text-white px-8 py-3 rounded-lg shadow-sm hover:shadow transition-all w-full sm:w-auto"
                     size="lg"
                   >
                     <HiPlus className="w-5 h-5 mr-2" />
@@ -849,35 +849,35 @@ const HomeownerGetProjects = () => {
               {projects.map((project) => (
                 <Card
                   key={project.id}
-                  className="group rounded-xl bg-card border border-border shadow-sm hover:border-border/60 hover:shadow-lg transition-all duration-300 overflow-hidden"
+                  className="group rounded-2xl bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden"
                 >
                   <CardHeader className="p-6 pb-4">
                     {/* Status and ID Row */}
                     <div className="flex items-center justify-between mb-4">
                       <Badge
-                        className={`${getStatusColor(project.status)} font-medium px-3 py-1.5 rounded-lg text-sm`}
+                        className={`${getStatusColor(project.status)} font-medium px-3 py-1.5 rounded-full text-xs`}
                         aria-live="polite"
                       >
                         {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
                       </Badge>
-                      <span className="text-xs text-muted-foreground/70 font-mono bg-muted/30 px-2 py-1 rounded">
+                      <span className="text-xs text-gray-400 font-mono bg-gray-50 px-2.5 py-1 rounded">
                         #{project.project_id.slice(-8)}
                       </span>
                     </div>
 
                     {/* Title */}
-                    <CardTitle className="text-xl font-bold text-foreground line-clamp-2 leading-tight mb-3">
+                    <CardTitle className="text-xl font-bold text-gray-900 line-clamp-2 leading-tight mb-3">
                       {project.job_title}
                     </CardTitle>
 
                     {/* Description */}
-                    <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed mb-4">
+                    <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed mb-4">
                       {project.job_description}
                     </p>
 
                     {/* Next Action Hint */}
                     <div className="mb-4">
-                      <p className="text-sm text-muted-foreground/80 italic bg-muted/30 rounded-lg px-3 py-2">
+                      <p className="text-sm text-gray-500 italic bg-gray-50 rounded-lg px-3 py-2">
                         {getNextActionHint(project.status)}
                       </p>
                     </div>
@@ -887,15 +887,15 @@ const HomeownerGetProjects = () => {
                     {/* Project Image */}
                     {project.image_urls && project.image_urls.length > 0 && (
                       <div className="mb-6">
-                        <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-muted/30">
+                        <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-gray-50">
                           <img
                             src={project.image_urls[0]}
                             alt="Project"
-                            className="w-full h-full object-cover transition-all duration-300 group-hover:opacity-80 group-hover:scale-105"
+                            className="w-full h-full object-cover transition-all duration-200"
                             loading="lazy"
                           />
                           {project.image_count > 1 && (
-                            <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm">
+                            <div className="absolute bottom-2 right-2 bg-gray-900/90 text-white text-xs px-2.5 py-1 rounded-full">
                               +{project.image_count - 1} more
                             </div>
                           )}
@@ -908,15 +908,15 @@ const HomeownerGetProjects = () => {
                       {/* Left Column */}
                       <div className="space-y-3">
                         <div className="flex items-center gap-2 text-sm">
-                          <HiMapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                          <span className="text-muted-foreground truncate">
+                          <HiMapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                          <span className="text-gray-600 truncate">
                             {project.additional_data?.location}
                           </span>
                         </div>
 
                         <div className="flex items-center gap-2 text-sm">
-                          <HiCurrencyPound className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                          <span className="font-medium text-foreground">
+                          <HiCurrencyPound className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                          <span className="font-medium text-gray-900">
                             {formatBudget(project.budget)}
                           </span>
                         </div>
@@ -925,15 +925,15 @@ const HomeownerGetProjects = () => {
                       {/* Right Column */}
                       <div className="space-y-3">
                         <div className="flex items-center gap-2 text-sm">
-                          <HiClock className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                          <span className="text-muted-foreground">
+                          <HiClock className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                          <span className="text-gray-600">
                             {formatUrgency(project.urgency)}
                           </span>
                         </div>
 
                         <div className="flex items-center gap-2 text-sm">
-                          <HiCalendarDays className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                          <span className="text-muted-foreground">
+                          <HiCalendarDays className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                          <span className="text-gray-600">
                             {formatDate(project.created_at)}
                           </span>
                         </div>
@@ -942,7 +942,7 @@ const HomeownerGetProjects = () => {
 
                     {/* Optional chips */}
                     <div className="flex items-center justify-between mb-6 text-xs">
-                      <div className="flex items-center gap-1 text-muted-foreground">
+                      <div className="flex items-center gap-1 text-gray-500">
                         <Clock className="w-3 h-3" />
                         <span>Updated {formatTimeAgo(project.updated_at)}</span>
                       </div>
@@ -955,7 +955,7 @@ const HomeownerGetProjects = () => {
                         <Button
                           onClick={() => navigate(`/jobs/${project.project_id}`)}
                           variant="outline"
-                          className="h-11 px-4 rounded-xl border-border hover:bg-muted/50 text-sm font-medium transition-all"
+                          className="h-11 px-4 rounded-lg border-gray-200 hover:bg-gray-50 text-sm font-medium transition-all text-gray-700"
                           aria-label={`View details for ${project.job_title}`}
                         >
                           <HiEye className="w-4 h-4 mr-2" />
@@ -966,7 +966,7 @@ const HomeownerGetProjects = () => {
                           <Button
                             onClick={() => navigate(`/edit-job/${project?.project_id}`)}
                             variant="outline"
-                            className="h-11 px-4 rounded-xl border-border hover:bg-muted/50 text-sm font-medium transition-all"
+                            className="h-11 px-4 rounded-lg border-gray-200 hover:bg-gray-50 text-sm font-medium transition-all text-gray-700"
                             aria-label={`Edit ${project.job_title}`}
                           >
                             <Edit className="w-4 h-4 mr-2" />
@@ -977,7 +977,7 @@ const HomeownerGetProjects = () => {
                         {project.status === 'completed' && (
                           <Button
                             onClick={() => handleOpenRatingModal(project)}
-                            className="h-11 px-4 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-xl transition-all"
+                            className="h-11 px-4 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-lg transition-all"
                             aria-label={`Rate trader for ${project.job_title}`}
                           >
                             <Star className="w-4 h-4 mr-2" />
@@ -991,7 +991,7 @@ const HomeownerGetProjects = () => {
                         {project.status !== 'completed' && (
                           <Button
                             onClick={() => handleMarkComplete(project)}
-                            className="h-11 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl transition-all"
+                            className="h-11 px-4 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-all"
                             aria-label={`Mark ${project.job_title} as complete`}
                           >
                             <CheckCircle className="w-4 h-4 mr-2" />
@@ -1002,7 +1002,7 @@ const HomeownerGetProjects = () => {
                         <Button
                           onClick={() => handleCloseJob(project)}
                           variant="outline"
-                          className="h-11 px-4 border-red-200 text-red-700 hover:bg-red-50 hover:border-red-300 text-sm font-medium rounded-xl transition-all"
+                          className="h-11 px-4 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 text-sm font-medium rounded-lg transition-all"
                           aria-label={project.status === 'completed' ? `Delete ${project.job_title}` : `Cancel ${project.job_title}`}
                         >
                           <Trash2 className="w-4 h-4 mr-2" />
@@ -1021,7 +1021,7 @@ const HomeownerGetProjects = () => {
             <Button
               onClick={() => navigate('/post-job')}
               size="lg"
-              className="rounded-full h-14 w-14 sm:h-16 sm:w-16 shadow-xl bg-trust-blue hover:bg-trust-blue/90 text-trust-blue-foreground hover:shadow-2xl transition-all duration-200 transform hover:scale-110 active:scale-95 active:shadow-lg mb-safe"
+              className="rounded-full h-14 w-14 sm:h-16 sm:w-16 shadow-lg bg-[#1d4ed8] hover:bg-[#1e40af] text-white hover:shadow-xl transition-all duration-200 active:scale-95 mb-safe"
             >
               <HiPlus className="w-6 h-6 sm:w-7 sm:h-7" />
             </Button>
@@ -1033,13 +1033,13 @@ const HomeownerGetProjects = () => {
 
         {/* Confirmation Modal */}
         {confirmModal.isOpen && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 animate-in fade-in-0 zoom-in-95 duration-200">
               <div className="p-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   {confirmModal.title}
                 </h3>
-                <p className="text-slate-600 mb-6">
+                <p className="text-gray-600 mb-6">
                   {confirmModal.message}
                 </p>
 
@@ -1047,14 +1047,14 @@ const HomeownerGetProjects = () => {
                   <Button
                     onClick={closeConfirmModal}
                     variant="outline"
-                    className="px-4 py-2"
+                    className="px-4 py-2 border-gray-200 text-gray-700 hover:bg-gray-50"
                   >
                     Cancel
                   </Button>
                   <button
                     onClick={confirmModal.onConfirm}
                     disabled={confirmModal.isLoading}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${confirmModal.confirmStyle} disabled:opacity-50`}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${confirmModal.confirmStyle} disabled:opacity-50`}
                   >
                     {confirmModal.isLoading ? (
                       <>
@@ -1074,24 +1074,24 @@ const HomeownerGetProjects = () => {
         {/* Rating Modal */}
         {showRatingModal && (
           <div
-            className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 animate-in fade-in-0 duration-200"
+            className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4 animate-in fade-in-0 duration-200"
             onClick={handleCloseRatingModal}
           >
             <div
-              className="bg-background rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200"
+              className="bg-white rounded-2xl shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Modal Header */}
-              <div className="sticky top-0 bg-background p-6 border-b border-border z-10">
+              <div className="sticky top-0 bg-white p-6 border-b border-gray-100 z-10">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-2xl font-bold text-foreground">
+                  <h2 className="text-2xl font-bold text-gray-900">
                     {selectedTrader ? "Rate Your Experience" : "Select Trader to Rate"}
                   </h2>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={handleCloseRatingModal}
-                    className="h-8 w-8 p-0 hover:bg-muted rounded-full"
+                    className="h-8 w-8 p-0 hover:bg-gray-50 rounded-full"
                     aria-label="Close modal"
                   >
                     <X className="h-4 w-4" />
@@ -1103,17 +1103,17 @@ const HomeownerGetProjects = () => {
               <div className="p-6">
                 {loadingTraders ? (
                   <div className="flex flex-col items-center justify-center py-12">
-                    <Loader2 className="h-12 w-12 text-primary animate-spin mb-4" />
-                    <p className="text-muted-foreground">Loading traders...</p>
+                    <Loader2 className="h-12 w-12 text-[#1d4ed8] animate-spin mb-4" />
+                    <p className="text-gray-600">Loading traders...</p>
                   </div>
                 ) : traders.length === 0 ? (
                   <div className="text-center py-12">
-                    <MessageCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold mb-2">No traders to rate</h3>
-                    <p className="text-muted-foreground mb-6">
+                    <MessageCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold mb-2 text-gray-900">No traders to rate</h3>
+                    <p className="text-gray-600 mb-6">
                       You haven't had any conversations with traders for this job yet.
                     </p>
-                    <Button onClick={handleCloseRatingModal} variant="outline">
+                    <Button onClick={handleCloseRatingModal} variant="outline" className="border-gray-200 text-gray-700">
                       Close
                     </Button>
                   </div>
@@ -1124,7 +1124,7 @@ const HomeownerGetProjects = () => {
                       <Button
                         variant="ghost"
                         onClick={handleBackToTraderList}
-                        className="mb-4 -ml-2"
+                        className="mb-4 -ml-2 text-gray-700 hover:bg-gray-50"
                       >
                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -1134,9 +1134,9 @@ const HomeownerGetProjects = () => {
                     )}
 
                     {/* Trader Info */}
-                    <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl">
-                      <Avatar className="h-16 w-16 border-2 border-background shadow-sm">
-                        <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground text-xl font-bold">
+                    <div className="flex items-center gap-4 p-4 bg-blue-50/50 rounded-xl border border-blue-100">
+                      <Avatar className="h-16 w-16 border-2 border-white shadow-sm">
+                        <AvatarFallback className="bg-[#1d4ed8] text-white text-xl font-bold">
                           {selectedTrader.trader_details.name
                             .split(" ")
                             .map((n) => n[0])
@@ -1144,10 +1144,10 @@ const HomeownerGetProjects = () => {
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <h3 className="font-semibold text-lg text-foreground">
+                        <h3 className="font-semibold text-lg text-gray-900">
                           {selectedTrader.trader_details.name}
                         </h3>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-gray-600">
                           {selectedTrader.trader_details.primaryTrade} • {selectedTrader.trader_details.city}
                         </p>
                       </div>
@@ -1155,14 +1155,14 @@ const HomeownerGetProjects = () => {
 
                     {/* Job Title */}
                     <div>
-                      <p className="text-sm text-muted-foreground mb-1">Job completed:</p>
-                      <p className="font-medium text-foreground">{selectedTrader.job_details.job_title}</p>
+                      <p className="text-sm text-gray-600 mb-1">Job completed:</p>
+                      <p className="font-medium text-gray-900">{selectedTrader.job_details.job_title}</p>
                     </div>
 
                     {/* Star Rating */}
                     <div>
-                      <label className="block text-sm font-medium text-foreground mb-3">
-                        Your Rating <span className="text-destructive">*</span>
+                      <label className="block text-sm font-medium text-gray-900 mb-3">
+                        Your Rating <span className="text-red-600">*</span>
                       </label>
                       <div className="flex items-center gap-2">
                         {[1, 2, 3, 4, 5].map((star) => (
@@ -1172,20 +1172,20 @@ const HomeownerGetProjects = () => {
                             onClick={() => setRating(star)}
                             onMouseEnter={() => setHoveredRating(star)}
                             onMouseLeave={() => setHoveredRating(0)}
-                            className="transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-full p-1"
+                            className="transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-offset-2 rounded-full p-1"
                             aria-label={`Rate ${star} stars`}
                           >
                             <Star
                               className={`w-10 h-10 transition-colors ${star <= (hoveredRating || rating)
                                   ? "text-[#FACC15] fill-[#FACC15]"
-                                  : "text-muted-foreground"
+                                  : "text-gray-300"
                                 }`}
                             />
                           </button>
                         ))}
                       </div>
                       {rating > 0 && (
-                        <p className="text-sm text-muted-foreground mt-2">
+                        <p className="text-sm text-gray-600 mt-2">
                           {rating === 5 && "Excellent! ⭐"}
                           {rating === 4 && "Very Good! 👍"}
                           {rating === 3 && "Good"}
@@ -1197,30 +1197,30 @@ const HomeownerGetProjects = () => {
 
                     {/* Comment */}
                     <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">
+                      <label className="block text-sm font-medium text-gray-900 mb-2">
                         Comment (Optional)
                       </label>
                       <Textarea
                         value={comment}
                         onChange={(e) => setComment(e.target.value)}
                         placeholder="Share your experience with this trader..."
-                        className="min-h-[100px] resize-none"
+                        className="min-h-[100px] resize-none border-gray-200 focus:border-[#1d4ed8] focus:ring-[#1d4ed8]"
                         maxLength={500}
                       />
-                      <p className="text-xs text-muted-foreground mt-1 text-right">
+                      <p className="text-xs text-gray-500 mt-1 text-right">
                         {comment.length}/500
                       </p>
                     </div>
 
                     {/* Submit Button */}
-                    <div className="flex gap-3 justify-end pt-4 border-t border-border">
-                      <Button variant="outline" onClick={handleCloseRatingModal} disabled={submitting}>
+                    <div className="flex gap-3 justify-end pt-4 border-t border-gray-100">
+                      <Button variant="outline" onClick={handleCloseRatingModal} disabled={submitting} className="border-gray-200 text-gray-700">
                         Cancel
                       </Button>
                       <Button
                         onClick={handleSubmitRating}
                         disabled={rating === 0 || submitting}
-                        className="bg-primary hover:bg-primary/90 text-primary-foreground min-w-[120px]"
+                        className="bg-[#1d4ed8] hover:bg-[#1e40af] text-white min-w-[120px]"
                       >
                         {submitting ? (
                           <>
@@ -1239,22 +1239,22 @@ const HomeownerGetProjects = () => {
                 ) : (
                   <div className="space-y-6">
                     {/* Header Section */}
-                    <div className="text-center pb-4 border-b border-border">
-                      <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-amber-50 to-amber-100 rounded-full flex items-center justify-center">
-                        <Star className="w-8 h-8 text-amber-600" />
+                    <div className="text-center pb-4 border-b border-gray-100">
+                      <div className="w-16 h-16 mx-auto mb-4 bg-amber-50 rounded-full flex items-center justify-center">
+                        <Star className="w-8 h-8 text-amber-500" />
                       </div>
-                      <h3 className="text-xl font-bold text-foreground mb-2">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">
                         Who completed this job?
                       </h3>
                     </div>
 
                     {/* Job Context Card */}
                     {selectedProject && (
-                      <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
+                      <Card className="bg-blue-50/50 border-blue-100">
                         <CardContent className="p-4">
-                          <p className="text-xs text-muted-foreground mb-1">Rating for:</p>
-                          <h4 className="font-semibold text-foreground">{selectedProject.job_title}</h4>
-                          <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                          <p className="text-xs text-gray-600 mb-1">Rating for:</p>
+                          <h4 className="font-semibold text-gray-900">{selectedProject.job_title}</h4>
+                          <div className="flex items-center gap-2 mt-2 text-xs text-gray-600">
                             <HiMapPin className="w-3 h-3" />
                             <span>{selectedProject.additional_data?.location}</span>
                           </div>
@@ -1264,27 +1264,27 @@ const HomeownerGetProjects = () => {
 
                     {/* Traders List */}
                     <div className="space-y-3">
-                      <p className="text-sm font-medium text-foreground mb-3">
+                      <p className="text-sm font-medium text-gray-900 mb-3">
                         Select a tradesperson:
                       </p>
                       {traders.map((trader, index) => (
                         <Card
                           key={trader.conversation_id}
-                          className="group hover:shadow-lg transition-all duration-200 cursor-pointer border-2 border-border hover:border-primary/50 hover:bg-primary/5"
+                          className="group hover:shadow-md transition-all duration-200 cursor-pointer border border-gray-200 hover:border-[#1d4ed8]/30 hover:bg-blue-50/30"
                           onClick={() => handleSelectTrader(trader)}
                         >
                           <CardContent className="p-5">
                             <div className="flex items-start gap-4">
                               <div className="relative">
-                                <Avatar className="h-14 w-14 border-2 border-background shadow-sm">
-                                  <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground text-lg font-bold">
+                                <Avatar className="h-14 w-14 border-2 border-white shadow-sm">
+                                  <AvatarFallback className="bg-[#1d4ed8] text-white text-lg font-bold">
                                     {trader.trader_details.name
                                       .split(" ")
                                       .map((n) => n[0])
                                       .join("")}
                                   </AvatarFallback>
                                 </Avatar>
-                                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold border-2 border-background">
+                                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-[#1d4ed8] text-white rounded-full flex items-center justify-center text-xs font-bold border-2 border-white">
                                   {index + 1}
                                 </div>
                               </div>
@@ -1292,15 +1292,15 @@ const HomeownerGetProjects = () => {
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between gap-4 mb-2">
                                   <div className="flex-1">
-                                    <h3 className="font-bold text-lg text-foreground mb-1 group-hover:text-primary transition-colors">
+                                    <h3 className="font-bold text-lg text-gray-900 mb-1 group-hover:text-[#1d4ed8] transition-colors">
                                       {trader.trader_details.name}
                                     </h3>
                                     <div className="flex items-center gap-2 flex-wrap mb-2">
-                                      <Badge variant="secondary" className="text-xs font-medium">
+                                      <Badge variant="secondary" className="text-xs font-medium bg-gray-100 text-gray-700">
                                         <Briefcase className="w-3 h-3 mr-1" />
                                         {trader.trader_details.primaryTrade}
                                       </Badge>
-                                      <span className="text-sm text-muted-foreground flex items-center">
+                                      <span className="text-sm text-gray-600 flex items-center">
                                         <HiMapPin className="w-3 h-3 mr-1" />
                                         {trader.trader_details.city}
                                       </span>
@@ -1308,7 +1308,7 @@ const HomeownerGetProjects = () => {
                                   </div>
 
                                   <div className="flex flex-col items-end gap-2">
-                                    <div className="flex items-center gap-1 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200">
+                                    <div className="flex items-center gap-1 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100">
                                       <MessageCircle className="w-3.5 h-3.5 text-blue-600" />
                                       <span className="text-xs font-semibold text-blue-700">
                                         {trader.message_count} messages
@@ -1322,7 +1322,7 @@ const HomeownerGetProjects = () => {
                                     e.stopPropagation();
                                     handleSelectTrader(trader);
                                   }}
-                                  className="w-full mt-4 bg-primary hover:bg-primary/90 text-primary-foreground group-hover:shadow-md transition-all"
+                                  className="w-full mt-4 bg-[#1d4ed8] hover:bg-[#1e40af] text-white group-hover:shadow-sm transition-all"
                                 >
                                   <Star className="w-4 h-4 mr-2" />
                                   Rate {trader.trader_details.name}
