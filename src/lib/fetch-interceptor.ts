@@ -98,6 +98,10 @@ const interceptedFetch = async (url: RequestInfo | URL, options?: RequestInit): 
       console.log('⏱️ Waiting 200ms before redirect...');
       await new Promise(resolve => setTimeout(resolve, 200));
       
+      // Clear auth data from localStorage before redirecting
+      console.log('🗑️ Clearing auth_user from localStorage');
+      localStorage.removeItem('auth_user');
+      
       const currentPathWithQuery = window.location.pathname + window.location.search;
       
       console.log('🔄 Redirecting to auth with next:', currentPathWithQuery);
