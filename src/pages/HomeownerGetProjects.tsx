@@ -113,6 +113,7 @@ const HomeownerGetProjects = () => {
   const [hoveredRating, setHoveredRating] = useState(0);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [paidJobsStatus, setPaidJobsStatus] = useState<Record<string, boolean>>({});
 
   const navigate = useNavigate();
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -230,7 +231,50 @@ const HomeownerGetProjects = () => {
     fetchProjects();
   }, [userId, apiUrl]);
 
+  // Check payment status for all projects
+  useEffect(() => {
+    const checkPaymentStatusForAllProjects = async () => {
+      if (projects.length === 0) return;
 
+      console.log(`🔍 Checking payment status for ${projects.length} projects...`);
+      const statusMap: Record<string, boolean> = {};
+
+      // Check payment status for each project
+      await Promise.all(
+        projects.map(async (project) => {
+          try {
+            const response = await fetch(
+              `${apiUrl}/api/payments/check-if-any-job-is-paid/${project.project_id}`,
+              {
+                credentials: 'include',
+              }
+            );
+
+            if (response.ok) {
+              const data = await response.json();
+              statusMap[project.project_id] = data.status === true;
+              console.log(
+                `💳 Job ${project.project_id} (${project.job_title}): ${
+                  data.status ? '✅ PAID' : '❌ NOT PAID'
+                }`
+              );
+            } else {
+              statusMap[project.project_id] = false;
+              console.warn(`⚠️ Failed to check payment status for job ${project.project_id}`);
+            }
+          } catch (error) {
+            console.error(`❌ Error checking payment for job ${project.project_id}:`, error);
+            statusMap[project.project_id] = false;
+          }
+        })
+      );
+
+      setPaidJobsStatus(statusMap);
+      console.log('✅ Payment status check complete:', statusMap);
+    };
+
+    checkPaymentStatusForAllProjects();
+  }, [projects, apiUrl]);
 
   const formatBudget = (budget: string) => {
     const budgetMap: { [key: string]: string } = {
@@ -989,14 +1033,35 @@ const HomeownerGetProjects = () => {
                       {/* Secondary Actions Row */}
                       <div className="grid grid-cols-2 gap-3">
                         {project.status !== 'completed' && (
-                          <Button
-                            onClick={() => handleMarkComplete(project)}
-                            className="h-11 px-4 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-all"
-                            aria-label={`Mark ${project.job_title} as complete`}
-                          >
-                            <CheckCircle className="w-4 h-4 mr-2" />
-                            Mark Complete
-                          </Button>
+                          <>
+                            {paidJobsStatus[project.project_id] === true ? (
+                              <Button
+                                onClick={() => handleMarkComplete(project)}
+                                className="h-11 px-4 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-all"
+                                aria-label={`Mark ${project.job_title} as complete`}
+                              >
+                                <CheckCircle className="w-4 h-4 mr-2" />
+                                Mark Complete
+                              </Button>
+                            ) : paidJobsStatus[project.project_id] === false ? (
+                              <Button
+                                disabled
+                                className="h-11 px-4 bg-gray-300 text-gray-500 text-sm font-medium rounded-lg cursor-not-allowed"
+                                title="At least one application must be paid before marking as complete"
+                              >
+                                <CheckCircle className="w-4 h-4 mr-2" />
+                                Mark Complete
+                              </Button>
+                            ) : (
+                              <Button
+                                disabled
+                                className="h-11 px-4 bg-gray-200 text-gray-400 text-sm font-medium rounded-lg cursor-wait"
+                              >
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Checking...
+                              </Button>
+                            )}
+                          </>
                         )}
 
                         <Button
