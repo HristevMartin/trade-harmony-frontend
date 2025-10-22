@@ -611,9 +611,6 @@ const JobDetail = () => {
                                     <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                                         <div className="text-white space-y-3">
                                             <h3 className="text-xl md:text-2xl font-bold leading-tight">Ready to apply for this job?</h3>
-                                            <p className="text-blue-50 text-base md:text-lg leading-relaxed font-medium">
-                                                Get homeowner contact details and submit your quote.
-                                            </p>
                                             <p className="text-blue-100/80 text-sm leading-relaxed flex items-center gap-2">
                                                 <HiCheckCircle className="w-4 h-4 flex-shrink-0" />
                                                 <span>We verify every job to protect your spend.</span>
@@ -642,7 +639,6 @@ const JobDetail = () => {
                                 <div className="space-y-3">
                                     <div className="text-center">
                                         <p className="text-slate-900 font-bold text-base leading-tight mb-1">Ready to apply for this job?</p>
-                                        <p className="text-slate-600 text-sm">Get homeowner contact details and submit your quote.</p>
                                         <p className="text-slate-500 text-xs mt-1.5 flex items-center justify-center gap-1.5">
                                             <HiCheckCircle className="w-3.5 h-3.5 text-green-600 flex-shrink-0" />
                                             <span>We verify every job to protect your spend.</span>
@@ -949,7 +945,6 @@ const JobDetail = () => {
                     <div className="space-y-3">
                         <div className="text-center">
                             <p className="text-slate-900 font-bold text-base leading-tight mb-1">Ready to apply for this job?</p>
-                            <p className="text-slate-600 text-sm">Get homeowner contact details and submit your quote.</p>
                             <p className="text-slate-500 text-xs mt-1.5 flex items-center justify-center gap-1.5">
                                 <HiCheckCircle className="w-3.5 h-3.5 text-green-600 flex-shrink-0" />
                                 <span>We verify every job to protect your spend.</span>
