@@ -604,24 +604,32 @@ const JobDetail = () => {
                         <>
                             {/* Desktop Banner */}
                             <div className="hidden md:block mb-6 md:mb-8">
-                                <Card className="rounded-2xl bg-gradient-to-r from-blue-600 to-blue-700 border-0 p-6 md:p-8 shadow-lg hover:shadow-xl transition-all duration-300">
-                                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                                        <div className="text-white space-y-2">
+                                <Card className="rounded-2xl bg-gradient-to-br from-[#1E4FFB] via-blue-600 to-blue-700 border-0 p-6 md:p-8 shadow-xl hover:shadow-2xl transition-all duration-300 relative overflow-hidden">
+                                    {/* Subtle decorative gradient overlay */}
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none"></div>
+                                    
+                                    <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                                        <div className="text-white space-y-3">
                                             <h3 className="text-xl md:text-2xl font-bold leading-tight">Ready to apply for this job?</h3>
-                                            <p className="text-blue-100 text-base md:text-lg leading-relaxed font-medium">
-                                                Get homeowner contact details and submit your quote
+                                            <p className="text-blue-50 text-base md:text-lg leading-relaxed font-medium">
+                                                Get homeowner contact details and submit your quote.
+                                            </p>
+                                            <p className="text-blue-100/80 text-sm leading-relaxed flex items-center gap-2">
+                                                <HiCheckCircle className="w-4 h-4 flex-shrink-0" />
+                                                <span>We verify every job to protect your spend.</span>
                                             </p>
                                         </div>
-                                        <div className="flex flex-col items-center lg:items-end gap-3">
+                                        <div className="flex flex-col items-center lg:items-end gap-2.5">
                                             <Button
                                                 onClick={() => setShowPayToApplyModal(true)}
-                                                className="bg-white text-blue-600 hover:bg-blue-50 font-bold px-8 py-4 text-lg rounded-full shadow-md hover:shadow-lg transition-all duration-200 min-h-[44px] whitespace-nowrap border-2 border-white hover:border-blue-100 hover-scale"
+                                                className="bg-white text-[#1E4FFB] hover:bg-blue-50 font-bold px-8 py-4 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-200 min-h-[48px] whitespace-nowrap border-2 border-white hover:border-blue-100 hover:scale-105"
                                                 size="lg"
+                                                aria-label="Apply for this job securely"
                                             >
                                                 <HiLockClosed className="w-5 h-5 mr-2" />
                                                 Apply for £5
                                             </Button>
-                                            <p className="text-blue-100 text-sm text-center lg:text-right font-medium">
+                                            <p className="text-blue-100/70 text-xs text-center lg:text-right font-normal">
                                                 Secure payment powered by Stripe
                                             </p>
                                         </div>
@@ -630,19 +638,27 @@ const JobDetail = () => {
                             </div>
 
                             {/* Mobile Sticky CTA */}
-                            <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 p-4 pb-safe shadow-lg">
-                                <div className="flex items-center justify-between gap-4">
-                                    <div>
-                                        <p className="text-slate-900 font-semibold text-base">Ready to apply?</p>
-                                        <p className="text-slate-600 text-sm">Get contact details</p>
+                            <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t-2 border-slate-200 p-4 pb-safe shadow-2xl">
+                                <div className="space-y-3">
+                                    <div className="text-center">
+                                        <p className="text-slate-900 font-bold text-base leading-tight mb-1">Ready to apply for this job?</p>
+                                        <p className="text-slate-600 text-sm">Get homeowner contact details and submit your quote.</p>
+                                        <p className="text-slate-500 text-xs mt-1.5 flex items-center justify-center gap-1.5">
+                                            <HiCheckCircle className="w-3.5 h-3.5 text-green-600 flex-shrink-0" />
+                                            <span>We verify every job to protect your spend.</span>
+                                        </p>
                                     </div>
                                     <Button
                                         onClick={() => setShowPayToApplyModal(true)}
-                                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-full shadow-md hover:shadow-lg transition-all duration-200 min-h-[44px] whitespace-nowrap hover-scale"
+                                        className="w-full bg-[#1E4FFB] hover:bg-blue-700 text-white font-bold px-6 py-3.5 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 min-h-[48px] active:scale-95"
+                                        aria-label="Apply for this job securely"
                                     >
-                                        <HiLockClosed className="w-4 h-4 mr-2" />
+                                        <HiLockClosed className="w-5 h-5 mr-2" />
                                         Apply for £5
                                     </Button>
+                                    <p className="text-slate-400 text-xs text-center font-normal">
+                                        Secure payment powered by Stripe
+                                    </p>
                                 </div>
                             </div>
                         </>
@@ -927,21 +943,29 @@ const JobDetail = () => {
             )}
 
             {/* Mobile Sticky Footer */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-lg p-3 sm:hidden"
-                style={{ paddingBottom: 'env(safe-area-inset-bottom, 12px)' }}>
+            <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-slate-200 shadow-2xl p-4 sm:hidden"
+                style={{ paddingBottom: 'env(safe-area-inset-bottom, 16px)' }}>
                 {isTrader && !userPaid && paymentStatusLoaded && (
-                    <div className="flex items-center justify-between gap-3">
-                        <div className="flex-1">
-                            <p className="text-sm font-semibold text-slate-900">Ready to apply?</p>
-                            <p className="text-xs text-slate-600 font-medium">Get contact details</p>
+                    <div className="space-y-3">
+                        <div className="text-center">
+                            <p className="text-slate-900 font-bold text-base leading-tight mb-1">Ready to apply for this job?</p>
+                            <p className="text-slate-600 text-sm">Get homeowner contact details and submit your quote.</p>
+                            <p className="text-slate-500 text-xs mt-1.5 flex items-center justify-center gap-1.5">
+                                <HiCheckCircle className="w-3.5 h-3.5 text-green-600 flex-shrink-0" />
+                                <span>We verify every job to protect your spend.</span>
+                            </p>
                         </div>
                         <Button
                             onClick={() => setShowPayToApplyModal(true)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-full shadow-md hover:shadow-lg transition-all duration-200 min-h-[44px] hover-scale"
+                            className="w-full bg-[#1E4FFB] hover:bg-blue-700 text-white font-bold px-6 py-3.5 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 min-h-[48px] active:scale-95"
+                            aria-label="Apply for this job securely"
                         >
-                            <HiLockClosed className="w-4 h-4 mr-1" />
+                            <HiLockClosed className="w-5 h-5 mr-2" />
                             Apply for £5
                         </Button>
+                        <p className="text-slate-400 text-xs text-center font-normal">
+                            Secure payment powered by Stripe
+                        </p>
                     </div>
                 )}
 
