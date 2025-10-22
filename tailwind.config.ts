@@ -65,6 +65,29 @@ export default {
           DEFAULT: "hsl(var(--accent-orange))",
           foreground: "hsl(var(--accent-orange-foreground))",
         },
+        jobhub: {
+          blue: '#1D4ED8',
+          blueFg: '#0B2C83',
+          surface: '#F9FAFB',
+          card: '#FFFFFF',
+          border: '#E5E7EB',
+          text: '#111827',
+          subtext: '#6B7280',
+          successBg: '#E6F4EA',
+          infoBg: '#E8F0FE',
+          dangerBg: '#FDECEA',
+          neutralBg: '#F4F6F8',
+        },
+      },
+      boxShadow: {
+        subtle: '0 1px 2px rgba(0,0,0,0.04)',
+        lift: '0 6px 16px rgba(0,0,0,0.08)',
+      },
+      borderRadius: {
+        xl2: '1rem',
+      },
+      spacing: {
+        section: '5.5rem',
       },
       keyframes: {
         "fade-up": {
