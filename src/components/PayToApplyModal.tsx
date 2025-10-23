@@ -133,74 +133,63 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
   };
 
   const renderPaymentStep = () => (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-5">
       {/* Header */}
-      <div className="text-center pb-4 md:pb-6 border-b border-border">
-        <h2 className="text-xl md:text-2xl font-bold text-foreground mb-2">Apply for this job</h2>
-        <p className="text-muted-foreground text-sm md:text-base mb-3 md:mb-4 px-2 leading-relaxed">{jobTitle}</p>
-        <div className="inline-flex items-center justify-center">
-          <Badge variant="secondary" className="text-sm md:text-base px-3 py-1 font-semibold">
-            Application Fee: £5
-          </Badge>
+      <div className="text-center pb-5 border-b border-gray-200">
+        <h2 id="apply-modal-title" className="text-xl font-semibold text-gray-900 mb-2">Apply for this job</h2>
+        <p className="text-gray-600 text-sm leading-relaxed mb-4">{jobTitle}</p>
+        <div className="inline-flex items-center border border-gray-200 bg-white rounded-full px-3 py-1.5 text-sm text-gray-900 font-medium">
+          Application Fee: £5
         </div>
       </div>
 
       {/* Benefits */}
-      <div className="space-y-3 md:space-y-4">
-        <h3 className="font-semibold text-foreground text-base md:text-lg">What you get:</h3>
-        <div className="grid gap-2 md:gap-3">
-          <div className="flex items-start gap-3 p-3 md:p-4 rounded-xl bg-gradient-to-r from-green-50 to-green-100 border border-green-200/80 shadow-sm">
-            <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-              <HiCheckCircle className="w-3 h-3 text-white" />
+      <div className="space-y-4">
+        <h3 className="font-semibold text-gray-900 text-base">What you get:</h3>
+        <div className="space-y-3">
+          <div className="flex items-start gap-3">
+            <div className="h-7 w-7 rounded-full border border-gray-200 bg-white text-emerald-600 flex items-center justify-center flex-shrink-0">
+              <HiCheckCircle className="w-4 h-4" />
             </div>
-            <span className="text-green-800 font-medium text-sm md:text-base">Gain homeowner's contact details</span>
+            <span className="text-gray-700 text-sm">Submit a competitive quote</span>
           </div>
-          <div className="flex items-start gap-3 p-3 md:p-4 rounded-xl bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200/80 shadow-sm">
-            <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-              <HiCheckCircle className="w-3 h-3 text-white" />
+          <div className="flex items-start gap-3">
+            <div className="h-7 w-7 rounded-full border border-gray-200 bg-white text-emerald-600 flex items-center justify-center flex-shrink-0">
+              <HiCheckCircle className="w-4 h-4" />
             </div>
-            <span className="text-blue-800 font-medium text-sm md:text-base">Submit a competitive quote</span>
-          </div>
-          <div className="flex items-start gap-3 p-3 md:p-4 rounded-xl bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200/80 shadow-sm">
-            <div className="w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-              <HiCheckCircle className="w-3 h-3 text-white" />
-            </div>
-            <span className="text-purple-800 font-medium text-sm md:text-base">Increase chances of winning the job</span>
+            <span className="text-gray-700 text-sm">Increase chances of winning the job</span>
           </div>
         </div>
       </div>
 
-      {/* Payment Form Container */}
-      <Card className="p-4 md:p-6 bg-gradient-to-br from-background to-muted/30 border-2 border-dashed border-muted-foreground/20 rounded-xl">
-        <div className="text-center space-y-3 md:space-y-4">
-          <div className="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto shadow-lg">
-            <HiShieldCheck className="w-6 h-6 md:w-8 md:h-8 text-white" />
+      {/* Trust Card */}
+      <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 space-y-3">
+        <div className="flex items-center justify-center gap-2">
+          <div className="h-10 w-10 rounded-full bg-jobhub-successBg text-emerald-600 flex items-center justify-center">
+            <HiShieldCheck className="w-6 h-6" />
           </div>
-          <div>
-            <p className="font-semibold text-foreground text-base md:text-lg">Secure Payment</p>
-            <p className="text-muted-foreground text-sm md:text-base">Payment processed securely via Stripe</p>
+          <div className="text-left">
+            <p className="font-semibold text-gray-900 text-sm">Secure Payment</p>
+            <p className="text-gray-600 text-xs">Powered by Stripe</p>
           </div>
         </div>
-      </Card>
-
-      {/* Trust Signals */}
-      <div className="space-y-3 md:space-y-4">
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-6 text-xs md:text-sm text-muted-foreground border-t border-border pt-3 md:pt-4">
-          <div className="flex items-center gap-2">
-            <HiLockClosed className="w-3 h-3 md:w-4 md:h-4 text-green-600" />
+        <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-gray-600 border-t border-gray-200 pt-3">
+          <div className="flex items-center gap-1.5">
+            <HiLockClosed className="w-3.5 h-3.5 text-emerald-600" />
             <span>256-bit SSL encryption</span>
           </div>
-          <div className="flex items-center gap-2">
-            <HiShieldCheck className="w-3 h-3 md:w-4 md:h-4 text-green-600" />
+          <div className="flex items-center gap-1.5">
+            <HiShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
             <span>Money-back guarantee</span>
           </div>
         </div>
+      </div>
 
-        <div className="text-center">
-          <p className="text-xs md:text-sm text-muted-foreground font-medium px-2">
-            You will only be charged once. No subscription fees.
-          </p>
-        </div>
+      {/* Info Banner */}
+      <div className="rounded-lg border border-gray-200 bg-jobhub-infoBg px-3 py-2">
+        <p className="text-jobhub-blue text-xs text-center">
+          You will only be charged once. No subscription fees.
+        </p>
       </div>
 
       {/* Stripe Payment Element */}
@@ -213,18 +202,18 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
               appearance: { 
                 theme: 'stripe',
                 variables: {
-                  colorPrimary: 'hsl(var(--primary))',
-                  colorBackground: 'hsl(var(--background))',
-                  colorText: 'hsl(var(--foreground))',
-                  borderRadius: '8px'
+                  colorPrimary: '#1D4ED8',
+                  colorBackground: '#FFFFFF',
+                  colorText: '#111827',
+                  borderRadius: '12px'
                 }
               },
             }}
             key={clientSecret}
           >
             {payError && (
-              <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-                <p className="text-destructive text-sm font-medium">{payError}</p>
+              <div className="p-3 bg-jobhub-dangerBg border border-red-200 rounded-lg">
+                <p className="text-red-700 text-sm font-medium">{payError}</p>
               </div>
             )}
             <CheckoutForm
@@ -237,25 +226,23 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
 
       {/* Action Button - Only show when clientSecret is not available */}
       {!clientSecret && (
-        <div className="sticky bottom-0 bg-background border-t border-border pt-4 -mb-6 -mx-4 md:-mx-6 px-4 md:px-6 pb-4 md:pb-6">
-          <Button
-            onClick={handlePayment}
-            disabled={isLoading}
-            className="w-full bg-gradient-to-r from-trust-blue to-blue-600 hover:from-trust-blue/90 hover:to-blue-600/90 text-white font-semibold py-3 md:py-4 text-base md:text-lg rounded-xl min-h-[48px] md:min-h-[52px] shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02]"
-          >
-            {isLoading ? (
-              <div className="flex items-center justify-center gap-2">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                <span>Loading...</span>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center gap-2">
-                <HiLockClosed className="w-5 h-5" />
-                <span>Continue to payment</span>
-              </div>
-            )}
-          </Button>
-        </div>
+        <Button
+          onClick={handlePayment}
+          disabled={isLoading}
+          className="w-full bg-jobhub-blue text-white hover:bg-jobhub-blue/90 focus:ring-2 focus:ring-jobhub-blue/30 h-11 rounded-xl font-semibold"
+        >
+          {isLoading ? (
+            <div className="flex items-center justify-center gap-2">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              <span>Loading...</span>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center gap-2">
+              <HiLockClosed className="w-5 h-5" />
+              <span>Continue to payment</span>
+            </div>
+          )}
+        </Button>
       )}
     </div>
   );
@@ -297,10 +284,12 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
       <Modal
         isOpen={isOpen}
         onClose={handleClose}
-        size="xl"
+        size="lg"
         showCloseButton={currentStep !== 'success'}
+        titleId="apply-modal-title"
+        bodyId="apply-modal-body"
       >
-        <div className="max-h-[80vh] overflow-y-auto scrollbar-hide">
+        <div id="apply-modal-body">
           {currentStep === 'payment' && renderPaymentStep()}
           {currentStep === 'success' && renderSuccessStep()}
         </div>
@@ -308,14 +297,14 @@ const PayToApplyModal: React.FC<PayToApplyModalProps> = ({
 
       {/* Celebration Overlay */}
       {showCelebration && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 animate-fade-in">
-          <div className="bg-white rounded-2xl p-8 shadow-2xl animate-scale-in">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/30 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-lift animate-scale-in">
             <div className="text-center">
-              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-                <HiCheckCircle className="w-12 h-12 text-green-600" />
+              <div className="w-20 h-20 bg-jobhub-successBg rounded-full flex items-center justify-center mx-auto mb-4">
+                <HiCheckCircle className="w-12 h-12 text-emerald-600" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900">Payment Complete! 🎉</h3>
-              <p className="text-slate-600 mt-2">Getting your application ready...</p>
+              <h3 className="text-xl font-bold text-gray-900">Payment Complete! 🎉</h3>
+              <p className="text-gray-600 mt-2">Getting your application ready...</p>
             </div>
           </div>
         </div>
