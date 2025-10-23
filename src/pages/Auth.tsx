@@ -243,8 +243,8 @@ const Auth = () => {
               )}
 
               {activeTab === 'login' ? (
-                <form id="auth-form" onSubmit={handleSubmit} className="space-y-4 flex-1 flex flex-col md:block">
-                  <div className="flex-1 space-y-4 md:space-y-4">
+                <form id="auth-form" onSubmit={handleSubmit} className="space-y-5 flex-1 flex flex-col md:block">
+                  <div className="flex-1 space-y-5 md:space-y-5">
                   {/* Email Field */}
                   <div className="space-y-2">
                     <Label htmlFor="email" className="text-sm font-medium text-foreground">
@@ -290,7 +290,8 @@ const Auth = () => {
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
                       >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
@@ -298,6 +299,17 @@ const Auth = () => {
                     {errors.password && (
                       <p className="text-red-500 text-xs mt-1">{errors.password}</p>
                     )}
+                    
+                    {/* Forgot Password Link - Moved here for better visual association */}
+                    <div className="text-right pt-1">
+                      <button 
+                        type="button"
+                        onClick={() => switchTab('forgot-password')}
+                        className="text-sm text-trust-blue hover:underline transition-all"
+                      >
+                        Forgot your password?
+                      </button>
+                    </div>
                   </div>
                   </div>
 
@@ -306,7 +318,7 @@ const Auth = () => {
                     <Button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full h-12 bg-accent-orange hover:bg-accent-orange/90 text-white font-semibold transition-all duration-300 mt-6"
+                      className="w-full h-12 bg-accent-orange hover:bg-accent-orange/90 text-white font-semibold transition-all duration-300 mt-6 active:scale-[0.98] hover:shadow-lg"
                     >
                       {isLoading ? (
                         <>
@@ -449,24 +461,17 @@ const Auth = () => {
 
               {/* Footer Links - Only for Login Tab */}
               {activeTab === 'login' && (
-                <div className="text-center space-y-3 pt-4 border-t border-border/50">
-                  <div className="space-y-2">
-                    <button 
-                      onClick={() => switchTab('forgot-password')}
-                      className="text-sm text-trust-blue hover:underline"
+                <div className="text-center pt-4 border-t border-border/50">
+                  <p className="text-sm text-muted-foreground">
+                    Don't have an account?{' '}
+                    <button
+                      type="button"
+                      onClick={() => switchTab('register')}
+                      className="text-trust-blue hover:underline font-medium transition-all"
                     >
-                      Forgot your password?
+                      Sign up here
                     </button>
-                    <p className="text-sm text-muted-foreground">
-                      Don't have an account?{' '}
-                      <button
-                        onClick={() => switchTab('register')}
-                        className="text-trust-blue hover:underline font-medium"
-                      >
-                        Sign up here
-                      </button>
-                    </p>
-                  </div>
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -480,7 +485,7 @@ const Auth = () => {
               type="submit"
               form="auth-form"
               disabled={isLoading}
-              className="w-full h-12 min-h-[48px] bg-accent-orange hover:bg-accent-orange/90 text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl"
+              className="w-full h-12 min-h-[48px] bg-accent-orange hover:bg-accent-orange/90 text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl active:scale-[0.98]"
             >
               {isLoading ? (
                 <>

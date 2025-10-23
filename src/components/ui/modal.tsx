@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 
 interface ModalProps {
@@ -9,6 +9,9 @@ interface ModalProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
   showCloseButton?: boolean;
   closeable?: boolean;
+  footer?: React.ReactNode;
+  titleId?: string;
+  bodyId?: string;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -18,25 +21,75 @@ const Modal: React.FC<ModalProps> = ({
   children,
   size = 'md',
   showCloseButton = true,
-  closeable = true
+  closeable = true,
+  footer,
+  titleId = 'modal-title',
+  bodyId = 'modal-body'
 }) => {
-  // Handle escape key
+  const modalRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+
+  // Focus trap and accessibility
   useEffect(() => {
+    if (!isOpen) return;
+
+    // Store previously focused element
+    previousFocusRef.current = document.activeElement as HTMLElement;
+
+    // Prevent body scroll
+    document.body.style.overflow = 'hidden';
+
+    // Focus modal after animation
+    const timeout = setTimeout(() => {
+      const focusableElements = modalRef.current?.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusableElements && focusableElements.length > 0) {
+        (focusableElements[0] as HTMLElement).focus();
+      }
+    }, 100);
+
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && closeable) {
         onClose();
       }
     };
 
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      // Prevent body scroll when modal is open
-      document.body.style.overflow = 'hidden';
-    }
+    // Focus trap
+    const handleTab = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') return;
+
+      const focusableElements = modalRef.current?.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+
+      if (!focusableElements || focusableElements.length === 0) return;
+
+      const firstElement = focusableElements[0] as HTMLElement;
+      const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    document.addEventListener('keydown', handleTab);
 
     return () => {
+      clearTimeout(timeout);
       document.removeEventListener('keydown', handleEscape);
+      document.removeEventListener('keydown', handleTab);
       document.body.style.overflow = 'unset';
+
+      // Return focus to previous element
+      if (previousFocusRef.current) {
+        previousFocusRef.current.focus();
+      }
     };
   }, [isOpen, closeable, onClose]);
 
@@ -57,24 +110,26 @@ const Modal: React.FC<ModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 flex items-center justify-center p-4 sm:p-6 bg-black/30 backdrop-blur-sm animate-fade-in"
       style={{ zIndex: 9999 }}
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
-      aria-labelledby={title ? 'modal-title' : undefined}
+      aria-labelledby={title ? titleId : undefined}
+      aria-describedby={bodyId}
     >
       <div 
-        className={`relative w-full ${sizeClasses[size]} bg-white rounded-2xl shadow-xl ring-1 ring-slate-200/50 transform transition-all duration-300 ease-out max-h-[85vh] overflow-y-auto animate-scale-in`}
+        ref={modalRef}
+        className={`relative w-full ${sizeClasses[size]} bg-white rounded-2xl border border-gray-200 shadow-subtle transform transition-all duration-300 ease-out max-h-[90vh] flex flex-col animate-scale-in`}
         role="document"
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between p-4 sm:p-6 pb-3 sm:pb-4">
+          <div className="flex items-center justify-between p-6 md:p-8 pb-4 flex-shrink-0">
             {title && (
               <h2 
-                id="modal-title" 
-                className="text-lg sm:text-xl font-semibold text-slate-900"
+                id={titleId}
+                className="text-xl font-semibold text-gray-900"
               >
                 {title}
               </h2>
@@ -82,19 +137,29 @@ const Modal: React.FC<ModalProps> = ({
             {showCloseButton && closeable && (
               <button
                 onClick={onClose}
-                className="p-1.5 sm:p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                className="rounded-full p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-jobhub-blue/40"
                 aria-label="Close modal"
               >
-                <X className="w-4 h-4 sm:w-5 sm:h-5" />
+                <X className="w-5 h-5" />
               </button>
             )}
           </div>
         )}
 
         {/* Content */}
-        <div className={`px-4 sm:px-6 ${title || showCloseButton ? 'pb-4 sm:pb-6' : 'py-4 sm:py-6'}`}>
+        <div 
+          id={bodyId}
+          className={`px-6 md:px-8 overflow-y-auto flex-1 ${title || showCloseButton ? '' : 'pt-6 md:pt-8'} ${footer ? '' : 'pb-6 md:pb-8'}`}
+        >
           {children}
         </div>
+
+        {/* Optional Sticky Footer */}
+        {footer && (
+          <div className="sticky bottom-0 -mx-0 px-6 md:px-8 py-4 bg-white/95 backdrop-blur-sm border-t border-gray-200 flex-shrink-0">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );
