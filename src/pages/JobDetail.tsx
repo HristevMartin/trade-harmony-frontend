@@ -388,7 +388,7 @@ const JobDetail = () => {
     return (
         <>
 
-            <div className="min-h-screen bg-gray-50">
+            <div className="min-h-screen bg-gray-50 animate-fade-in">
                 {/* Edit Success Banner */}
                 {showEditSuccess && (
                     <div className="bg-jobhub-successBg border-b border-emerald-200">
@@ -530,7 +530,7 @@ const JobDetail = () => {
                             {!isTrader && (
                                 <Button
                                     onClick={() => navigate(`/edit-job/${id}`)}
-                                    className="hidden sm:flex items-center gap-2 bg-jobhub-blue hover:bg-jobhub-blue/90 w-fit"
+                                    className="hidden sm:flex items-center gap-2 bg-jobhub-blue hover:bg-jobhub-blue/90 w-fit transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-95"
                                     size="sm"
                                 >
                                     <HiPencilSquare className="w-4 h-4" />
@@ -539,19 +539,23 @@ const JobDetail = () => {
                             )}
                         </div>
 
-                        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-gray-900 mb-3 md:mb-4 leading-tight">
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-gray-900 mb-4 md:mb-5 leading-tight">
                             {jobData.job_title}
                         </h1>
+                        
+                        {/* Subtle gradient divider */}
+                        <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent mb-4"></div>
+                        
                         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-gray-600 text-sm sm:text-base mb-2">
                             <div className="flex items-center gap-2">
-                                <div className="w-5 h-5 bg-gray-100 rounded-full flex items-center justify-center">
-                                    <HiMapPin className="w-3 h-3 text-gray-600" />
+                                <div className="w-5 h-5 bg-blue-50 rounded-full flex items-center justify-center">
+                                    <HiMapPin className="w-3 h-3 text-jobhub-blue" />
                                 </div>
                                 <span className="truncate font-medium">{getCountryFlag(jobData.additional_data.country)} {jobData.additional_data.location}</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <div className="w-5 h-5 bg-gray-100 rounded-full flex items-center justify-center">
-                                    <HiCalendar className="w-3 h-3 text-gray-600" />
+                                <div className="w-5 h-5 bg-blue-50 rounded-full flex items-center justify-center">
+                                    <HiCalendar className="w-3 h-3 text-jobhub-blue" />
                                 </div>
                                 <span className="truncate">Posted {formatDate(jobData.created_at)}</span>
                             </div>
@@ -568,8 +572,8 @@ const JobDetail = () => {
 
                         {/* Job Statistics - For Traders */}
                         {isTrader && jobStats && (
-                            <div className="mt-4">
-                                <Card className="rounded-2xl bg-white shadow-sm border border-gray-200 p-4 md:p-5">
+                            <div className="mt-6">
+                                <Card className="rounded-2xl bg-white shadow-md border border-gray-200 p-5 md:p-6">
                                     <h3 className="text-sm font-semibold text-gray-900 mb-3">Homeowner's Job Activity</h3>
                                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                         <div className="text-center p-3 bg-white rounded-xl border-2 border-emerald-200">
@@ -616,7 +620,7 @@ const JobDetail = () => {
                         <>
                             {/* Desktop Banner */}
                             <div className="hidden md:block mb-6 md:mb-8">
-                                <Card className="rounded-2xl bg-gradient-to-br from-jobhub-blue/95 to-jobhub-blue border border-jobhub-blue/20 p-6 md:p-8 shadow-lg transition-all duration-300 relative overflow-hidden">
+                                <Card className="rounded-2xl bg-gradient-to-br from-jobhub-blue/95 to-jobhub-blue border border-jobhub-blue/20 p-6 md:p-8 shadow-xl transition-all duration-300 relative overflow-hidden hover:shadow-2xl">
                                     {/* Subtle decorative gradient overlay */}
                                     <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none"></div>
                                     
@@ -728,15 +732,17 @@ const JobDetail = () => {
                     )}
 
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 pb-24 md:pb-0">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 md:gap-8 pb-24 md:pb-0">
                         {/* Main Content */}
-                        <div className="lg:col-span-2 space-y-4 md:space-y-6">
+                        <div className="lg:col-span-2 space-y-5 md:space-y-6">
                             {/* What Happens Next Info Card */}
-                            <Card className="rounded-2xl bg-jobhub-infoBg border border-blue-200 p-4 md:p-6">
+                            <Card className="rounded-2xl bg-blue-50/50 border border-blue-200 p-5 md:p-6 shadow-md">
                                 <div className="flex items-start gap-3">
-                                    <HiInformationCircle className="w-5 h-5 md:w-6 md:h-6 text-jobhub-blue flex-shrink-0 mt-0.5" />
+                                    <div className="w-8 h-8 md:w-9 md:h-9 bg-jobhub-blue/10 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <HiInformationCircle className="w-5 h-5 md:w-5 md:h-5 text-jobhub-blue" />
+                                    </div>
                                     <div>
-                                        <h3 className="font-semibold text-gray-900 mb-2 text-sm md:text-base">What happens next?</h3>
+                                        <h3 className="font-semibold text-gray-900 mb-3 text-sm md:text-base tracking-tight">What happens next?</h3>
                                         <div className="space-y-1 md:space-y-2 text-xs md:text-sm text-gray-700">
                                             {isTrader ? (
                                                 <>
@@ -755,21 +761,23 @@ const JobDetail = () => {
                                 </div>
                             </Card>
                             {/* Job Details */}
-                            <Card className="rounded-2xl bg-white shadow-sm border border-gray-200 p-4 md:p-6">
-                                <div className="flex items-center gap-2 mb-3 md:mb-4">
-                                    <HiWrenchScrewdriver className="w-4 h-4 md:w-5 md:h-5 text-jobhub-blue" />
-                                    <h2 className="text-base md:text-lg font-semibold text-gray-900">Job Details</h2>
+                            <Card className="rounded-2xl bg-white shadow-md border border-gray-200 p-5 md:p-6">
+                                <div className="flex items-center gap-2 mb-4 md:mb-5">
+                                    <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                                        <HiWrenchScrewdriver className="w-4 h-4 md:w-5 md:h-5 text-jobhub-blue" />
+                                    </div>
+                                    <h2 className="text-base md:text-lg font-semibold text-gray-900 tracking-tight">Job Details</h2>
                                 </div>
 
-                                <div className="space-y-3 md:space-y-4">
+                                <div className="space-y-4 md:space-y-5">
                                     <div>
-                                        <h3 className="font-semibold text-gray-900 mb-1 text-sm md:text-base">Service Category</h3>
-                                        <p className="text-gray-600 text-sm md:text-base">{jobData.additional_data.serviceCategory}</p>
+                                        <h3 className="font-semibold text-gray-900 mb-2 text-sm md:text-base">Service Category</h3>
+                                        <p className="text-gray-700 text-sm md:text-base">{jobData.additional_data.serviceCategory}</p>
                                     </div>
 
                                     <div>
-                                        <h3 className="font-semibold text-gray-900 mb-1 text-sm md:text-base">Description</h3>
-                                        <p className="text-gray-600 leading-relaxed text-sm md:text-base">{jobData.job_description}</p>
+                                        <h3 className="font-semibold text-gray-900 mb-2 text-sm md:text-base">Description</h3>
+                                        <p className="text-gray-700 leading-relaxed text-sm md:text-base">{jobData.job_description}</p>
                                     </div>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
@@ -794,10 +802,12 @@ const JobDetail = () => {
 
                             {/* Photos */}
                             {jobData.image_urls && jobData.image_urls.length > 0 && (
-                                <Card className="rounded-2xl bg-white shadow-sm border border-gray-200 p-4 md:p-6">
-                                    <div className="flex items-center gap-2 mb-3 md:mb-4">
-                                        <HiCamera className="w-4 h-4 md:w-5 md:h-5 text-jobhub-blue" />
-                                        <h2 className="text-base md:text-lg font-semibold text-gray-900">
+                                <Card className="rounded-2xl bg-white shadow-md border border-gray-200 p-5 md:p-6">
+                                    <div className="flex items-center gap-2 mb-4 md:mb-5">
+                                        <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                                            <HiCamera className="w-4 h-4 md:w-5 md:h-5 text-jobhub-blue" />
+                                        </div>
+                                        <h2 className="text-base md:text-lg font-semibold text-gray-900 tracking-tight">
                                             Photos ({jobData.image_count})
                                         </h2>
                                     </div>
@@ -806,13 +816,13 @@ const JobDetail = () => {
                                         {jobData.image_urls.map((imageUrl, index) => (
                                             <div
                                                 key={index}
-                                                className="relative aspect-square overflow-hidden rounded-xl border border-gray-200 bg-gray-50 cursor-pointer hover:border-jobhub-blue hover:shadow-lift transition-all"
+                                                className="relative aspect-square overflow-hidden rounded-xl border-2 border-gray-200 bg-gray-50 cursor-pointer hover:border-jobhub-blue hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group"
                                                 onClick={() => setSelectedImageIndex(index)}
                                             >
                                                 <img
                                                     src={imageUrl}
                                                     alt={`Job photo ${index + 1}`}
-                                                    className="w-full h-full object-cover"
+                                                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                                                 />
                                             </div>
                                         ))}
@@ -823,24 +833,24 @@ const JobDetail = () => {
 
 
                         {/* Sidebar */}
-                        <div className="space-y-4 md:space-y-6">
+                        <div className="space-y-5 md:space-y-6">
                             {/* Contact Information - Hidden for traders */}
                             {!isTrader && (
-                                <Card className="rounded-2xl bg-white shadow-sm border border-gray-200 p-4 md:p-6">
-                                    <div className="flex items-center gap-2 mb-3 md:mb-4">
-                                        <HiUserCircle className="w-4 h-4 md:w-5 md:h-5 text-jobhub-blue" />
-                                        <h2 className="text-base md:text-lg font-semibold text-gray-900">Contact Information</h2>
+                                <Card className="rounded-2xl bg-white shadow-sm border border-gray-200 p-5 md:p-6">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <HiUserCircle className="w-5 h-5 text-gray-400" />
+                                        <h2 className="text-base md:text-lg font-semibold text-gray-700 tracking-tight">Contact Information</h2>
                                     </div>
 
-                                    <div className="space-y-3 md:space-y-4">
+                                    <div className="space-y-4">
                                         <div>
-                                            <h3 className="font-semibold text-gray-900 mb-1 text-sm md:text-base">Name</h3>
+                                            <h3 className="font-medium text-gray-700 mb-1.5 text-sm">Name</h3>
                                             <p className="text-gray-600 text-sm md:text-base">{jobData.first_name}</p>
                                         </div>
 
                                         <div>
-                                            <h3 className="font-semibold text-gray-900 mb-1 flex items-center gap-1 text-sm md:text-base">
-                                                <HiEnvelope className="w-4 h-4" />
+                                            <h3 className="font-medium text-gray-700 mb-1.5 flex items-center gap-1.5 text-sm">
+                                                <HiEnvelope className="w-4 h-4 text-gray-400" />
                                                 Email
                                             </h3>
                                             <p className="text-gray-600 text-sm md:text-base break-all">{jobData.email}</p>
@@ -848,8 +858,8 @@ const JobDetail = () => {
 
                                         {jobData.phone && (
                                             <div>
-                                                <h3 className="font-semibold text-gray-900 mb-1 flex items-center gap-1 text-sm md:text-base">
-                                                    <HiPhone className="w-4 h-4" />
+                                                <h3 className="font-medium text-gray-700 mb-1.5 flex items-center gap-1.5 text-sm">
+                                                    <HiPhone className="w-4 h-4 text-gray-400" />
                                                     Phone
                                                 </h3>
                                                 <p className="text-gray-600 text-sm md:text-base">{jobData.phone}</p>
@@ -857,7 +867,7 @@ const JobDetail = () => {
                                         )}
 
                                         <div>
-                                            <h3 className="font-semibold text-gray-900 mb-1 text-sm md:text-base">Preferred Contact</h3>
+                                            <h3 className="font-medium text-gray-700 mb-1.5 text-sm">Preferred Contact</h3>
                                             <p className="text-gray-600 capitalize text-sm md:text-base">{jobData.contact_method}</p>
                                         </div>
                                     </div>
@@ -865,18 +875,18 @@ const JobDetail = () => {
                             )}
 
                             {/* Location */}
-                            <Card className="rounded-2xl bg-white shadow-sm border border-gray-200 p-4 md:p-6">
-                                <div className="flex items-center gap-2 mb-3 md:mb-4">
-                                    <HiMapPin className="w-4 h-4 md:w-5 md:h-5 text-jobhub-blue" />
-                                    <h2 className="text-base md:text-lg font-semibold text-gray-900">Location</h2>
+                            <Card className="rounded-2xl bg-white shadow-sm border border-gray-200 p-5 md:p-6">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <HiMapPin className="w-5 h-5 text-gray-400" />
+                                    <h2 className="text-base md:text-lg font-semibold text-gray-700 tracking-tight">Location</h2>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <p className="text-gray-600 text-sm md:text-base">
+                                    <p className="text-gray-600 text-sm md:text-base font-medium">
                                         {getCountryFlag(jobData.additional_data.country)} {jobData.additional_data.location}
                                     </p>
                                     {jobData.additional_data.postcode && (
-                                        <p className="text-gray-600 text-sm md:text-base font-medium">
+                                        <p className="text-gray-600 text-sm md:text-base">
                                             {jobData.additional_data.postcode}
                                         </p>
                                     )}
@@ -887,17 +897,17 @@ const JobDetail = () => {
                             </Card>
 
                             {/* Job Meta */}
-                            <Card className="rounded-2xl bg-white shadow-sm border border-gray-200 p-4 md:p-6">
-                                <h2 className="text-base md:text-lg font-semibold text-gray-900 mb-3 md:mb-4">Job Information</h2>
+                            <Card className="rounded-2xl bg-white shadow-sm border border-gray-200 p-5 md:p-6">
+                                <h2 className="text-base md:text-lg font-semibold text-gray-700 mb-4 tracking-tight">Job Information</h2>
 
                                 <div className="space-y-3 text-xs md:text-sm">
                                     <div className="flex justify-between items-start">
                                         <span className="text-gray-500 flex-shrink-0">Created:</span>
-                                        <span className="text-gray-900 text-right ml-2">{formatDate(jobData.created_at)}</span>
+                                        <span className="text-gray-700 text-right ml-2 font-medium">{formatDate(jobData.created_at)}</span>
                                     </div>
                                     <div className="flex justify-between items-start">
                                         <span className="text-gray-500 flex-shrink-0">Updated:</span>
-                                        <span className="text-gray-900 text-right ml-2">{formatDate(jobData.updated_at)}</span>
+                                        <span className="text-gray-700 text-right ml-2 font-medium">{formatDate(jobData.updated_at)}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
                                         <span className="text-gray-500">Status:</span>
@@ -951,7 +961,7 @@ const JobDetail = () => {
             )}
 
             {/* Mobile Sticky Footer */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg p-4 sm:hidden"
+            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-xl p-4 sm:hidden backdrop-blur-sm"
                 style={{ paddingBottom: 'env(safe-area-inset-bottom, 16px)' }}>
                 {isTrader && !userPaid && paymentStatusLoaded && (
                     <div className="space-y-3">
@@ -980,7 +990,7 @@ const JobDetail = () => {
                 {!isTrader && (
                     <Button
                         onClick={() => navigate(`/edit-job/${id}`)}
-                        className="w-full bg-jobhub-blue hover:bg-jobhub-blue/90 flex items-center justify-center gap-2 min-h-[44px]"
+                        className="w-full bg-gradient-to-r from-jobhub-blue to-blue-500 hover:from-jobhub-blue/90 hover:to-blue-500/90 text-white flex items-center justify-center gap-2 min-h-[48px] font-semibold shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
                     >
                         <HiPencilSquare className="w-4 h-4" />
                         Edit Job
