@@ -640,7 +640,7 @@ const JobDetail = () => {
                                                 aria-label="Apply for this job securely"
                                             >
                                                 <HiLockClosed className="w-5 h-5 mr-2" />
-                                                Apply for £5
+                                                Apply for £1.99
                                             </Button>
                                             <p className="text-blue-100 text-xs text-center lg:text-right font-normal">
                                                 Secure payment powered by Stripe
@@ -666,7 +666,7 @@ const JobDetail = () => {
                                         aria-label="Apply for this job securely"
                                     >
                                         <HiLockClosed className="w-5 h-5 mr-2" />
-                                        Apply for £5
+                                        Apply for £1.99
                                     </Button>
                                     <p className="text-gray-500 text-xs text-center font-normal">
                                         Secure payment powered by Stripe
@@ -978,7 +978,7 @@ const JobDetail = () => {
                             aria-label="Apply for this job securely"
                         >
                             <HiLockClosed className="w-5 h-5 mr-2" />
-                            Apply for £5
+                            Apply for £1.99
                         </Button>
                         <p className="text-gray-500 text-xs text-center font-normal">
                             Secure payment powered by Stripe
