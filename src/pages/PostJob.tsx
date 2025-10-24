@@ -27,6 +27,7 @@ import {
 } from "react-icons/hi2";
 import { X, Sparkles } from "lucide-react";
 import UKLocationInput from "@/components/UKLocationInput";
+import PostcodeInput from "@/components/PostcodeInput";
 import type { JobDraft } from "@/lib/ai/placeholders";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -1078,40 +1079,66 @@ const PostJob = () => {
                                 </div>
                                 <div>
                                     {formData.country === 'GB' ? (
-                                        <UKLocationInput
-                                            value={{
-                                                country: formData.country,
-                                                location: formData.area, // Use area field for UK
-                                                postcode: formData.postcode
-                                            }}
-                                            onChange={(locationData) => {
-                                                setFormData(prev => ({
-                                                    ...prev,
-                                                    area: locationData.location, // Set area field for UK
-                                                    postcode: locationData.postcode
-                                                }));
-                                                
-                                                // Clear errors when fields are updated
-                                                if (locationData.location && formErrors.area) {
-                                                    setFormErrors(prev => {
-                                                        const newErrors = { ...prev };
-                                                        delete newErrors.area;
-                                                        return newErrors;
-                                                    });
-                                                }
-                                                if (locationData.postcode && formErrors.postcode) {
-                                                    setFormErrors(prev => {
-                                                        const newErrors = { ...prev };
-                                                        delete newErrors.postcode;
-                                                        return newErrors;
-                                                    });
-                                                }
-                                            }}
-                                            errors={{
-                                                location: formErrors.area, // Use area errors for UK
-                                                postcode: formErrors.postcode
-                                            }}
-                                        />
+                                        <div className="space-y-4">
+                                            <div>
+                                                <Label htmlFor="area" className="text-sm font-medium text-slate-700">
+                                                    Town/City <span className="text-red-500">*</span>
+                                                </Label>
+                                                <Input
+                                                    id="area"
+                                                    value={formData.area}
+                                                    onChange={(e) => {
+                                                        handleInputChange('area', e.target.value);
+                                                        // Clear error when user starts typing and value is not empty
+                                                        if (e.target.value.trim() && formErrors.area) {
+                                                            setFormErrors(prev => {
+                                                                const newErrors = { ...prev };
+                                                                delete newErrors.area;
+                                                                return newErrors;
+                                                            });
+                                                        }
+                                                    }}
+                                                    onBlur={(e) => handleBlur('area', e.target.value)}
+                                                    placeholder="Enter your town or city"
+                                                    className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${
+                                                        formErrors.area ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
+                                                    }`}
+                                                    aria-invalid={!!formErrors.area}
+                                                    aria-describedby={formErrors.area ? 'area-error' : 'area-help'}
+                                                />
+                                                {formErrors.area ? (
+                                                    <p id="area-error" className="text-xs text-red-600 mt-1">{formErrors.area}</p>
+                                                ) : (
+                                                    <p id="area-help" className="text-xs text-slate-500 mt-1">We'll use this to find local tradespeople</p>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <PostcodeInput
+                                                    label="Postcode"
+                                                    placeholder="e.g., SW1A 1AA"
+                                                    value={formData.postcode}
+                                                    onChange={(value) => {
+                                                        handleInputChange('postcode', value);
+                                                        // Clear errors when postcode is updated
+                                                        if (value && formErrors.postcode) {
+                                                            setFormErrors(prev => {
+                                                                const newErrors = { ...prev };
+                                                                delete newErrors.postcode;
+                                                                return newErrors;
+                                                            });
+                                                        }
+                                                    }}
+                                                    onValid={(verifiedPostcode) => {
+                                                        console.log('Postcode verified:', verifiedPostcode);
+                                                        // You can add additional logic here when postcode is verified
+                                                    }}
+                                                    required
+                                                    showSuggestions
+                                                    maxSuggestions={8}
+                                                    helperText="We'll verify this postcode exists"
+                                                />
+                                            </div>
+                                        </div>
                                     ) : (
                                         <>
                                             <Label htmlFor="location" className="text-sm font-medium text-slate-700">
