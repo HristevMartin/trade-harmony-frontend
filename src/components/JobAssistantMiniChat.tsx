@@ -289,6 +289,11 @@ export default function JobAssistantMiniChat({ variant = 'job', jobId, title, po
         setInputValue('');
         setIsLoading(true);
 
+        const history = updatedMessages.slice(-8).map(m => ({
+            role: m.role,          
+            content: m.text,        
+        }));
+
         try {
             // Use different endpoint for home screen vs job-specific chat
             const endpoint = variant === 'home'
@@ -303,6 +308,7 @@ export default function JobAssistantMiniChat({ variant = 'job', jobId, title, po
                 },
                 body: JSON.stringify({
                     message: trimmedInput,
+                    history: history,
                     jobId: jobId || 'home',
                     jobTitle: title || 'General inquiry',
                     location: postcode || 'UK'

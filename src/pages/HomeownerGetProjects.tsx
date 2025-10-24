@@ -18,6 +18,7 @@ import {
 import { RefreshCw, CheckCircle, Trash2, Edit, Users, Clock, Star, X, Loader2, MessageCircle, Briefcase } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
+import JobAssistantMiniChat from "@/components/JobAssistantMiniChat";
 
 interface Project {
   id: string;
@@ -1030,6 +1031,11 @@ const HomeownerGetProjects = () => {
                         )}
                       </div>
 
+                      {/* AI Assistant Tip */}
+                      <p className="text-sm text-gray-500 hover:text-blue-600 transition-colors mt-2 px-1">
+                        💡 Tip: Open 'View Details' to chat with the JobHub AI Assistant and find local traders.
+                      </p>
+
                       {/* Secondary Actions Row */}
                       <div className="grid grid-cols-2 gap-3">
                         {project.status !== 'completed' && (
@@ -1404,6 +1410,7 @@ const HomeownerGetProjects = () => {
             </div>
           </div>
         )}
+
       </div>
     </>
   );
