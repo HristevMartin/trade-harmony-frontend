@@ -530,7 +530,7 @@ const JobDetail = () => {
                             {!isTrader && (
                                 <Button
                                     onClick={() => navigate(`/edit-job/${id}`)}
-                                    className="hidden sm:flex items-center gap-2 bg-jobhub-blue hover:bg-jobhub-blue/90 w-fit transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-95"
+                                    className="hidden mt-3 sm:flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white w-fit transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-95"
                                     size="sm"
                                 >
                                     <HiPencilSquare className="w-4 h-4" />
