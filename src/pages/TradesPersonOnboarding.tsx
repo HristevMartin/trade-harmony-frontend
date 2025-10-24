@@ -11,7 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ChevronLeft, ChevronRight, Upload, X, CheckCircle, Badge } from 'lucide-react';
 import AuthModal from '@/components/AuthModal';
-import UKLocationInput from '@/components/UKLocationInput';
+import PostcodeInput from '@/components/PostcodeInput';
 
 type ProDraft = {
   name: string;
@@ -417,14 +417,6 @@ const TradesPersonOnboarding = () => {
   const removeCertificationImage = (index: number) => {
     const updatedImages = formData.certificationImages.filter((_, i) => i !== index);
     updateFormData('certificationImages', updatedImages);
-  };
-
-  const normalizePostcode = (postcode: string) => {
-    return postcode.toUpperCase().replace(/\s+/g, ' ').trim();
-  };
-
-  const handlePostcodeChange = (value: string) => {
-    updateFormData('postcode', normalizePostcode(value));
   };
 
   const handleBioChange = (value: string) => {
@@ -1250,37 +1242,71 @@ const TradesPersonOnboarding = () => {
             {currentStep === 3 && (
               <>
                 <div className="space-y-6">
-                  <UKLocationInput
-                    value={{
-                      country: 'GB',
-                      location: formData.city,
-                      postcode: formData.postcode
-                    }}
-                    onChange={(locationData) => {
-                      updateFormData('city', locationData.location);
-                      updateFormData('postcode', locationData.postcode);
+                  {/* Town/City Input */}
+                  <div className="space-y-3">
+                    <Label htmlFor="city" className="text-base font-medium text-slate-900">Town/City *</Label>
+                    <Input
+                      id="city"
+                      value={formData.city}
+                      onChange={(e) => {
+                        updateFormData('city', e.target.value);
+                        // Clear error when user starts typing and value is not empty
+                        if (e.target.value.trim() && errors.city) {
+                          setErrors(prev => {
+                            const newErrors = { ...prev };
+                            delete newErrors.city;
+                            return newErrors;
+                          });
+                        }
+                      }}
+                      onBlur={() => handleFieldBlur('city')}
+                      placeholder="Enter your town or city"
+                      className={`h-12 text-base px-4 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:ring-offset-0 ${errors.city ? 'border-red-500 bg-red-50' : ''}`}
+                      style={{ borderRadius: '12px', fontSize: '16px' }}
+                      aria-invalid={!!errors.city}
+                      aria-describedby={errors.city ? 'city-error' : 'city-help'}
+                    />
+                    {errors.city ? (
+                      <p id="city-error" className="text-sm text-red-600 font-medium">{errors.city}</p>
+                    ) : (
+                      <p id="city-help" className="text-sm text-slate-500">Where are you based?</p>
+                    )}
+                  </div>
 
-                      // Clear errors when fields are updated
-                      if (locationData.location && errors.city) {
-                        setErrors(prev => {
-                          const newErrors = { ...prev };
-                          delete newErrors.city;
-                          return newErrors;
-                        });
-                      }
-                      if (locationData.postcode && errors.postcode) {
-                        setErrors(prev => {
-                          const newErrors = { ...prev };
-                          delete newErrors.postcode;
-                          return newErrors;
-                        });
-                      }
-                    }}
-                    errors={{
-                      location: errors.city,
-                      postcode: errors.postcode
-                    }}
-                  />
+                  {/* Postcode Input with Dropdown */}
+                  <div>
+                    <PostcodeInput
+                      label="Postcode"
+                      placeholder="e.g., SW1A 1AA"
+                      value={formData.postcode}
+                      onChange={(value) => {
+                        updateFormData('postcode', value);
+                        // Clear errors when postcode is updated
+                        if (value && errors.postcode) {
+                          setErrors(prev => {
+                            const newErrors = { ...prev };
+                            delete newErrors.postcode;
+                            return newErrors;
+                          });
+                        }
+                      }}
+                      onValid={(verifiedPostcode) => {
+                        console.log('Postcode verified:', verifiedPostcode);
+                        // Clear any postcode errors when verified
+                        if (errors.postcode) {
+                          setErrors(prev => {
+                            const newErrors = { ...prev };
+                            delete newErrors.postcode;
+                            return newErrors;
+                          });
+                        }
+                      }}
+                      required
+                      showSuggestions
+                      maxSuggestions={8}
+                      helperText="We'll verify this postcode exists and use it to match you with nearby jobs"
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-3">

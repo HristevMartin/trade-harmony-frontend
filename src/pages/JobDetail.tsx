@@ -79,9 +79,61 @@ const JobDetail = () => {
     } | null>(null);
     const [homeOwnerVerified, setHomeOwnerVerified] = useState(false);
     const [showVerificationModal, setShowVerificationModal] = useState(false);
+    const [isRequestingVerification, setIsRequestingVerification] = useState(false);
+    const [verificationPending, setVerificationPending] = useState(false);
+    const [showVerificationSuccess, setShowVerificationSuccess] = useState(false);
 
     // Get AI job fit data for follow-up questions
     const { followUpQuestions } = useAiJobFit(jobData?.project_id || '');
+
+    // Handler for verification request
+    const handleRequestVerification = async () => {
+        if (!user?.id) {
+            console.error('No user ID available');
+            return;
+        }
+
+        setIsRequestingVerification(true);
+        
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/homeowner/verify/user`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: user.id
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Verification request response:', data);
+            
+            // Save verification pending status to localStorage
+            const verificationKey = `verification_pending_${user.id}`;
+            localStorage.setItem(verificationKey, 'true');
+            setVerificationPending(true);
+            
+            // Show success modal
+            setShowVerificationSuccess(true);
+            
+            // Auto-hide modal after 4 seconds
+            setTimeout(() => {
+                setShowVerificationSuccess(false);
+            }, 4000);
+            
+        } catch (error) {
+            console.error('Error requesting verification:', error);
+            alert('Failed to submit verification request. Please try again.');
+        } finally {
+            setIsRequestingVerification(false);
+        }
+    };
 
     // Handler functions for follow-up questions
     const handleFollowUpQuestion = async (question: string) => {
@@ -158,6 +210,17 @@ const JobDetail = () => {
             }
         }
     }, []);
+
+    // Check if verification request is pending in localStorage
+    useEffect(() => {
+        if (user?.id) {
+            const verificationKey = `verification_pending_${user.id}`;
+            const isPending = localStorage.getItem(verificationKey);
+            if (isPending === 'true') {
+                setVerificationPending(true);
+            }
+        }
+    }, [user]);
 
     useEffect(() => {
         const getCustomerApplication = async () => {
@@ -292,12 +355,18 @@ const JobDetail = () => {
             let data = await apiResponse.json()
             if (data.status === true) {
                 setHomeOwnerVerified(true)
+                // Clear pending verification status from localStorage when verified
+                if (user?.id) {
+                    const verificationKey = `verification_pending_${user.id}`;
+                    localStorage.removeItem(verificationKey);
+                    setVerificationPending(false);
+                }
             } else {
                 setHomeOwnerVerified(false)
             }
         }
         apiCall()
-    }, [id])
+    }, [id, user])
 
 
     const formatDate = (dateString: string) => {
@@ -475,6 +544,14 @@ const JobDetail = () => {
                                     <HiCheckCircle className="w-4 h-4" />
                                     Verified Client
                                 </Badge>
+                            ) : verificationPending ? (
+                                <Badge 
+                                    className="bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-1.5 text-xs px-2.5 py-0.5 rounded-full font-medium hover:bg-blue-100 transition-colors cursor-pointer"
+                                    onClick={() => setShowVerificationModal(true)}
+                                >
+                                    <HiClock className="w-4 h-4" />
+                                    Verification Pending
+                                </Badge>
                             ) : (
                                 <Badge 
                                     className="bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1.5 text-xs px-2.5 py-0.5 rounded-full font-medium hover:bg-amber-100 transition-colors cursor-pointer"
@@ -487,7 +564,7 @@ const JobDetail = () => {
                         </div>
 
                         {/* Verification Info Message - Only for homeowners */}
-                        {!isTrader && !homeOwnerVerified && (
+                        {!isTrader && !homeOwnerVerified && !verificationPending && (
                             <div className="mt-4 mb-4 p-4 bg-jobhub-infoBg border border-blue-200 rounded-xl">
                                 <div className="flex items-start gap-3">
                                     <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
@@ -501,10 +578,29 @@ const JobDetail = () => {
                                         <Button 
                                             variant="outline" 
                                             size="sm"
-                                            className="bg-white border-jobhub-blue text-jobhub-blue hover:bg-jobhub-blue/5 text-xs font-medium"
+                                            onClick={handleRequestVerification}
+                                            disabled={isRequestingVerification}
+                                            className="bg-white border-jobhub-blue text-jobhub-blue hover:bg-jobhub-blue/5 text-xs font-medium disabled:opacity-50"
                                         >
-                                            Start Verification Process
+                                            {isRequestingVerification ? 'Requesting...' : 'Request Verification'}
                                         </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Verification Pending Message - Only for homeowners with pending verification */}
+                        {!isTrader && !homeOwnerVerified && verificationPending && (
+                            <div className="mt-4 mb-4 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                                <div className="flex items-start gap-3">
+                                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <HiClock className="w-4 h-4 text-blue-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h4 className="text-gray-900 font-semibold mb-2 text-sm">Verification Request Submitted</h4>
+                                        <p className="text-gray-700 text-sm leading-relaxed">
+                                            Your verification request has been received! Our team is reviewing your account. You'll be notified once the verification process is complete.
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -1050,6 +1146,44 @@ const JobDetail = () => {
                                     Got it
                                 </Button>
                             </>
+                        ) : verificationPending ? (
+                            <>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <HiClock className="w-6 h-6 text-blue-600" />
+                                    </div>
+                                    <h3 className="text-lg font-semibold text-gray-900">Verification Pending</h3>
+                                </div>
+                                
+                                <div className="space-y-3 mb-6">
+                                    <p className="text-gray-600 text-sm leading-relaxed">
+                                        Your verification request is currently being reviewed by our team. This process typically takes 1-2 business days.
+                                    </p>
+                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                        <div className="flex items-start gap-2">
+                                            <HiClock className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                                            <div className="text-xs text-blue-800">
+                                                <p className="font-medium mb-1">We're checking:</p>
+                                                <ul className="space-y-1 text-xs">
+                                                    <li>• Identity confirmation</li>
+                                                    <li>• Activity validation</li>
+                                                    <li>• Platform compliance check</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p className="text-gray-500 text-xs">
+                                        You'll receive an email notification once your account has been verified.
+                                    </p>
+                                </div>
+                                
+                                <Button
+                                    onClick={() => setShowVerificationModal(false)}
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                                >
+                                    Got it
+                                </Button>
+                            </>
                         ) : (
                             <>
                                 <div className="flex items-center gap-3 mb-4">
@@ -1098,6 +1232,31 @@ const JobDetail = () => {
                     postcode={jobData.additional_data.location}
                     serviceCategory={jobData.additional_data.serviceCategory}
                 />
+            )}
+
+            {/* Verification Success Modal */}
+            {showVerificationSuccess && (
+                <div className="fixed top-4 right-4 z-50 animate-slide-in-right">
+                    <div className="bg-emerald-500 text-white rounded-lg shadow-lg p-4 max-w-sm border border-emerald-600">
+                        <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0">
+                                <HiCheckCircle className="w-5 h-5 text-white" />
+                            </div>
+                            <div className="flex-1">
+                                <h4 className="font-semibold text-sm mb-1">Verification Request Submitted!</h4>
+                                <p className="text-emerald-100 text-xs leading-relaxed">
+                                    We will review your request shortly. You'll be notified once verification is complete.
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setShowVerificationSuccess(false)}
+                                className="flex-shrink-0 text-emerald-100 hover:text-white transition-colors"
+                            >
+                                <HiXMark className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </>
     );
