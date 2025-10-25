@@ -196,7 +196,7 @@ const Auth = () => {
           <Card className="shadow-xl border-0 bg-white/95 backdrop-blur flex-1 md:flex-initial">
             <CardHeader className="space-y-4 pb-6">
               <div className="text-center">
-                <CardTitle className="text-2xl font-bold text-trust-blue">Welcome to JobHub</CardTitle>
+                <CardTitle className="text-2xl font-bold text-trust-blue">Welcome to HireLocal</CardTitle>
                 <CardDescription className="text-muted-foreground mt-2">
                   {activeTab === 'login' 
                     ? 'Sign in to your account to continue' 
@@ -318,7 +318,7 @@ const Auth = () => {
                     <Button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full h-12 bg-accent-orange hover:bg-accent-orange/90 text-white font-semibold transition-all duration-300 mt-6 active:scale-[0.98] hover:shadow-lg"
+                      className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all duration-300 mt-6 active:scale-[0.98] hover:shadow-lg"
                     >
                       {isLoading ? (
                         <>
@@ -388,7 +388,7 @@ const Auth = () => {
                       <Button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full h-12 bg-accent-orange hover:bg-accent-orange/90 text-white font-semibold transition-all duration-300"
+                        className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all duration-300"
                       >
                         {isLoading ? (
                           <>
@@ -435,7 +435,7 @@ const Auth = () => {
                       {/* Primary CTA - Post a Job */}
                       <Button
                         onClick={() => navigate('/post-job')}
-                        className="bg-orange-500 text-white hover:bg-orange-600 w-full py-2.5 rounded-lg font-medium h-12 min-h-[48px] transition-all duration-300"
+                        className="bg-blue-600 text-white hover:bg-blue-700 w-full py-2.5 rounded-lg font-medium h-12 min-h-[48px] transition-all duration-300"
                         aria-label="Post a Job"
                       >
                         Post a Job
@@ -485,7 +485,7 @@ const Auth = () => {
               type="submit"
               form="auth-form"
               disabled={isLoading}
-              className="w-full h-12 min-h-[48px] bg-accent-orange hover:bg-accent-orange/90 text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl active:scale-[0.98]"
+              className="w-full h-12 min-h-[48px] bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl active:scale-[0.98]"
             >
               {isLoading ? (
                 <>
