@@ -711,8 +711,25 @@ const PostJob = () => {
     };
 
     // Handle authentication success
-    const handleAuthSuccess = (authData: { id: string; role: string; token: string; email?: string }) => {
+    const handleAuthSuccess = async (authData: { id: string; role: string; token: string; email?: string }) => {
         console.log('Authentication successful:', authData);
+        
+        // CRITICAL: Update localStorage immediately
+        localStorage.setItem('auth_user', JSON.stringify({
+            id: authData.id,
+            role: authData.role,
+        }));
+        console.log('✅ localStorage updated');
+        
+        // CRITICAL: Mark recent login to prevent interceptor redirects
+        const { markRecentLogin } = await import('@/lib/fetch-interceptor');
+        markRecentLogin();
+        console.log('✅ markRecentLogin called');
+        
+        // CRITICAL: Dispatch auth change event
+        window.dispatchEvent(new Event('authChange'));
+        console.log('✅ authChange dispatched');
+        
         setShowAuthModal(false);
         
         // Check if the authenticated user has the correct role
@@ -1924,7 +1941,7 @@ const PostJob = () => {
                         <div className="text-center space-y-4 mt-8 sm:block hidden md:block md:mt-0">
                             <button 
                                 type="submit" 
-                                className="inline-flex items-center justify-center rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-medium px-6 py-3 shadow-md hover:shadow-lg transition w-full md:w-auto md:px-12 md:py-4 md:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="inline-flex items-center justify-center rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 shadow-md hover:shadow-lg transition w-full md:w-auto md:px-12 md:py-4 md:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={isSubmitting || showAuthModal}
                                 aria-busy={isSubmitting}
                             >
@@ -1955,7 +1972,7 @@ const PostJob = () => {
                         <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur border-t p-3 md:hidden z-50">
                             <button 
                                 type="submit" 
-                                className="inline-flex items-center justify-center rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-medium px-6 py-3 shadow-md hover:shadow-lg transition w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="inline-flex items-center justify-center rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 shadow-md hover:shadow-lg transition w-full disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={isSubmitting || showAuthModal}
                                 aria-busy={isSubmitting}
                             >
@@ -2055,6 +2072,7 @@ const PostJob = () => {
                 onSuccess={handleAuthSuccess}
                 initialEmail={formData.email}
                 defaultTab="register"
+                role="customer"
             />
         </>
     );

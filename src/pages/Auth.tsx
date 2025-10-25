@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, EyeOff, Loader2, Mail, Lock, User, ArrowLeft } from "lucide-react";
 import { markRecentLogin } from "@/lib/fetch-interceptor";
+import { GoogleLogin } from '@react-oauth/google';
+
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -16,29 +18,30 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  
+  const [showGoogleSignupOptions, setShowGoogleSignupOptions] = useState(false);
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     confirmPassword: ''
   });
-  
+
   const [forgotPasswordSent, setForgotPasswordSent] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => {
       const newData = { ...prev, [name]: value };
-      
+
       // Clear errors after state update, with access to new values
       setErrors(prevErrors => {
         const newErrors = { ...prevErrors };
-        
+
         // Clear current field error
         if (newErrors[name]) {
           delete newErrors[name];
         }
-        
+
         // Clear confirmPassword error when either password field changes
         // But only if passwords now match
         if (name === 'password' || name === 'confirmPassword') {
@@ -48,10 +51,10 @@ const Auth = () => {
             delete newErrors.confirmPassword;
           }
         }
-        
+
         return newErrors;
       });
-      
+
       return newData;
     });
   };
@@ -90,7 +93,7 @@ const Auth = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -112,15 +115,15 @@ const Auth = () => {
         console.log('the header in here is', headers);
       } else {
         endpoint = activeTab === 'login' ? '/travel/login' : '/travel/register';
-        payload = activeTab === 'login' 
-          ? { 
-              email: formData.email, 
-              password: formData.password 
-            }
-          : { 
-              email: formData.email, 
-              password: formData.password 
-            };
+        payload = activeTab === 'login'
+          ? {
+            email: formData.email,
+            password: formData.password
+          }
+          : {
+            email: formData.email,
+            password: formData.password
+          };
         headers = {
           "Content-Type": "application/json",
         }
@@ -132,7 +135,7 @@ const Auth = () => {
       const response = await fetch(fullUrl, {
         method: 'POST',
         headers: headers,
-        credentials: 'include', 
+        credentials: 'include',
         body: JSON.stringify(payload),
       });
 
@@ -142,15 +145,15 @@ const Auth = () => {
         if (activeTab === 'forgot-password') {
           setForgotPasswordSent(true);
         } else {
-          localStorage.setItem('auth_user', JSON.stringify({ 
-            id: data.id, 
-            role: data.role, 
+          localStorage.setItem('auth_user', JSON.stringify({
+            id: data.id,
+            role: data.role,
           }));
-          
+
           markRecentLogin();
-          
+
           window.dispatchEvent(new Event('authChange'));
-          
+
           const nextPath = searchParams.get('next') || '/';
           navigate(nextPath);
         }
@@ -168,11 +171,66 @@ const Auth = () => {
     setActiveTab(tab);
     setErrors({});
     setForgotPasswordSent(false);
+    setShowGoogleSignupOptions(false);
     setFormData({
       email: '',
       password: '',
       confirmPassword: ''
     });
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    setIsLoading(true);
+    setErrors({});
+    setShowGoogleSignupOptions(false);
+
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const response = await fetch(`${apiUrl}/travel/auth/google`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          credential: credentialResponse.credential
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem('auth_user', JSON.stringify({
+          id: data.id,
+          role: data.role,
+        }));
+
+        markRecentLogin();
+        window.dispatchEvent(new Event('authChange'));
+
+        const nextPath = searchParams.get('next') || '/';
+        navigate(nextPath);
+      } else {
+        // Check if this is a "no account" error
+        if (response.status === 400 && data.message && data.message.toLowerCase().includes("don't have an account")) {
+          setErrors({ general: "You don't have an account yet. Please choose how you'd like to continue:" });
+          setShowGoogleSignupOptions(true);
+        } else {
+          setErrors({ general: data.message || 'Google authentication failed' });
+          setShowGoogleSignupOptions(false);
+        }
+      }
+    } catch (error) {
+      console.error('Google auth error:', error);
+      setErrors({ general: 'Network error. Please try again.' });
+      setShowGoogleSignupOptions(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setErrors({ general: 'Google sign-in was cancelled or failed.' });
   };
 
   return (
@@ -196,13 +254,13 @@ const Auth = () => {
           <Card className="shadow-xl border-0 bg-white/95 backdrop-blur flex-1 md:flex-initial">
             <CardHeader className="space-y-4 pb-6">
               <div className="text-center">
-                <CardTitle className="text-2xl font-bold text-trust-blue">Welcome to JobHub</CardTitle>
+                <CardTitle className="text-2xl font-bold text-trust-blue">Welcome to HireLocal</CardTitle>
                 <CardDescription className="text-muted-foreground mt-2">
-                  {activeTab === 'login' 
-                    ? 'Sign in to your account to continue' 
+                  {activeTab === 'login'
+                    ? 'Sign in to your account to continue'
                     : activeTab === 'register'
-                    ? 'Create your account to get started'
-                    : 'Enter your email to reset your password'
+                      ? 'Create your account to get started'
+                      : 'Enter your email to reset your password'
                   }
                 </CardDescription>
               </div>
@@ -212,21 +270,19 @@ const Auth = () => {
                 <div className="flex rounded-lg bg-muted p-1">
                   <button
                     onClick={() => switchTab('login')}
-                    className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 ${
-                      activeTab === 'login'
-                        ? 'bg-white text-trust-blue shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
+                    className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 ${activeTab === 'login'
+                      ? 'bg-white text-trust-blue shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                      }`}
                   >
                     Login
                   </button>
                   <button
                     onClick={() => switchTab('register')}
-                    className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 ${
-                      activeTab === 'register'
-                        ? 'bg-white text-trust-blue shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
+                    className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all duration-200 ${activeTab === 'register'
+                      ? 'bg-white text-trust-blue shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                      }`}
                   >
                     Register
                   </button>
@@ -238,99 +294,142 @@ const Auth = () => {
               {/* General Error */}
               {errors.general && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                  {errors.general}
+                  <p className="mb-3">{errors.general}</p>
+                  
+                  {/* Google Signup Options */}
+                  {showGoogleSignupOptions && (
+                    <div className="space-y-2 mt-4">
+                      <Button
+                        onClick={() => navigate('/post-job')}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-colors text-sm"
+                      >
+                        Post a Job (Homeowners)
+                      </Button>
+                      <Button
+                        onClick={() => navigate('/tradesperson/onboarding')}
+                        variant="outline"
+                        className="w-full border-blue-600 text-blue-600 hover:bg-blue-50 font-medium py-2 rounded-lg transition-colors text-sm"
+                      >
+                        Join as Tradesperson
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
 
               {activeTab === 'login' ? (
-                <form id="auth-form" onSubmit={handleSubmit} className="space-y-5 flex-1 flex flex-col md:block">
-                  <div className="flex-1 space-y-5 md:space-y-5">
-                  {/* Email Field */}
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-medium text-foreground">
-                      Email Address
-                    </Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        placeholder="Enter your email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        className={`pl-10 h-12 min-h-[48px] rounded-lg border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 ${errors.email ? 'border-red-300 bg-red-50' : ''}`}
-                        disabled={isLoading}
-                        aria-invalid={!!errors.email}
-                      />
+                <>
+                  <form id="auth-form" onSubmit={handleSubmit} className="space-y-5 flex-1 flex flex-col md:block">
+                    <div className="flex-1 space-y-5 md:space-y-5">
+                      {/* Email Field */}
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className="text-sm font-medium text-foreground">
+                          Email Address
+                        </Label>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            id="email"
+                            name="email"
+                            type="email"
+                            placeholder="Enter your email"
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            className={`pl-10 h-12 min-h-[48px] rounded-lg border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 ${errors.email ? 'border-red-300 bg-red-50' : ''}`}
+                            disabled={isLoading}
+                            aria-invalid={!!errors.email}
+                          />
+                        </div>
+                        {errors.email && (
+                          <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                        )}
+                      </div>
+
+                      {/* Password Field */}
+                      <div className="space-y-2">
+                        <Label htmlFor="password" className="text-sm font-medium text-foreground">
+                          Password
+                        </Label>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            id="password"
+                            name="password"
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="Enter your password"
+                            value={formData.password}
+                            onChange={handleInputChange}
+                            className={`pl-10 pr-10 h-12 min-h-[48px] rounded-lg border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 ${errors.password ? 'border-red-300 bg-red-50' : ''}`}
+                            disabled={isLoading}
+                            aria-invalid={!!errors.password}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                            aria-label={showPassword ? "Hide password" : "Show password"}
+                          >
+                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
+                        </div>
+                        {errors.password && (
+                          <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+                        )}
+
+                        {/* Forgot Password Link - Moved here for better visual association */}
+                        <div className="text-right pt-1">
+                          <button
+                            type="button"
+                            onClick={() => switchTab('forgot-password')}
+                            className="text-sm text-trust-blue hover:underline transition-all"
+                          >
+                            Forgot your password?
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                    {errors.email && (
-                      <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-                    )}
+
+                    {/* Desktop Submit Button - Login Only */}
+                    <div className="hidden md:block">
+                      <Button
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all duration-300 mt-6 active:scale-[0.98] hover:shadow-lg"
+                      >
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Signing in...
+                          </>
+                        ) : (
+                          'Sign In'
+                        )}
+                      </Button>
+                    </div>
+                  </form>
+
+                  {/* Divider */}
+                  <div className="relative my-6">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-gray-300" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-white px-2 text-gray-500">Or continue with</span>
+                    </div>
                   </div>
 
-                  {/* Password Field */}
-                  <div className="space-y-2">
-                    <Label htmlFor="password" className="text-sm font-medium text-foreground">
-                      Password
-                    </Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="password"
-                        name="password"
-                        type={showPassword ? 'text' : 'password'}
-                        placeholder="Enter your password"
-                        value={formData.password}
-                        onChange={handleInputChange}
-                        className={`pl-10 pr-10 h-12 min-h-[48px] rounded-lg border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 ${errors.password ? 'border-red-300 bg-red-50' : ''}`}
-                        disabled={isLoading}
-                        aria-invalid={!!errors.password}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                        aria-label={showPassword ? "Hide password" : "Show password"}
-                      >
-                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </button>
-                    </div>
-                    {errors.password && (
-                      <p className="text-red-500 text-xs mt-1">{errors.password}</p>
-                    )}
-                    
-                    {/* Forgot Password Link - Moved here for better visual association */}
-                    <div className="text-right pt-1">
-                      <button 
-                        type="button"
-                        onClick={() => switchTab('forgot-password')}
-                        className="text-sm text-trust-blue hover:underline transition-all"
-                      >
-                        Forgot your password?
-                      </button>
-                    </div>
+                  {/* Google Sign-In Button */}
+                  <div className="w-full flex justify-center px-4">
+                    <GoogleLogin
+                      onSuccess={handleGoogleSuccess}
+                      onError={handleGoogleError}
+                      useOneTap={false}
+                      theme="outline"
+                      size="large"
+                      text="signin_with"
+                    />
                   </div>
-                  </div>
-
-                  {/* Desktop Submit Button - Login Only */}
-                  <div className="hidden md:block">
-                    <Button
-                      type="submit"
-                      disabled={isLoading}
-                      className="w-full h-12 bg-accent-orange hover:bg-accent-orange/90 text-white font-semibold transition-all duration-300 mt-6 active:scale-[0.98] hover:shadow-lg"
-                    >
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Signing in...
-                        </>
-                      ) : (
-                        'Sign In'
-                      )}
-                    </Button>
-                  </div>
-                </form>
+                </>
               ) : activeTab === 'forgot-password' ? (
                 /* Forgot Password Form */
                 <div className="space-y-6">
@@ -388,7 +487,7 @@ const Auth = () => {
                       <Button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full h-12 bg-accent-orange hover:bg-accent-orange/90 text-white font-semibold transition-all duration-300"
+                        className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all duration-300"
                       >
                         {isLoading ? (
                           <>
@@ -419,7 +518,7 @@ const Auth = () => {
                     <h3 className="text-xl font-semibold text-foreground mb-4">
                       Create your account by starting the right journey
                     </h3>
-                    
+
                     <div className="space-y-4 text-left">
                       <p className="text-sm text-gray-600 flex items-start gap-2">
                         <span className="text-accent-orange font-bold">•</span>
@@ -435,7 +534,7 @@ const Auth = () => {
                       {/* Primary CTA - Post a Job */}
                       <Button
                         onClick={() => navigate('/post-job')}
-                        className="bg-orange-500 text-white hover:bg-orange-600 w-full py-2.5 rounded-lg font-medium h-12 min-h-[48px] transition-all duration-300"
+                        className="bg-blue-600 text-white hover:bg-blue-700 w-full py-2.5 rounded-lg font-medium h-12 min-h-[48px] transition-all duration-300"
                         aria-label="Post a Job"
                       >
                         Post a Job
@@ -485,7 +584,7 @@ const Auth = () => {
               type="submit"
               form="auth-form"
               disabled={isLoading}
-              className="w-full h-12 min-h-[48px] bg-accent-orange hover:bg-accent-orange/90 text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl active:scale-[0.98]"
+              className="w-full h-12 min-h-[48px] bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl active:scale-[0.98]"
             >
               {isLoading ? (
                 <>

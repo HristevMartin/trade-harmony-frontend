@@ -633,8 +633,24 @@ const TradesPersonOnboarding = () => {
   }, [formData, isSubmitting, hasSubmitted, navigate]);
 
   // Handle authentication success
-  const handleAuthSuccess = useCallback((authData: { id: string; role: string; token: string; email?: string }) => {
+  const handleAuthSuccess = useCallback(async (authData: { id: string; role: string; token: string; email?: string }) => {
     console.log('Authentication successful:', authData);
+
+    // CRITICAL: Update localStorage immediately
+    localStorage.setItem('auth_user', JSON.stringify({
+      id: authData.id,
+      role: authData.role,
+    }));
+    console.log('✅ localStorage updated');
+    
+    // CRITICAL: Mark recent login to prevent interceptor redirects
+    const { markRecentLogin } = await import('@/lib/fetch-interceptor');
+    markRecentLogin();
+    console.log('✅ markRecentLogin called');
+    
+    // CRITICAL: Dispatch auth change event
+    window.dispatchEvent(new Event('authChange'));
+    console.log('✅ authChange dispatched');
 
     // Clear any previous errors
     setErrors(prev => ({ ...prev, general: '' }));

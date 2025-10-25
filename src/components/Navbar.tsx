@@ -232,7 +232,7 @@ const Navbar = () => {
 
   return (
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-4">
+      <div className="container mx-auto px-4 pt-6 sm:pt-8 pb-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <motion.div
@@ -241,9 +241,15 @@ const Navbar = () => {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-2xl font-bold text-trust-blue"
+            className="flex items-center gap-2 group"
           >
-            JobHub
+            <div className="relative">
+              <div className="w-7 h-7 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300 ring-1 ring-blue-100/50">
+                <span className="text-white font-bold text-xs">H</span>
+              </div>
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white shadow-sm"></div>
+            </div>
+            <span className="text-xl font-bold text-gray-900">HireLocal</span>
           </motion.div>
 
           {/* Desktop Navigation */}

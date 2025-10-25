@@ -96,7 +96,7 @@ const Index = () => {
   const showPopularServices = !isTrader;
 
   const countries = [
-    { name: "United Kingdom", code: "UK", flag: "🇬🇧" },
+    { name: "United Kingdom", code: "UK", flag: "GB" },
   ];
 
   const services = [
@@ -123,7 +123,7 @@ const Index = () => {
       service: "Verified Homeowner"
     },
     {
-      text: "Been getting steady work through JobHub for three months now. The verification badge really helps customers trust me straight away.",
+      text: "Been getting steady work through HireLocal for three months now. The verification badge really helps customers trust me straight away.",
       name: "James M.",
       location: "Croydon, London",
       avatar: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=150&h=150&fit=crop&crop=face",
@@ -139,7 +139,7 @@ const Index = () => {
       service: "Verified Homeowner"
     },
     {
-      text: "No more paying for leads that go nowhere. JobHub only charges when both sides agree, which is fair for everyone.",
+      text: "No more paying for leads that go nowhere. HireLocal only charges when both sides agree, which is fair for everyone.",
       name: "David P.",
       location: "Wandsworth, London",
       avatar: "https://images.unsplash.com/photo-1504593811423-6dd665756598?w=150&h=150&fit=crop&crop=face",
@@ -265,10 +265,10 @@ const Index = () => {
       `}</style>
       
       
-      <div className="max-w-6xl lg:max-w-7xl mx-auto px-4 sm:px-6">
+      <div className="max-w-6xl lg:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
       {/* Hero Section */}
-      <section className="relative min-h-[80vh] lg:min-h-[85vh] overflow-hidden bg-jobhub-surface before:absolute before:inset-0 before:bg-gradient-to-t before:from-white/40 before:via-transparent before:to-transparent before:z-[1]">
+      <section className="relative min-h-[70vh] sm:min-h-[75vh] lg:min-h-[85vh] overflow-hidden bg-jobhub-surface before:absolute before:inset-0 before:bg-gradient-to-t before:from-white/40 before:via-transparent before:to-transparent before:z-[1]">
         {/* Background Decorative Images - Positioned Outside Content Area */}
         <div className="absolute inset-0 z-0 pointer-events-none">
           {/* Left Side Images */}
@@ -370,8 +370,8 @@ const Index = () => {
         </div>
         
         {/* Main Content Container - Centered with Safe Margins */}
-        <div className="relative z-10 flex flex-col justify-center min-h-[80vh] lg:min-h-[85vh] py-12 md:py-16">
-          <div className="max-w-5xl mx-auto">
+        <div className="relative z-10 flex flex-col justify-center min-h-[70vh] sm:min-h-[75vh] lg:min-h-[85vh] py-8 sm:py-12 md:py-16">
+          <div className="max-w-5xl mx-auto w-full">
             
             {/* Hero Title Section */}
             <div  className="text-center">
@@ -383,26 +383,25 @@ const Index = () => {
               className="inline-flex items-center gap-2 bg-jobhub-infoBg text-blue-800 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full mb-4 sm:mb-6 font-semibold border border-jobhub-border shadow-subtle hover:shadow-lift transition-all duration-300 text-xs sm:text-sm md:text-base"
             >
               <span className="text-lg sm:text-xl">💫</span>
-              <span className="text-jobhub-blueFg font-bold">Built for UK homeowners — verified trades, powered by AI</span>
+              <span className="text-jobhub-blueFg font-bold">Built for UK homeowners & verified trades, powered by AI</span>
             </motion.div>
             
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
-                className="font-bold leading-tight tracking-tight text-[clamp(1.8rem,5vw,3.2rem)] text-jobhub-text mb-6 md:mb-8 max-w-4xl mx-auto"
+                className="font-bold leading-tight tracking-tight text-[clamp(1.5rem,5vw,3.2rem)] text-jobhub-text mb-4 sm:mb-6 md:mb-8 max-w-4xl mx-auto px-2"
             >
-                Smarter Local Hiring —{" "}
-              <span className="text-jobhub-blue">Where Real Verification Meets AI</span>
+                <div className="text-jobhub-black">Smarter Local Hiring</div>
             </motion.h1>
             
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-                className="text-jobhub-subtext text-[clamp(1rem,2.8vw,1.25rem)] mb-3 sm:mb-5 max-w-3xl mx-auto leading-relaxed"
+                className="text-jobhub-subtext text-[clamp(0.95rem,2.8vw,1.25rem)] mb-3 sm:mb-5 max-w-3xl mx-auto leading-relaxed px-2"
             >
-                AI helps you post clearly. Verified local pros bring it to life.
+                Post with confidence using AI — verified local pros handle the rest.
             </motion.p>
             </div>
 
@@ -411,10 +410,10 @@ const Index = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="mt-3"
+              className="mt-3 px-2"
             >
-              <div className="bg-jobhub-card rounded-2xl border border-jobhub-border shadow-lift p-4 sm:p-5 md:p-6">
-                <div className="space-y-4 md:space-y-0 md:flex md:gap-3">
+              <div className="bg-jobhub-card rounded-2xl border border-jobhub-border shadow-lift p-3 sm:p-4 md:p-5 lg:p-6">
+                <div className="space-y-3 md:space-y-0 md:flex md:gap-3">
                   {/* Country Dropdown */}
                 <div className="flex-1">
                     <label htmlFor="country-select" className="sr-only">Select Country</label>
@@ -428,10 +427,7 @@ const Index = () => {
                     <SelectContent>
                         {countries.map((country) => (
                           <SelectItem key={country.code} value={country.code}>
-                            <div className="flex items-center gap-2">
-                              <span>{country.flag}</span>
-                              <span>{country.name}</span>
-                            </div>
+                            {country.name}
                           </SelectItem>
                         ))}
                     </SelectContent>
@@ -478,7 +474,7 @@ const Index = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
-              className="mt-4 md:hidden space-y-3"
+              className="mt-4 md:hidden space-y-3 px-2"
             >
               <Button 
                 size="lg" 
@@ -513,12 +509,12 @@ const Index = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
-              className="mt-4 sm:mt-5"
+              className="mt-4 sm:mt-5 px-2"
             >
               <p 
                 role="note" 
                 aria-label="Trust indicators"
-                className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base"
+                className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base px-2"
             >
               <span className="text-jobhub-text font-semibold">Now live</span>
               <div className="flex">
@@ -535,7 +531,7 @@ const Index = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.8 }}
-              className="text-center mt-6"
+              className="text-center mt-4 sm:mt-6 px-2"
             >
               <p className="text-jobhub-subtext text-xs sm:text-sm font-medium">
                 Free to post. No obligation.
@@ -547,8 +543,8 @@ const Index = () => {
 
       {/* Service Categories Grid */}
       {showPopularServices && (
-        <section className="py-section bg-white border-t border-jobhub-border">
-          <div className="space-y-6 md:space-y-10">
+        <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-white border-t border-jobhub-border">
+          <div className="space-y-6 md:space-y-10 px-2 sm:px-0">
             <div className="text-center">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -560,7 +556,7 @@ const Index = () => {
               </motion.div>
           </div>
           
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
             {services.map((service, index) => (
               <motion.div
                 key={service.name}
@@ -569,19 +565,19 @@ const Index = () => {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
                   <Card 
-                    className="rounded-2xl p-4 sm:p-6 shadow-subtle hover:shadow-lift hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group border border-jobhub-border hover:border-jobhub-blue/30 bg-jobhub-card focus:outline-none focus:ring-2 focus:ring-jobhub-blue/40"
+                    className="rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 shadow-subtle hover:shadow-lift hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group border border-jobhub-border hover:border-jobhub-blue/30 bg-jobhub-card focus:outline-none focus:ring-2 focus:ring-jobhub-blue/40"
                     onClick={() => handleServiceClick(service.slug)}
                     onKeyPress={(e) => handleServiceKeyPress(e, service.slug)}
                     role="button"
                     tabIndex={0}
                   >
                     <CardContent className="p-0 text-center relative overflow-hidden">
-                      <div className={`text-jobhub-blue mb-3 transition-all duration-300 relative z-10 flex justify-center`}>
-                        <div className="w-8 h-8" aria-hidden="true">
+                      <div className={`text-jobhub-blue mb-2 sm:mb-3 transition-all duration-300 relative z-10 flex justify-center`}>
+                        <div className="w-6 h-6 sm:w-8 sm:h-8" aria-hidden="true">
                           {service.icon}
                         </div>
                       </div>
-                      <h3 className="font-semibold text-sm sm:text-base leading-tight text-jobhub-text group-hover:text-jobhub-blue transition-colors relative z-10">{service.name}</h3>
+                      <h3 className="font-semibold text-xs sm:text-sm md:text-base leading-tight text-jobhub-text group-hover:text-jobhub-blue transition-colors relative z-10">{service.name}</h3>
                       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <Sparkles className="h-3 w-3 text-jobhub-blue" />
                       </div>
@@ -595,15 +591,15 @@ const Index = () => {
       )}
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="py-section bg-jobhub-surface">
-        <div className="space-y-6 md:space-y-10">
+      <section id="how-it-works" className="py-8 sm:py-12 md:py-16 lg:py-20 bg-jobhub-surface">
+        <div className="space-y-6 md:space-y-10 px-2 sm:px-4 lg:px-0">
           <div className="text-center max-w-3xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-jobhub-text mb-3 sm:mb-4">How JobHub Works</h2>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-jobhub-text mb-3 sm:mb-4">How HireLocal Works</h2>
               <p className="text-jobhub-subtext text-base sm:text-lg px-4 max-w-2xl mx-auto">Smart AI assistance meets human verification — for your perfect match</p>
             </motion.div>
           </div>
@@ -612,7 +608,7 @@ const Index = () => {
             {/* Connection lines - desktop only */}
             <div className="hidden md:block absolute top-24 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-jobhub-border to-transparent" aria-hidden="true" />
             
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-4 relative">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-4 relative">
               {[
                 {
                   icon: <ClipboardList className="h-10 w-10" />,
@@ -647,7 +643,7 @@ const Index = () => {
                   transition={{ duration: 0.5, delay: index * 0.15 }}
                   className="relative"
                 >
-                  <div className="rounded-2xl py-6 px-6 bg-jobhub-card border border-jobhub-border text-center group shadow-subtle hover:shadow-lift hover:-translate-y-0.5 transition-all duration-300 h-full min-h-[220px] sm:min-h-0">
+                  <div className="rounded-xl sm:rounded-2xl py-5 sm:py-6 px-4 sm:px-6 bg-jobhub-card border border-jobhub-border text-center group shadow-subtle hover:shadow-lift hover:-translate-y-0.5 transition-all duration-300 h-full min-h-[200px] sm:min-h-0">
                     {/* Step number badge */}
                     <div className="bg-jobhub-infoBg text-jobhub-blue rounded-full w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center mx-auto mb-4 text-base font-bold border border-jobhub-border group-hover:scale-110 transition-all duration-300">
                       {index + 1}
@@ -679,8 +675,8 @@ const Index = () => {
       <hr className="my-6 border-gray-200 sm:hidden" />
       
       {/* Verified Network Section */}
-      <section className="py-section bg-white border-t border-jobhub-border">
-        <div className="space-y-6 md:space-y-10">
+      <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-white border-t border-jobhub-border">
+        <div className="space-y-6 md:space-y-10 px-2 sm:px-4 lg:px-0">
           <div className="text-center max-w-3xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -698,14 +694,14 @@ const Index = () => {
             </motion.div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
             {/* Left: What we verify */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="rounded-2xl p-6 md:p-8 bg-jobhub-card border border-jobhub-border shadow-subtle"
+              className="rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 bg-jobhub-card border border-jobhub-border shadow-subtle"
             >
               <h3 className="text-xl sm:text-2xl font-bold text-jobhub-text mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
                 <CheckCircle2 className="h-6 w-6 sm:h-7 sm:w-7 text-emerald-600" />
@@ -745,7 +741,7 @@ const Index = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="rounded-2xl p-6 md:p-8 bg-jobhub-surface border border-jobhub-border shadow-subtle"
+              className="rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 bg-jobhub-surface border border-jobhub-border shadow-subtle"
             >
               <h3 className="text-xl sm:text-2xl font-bold text-jobhub-text mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
                 <Shield className="h-6 w-6 sm:h-7 sm:w-7 text-emerald-600" />
@@ -819,8 +815,8 @@ const Index = () => {
       <hr className="my-6 border-gray-200 sm:hidden" />
 
       {/* AI Job Matching Section */}
-      <section className="py-section bg-jobhub-surface border-t border-jobhub-border">
-        <div className="space-y-6 md:space-y-10">
+      <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-jobhub-surface border-t border-jobhub-border">
+        <div className="space-y-6 md:space-y-10 px-2 sm:px-4 lg:px-0">
           <div className="text-center max-w-3xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -842,7 +838,7 @@ const Index = () => {
           </div>
           
           {/* Visual matching examples */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
             {[
               {
                 badge: "Perfect Fit",
@@ -891,7 +887,7 @@ const Index = () => {
                   index === 0 ? 'border-emerald-200 ring-1 ring-emerald-100' : 
                   index === 1 ? 'border-blue-200' : 
                   'border-jobhub-border opacity-75'
-                } transition-all duration-300 hover:shadow-lift hover:-translate-y-0.5`}
+                } transition-all duration-300 hover:shadow-lift hover:-translate-y-0.5 sm:col-span-1 ${index === 2 ? 'sm:col-span-2 md:col-span-1' : ''}`}
               >
                 {/* Match badge */}
                 <div className="flex flex-wrap items-center gap-2 mb-4">
@@ -944,7 +940,7 @@ const Index = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8"
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mt-8"
           >
             {[
               { icon: <Brain className="h-8 w-8" />, title: "AI-Assisted Job Posts", desc: "AI helps you create clearer, more detailed job descriptions" },
@@ -977,8 +973,8 @@ const Index = () => {
       </section>
 
       {/* Social Proof & Trust Section */}
-      <section className="py-section bg-white border-t border-jobhub-border">
-        <div className="space-y-6 md:space-y-10">
+      <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-white border-t border-jobhub-border">
+        <div className="space-y-6 md:space-y-10 px-2 sm:px-4 lg:px-0">
           <div className="text-center max-w-3xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -991,7 +987,7 @@ const Index = () => {
                 <span>Our Mission</span>
               </div>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-jobhub-text mb-3 sm:mb-4">Trust Built In — Through Verified Reviews</h2>
-              <p className="text-jobhub-subtext text-base sm:text-lg px-4 max-w-2xl mx-auto">JobHub uses AI to connect homeowners with suitable tradespeople. Verified professionals upload qualifications and insurance for added trust.</p>
+              <p className="text-jobhub-subtext text-base sm:text-lg px-4 max-w-2xl mx-auto">HireLocal uses AI to connect homeowners with suitable tradespeople. Verified professionals upload qualifications and insurance for added trust.</p>
               <p className="text-xs sm:text-sm text-jobhub-subtext mt-2 italic px-4 max-w-2xl mx-auto">Every review comes from completed jobs — no fake feedback, ever. Both verified and unverified users can leave reviews.</p>
             <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 mt-4 sm:mt-6 mb-6 sm:mb-8 px-4">
               <div className="flex items-center gap-1.5 sm:gap-2 bg-jobhub-successBg px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full border border-emerald-200">
@@ -1114,30 +1110,30 @@ const Index = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto px-4"
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 max-w-5xl mx-auto px-2 sm:px-4"
           >
-            <div className="text-center p-6 md:p-8 rounded-2xl bg-jobhub-card border border-jobhub-border shadow-subtle hover:shadow-lift hover:-translate-y-0.5 transition-all duration-300">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-jobhub-infoBg mb-4 border border-blue-200">
-                <Brain className="h-8 w-8 text-jobhub-blue" />
+            <div className="text-center p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl bg-jobhub-card border border-jobhub-border shadow-subtle hover:shadow-lift hover:-translate-y-0.5 transition-all duration-300">
+              <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-jobhub-infoBg mb-3 sm:mb-4 border border-blue-200">
+                <Brain className="h-7 w-7 sm:h-8 sm:w-8 text-jobhub-blue" />
               </div>
-              <h3 className="text-xl font-bold text-jobhub-text mb-3">AI-Assisted Matching</h3>
-              <p className="text-jobhub-subtext text-sm leading-relaxed">Faster, smarter job connections powered by intelligent automation.</p>
+              <h3 className="text-lg sm:text-xl font-bold text-jobhub-text mb-2 sm:mb-3">AI-Assisted Matching</h3>
+              <p className="text-jobhub-subtext text-xs sm:text-sm leading-relaxed">Faster, smarter job connections powered by intelligent automation.</p>
             </div>
             
-            <div className="text-center p-6 md:p-8 rounded-2xl bg-jobhub-card border border-jobhub-border shadow-subtle hover:shadow-lift hover:-translate-y-0.5 transition-all duration-300">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-jobhub-successBg mb-4 border border-emerald-200">
-                <Shield className="h-8 w-8 text-emerald-600" />
+            <div className="text-center p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl bg-jobhub-card border border-jobhub-border shadow-subtle hover:shadow-lift hover:-translate-y-0.5 transition-all duration-300">
+              <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-jobhub-successBg mb-3 sm:mb-4 border border-emerald-200">
+                <Shield className="h-7 w-7 sm:h-8 sm:w-8 text-emerald-600" />
               </div>
-              <h3 className="text-xl font-bold text-jobhub-text mb-3">Verified Badges Available</h3>
-              <p className="text-jobhub-subtext text-sm leading-relaxed">Verification is optional — verified professionals upload qualifications and insurance for review — verification badges help you identify them.</p>
+              <h3 className="text-lg sm:text-xl font-bold text-jobhub-text mb-2 sm:mb-3">Verified Badges Available</h3>
+              <p className="text-jobhub-subtext text-xs sm:text-sm leading-relaxed">Verification is optional — verified professionals upload qualifications and insurance for review — verification badges help you identify them.</p>
             </div>
             
-            <div className="text-center p-6 md:p-8 rounded-2xl bg-jobhub-card border border-jobhub-border shadow-subtle hover:shadow-lift hover:-translate-y-0.5 transition-all duration-300">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-jobhub-infoBg mb-4 border border-blue-200">
-                <CheckCircle2 className="h-8 w-8 text-jobhub-blue" />
+            <div className="text-center p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl bg-jobhub-card border border-jobhub-border shadow-subtle hover:shadow-lift hover:-translate-y-0.5 transition-all duration-300 sm:col-span-2 md:col-span-1">
+              <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-jobhub-infoBg mb-3 sm:mb-4 border border-blue-200">
+                <CheckCircle2 className="h-7 w-7 sm:h-8 sm:w-8 text-jobhub-blue" />
               </div>
-              <h3 className="text-xl font-bold text-jobhub-text mb-3">Free for Homeowners</h3>
-              <p className="text-jobhub-subtext text-sm leading-relaxed">Post your job at no cost — transparency from start to finish.</p>
+              <h3 className="text-lg sm:text-xl font-bold text-jobhub-text mb-2 sm:mb-3">Free for Homeowners</h3>
+              <p className="text-jobhub-subtext text-xs sm:text-sm leading-relaxed">Post your job at no cost — transparency from start to finish.</p>
             </div>
           </motion.div>
         </div>
@@ -1164,8 +1160,8 @@ const Index = () => {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-section bg-white border-t border-jobhub-border">
-        <div className="space-y-6 md:space-y-10 max-w-3xl mx-auto px-4 sm:px-6">
+      <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-white border-t border-jobhub-border">
+        <div className="space-y-6 md:space-y-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -1174,19 +1170,19 @@ const Index = () => {
               transition={{ duration: 0.6 }}
             >
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-jobhub-text mb-3 sm:mb-4">Frequently Asked Questions</h2>
-              <p className="text-jobhub-subtext text-base sm:text-lg max-w-2xl mx-auto">Everything you need to know about finding and hiring tradespeople on JobHub</p>
+              <p className="text-jobhub-subtext text-base sm:text-lg max-w-2xl mx-auto">Everything you need to know about finding and hiring tradespeople on HireLocal</p>
             </motion.div>
           </div>
           
           <div className="space-y-4">
             {[
               {
-                question: "What does 'verified' mean on JobHub?",
+                question: "What does 'verified' mean on HireLocal?",
                 answer: "Verification is optional for tradespeople. Verified professionals upload qualifications and insurance, which are manually reviewed before a verification badge is awarded. This includes trade certifications review, insurance confirmation, and profile completeness checks.",
                 icon: <CheckCircle2 className="h-5 w-5 text-emerald-600" />
               },
               {
-                question: "How does JobHub's AI match me with professionals?",
+                question: "How does HireLocal's AI match me with professionals?",
                 answer: "AI analyses skills, distance, and verified experience to recommend the best local matches. It compares your project requirements with each tradesperson's expertise, specialisations, location, and availability.",
                 icon: <Brain className="h-5 w-5 text-jobhub-blue" />
               },
@@ -1201,7 +1197,7 @@ const Index = () => {
                 icon: <MessageSquare className="h-5 w-5 text-amber-600" />
               },
               {
-                question: "How does JobHub's AI get smarter?",
+                question: "How does HireLocal's AI get smarter?",
                 answer: "Over time, AI learns from successful matches and feedback to improve accuracy and recommendations. It continuously refines its understanding of what makes a successful homeowner-tradesperson partnership.",
                 icon: <Brain className="h-5 w-5 text-jobhub-blue" />
               }
@@ -1214,19 +1210,19 @@ const Index = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className={`rounded-2xl bg-jobhub-card border border-jobhub-border shadow-subtle hover:shadow-lift transition-all duration-300 ease-in-out overflow-hidden ${
+                  className={`rounded-xl sm:rounded-2xl bg-jobhub-card border border-jobhub-border shadow-subtle hover:shadow-lift transition-all duration-300 ease-in-out overflow-hidden ${
                     isOpen ? 'bg-jobhub-surface' : 'hover:bg-jobhub-surface'
                   }`}
                 >
                   <button
                     onClick={() => setOpenFaqIndex(isOpen ? null : index)}
-                    className="w-full text-left p-4 sm:p-6 min-h-[56px] flex items-center justify-between cursor-pointer focus:outline-none focus:ring-2 focus:ring-jobhub-blue/40 focus:ring-offset-2 transition-colors duration-300"
+                    className="w-full text-left p-3 sm:p-4 md:p-6 min-h-[56px] flex items-center justify-between cursor-pointer focus:outline-none focus:ring-2 focus:ring-jobhub-blue/40 focus:ring-offset-2 transition-colors duration-300"
                     aria-expanded={isOpen}
                     aria-controls={`faq-answer-${index}`}
                   >
-                    <div className="flex items-center gap-3 flex-1 pr-2">
-                      {faq.icon}
-                      <span className="font-semibold text-jobhub-text text-base sm:text-lg">{faq.question}</span>
+                    <div className="flex items-center gap-2 sm:gap-3 flex-1 pr-2">
+                      <div className="flex-shrink-0">{faq.icon}</div>
+                      <span className="font-semibold text-jobhub-text text-sm sm:text-base md:text-lg leading-tight">{faq.question}</span>
                     </div>
                     <ChevronDown 
                       className={`h-5 w-5 text-jobhub-subtext transition-transform duration-300 ease-in-out flex-shrink-0 ${
@@ -1245,8 +1241,8 @@ const Index = () => {
                     transition={{ duration: 0.3, ease: 'easeInOut' }}
                     className="overflow-hidden"
                   >
-                    <div className="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-jobhub-border">
-                      <div className="pt-4 text-jobhub-subtext text-sm sm:text-base leading-relaxed">
+                    <div className="px-3 sm:px-4 md:px-6 pb-3 sm:pb-4 md:pb-6 border-t border-jobhub-border">
+                      <div className="pt-3 sm:pt-4 text-jobhub-subtext text-xs sm:text-sm md:text-base leading-relaxed">
                         {faq.answer}
                       </div>
                     </div>

@@ -8,8 +8,8 @@ export const markRecentLogin = () => {
   console.log('🟢 markRecentLogin called at', new Date().toISOString());
   setTimeout(() => { 
     justLoggedIn = false;
-    console.log('⏰ justLoggedIn flag cleared after 8s');
-  }, 8000);
+    console.log('⏰ justLoggedIn flag cleared after 15s');
+  }, 15000);
 };
 
 const originalFetch = window.fetch;
@@ -51,6 +51,19 @@ const interceptedFetch = async (url: RequestInfo | URL, options?: RequestInit): 
   }
   
   if (isApiRequest && response.status === 401) {
+    const authEndpoints = [
+      '/auth/google',
+      '/api/auth/google',
+      '/travel/auth/google',
+      '/travel/login',
+      '/travel/register'
+    ];
+    // Skip interceptor logic for Google auth endpoint
+    if (authEndpoints.some(endpoint => urlString.includes(endpoint))) {
+      console.log('⏭️ Skipping interceptor for Google auth endpoint');
+      return response;
+    }
+    
     const timeSinceLogin = Date.now() - loginTimestamp;
     const allCookies = document.cookie;
     
@@ -63,7 +76,7 @@ const interceptedFetch = async (url: RequestInfo | URL, options?: RequestInit): 
       currentPath: window.location.pathname
     });
     
-    if (justLoggedIn || timeSinceLogin < 8000) {
+    if (justLoggedIn || timeSinceLogin < 15000) {
       console.log('⏳ Skipping redirect - recent login (time since login:', timeSinceLogin, 'ms)');
       return response;
     }
