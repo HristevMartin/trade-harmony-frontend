@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HiXMark, HiEye, HiEyeSlash } from "react-icons/hi2";
 import { X } from "lucide-react";
 import { markRecentLogin } from "@/lib/fetch-interceptor";
+import { GoogleLogin } from '@react-oauth/google';
 
 interface AuthData {
     id: string;
@@ -168,6 +169,59 @@ const AuthModal = ({ isOpen, onClose, onSuccess, role = 'customer', initialEmail
         }
     };
 
+    const handleGoogleSuccess = async (credentialResponse: any) => {
+        setIsSubmitting(true);
+        setErrors({});
+
+        try {
+            const apiUrl = import.meta.env.VITE_API_URL;
+            const response = await fetch(`${apiUrl}/travel/auth/google`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    credential: credentialResponse.credential,
+                    role: role // Pass the role from props (customer or trader)
+                }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                localStorage.setItem('auth_user', JSON.stringify({
+                    id: data.id,
+                    role: data.role,
+                }));
+
+                markRecentLogin();
+                window.dispatchEvent(new Event('authChange'));
+
+                onSuccess({
+                    id: data.id,
+                    role: data.role,
+                    token: data.token || '',
+                    email: data.email,
+                });
+
+                setFormData({ email: '', password: '', confirmPassword: '' });
+                onClose();
+            } else {
+                setErrors({ general: data.message || 'Google authentication failed' });
+            }
+        } catch (error) {
+            console.error('Google auth error:', error);
+            setErrors({ general: 'Network error. Please try again.' });
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleGoogleError = () => {
+        setErrors({ general: 'Google sign-in was cancelled or failed.' });
+    };
+
     const handleClose = () => {
         setFormData({ email: '', password: '', confirmPassword: '' });
         setErrors({});
@@ -190,32 +244,41 @@ const AuthModal = ({ isOpen, onClose, onSuccess, role = 'customer', initialEmail
                     </button>
                     
                     <CardTitle className="text-xl font-bold text-center text-slate-900 pr-8">
-                        Welcome to TradeFinder
+                        Welcome to HireLocal
                     </CardTitle>
                     
-                    {/* Tab Navigation */}
-                    <div className="flex bg-slate-100 rounded-lg p-1 mt-4">
-                        <button
-                            onClick={() => setActiveTab('login')}
-                            className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
-                                activeTab === 'login'
-                                    ? 'bg-white text-slate-900 shadow-sm'
-                                    : 'text-slate-600 hover:text-slate-900'
-                            }`}
-                        >
-                            Login
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('register')}
-                            className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
-                                activeTab === 'register'
-                                    ? 'bg-white text-slate-900 shadow-sm'
-                                    : 'text-slate-600 hover:text-slate-900'
-                            }`}
-                        >
-                            Register
-                        </button>
-                    </div>
+                    {/* Subtitle for registration flow */}
+                    {defaultTab === 'register' && (
+                        <p className="text-sm text-center text-slate-600 mt-2">
+                            Create your account to continue
+                        </p>
+                    )}
+                    
+                    {/* Tab Navigation - Hide when defaultTab is 'register' (user is in registration flow) */}
+                    {defaultTab !== 'register' && (
+                        <div className="flex bg-slate-100 rounded-lg p-1 mt-4">
+                            <button
+                                onClick={() => setActiveTab('login')}
+                                className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
+                                    activeTab === 'login'
+                                        ? 'bg-white text-slate-900 shadow-sm'
+                                        : 'text-slate-600 hover:text-slate-900'
+                                }`}
+                            >
+                                Login
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('register')}
+                                className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
+                                    activeTab === 'register'
+                                        ? 'bg-white text-slate-900 shadow-sm'
+                                        : 'text-slate-600 hover:text-slate-900'
+                                }`}
+                            >
+                                Register
+                            </button>
+                        </div>
+                    )}
                 </CardHeader>
 
                 <CardContent className="pt-0">
@@ -327,19 +390,43 @@ const AuthModal = ({ isOpen, onClose, onSuccess, role = 'customer', initialEmail
                         </Button>
                     </form>
 
-                    {/* Footer Message */}
-                    <div className="mt-6 text-center">
-                        <p className="text-sm text-slate-600">
-                            {activeTab === 'login' ? "Don't have an account? " : "Already have an account? "}
-                            <button
-                                type="button"
-                                onClick={() => setActiveTab(activeTab === 'login' ? 'register' : 'login')}
-                                className="text-blue-600 hover:text-blue-700 font-medium"
-                            >
-                                {activeTab === 'login' ? 'Sign up' : 'Sign in'}
-                            </button>
-                        </p>
+                    {/* Divider */}
+                    <div className="relative my-6">
+                        <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t border-gray-300" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-white px-2 text-gray-500">Or continue with</span>
+                        </div>
                     </div>
+
+                    {/* Google Sign-In Button */}
+                    <div className="w-full flex justify-center">
+                        <GoogleLogin
+                            onSuccess={handleGoogleSuccess}
+                            onError={handleGoogleError}
+                            useOneTap={false}
+                            theme="outline"
+                            size="large"
+                            text={activeTab === 'login' ? 'signin_with' : 'signup_with'}
+                        />
+                    </div>
+
+                    {/* Footer Message - Hide when in registration flow */}
+                    {defaultTab !== 'register' && (
+                        <div className="mt-6 text-center">
+                            <p className="text-sm text-slate-600">
+                                {activeTab === 'login' ? "Don't have an account? " : "Already have an account? "}
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveTab(activeTab === 'login' ? 'register' : 'login')}
+                                    className="text-blue-600 hover:text-blue-700 font-medium"
+                                >
+                                    {activeTab === 'login' ? 'Sign up' : 'Sign in'}
+                                </button>
+                            </p>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
         </div>
