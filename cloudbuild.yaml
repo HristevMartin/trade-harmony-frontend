@@ -85,6 +85,7 @@ steps:
         sendgrid_api_key               = "dummy-value-not-used-for-frontend"
         stripe_secret_key              = "dummy-value-not-used-for-frontend"
         OPENAI_API_KEY                 = "dummy-value-not-used-for-frontend"
+        google_client_id               = "dummy-value-not-used-for-frontend"
         EOF
         
         echo "=== Created terraform.tfvars ==="
