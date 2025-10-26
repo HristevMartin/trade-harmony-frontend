@@ -53,6 +53,9 @@ const TradesPersonProfile = () => {
     const [ratingsError, setRatingsError] = useState<string | null>(null);
     const [showAllReviews, setShowAllReviews] = useState(false);
     const [expandedComments, setExpandedComments] = useState<Set<number>>(new Set());
+    const [isRequestingVerification, setIsRequestingVerification] = useState(false);
+    const [verificationRequested, setVerificationRequested] = useState(false);
+    const [showVerificationSuccess, setShowVerificationSuccess] = useState(false);
 
     // Accordion states for mobile
     const [accordionStates, setAccordionStates] = useState({
@@ -496,13 +499,78 @@ const TradesPersonProfile = () => {
             });
             const data = await response.json();
             setIsVerified(data.success);
+            
+            // If verified, clear the verification request flag from localStorage
+            if (data.success && userId && isOwnProfile) {
+                const verificationKey = `trader_verification_requested_${userId}`;
+                localStorage.removeItem(verificationKey);
+                setVerificationRequested(false);
+            }
         } catch (error) {
             console.error('Error checking trader verification:', error);
             setIsVerified(false);
         } finally {
             setCheckingVerification(false);
         }
-    }
+    };
+
+    // Handler for verification request
+    const handleRequestVerification = async () => {
+        if (!userId) {
+            console.error('No user ID available');
+            toast({
+                title: "Error",
+                description: "Cannot request verification. Please try logging in again.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        setIsRequestingVerification(true);
+        
+        try {
+            const response = await fetch(`${apiUrl}/api/homeowner/verify/user`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: userId
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Verification request response:', data);
+            
+            // Save to localStorage that verification has been requested
+            const verificationKey = `trader_verification_requested_${userId}`;
+            localStorage.setItem(verificationKey, 'true');
+            setVerificationRequested(true);
+            
+            // Show success modal
+            setShowVerificationSuccess(true);
+            
+            // Auto-hide modal after 4 seconds
+            setTimeout(() => {
+                setShowVerificationSuccess(false);
+            }, 4000);
+            
+        } catch (error) {
+            console.error('Error requesting verification:', error);
+            toast({
+                title: "Error",
+                description: "Failed to submit verification request. Please try again.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsRequestingVerification(false);
+        }
+    };
 
     // Check verification status for homeowners viewing trader profiles
     useEffect(() => {
@@ -518,6 +586,17 @@ const TradesPersonProfile = () => {
             checkTraderVerified(userId);
         }
     }, [nameId, isOwnProfile]);
+
+    // Check if verification has been requested from localStorage
+    useEffect(() => {
+        if (userId && isOwnProfile) {
+            const verificationKey = `trader_verification_requested_${userId}`;
+            const hasRequested = localStorage.getItem(verificationKey);
+            if (hasRequested === 'true') {
+                setVerificationRequested(true);
+            }
+        }
+    }, [userId, isOwnProfile]);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -642,7 +721,7 @@ const TradesPersonProfile = () => {
                                 <h1 className="text-2xl font-bold text-foreground truncate">
                                     {traderProfile.name}
                                 </h1>
-                                <div className="flex items-center gap-2 mt-1">
+                                <div className="flex items-center gap-2 mt-1 flex-wrap">
                                     <Badge variant="default" className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground border-0 px-2 py-1 text-sm font-medium">
                                         {traderProfile.primaryTrade} Specialist
                                     </Badge>
@@ -652,12 +731,32 @@ const TradesPersonProfile = () => {
                                         variant={isVerified ? "default" : "secondary"}
                                         className={`px-2 py-1 text-xs font-medium border-0 ${isVerified
                                             ? "bg-gradient-to-r from-green-500 to-green-600 text-white"
+                                            : verificationRequested
+                                            ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
                                             : "bg-gradient-to-r from-gray-400 to-gray-500 text-white"
                                             }`}
                                     >
                                         <CheckCircle className="h-3 w-3 mr-1" />
-                                        {checkingVerification ? "Checking..." : (isVerified ? "Verified" : "Unverified")}
+                                        {checkingVerification 
+                                            ? "Checking..." 
+                                            : isVerified 
+                                            ? "Verified" 
+                                            : verificationRequested 
+                                            ? "Pending" 
+                                            : "Unverified"}
                                     </Badge>
+
+                                    {/* Request Verification Button - Only for traders on their own profile when not verified */}
+                                    {isOwnProfile && !isVerified && !verificationRequested && (
+                                        <Button
+                                            size="sm"
+                                            onClick={handleRequestVerification}
+                                            disabled={isRequestingVerification}
+                                            className="h-6 px-2 text-xs bg-green-600 hover:bg-green-700 text-white"
+                                        >
+                                            {isRequestingVerification ? 'Requesting...' : 'Request Verification'}
+                                        </Button>
+                                    )}
                                     {ratingTraderRatingProfile?.rating !== undefined && ratingTraderRatingProfile?.rating > 0 && ratingTraderRatingProfile?.total_ratings > 0 && (
                                         <button
                                             onClick={() => {
@@ -733,7 +832,7 @@ const TradesPersonProfile = () => {
                                     <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-3">
                                         {traderProfile.name}
                                     </h1>
-                                    <div className="flex items-center justify-center md:justify-start gap-2 mb-4">
+                                    <div className="flex items-center justify-center md:justify-start gap-2 mb-4 flex-wrap">
                                         <Badge variant="default" className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground border-0 px-4 py-2 text-base font-medium">
                                             {traderProfile.primaryTrade} Specialist
                                         </Badge>
@@ -741,12 +840,32 @@ const TradesPersonProfile = () => {
                                             variant={isVerified ? "default" : "secondary"}
                                             className={`px-3 py-2 text-sm font-medium border-0 ${isVerified
                                                 ? "bg-gradient-to-r from-green-500 to-green-600 text-white"
+                                                : verificationRequested
+                                                ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
                                                 : "bg-gradient-to-r from-gray-400 to-gray-500 text-white"
                                                 }`}
                                         >
                                             <CheckCircle className="h-4 w-4 mr-1" />
-                                            {checkingVerification ? "Checking..." : (isVerified ? "Verified" : "Unverified")}
+                                            {checkingVerification 
+                                                ? "Checking..." 
+                                                : isVerified 
+                                                ? "Verified" 
+                                                : verificationRequested 
+                                                ? "Pending" 
+                                                : "Unverified"}
                                         </Badge>
+
+                                        {/* Request Verification Button - Only for traders on their own profile when not verified */}
+                                        {isOwnProfile && !isVerified && !verificationRequested && (
+                                            <Button
+                                                size="sm"
+                                                onClick={handleRequestVerification}
+                                                disabled={isRequestingVerification}
+                                                className="px-4 py-2 text-sm bg-green-600 hover:bg-green-700 text-white"
+                                            >
+                                                {isRequestingVerification ? 'Requesting...' : 'Request Verification'}
+                                            </Button>
+                                        )}
                                     </div>
                                 </div>
 
@@ -1807,6 +1926,32 @@ const TradesPersonProfile = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Verification Success Modal */}
+            {showVerificationSuccess && (
+                <div className="fixed top-4 right-4 z-50 animate-slide-in-right">
+                    <div className="bg-emerald-500 text-white rounded-lg shadow-lg p-4 max-w-sm border border-emerald-600">
+                        <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0">
+                                <CheckCircle className="w-5 h-5 text-white" />
+                            </div>
+                            <div className="flex-1">
+                                <h4 className="font-semibold text-sm mb-1">Verification Request Submitted!</h4>
+                                <p className="text-emerald-100 text-xs leading-relaxed">
+                                    We will review your request shortly. You'll be notified once verification is complete.
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setShowVerificationSuccess(false)}
+                                className="flex-shrink-0 text-emerald-100 hover:text-white transition-colors"
+                                aria-label="Close notification"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
