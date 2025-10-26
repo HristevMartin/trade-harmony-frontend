@@ -302,7 +302,9 @@ const PostcodeInput: React.FC<PostcodeInputProps> = ({
           }
           aria-invalid={!!error}
           aria-describedby={error ? errorId : helperId}
-          className={`w-full bg-white focus:outline-none disabled:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60 placeholder:text-slate-400 ${inputClassName} ${
+          className={`w-full bg-white focus:outline-none disabled:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60 placeholder:text-slate-400 ${
+            inputClassName || 'h-12 text-base px-4 rounded-xl border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
+          } ${
             error ? 'border-red-500 bg-red-50' : ''
           }`}
         />
