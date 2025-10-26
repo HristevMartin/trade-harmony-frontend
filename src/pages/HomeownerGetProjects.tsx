@@ -761,41 +761,6 @@ const HomeownerGetProjects = () => {
 
   return (
     <>
-      {/* Mobile Header - Sticky */}
-      <div className="sm:hidden sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
-        <div className="flex items-center h-14 px-4">
-          {/* Back Arrow - 44px tap target */}
-          <button
-            onClick={() => {
-              if (window.history.length > 1) {
-                navigate(-1);
-              } else {
-                navigate('/');
-              }
-            }}
-            className="flex items-center justify-center w-11 h-11 -ml-2 mr-3 rounded-lg hover:bg-gray-50 transition-colors touch-manipulation"
-            style={{ minWidth: '44px', minHeight: '44px' }}
-            aria-label="Go back"
-          >
-            <svg
-              className="w-5 h-5 text-gray-900"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-          </button>
-
-          {/* Single Title */}
-          <h1 className="text-lg font-semibold text-gray-900">My Projects</h1>
-        </div>
-      </div>
       <div className="min-h-screen bg-gray-50">
         {/* Success Toast */}
         {showSuccess && (
@@ -808,6 +773,38 @@ const HomeownerGetProjects = () => {
         )}
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-12">
+          {/* Mobile Title with Back Button - Only on Mobile */}
+          <div className="sm:hidden mb-6 flex items-center gap-3">
+            <button
+              onClick={() => {
+                if (window.history.length > 1) {
+                  navigate(-1);
+                } else {
+                  navigate('/');
+                }
+              }}
+              className="flex items-center justify-center w-10 h-10 rounded-lg hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation"
+              aria-label="Go back"
+            >
+              <svg
+                className="w-5 h-5 text-gray-900"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+              My Projects
+            </h1>
+          </div>
+
           {/* Header Section - Desktop Only */}
           <div className="text-center mb-8 sm:mb-12 hidden sm:block">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-gray-900 mb-3 sm:mb-4">

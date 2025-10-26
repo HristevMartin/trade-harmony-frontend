@@ -245,11 +245,10 @@ const Navbar = () => {
           >
             <div className="relative flex items-center">
               <div className="w-7 h-7 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300 ring-1 ring-blue-100/50">
-                <span className="text-white font-bold text-xs">H</span>
+                <span className="text-white font-bold text-xs">J</span>
               </div>
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white shadow-sm"></div>
             </div>
-            <span className="text-lg font-bold text-gray-900 leading-none">HireLocal</span>
+            <span className="text-lg font-bold text-gray-900 leading-none">JobHub</span>
           </motion.div>
 
           {/* Desktop Navigation */}
