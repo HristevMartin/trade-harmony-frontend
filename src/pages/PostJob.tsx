@@ -1146,6 +1146,7 @@ const PostJob = () => {
                                                     showSuggestions
                                                     maxSuggestions={8}
                                                     helperText="We'll verify this postcode exists"
+                                                    inputClassName="h-12 text-base px-4 rounded-xl border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                                 />
                                             </div>
                                         </div>
