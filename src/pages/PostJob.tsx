@@ -147,7 +147,6 @@ const PostJob = () => {
         firstName: '',
         email: '',
         phone: '',
-        contactMethod: 'email',
         gdprConsent: false
     });
 
@@ -411,12 +410,6 @@ const PostJob = () => {
                             errors[field] = 'Please enter a valid UK postcode (e.g., SW1A 1AA)';
                         }
                     }
-                }
-                break;
-            case 'email':
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!value || !emailRegex.test(value as string)) {
-                    errors[field] = 'Please enter a valid email address';
                 }
                 break;
             case 'phone':
@@ -761,7 +754,7 @@ const PostJob = () => {
         
         // Validate all fields
         // Only include postcode validation if country is GB AND location is London
-        const baseFields = ['serviceCategory', 'jobTitle', 'jobDescription', 'budget', 'customBudget', 'email', 'firstName', 'phone', 'urgency', 'gdprConsent'];
+        const baseFields = ['serviceCategory', 'jobTitle', 'jobDescription', 'budget', 'customBudget', 'firstName', 'phone', 'urgency', 'gdprConsent'];
         const fieldsToValidate = formData.country === 'GB' 
             ? (formData.area === 'London' 
                 ? ['postcode', 'area', ...baseFields]
@@ -1820,96 +1813,35 @@ const PostJob = () => {
                                         )}
                                     </div>
                                     <div>
-                                        <Label htmlFor="email" className="text-sm font-medium text-slate-700">Email Address <span className="text-red-500">*</span></Label>
+                                        <Label htmlFor="phone" className="text-sm font-medium text-slate-700">Phone Number <span className="text-red-500">*</span></Label>
                                         <Input
-                                            id="email"
-                                            type="email"
-                                            value={formData.email}
+                                            id="phone"
+                                            type="tel"
+                                            value={formData.phone}
                                             onChange={(e) => {
-                                                handleInputChange('email', e.target.value);
-                                                // Clear error if email becomes valid
-                                                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                                                if (emailRegex.test(e.target.value) && formErrors.email) {
+                                                handleInputChange('phone', e.target.value);
+                                                // Clear error if phone becomes valid
+                                                if (e.target.value.length >= 10 && formErrors.phone) {
                                                     setFormErrors(prev => {
                                                         const newErrors = { ...prev };
-                                                        delete newErrors.email;
+                                                        delete newErrors.phone;
                                                         return newErrors;
                                                     });
                                                 }
                                             }}
-                                            onBlur={(e) => handleBlur('email', e.target.value)}
-                                            placeholder="your@email.com"
+                                            onBlur={(e) => handleBlur('phone', e.target.value)}
+                                            placeholder="Your phone number"
                                             className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${
-                                                formErrors.email ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
+                                                formErrors.phone ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
                                             }`}
-                                            aria-invalid={!!formErrors.email}
-                                            aria-describedby={formErrors.email ? 'email-error' : 'email-help'}
+                                            aria-invalid={!!formErrors.phone}
+                                            aria-describedby={formErrors.phone ? 'phone-error' : 'phone-help'}
                                         />
-                                        {formErrors.email ? (
-                                            <p id="email-error" className="text-xs text-red-600 mt-1">{formErrors.email}</p>
+                                        {formErrors.phone ? (
+                                            <p id="phone-error" className="text-xs text-red-600 mt-1">{formErrors.phone}</p>
                                         ) : (
-                                            <p id="email-help" className="text-xs text-slate-500 mt-1">Required for receiving quotes and updates</p>
+                                            <p id="phone-help" className="text-xs text-slate-500 mt-1">Required for tradespeople to contact you</p>
                                         )}
-                                    </div>
-                                </div>
-                                <div>
-                                    <Label htmlFor="phone" className="text-sm font-medium text-slate-700">Phone Number <span className="text-red-500">*</span></Label>
-                                    <Input
-                                        id="phone"
-                                        type="tel"
-                                        value={formData.phone}
-                                        onChange={(e) => {
-                                            handleInputChange('phone', e.target.value);
-                                            // Clear error if phone becomes valid
-                                            if (e.target.value.length >= 10 && formErrors.phone) {
-                                                setFormErrors(prev => {
-                                                    const newErrors = { ...prev };
-                                                    delete newErrors.phone;
-                                                    return newErrors;
-                                                });
-                                            }
-                                        }}
-                                        onBlur={(e) => handleBlur('phone', e.target.value)}
-                                        placeholder="Your phone number"
-                                        className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${
-                                            formErrors.phone ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
-                                        }`}
-                                        aria-invalid={!!formErrors.phone}
-                                        aria-describedby={formErrors.phone ? 'phone-error' : 'phone-help'}
-                                    />
-                                    {formErrors.phone ? (
-                                        <p id="phone-error" className="text-xs text-red-600 mt-1">{formErrors.phone}</p>
-                                    ) : (
-                                        <p id="phone-help" className="text-xs text-slate-500 mt-1">Required for tradespeople to contact you</p>
-                                    )}
-                                </div>
-                                <div>
-                                    <Label className="text-sm font-medium text-slate-700 block mb-3">Preferred Contact Method</Label>
-                                    <div className="space-y-2">
-                                        {[
-                                            { value: 'email', label: 'Email' },
-                                            // { value: 'phone', label: 'Phone' },
-                                            // { value: 'either', label: 'Either' }
-                                        ].map((option) => (
-                                            <label 
-                                                key={option.value}
-                                                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 hover:bg-slate-50 cursor-pointer transition-colors w-full ${
-                                                    formData.contactMethod === option.value 
-                                                        ? 'bg-blue-50 border-blue-400 text-blue-700' 
-                                                        : 'border-slate-300 text-slate-700'
-                                                }`}
-                                            >
-                                                <input
-                                                    type="radio"
-                                                    name="contactMethod"
-                                                    value={option.value}
-                                                    checked={formData.contactMethod === option.value}
-                                                    onChange={(e) => handleInputChange('contactMethod', e.target.value)}
-                                                    className="sr-only"
-                                                />
-                                                <span className="text-sm font-medium">{option.label}</span>
-                                            </label>
-                                        ))}
                                     </div>
                                 </div>
                                 <p className="text-xs text-slate-500 flex items-center gap-2">

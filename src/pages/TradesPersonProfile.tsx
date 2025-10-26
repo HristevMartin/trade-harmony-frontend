@@ -1278,7 +1278,7 @@ const TradesPersonProfile = () => {
                                                         {traderProfile.certifications || 'Professional Certification'}
                                                     </p>
                                                     <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                                                        {traderProfile.certifications ? 'Verified industry qualification' : 'Add your certifications to build trust with clients'}
+                                                        {traderProfile.certifications ? '' : 'Add your certifications to build trust with clients'}
                                                     </p>
                                                 </div>
                                             </div>
