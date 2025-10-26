@@ -31,7 +31,7 @@ export default defineConfig(({ mode }) => ({
           }
         ]
       },
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      includeAssets: [ 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
         name: 'Job-Hub',
         short_name: 'JobHub',
