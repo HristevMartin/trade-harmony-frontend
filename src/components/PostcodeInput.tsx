@@ -2,28 +2,6 @@ import React, { useState, useRef, useEffect, useId } from 'react';
 import { isValidFormat, normalize, fetchSuggestions, verifyPostcodeExists } from '../utils/postcode';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 
-// Detect Tailwind by checking if utility classes exist
-const hasTailwind = (() => {
-  try {
-    const testEl = document.createElement('div');
-    testEl.className = 'hidden';
-    document.body.appendChild(testEl);
-    const hasTw = window.getComputedStyle(testEl).display === 'none';
-    document.body.removeChild(testEl);
-    return hasTw;
-  } catch {
-    return false;
-  }
-})();
-
-// Import CSS module only if Tailwind is not available
-let styles: Record<string, string> = {};
-if (!hasTailwind) {
-  import('./PostcodeInput.module.css').then((module) => {
-    styles = module.default || module;
-  });
-}
-
 export type PostcodeInputProps = {
   label?: string;
   placeholder?: string;
@@ -63,6 +41,7 @@ const PostcodeInput: React.FC<PostcodeInputProps> = ({
   const [isFocused, setIsFocused] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLUListElement>(null);
@@ -143,6 +122,7 @@ const PostcodeInput: React.FC<PostcodeInputProps> = ({
     
     setInputValue(rawValue);
     setError('');
+    setIsVerified(false);
     setActiveIndex(-1);
     
     if (onChange) {
@@ -167,24 +147,29 @@ const PostcodeInput: React.FC<PostcodeInputProps> = ({
 
   const verifyPostcode = async (postcode: string) => {
     if (!postcode || !isValidFormat(postcode)) {
+      setIsVerified(false);
       return;
     }
 
     setIsVerifying(true);
     setError('');
+    setIsVerified(false);
 
     try {
       const exists = await verifyPostcodeExists(postcode);
       
       if (exists) {
+        setIsVerified(true);
         if (onValid) {
           onValid(normalize(postcode));
         }
       } else {
+        setIsVerified(false);
         setError('We couldn\'t verify this postcode.');
       }
     } catch (err) {
       // Non-blocking error
+      setIsVerified(false);
       console.warn('Verification failed:', err);
     } finally {
       setIsVerifying(false);
@@ -201,11 +186,13 @@ const PostcodeInput: React.FC<PostcodeInputProps> = ({
       
       if (!trimmed) {
         setError('');
+        setIsVerified(false);
         return;
       }
       
       if (!isValidFormat(trimmed)) {
         setError('Please enter a valid UK postcode format (e.g., SW1A 1AA)');
+        setIsVerified(false);
         return;
       }
       
@@ -280,46 +267,18 @@ const PostcodeInput: React.FC<PostcodeInputProps> = ({
     }
   }, [activeIndex]);
 
-  // Tailwind classes
-  const twClasses = hasTailwind
-    ? {
-        wrapper: 'relative w-full',
-        label: 'block text-sm font-medium text-gray-700 mb-2',
-        required: 'text-red-500 ml-1',
-        inputWrapper: 'relative',
-        input: `w-full px-3 py-2.5 text-sm border rounded-lg transition-all duration-150 ${
-          error
-            ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-4 focus:ring-red-100'
-            : 'border-gray-300 bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100'
-        } focus:outline-none disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60`,
-        spinner: 'absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-gray-200 border-t-blue-500 rounded-full animate-spin',
-        suggestionsWrapper: 'absolute top-full left-0 right-0 mt-1 z-50',
-        suggestions: 'max-h-64 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg p-1',
-        suggestion: 'px-3 py-2.5 text-sm cursor-pointer rounded-md transition-colors duration-150',
-        suggestionHover: 'hover:bg-gray-100',
-        suggestionActive: 'bg-blue-50 text-blue-900',
-        suggestionEmpty: 'px-3 py-3 text-sm text-gray-500 text-center',
-        helperText: 'block mt-1.5 text-xs text-gray-600',
-        errorText: 'block mt-1.5 text-xs text-red-600',
-      }
-    : styles;
-
   const isLoading = isLoadingSuggestions || isVerifying;
 
   return (
-    <div ref={wrapperRef} className={hasTailwind ? twClasses.wrapper : styles.wrapper + ` ${className}`}>
+    <div ref={wrapperRef} className={`relative w-full ${className}`}>
       {label && (
-        <label htmlFor={inputId} className={hasTailwind ? twClasses.label : styles.label}>
+        <label htmlFor={inputId} className="block text-base font-medium text-slate-900 mb-3">
           {label}
-          {required && (
-            <span className={hasTailwind ? twClasses.required : styles.required} aria-label="required">
-              *
-            </span>
-          )}
+          {required && <span className="text-red-500 ml-1" aria-label="required"> *</span>}
         </label>
       )}
 
-      <div className={hasTailwind ? twClasses.inputWrapper : styles.inputWrapper}>
+      <div className="relative">
         <input
           ref={inputRef}
           id={inputId}
@@ -339,22 +298,18 @@ const PostcodeInput: React.FC<PostcodeInputProps> = ({
           aria-controls={listboxId}
           aria-expanded={showDropdown}
           aria-activedescendant={
-            activeIndex >= 0 && showDropdown
-              ? `${listboxId}-option-${activeIndex}`
-              : undefined
+            activeIndex >= 0 && showDropdown ? `${listboxId}-option-${activeIndex}` : undefined
           }
           aria-invalid={!!error}
           aria-describedby={error ? errorId : helperId}
-          className={
-            hasTailwind
-              ? `${twClasses.input} ${inputClassName}`
-              : `${styles.input} ${error ? styles.error : ''} ${inputClassName}`
-          }
+          className={`w-full bg-white focus:outline-none disabled:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60 placeholder:text-slate-400 ${inputClassName} ${
+            error ? 'border-red-500 bg-red-50' : ''
+          }`}
         />
 
         {isLoading && (
           <div
-            className={hasTailwind ? twClasses.spinner : styles.spinner}
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-slate-200 border-t-blue-500 rounded-full animate-spin"
             role="status"
             aria-label="Loading"
           />
@@ -362,13 +317,13 @@ const PostcodeInput: React.FC<PostcodeInputProps> = ({
       </div>
 
       {showDropdown && suggestions.length > 0 && (
-        <div className={hasTailwind ? twClasses.suggestionsWrapper : styles.suggestionsWrapper}>
+        <div className="absolute top-full left-0 right-0 mt-2 z-50">
           <ul
             ref={suggestionsRef}
             id={listboxId}
             role="listbox"
             aria-label="Postcode suggestions"
-            className={hasTailwind ? twClasses.suggestions : styles.suggestions}
+            className="max-h-72 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl py-2"
           >
             {suggestions.map((suggestion, index) => (
               <li
@@ -378,15 +333,27 @@ const PostcodeInput: React.FC<PostcodeInputProps> = ({
                 aria-selected={index === activeIndex}
                 onClick={() => selectSuggestion(suggestion)}
                 onMouseEnter={() => setActiveIndex(index)}
-                className={
-                  hasTailwind
-                    ? `${twClasses.suggestion} ${
-                        index === activeIndex ? twClasses.suggestionActive : twClasses.suggestionHover
-                      }`
-                    : `${styles.suggestion} ${index === activeIndex ? styles.active : ''}`
-                }
+                className={`px-4 py-3 text-sm cursor-pointer transition-all flex items-center justify-between ${
+                  index === activeIndex
+                    ? 'bg-blue-50 text-blue-900 font-medium'
+                    : 'hover:bg-blue-50'
+                }`}
               >
-                {suggestion}
+                <span className="flex items-center gap-2">
+                  <svg
+                    className="w-4 h-4 text-slate-400"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                  {suggestion}
+                </span>
               </li>
             ))}
           </ul>
@@ -394,24 +361,24 @@ const PostcodeInput: React.FC<PostcodeInputProps> = ({
       )}
 
       {showDropdown && !isLoadingSuggestions && suggestions.length === 0 && inputValue.length >= 3 && (
-        <div className={hasTailwind ? twClasses.suggestionsWrapper : styles.suggestionsWrapper}>
-          <div className={hasTailwind ? twClasses.suggestions : styles.suggestions}>
-            <div className={hasTailwind ? twClasses.suggestionEmpty : styles.suggestionEmpty}>
-              No postcodes found
-            </div>
+        <div className="absolute top-full left-0 right-0 mt-2 z-50">
+          <div className="bg-white border border-slate-200 rounded-xl shadow-xl py-2">
+            <div className="px-4 py-4 text-sm text-slate-500 text-center">No postcodes found</div>
           </div>
         </div>
       )}
 
-      {error ? (
-        <span id={errorId} className={hasTailwind ? twClasses.errorText : styles.errorText} role="alert">
+      {error && (
+        <span id={errorId} className="block mt-1.5 text-xs text-red-600" role="alert">
           {error}
         </span>
-      ) : helperText && !isLoading ? (
-        <span id={helperId} className={hasTailwind ? twClasses.helperText : styles.helperText}>
+      )}
+      
+      {!error && helperText && (
+        <span id={helperId} className="block mt-1.5 text-xs text-slate-500">
           {helperText}
         </span>
-      ) : null}
+      )}
     </div>
   );
 };

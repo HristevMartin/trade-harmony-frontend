@@ -15,7 +15,6 @@ import PostcodeInput from '@/components/PostcodeInput';
 
 type ProDraft = {
   name: string;
-  email: string;
   phone?: string;
   primaryTrade: string;
   otherServices: string[];
@@ -32,7 +31,6 @@ type ProDraft = {
 
 const initialProDraft: ProDraft = {
   name: '',
-  email: '',
   phone: '',
   primaryTrade: '',
   otherServices: [],
@@ -105,8 +103,7 @@ const TradesPersonOnboarding = () => {
           try {
             const userData = JSON.parse(authUser);
             prefillData = {
-              name: userData.name || '',
-              email: userData.email || ''
+              name: userData.name || ''
             };
           } catch (error) {
             console.error('Error parsing auth user:', error);
@@ -126,7 +123,6 @@ const TradesPersonOnboarding = () => {
               // Filter out any invalid or corrupted data
               const validDraft = {
                 name: parsedDraft.name || '',
-                email: parsedDraft.email || '',
                 phone: parsedDraft.phone || '',
                 primaryTrade: parsedDraft.primaryTrade || '',
                 otherServices: Array.isArray(parsedDraft.otherServices) ? parsedDraft.otherServices : [],
@@ -229,15 +225,6 @@ const TradesPersonOnboarding = () => {
           delete newErrors.name;
         }
         break;
-      case 'email':
-        if (!formData.email.trim()) {
-          newErrors.email = 'Required';
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-          newErrors.email = 'Invalid email';
-        } else {
-          delete newErrors.email;
-        }
-        break;
       case 'primaryTrade':
         if (!formData.primaryTrade) {
           newErrors.primaryTrade = 'Required';
@@ -282,7 +269,7 @@ const TradesPersonOnboarding = () => {
 
     switch (step) {
       case 1:
-        fieldsToValidate.push('name', 'email');
+        fieldsToValidate.push('name');
         break;
       case 2:
         fieldsToValidate.push('primaryTrade');
@@ -302,7 +289,7 @@ const TradesPersonOnboarding = () => {
   const isStepValid = (step: number): boolean => {
     switch (step) {
       case 1:
-        return !!formData.name.trim() && !!formData.email.trim() && /\S+@\S+\.\S+/.test(formData.email);
+        return !!formData.name.trim();
       case 2:
         return !!formData.primaryTrade;
       case 3:
@@ -469,25 +456,10 @@ const TradesPersonOnboarding = () => {
     console.log('Saving tradesperson data after authentication...');
 
     // Check authentication status with detailed logging
-    const token = localStorage.getItem('access_token');
     const authUser = localStorage.getItem('auth_user');
 
-    console.log('Auth check in submitRegistration - Token:', token ? 'EXISTS' : 'MISSING', 'AuthUser:', authUser ? 'EXISTS' : 'MISSING');
-
-    if (!token || !authUser) {
-      console.error('No authentication data found in submitRegistration');
-      console.error('Token:', token);
-      console.error('AuthUser:', authUser);
-      setErrors({ general: 'Authentication required. Please try again.' });
-      setIsSubmitting(false);
-      setHasSubmitted(false);
-      return;
-    }
-
-    console.log('Authentication data confirmed, proceeding with API call');
-
     // Validate required fields before submission
-    const requiredFields = ['name', 'email', 'primaryTrade', 'city', 'postcode'];
+    const requiredFields = ['name', 'primaryTrade', 'city', 'postcode'];
     const missingFields = requiredFields.filter(field => !formData[field as keyof ProDraft]);
 
     if (missingFields.length > 0) {
@@ -508,7 +480,6 @@ const TradesPersonOnboarding = () => {
       // Add basic tradesperson information - mimic PostJob's approach
       const tradespersonData = {
         name: formData.name,
-        email: formData.email,
         phone: formData.phone || '',
         primaryTrade: formData.primaryTrade,
         otherServices: JSON.stringify(formData.otherServices), // Convert array to JSON string
@@ -547,33 +518,7 @@ const TradesPersonOnboarding = () => {
 
       // Add auth token to headers exactly like PostJob
       const headers: HeadersInit = {};
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
-      console.log('Sending tradesperson data to:', `${import.meta.env.VITE_API_URL}/travel/save-trader-project`);
-      console.log('Complete formData state:', formData);
-      console.log('Required fields check:', {
-        name: formData.name || 'MISSING',
-        email: formData.email || 'MISSING',
-        primaryTrade: formData.primaryTrade || 'MISSING',
-        city: formData.city || 'MISSING',
-        postcode: formData.postcode || 'MISSING',
-        portfolioCount: formData.portfolio.length,
-        certificationImagesCount: formData.certificationImages.length,
-        hasToken: !!token
-      });
-
-      // Debug: Log all FormData entries
-      console.log('FormData entries:');
-      for (let [key, value] of formDataToSend.entries()) {
-        if (value instanceof File) {
-          console.log(`${key}:`, `File(${value.name}, ${value.size} bytes, ${value.type})`);
-        } else {
-          console.log(`${key}:`, value);
-        }
-      }
-
+   
       const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/save-trader-project`, {
         method: 'POST',
         credentials: 'include',
@@ -581,15 +526,12 @@ const TradesPersonOnboarding = () => {
         body: formDataToSend
       });
 
-      console.log('Tradesperson data save response status:', response.status);
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Tradesperson data saved successfully:', data);
 
         setIsCompleted(true);
         localStorage.removeItem('pro_onboarding_draft');
-        console.log('Tradesperson registration flow completed');
 
         // Redirect after showing success to the jobs page
         setTimeout(() => {
@@ -621,7 +563,6 @@ const TradesPersonOnboarding = () => {
       } else if (error.message.includes('Server error: 401')) {
         setErrors({ general: 'Authentication expired. Please log in again.' });
         // Clear auth data if unauthorized
-        localStorage.removeItem('access_token');
         localStorage.removeItem('auth_user');
       } else {
         setErrors({ general: error.message || 'Failed to save your information. Please try again.' });
@@ -689,7 +630,7 @@ const TradesPersonOnboarding = () => {
     console.log('Saving tradesperson data with provided auth data...');
 
     // Validate required fields before submission
-    const requiredFields = ['name', 'email', 'primaryTrade', 'city', 'postcode'];
+    const requiredFields = ['name', 'primaryTrade', 'city', 'postcode'];
     const missingFields = requiredFields.filter(field => !formData[field as keyof ProDraft]);
 
     if (missingFields.length > 0) {
@@ -711,7 +652,6 @@ const TradesPersonOnboarding = () => {
       // Add basic tradesperson information
       const tradespersonData = {
         name: formData.name,
-        email: formData.email,
         phone: formData.phone || '',
         primaryTrade: formData.primaryTrade,
         otherServices: JSON.stringify(formData.otherServices),
@@ -755,7 +695,6 @@ const TradesPersonOnboarding = () => {
       console.log('Complete formData state:', formData);
       console.log('Required fields check:', {
         name: formData.name || 'MISSING',
-        email: formData.email || 'MISSING',
         primaryTrade: formData.primaryTrade || 'MISSING',
         city: formData.city || 'MISSING',
         postcode: formData.postcode || 'MISSING',
@@ -838,17 +777,6 @@ const TradesPersonOnboarding = () => {
     // Clear any previous errors
     setErrors(prev => ({ ...prev, general: '' }));
 
-    // Debug: Log current form data state
-    console.log('Complete Registration - Current Form Data:', {
-      name: formData.name || 'MISSING',
-      email: formData.email || 'MISSING',
-      primaryTrade: formData.primaryTrade || 'MISSING',
-      city: formData.city || 'MISSING',
-      postcode: formData.postcode || 'MISSING',
-      radiusKm: formData.radiusKm,
-      marketingConsent: formData.marketingConsent
-    });
-
     // Check user role first (for authenticated users)
     const roleCheck = checkUserRole();
     if (!roleCheck.isValid) {
@@ -870,7 +798,6 @@ const TradesPersonOnboarding = () => {
 
   const progressPercentage = (currentStep / 4) * 100;
   const selectedServicesCount = (formData.primaryTrade ? 1 : 0) + formData.otherServices.length;
-  const isEmailFromAuth = localStorage.getItem('auth_user');
 
   const stepTitles = {
     1: 'Personal Details',
@@ -884,20 +811,6 @@ const TradesPersonOnboarding = () => {
       e.preventDefault(); // Prevent form submission
     }
   };
-
-  // Debug log for rendering issues (only in development)
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development' && currentStep === 4) {
-      console.log('Step 4 Debug:', {
-        currentStep,
-        isCompleted,
-        showAuthModal,
-        hasFormData: !!formData,
-        errors: Object.keys(errors),
-        isSubmitting
-      });
-    }
-  }, [currentStep, isCompleted, showAuthModal, formData, errors, isSubmitting]);
 
   // Show loading state while initializing
   if (isLoading) {
@@ -1056,30 +969,6 @@ const TradesPersonOnboarding = () => {
                     <p id="name-error" className="text-sm text-red-600 font-medium">{errors.name}</p>
                   ) : (
                     <p id="name-help" className="text-sm text-slate-500">Required for your professional profile</p>
-                  )}
-                </div>
-
-                <div className="space-y-3">
-                  <Label htmlFor="email" className="text-base font-medium text-slate-900">Email Address *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => updateFormData('email', e.target.value)}
-                    onBlur={() => handleFieldBlur('email')}
-                    placeholder="Enter your email address"
-                    className={`h-12 text-base px-4 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:ring-offset-0 ${errors.email ? 'border-red-500 bg-red-50' : ''} ${isEmailFromAuth ? 'bg-slate-50' : ''}`}
-                    style={{ borderRadius: '12px', fontSize: '16px' }}
-                    readOnly={!!isEmailFromAuth}
-                    aria-invalid={!!errors.email}
-                    aria-describedby={errors.email ? 'email-error' : 'email-help'}
-                  />
-                  {errors.email ? (
-                    <p id="email-error" className="text-sm text-red-600 font-medium">{errors.email}</p>
-                  ) : isEmailFromAuth ? (
-                    <p id="email-help" className="text-sm text-slate-500">Email from your account</p>
-                  ) : (
-                    <p id="email-help" className="text-sm text-slate-500">Required for job notifications and account access</p>
                   )}
                 </div>
 
@@ -1290,7 +1179,7 @@ const TradesPersonOnboarding = () => {
                   </div>
 
                   {/* Postcode Input with Dropdown */}
-                  <div>
+                  <div className="space-y-3">
                     <PostcodeInput
                       label="Postcode"
                       placeholder="e.g., SW1A 1AA"
@@ -1321,6 +1210,7 @@ const TradesPersonOnboarding = () => {
                       showSuggestions
                       maxSuggestions={8}
                       helperText="We'll verify this postcode exists and use it to match you with nearby jobs"
+                      inputClassName="h-12 text-base px-4 rounded-xl border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     />
                   </div>
                 </div>
@@ -1614,7 +1504,6 @@ const TradesPersonOnboarding = () => {
             setPendingRegistration(false);
           }}
           onSuccess={handleAuthSuccess}
-          initialEmail={formData.email}
           role="trader"
           defaultTab="register"
         />

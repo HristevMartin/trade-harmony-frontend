@@ -88,7 +88,7 @@ const Privacy = () => {
                   1. Who we are (Data Controller)
                 </h2>
                 <p className="mt-3 text-slate-700 dark:text-slate-300 leading-7">
-                  <strong>Controller:</strong> Martin Hristev (operating as JobHub)
+                  <strong>Controller:</strong> Martin Hristev (operating as HireLocal)
                   <br />
                   <strong>Registered address:</strong> 27 Botsford Road, United Kingdom
                   <br />
