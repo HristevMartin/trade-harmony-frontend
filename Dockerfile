@@ -5,10 +5,12 @@ WORKDIR /app
 # Accept build arguments
 ARG VITE_API_URL
 ARG VITE_STRIPE_PK
+ARG VITE_GOOGLE_CLIENT_ID
 
 # Set them as environment variables for the build
 ENV VITE_API_URL=$VITE_API_URL
 ENV VITE_STRIPE_PK=$VITE_STRIPE_PK
+ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
 
 COPY package*.json ./
 RUN npm ci
