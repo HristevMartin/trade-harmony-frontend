@@ -83,6 +83,7 @@ interface FormData {
     job_description: string;
     location: string;
     budget: string;
+    customBudget: string;
     urgency: string;
     images: File[];
     existing_images: string[];
@@ -109,6 +110,7 @@ const EditJob = () => {
         job_description: '',
         location: '',
         budget: '',
+        customBudget: '',
         urgency: '',
         images: [],
         existing_images: [],
@@ -137,12 +139,27 @@ const EditJob = () => {
                     const job = data.project;
                     setJobData(job);
                     
+                    // Parse budget - check if it's custom or a standard range
+                    let parsedBudget = job.budget || '';
+                    let parsedCustomBudget = '';
+                    
+                    if (parsedBudget.startsWith('Custom: £')) {
+                        // Extract the custom amount from "Custom: £321"
+                        parsedCustomBudget = parsedBudget.replace('Custom: £', '');
+                        parsedBudget = 'custom';
+                    } else if (job.additional_data?.budgetType === 'custom' && job.additional_data?.customBudget) {
+                        // Alternative: check additional_data for custom budget
+                        parsedCustomBudget = job.additional_data.customBudget;
+                        parsedBudget = 'custom';
+                    }
+                    
                     // Prefill form with existing data
                     setFormData({
                         job_title: job.job_title || '',
                         job_description: job.job_description || '',
                         location: job.additional_data?.location || '',
-                        budget: job.budget || '',
+                        budget: parsedBudget,
+                        customBudget: parsedCustomBudget,
                         urgency: job.urgency || '',
                         images: [],
                         existing_images: job.image_urls || [],
@@ -222,7 +239,17 @@ const EditJob = () => {
             formDataToSend.append('job_title', formData.job_title);
             formDataToSend.append('job_description', formData.job_description);
             formDataToSend.append('location', formData.location);
-            formDataToSend.append('budget', formData.budget);
+            
+            // Handle budget specially
+            if (formData.budget === 'custom' && formData.customBudget) {
+                formDataToSend.append('budget', `Custom: £${formData.customBudget}`);
+                formDataToSend.append('budgetType', 'custom');
+                formDataToSend.append('budgetAmount', formData.customBudget);
+            } else {
+                formDataToSend.append('budget', formData.budget);
+                formDataToSend.append('budgetType', 'range');
+            }
+            
             formDataToSend.append('urgency', formData.urgency);
             
             // Add contact and additional information
@@ -268,6 +295,8 @@ const EditJob = () => {
                 job_description: formData.job_description,
                 location: formData.location,
                 budget: formData.budget,
+                customBudget: formData.customBudget,
+                budgetFormatted: formData.budget === 'custom' ? `Custom: £${formData.customBudget}` : formData.budget,
                 urgency: formData.urgency,
                 existing_images_count: formData.existing_images.length,
                 new_images_count: formData.images.length,
@@ -489,17 +518,52 @@ const EditJob = () => {
                                         <Label htmlFor="budget" className="text-sm font-medium text-slate-900 mb-2 block">
                                             Budget
                                         </Label>
-                                        <Select value={formData.budget} onValueChange={(value) => handleInputChange('budget', value)}>
+                                        <Select value={formData.budget} onValueChange={(value) => {
+                                            handleInputChange('budget', value);
+                                            // Clear custom budget if switching away from custom
+                                            if (value !== 'custom') {
+                                                handleInputChange('customBudget', '');
+                                            }
+                                        }}>
                                             <SelectTrigger className="rounded-xl border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100">
                                                 <SelectValue placeholder="Select budget range" />
                                             </SelectTrigger>
                                             <SelectContent>
+                                                <SelectItem value="flexible">Flexible</SelectItem>
                                                 <SelectItem value="under-200">Under £200</SelectItem>
                                                 <SelectItem value="200-500">£200 - £500</SelectItem>
                                                 <SelectItem value="over-500">£500+</SelectItem>
-                                                <SelectItem value="flexible">Flexible</SelectItem>
+                                                <SelectItem value="custom">Custom Amount</SelectItem>
                                             </SelectContent>
                                         </Select>
+                                        
+                                        {/* Custom Budget Input - Show when 'Custom Amount' is selected */}
+                                        {formData.budget === 'custom' && (
+                                            <div className="mt-3">
+                                                <Label htmlFor="customBudget" className="text-sm font-medium text-slate-700">
+                                                    Enter your budget amount *
+                                                </Label>
+                                                <div className="relative mt-1">
+                                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-medium">£</span>
+                                                    <Input
+                                                        id="customBudget"
+                                                        type="text"
+                                                        placeholder="e.g. 750"
+                                                        value={formData.customBudget}
+                                                        onChange={(e) => {
+                                                            // Allow only numbers and decimal point
+                                                            const value = e.target.value.replace(/[^\d.]/g, '');
+                                                            // Prevent multiple decimal points
+                                                            const parts = value.split('.');
+                                                            const cleanValue = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : value;
+                                                            handleInputChange('customBudget', cleanValue);
+                                                        }}
+                                                        className="pl-8 rounded-xl border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                                                    />
+                                                </div>
+                                                <p className="text-xs text-slate-500 mt-1">Enter the amount you're willing to spend on this project</p>
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Urgency */}
