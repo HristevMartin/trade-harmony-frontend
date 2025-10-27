@@ -123,7 +123,7 @@ const Index = () => {
       service: "Verified Homeowner"
     },
     {
-      text: "Been getting steady work through HireLocal for three months now. The verification badge really helps customers trust me straight away.",
+      text: "Been getting steady work through JobHub for three months now. The verification badge really helps customers trust me straight away.",
       name: "James M.",
       location: "Croydon, London",
       avatar: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=150&h=150&fit=crop&crop=face",
@@ -139,7 +139,7 @@ const Index = () => {
       service: "Verified Homeowner"
     },
     {
-      text: "No more paying for leads that go nowhere. HireLocal only charges when both sides agree, which is fair for everyone.",
+      text: "No more paying for leads that go nowhere. JobHub only charges when both sides agree, which is fair for everyone.",
       name: "David P.",
       location: "Wandsworth, London",
       avatar: "https://images.unsplash.com/photo-1504593811423-6dd665756598?w=150&h=150&fit=crop&crop=face",
@@ -380,10 +380,10 @@ const Index = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 bg-jobhub-infoBg text-blue-800 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full mb-4 sm:mb-6 font-semibold border border-jobhub-border shadow-subtle hover:shadow-lift transition-all duration-300 text-xs sm:text-sm md:text-base"
+              className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-800 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full mb-4 sm:mb-6 font-semibold border border-emerald-200 shadow-subtle hover:shadow-lift transition-all duration-300 text-xs sm:text-sm md:text-base"
             >
-              <span className="text-lg sm:text-xl">💫</span>
-              <span className="text-jobhub-blueFg font-bold">Built for UK homeowners & verified trades, powered by AI</span>
+              <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600" />
+              <span className="font-bold">Verified Professionals. Checked Qualifications. Trusted by UK Homeowners.</span>
             </motion.div>
             
             <motion.h1
@@ -399,9 +399,17 @@ const Index = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-                className="text-jobhub-subtext text-[clamp(0.95rem,2.8vw,1.25rem)] mb-3 sm:mb-5 max-w-3xl mx-auto leading-relaxed px-2"
+                className="text-jobhub-subtext text-[clamp(0.95rem,2.8vw,1.25rem)] mb-2 sm:mb-3 max-w-3xl mx-auto leading-relaxed px-2"
             >
-                Post with confidence using AI — verified local pros handle the rest.
+                Hire with confidence — every verified pro is checked by us.
+            </motion.p>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+                className="text-jobhub-blue text-[clamp(0.85rem,2.5vw,1.1rem)] mb-3 sm:mb-5 max-w-2xl mx-auto font-semibold px-2"
+            >
+                AI finds the best local pros — we verify every one before they reach you.
             </motion.p>
             </div>
 
@@ -504,13 +512,23 @@ const Index = () => {
 
          
 
-            {/* Trustpilot Social Proof */}
+            {/* Trust Indicators */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
               className="mt-4 sm:mt-5 px-2"
             >
+              <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-3">
+                <div className="flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">
+                  <Shield className="h-4 w-4 text-emerald-600" />
+                  <span className="text-emerald-800 text-xs sm:text-sm font-semibold">Qualifications Checked</span>
+                </div>
+                <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-200">
+                  <CheckCircle2 className="h-4 w-4 text-blue-600" />
+                  <span className="text-blue-800 text-xs sm:text-sm font-semibold">Insurance Verified</span>
+                </div>
+              </div>
               <p 
                 role="note" 
                 aria-label="Trust indicators"
@@ -531,10 +549,13 @@ const Index = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.8 }}
-              className="text-center mt-4 sm:mt-6 px-2"
+              className="text-center mt-4 sm:mt-6 px-2 space-y-2"
             >
               <p className="text-jobhub-subtext text-xs sm:text-sm font-medium">
-                Free to post. No obligation.
+                Free to post. No obligation. Only verified pros prioritized.
+              </p>
+              <p className="text-jobhub-text text-xs sm:text-sm font-semibold">
+                JobHub is built for real homeowners and qualified UK trades — no fake profiles, ever.
               </p>
             </motion.div>
           </div>
@@ -599,7 +620,7 @@ const Index = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-jobhub-text mb-3 sm:mb-4">How HireLocal Works</h2>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-jobhub-text mb-3 sm:mb-4">How JobHub Works</h2>
               <p className="text-jobhub-subtext text-base sm:text-lg px-4 max-w-2xl mx-auto">Smart AI assistance meets human verification — for your perfect match</p>
             </motion.div>
           </div>
@@ -617,22 +638,22 @@ const Index = () => {
                   color: "trust-blue"
                 },
                 {
-                  icon: <Brain className="h-10 w-10" />,
-                  title: "AI Finds Perfect Matches",
-                  description: "AI helps suggest local trades that best fit your job based on trade type and verified experience.",
+                  icon: <Shield className="h-10 w-10" />,
+                  title: "We Verify Qualifications",
+                  description: "JobHub manually checks qualifications and insurance before awarding verified badges to professionals.",
                   color: "trust-green"
                 },
                 {
-                  icon: <Users className="h-10 w-10" />,
-                  title: "Verified Pros Apply",
-                  description: "Verified and insured professionals prioritized",
-                  color: "accent-orange"
+                  icon: <Brain className="h-10 w-10" />,
+                  title: "AI Matches Verified Pros",
+                  description: "AI prioritizes verified, insured professionals in your postcode area for the perfect match.",
+                  color: "trust-blue"
                 },
                 {
                   icon: <Handshake className="h-10 w-10" />,
-                  title: "Hire & Leave Reviews",
-                  description: "Hire confidently and leave verified feedback after the job's done.",
-                  color: "trust-blue"
+                  title: "Hire with Confidence",
+                  description: "Choose from pre-checked professionals and leave verified feedback after completion.",
+                  color: "accent-orange"
                 }
               ].map((step, index) => (
                 <motion.div
@@ -686,11 +707,13 @@ const Index = () => {
             >
               <div className="inline-flex items-center gap-2 bg-jobhub-successBg text-emerald-700 px-4 py-2 rounded-full mb-6 font-semibold border border-emerald-200">
                 <Shield className="h-5 w-5" />
-                <span>Verified Network</span>
+                <span>Manually Verified by JobHub</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-jobhub-text mb-3 sm:mb-4">Smart Matching with Verified Badges</h2>
-              <p className="text-jobhub-subtext text-base sm:text-lg px-4 max-w-2xl mx-auto">Tradespeople can get <span className="font-semibold">verified</span> by uploading <span className="font-semibold">qualifications and insurance</span>, which are reviewed before approval. <span className="font-semibold">Verified badges</span> help you identify thoroughly checked professionals.</p>
-              <p className="text-xs sm:text-sm text-jobhub-subtext mt-2 italic px-4 max-w-2xl mx-auto">Verification is optional but recommended — verified professionals are prioritized in AI search results and receive more opportunities.</p>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-jobhub-text mb-3 sm:mb-4">Every Verified Badge Is Earned — Not Bought</h2>
+              <p className="text-jobhub-subtext text-base sm:text-lg px-4 max-w-2xl mx-auto">Tradespeople upload <span className="font-semibold">qualifications and insurance documents</span>, which are <span className="font-semibold">manually reviewed by our team</span> before approval. <span className="font-semibold">Verified badges</span> mean we've checked their credentials — giving you peace of mind.</p>
+              <p className="text-sm text-emerald-700 font-semibold mt-3 px-4 max-w-2xl mx-auto bg-emerald-50 py-2 rounded-lg border border-emerald-200">
+                ✓ For Traders: Get verified to stand out and earn more jobs — verified pros are prioritized in AI search results
+              </p>
             </motion.div>
           </div>
           
@@ -705,15 +728,15 @@ const Index = () => {
             >
               <h3 className="text-xl sm:text-2xl font-bold text-jobhub-text mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
                 <CheckCircle2 className="h-6 w-6 sm:h-7 sm:w-7 text-emerald-600" />
-                What We Verify
+                What We Manually Check
               </h3>
               
               <div className="space-y-4">
                 {[
-                  { icon: <Award className="h-5 w-5" />, title: "Professional Qualifications", desc: "Trades upload proof of qualifications and certifications, which are verified before approval" },
-                  { icon: <Shield className="h-5 w-5" />, title: "Insurance Coverage", desc: "Trades upload proof of insurance, which is verified before approval" },
-                  { icon: <CheckCircle2 className="h-5 w-5" />, title: "Account Verification", desc: "Profile completeness and authenticity checked" },
-                  { icon: <Star className="h-5 w-5" />, title: "Work History & Reviews", desc: "Real homeowner feedback from completed jobs" }
+                  { icon: <Award className="h-5 w-5" />, title: "Professional Qualifications", desc: "Our team reviews uploaded trade certificates and qualifications — no auto-approval" },
+                  { icon: <Shield className="h-5 w-5" />, title: "Insurance Coverage", desc: "We verify current liability insurance documentation before awarding verification" },
+                  { icon: <CheckCircle2 className="h-5 w-5" />, title: "Identity & Profile Checks", desc: "Profile completeness, business legitimacy, and contact verification" },
+                  { icon: <Star className="h-5 w-5" />, title: "Work History & Reviews", desc: "Only real homeowner feedback from completed jobs — no fake reviews" }
                 ].map((item, index) => (
                   <motion.div
                     key={index}
@@ -749,34 +772,34 @@ const Index = () => {
               </h3>
               
               <div className="space-y-6">
-                <div className="bg-jobhub-card rounded-xl p-5 border border-jobhub-border">
+                <div className="bg-emerald-50 rounded-xl p-5 border-2 border-emerald-200">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="bg-jobhub-successBg rounded-full p-2">
-                      <CheckCircle2 className="h-6 w-6 text-emerald-600" />
+                    <div className="bg-emerald-100 rounded-full p-2">
+                      <Shield className="h-6 w-6 text-emerald-700" />
                     </div>
-                    <h4 className="font-bold text-jobhub-text text-base sm:text-lg">AI chatbot finds the right professionals for you</h4>
+                    <h4 className="font-bold text-emerald-900 text-base sm:text-lg">We Check Credentials Before Verification</h4>
                   </div>
-                  <p className="text-jobhub-subtext text-xs sm:text-sm leading-relaxed">
-                    No endless scrolling — just ask our AI and we'll show you the best matches you can invite directly
+                  <p className="text-emerald-800 text-xs sm:text-sm leading-relaxed font-medium">
+                    Every verified badge is manually awarded after our team reviews qualifications and insurance — no shortcuts
                   </p>
                 </div>
                 
                 <div className="bg-jobhub-card rounded-xl p-5 border border-jobhub-border">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="bg-jobhub-infoBg rounded-full p-2">
-                      <Award className="h-6 w-6 text-jobhub-blue" />
+                      <Brain className="h-6 w-6 text-jobhub-blue" />
                     </div>
-                    <h4 className="font-bold text-jobhub-text text-base sm:text-lg">Verified badges help you identify trusted professionals</h4>
+                    <h4 className="font-bold text-jobhub-text text-base sm:text-lg">AI matches you with verified pros first</h4>
                   </div>
                   <p className="text-jobhub-subtext text-xs sm:text-sm leading-relaxed">
-                    Verification is optional — verified professionals upload qualifications and insurance, which are reviewed before badge approval
+                    Our AI prioritizes verified, insured professionals in your area — no endless scrolling needed
                   </p>
                 </div>
                 
                 <div className="bg-jobhub-card rounded-xl p-5 border border-jobhub-border">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="bg-amber-50 rounded-full p-2">
-                      <Shield className="h-6 w-6 text-amber-600" />
+                      <Star className="h-6 w-6 text-amber-600" />
                     </div>
                     <h4 className="font-bold text-jobhub-text text-base sm:text-lg">Reviews are verified and tied to completed jobs</h4>
                   </div>
@@ -797,10 +820,10 @@ const Index = () => {
             className="flex flex-wrap justify-center items-center gap-6 md:gap-12 py-6 px-4 bg-jobhub-surface rounded-2xl border border-jobhub-border"
           >
             {[
-              { icon: <Shield className="h-6 w-6" />, text: "Verification Available" },
-              { icon: <Award className="h-6 w-6" />, text: "Verified Pros Prioritized" },
-              { icon: <MessageSquare className="h-6 w-6" />, text: "AI Chatbot Matching" },
-              { icon: <Star className="h-6 w-6" />, text: "Reviewed by Real Homeowners" }
+              { icon: <Shield className="h-6 w-6" />, text: "Manually Verified by Our Team" },
+              { icon: <Award className="h-6 w-6" />, text: "Qualifications Checked" },
+              { icon: <CheckCircle2 className="h-6 w-6" />, text: "Insurance Confirmed" },
+              { icon: <Star className="h-6 w-6" />, text: "Real Reviews from Completed Jobs" }
             ].map((badge, index) => (
               <div key={index} className="flex items-center gap-2 text-jobhub-text font-semibold">
                 <div className="text-emerald-600">{badge.icon}</div>
@@ -826,14 +849,13 @@ const Index = () => {
             >
               <div className="inline-flex items-center gap-2 bg-jobhub-infoBg text-blue-800 border border-blue-200 px-4 py-2 rounded-full mb-6 font-semibold shadow-subtle">
                 <Brain className="h-5 w-5" />
-                <span>Powered by AI — Matching You Instantly</span>
+                <span>AI Matching + Manual Verification</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-jobhub-text mb-3 sm:mb-4">AI Finds the Right Professional — Instantly</h2>
-              <p className="mt-2 text-sm text-jobhub-subtext sm:hidden max-w-2xl mx-auto">
-                AI learns from verified matches — getting smarter with every connection.
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-jobhub-text mb-3 sm:mb-4">AI Finds Verified Pros — We've Already Checked Them</h2>
+              <p className="text-jobhub-subtext text-base sm:text-lg px-4 max-w-2xl mx-auto">Our AI chatbot matches you with suitable tradespeople based on trade, location, and verified credentials. <span className="font-semibold text-emerald-700">Verified pros appear first</span> because we've already checked their qualifications and insurance.</p>
+              <p className="text-sm text-jobhub-blue font-semibold mt-3 px-4 max-w-2xl mx-auto">
+                ✓ No endless scrolling — AI prioritizes pre-checked, verified professionals in your area
               </p>
-              <p className="text-jobhub-subtext text-base sm:text-lg px-4 max-w-2xl mx-auto">Use our AI chatbot to find suitable tradespeople based on trade, location, and experience. Click 'Notify Trader' to send email invitations, and professionals decide whether to apply.</p>
-              <p className="text-xs sm:text-sm text-jobhub-subtext mt-2 italic px-4 max-w-2xl mx-auto">No profile browsing needed — AI shows you the best matches and verified professionals are prioritized in suggestions.</p>
             </motion.div>
           </div>
           
@@ -943,9 +965,9 @@ const Index = () => {
             className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mt-8"
           >
             {[
-              { icon: <Brain className="h-8 w-8" />, title: "AI-Assisted Job Posts", desc: "AI helps you create clearer, more detailed job descriptions" },
-              { icon: <TrendingUp className="h-8 w-8" />, title: "Location-Based Matching", desc: "Find suitable professionals in your postcode area" },
-              { icon: <Shield className="h-8 w-8" />, title: "Verified Badges Available", desc: "Verification is optional — verified professionals upload qualifications and insurance for added trust" }
+              { icon: <Shield className="h-8 w-8" />, title: "Manual Verification First", desc: "We check qualifications and insurance before awarding verified badges — no automated approval" },
+              { icon: <Brain className="h-8 w-8" />, title: "AI Prioritizes Verified Pros", desc: "AI matches you with pre-checked professionals in your postcode area first" },
+              { icon: <CheckCircle2 className="h-8 w-8" />, title: "Hire with Confidence", desc: "Every verified badge means we've reviewed their credentials — peace of mind guaranteed" }
             ].map((benefit, index) => (
               <div key={index} className="text-center p-6 rounded-xl bg-card/80 border border-border/50 shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/20  mb-4 shadow-md border border-primary/20">
@@ -966,7 +988,7 @@ const Index = () => {
             className="text-center mt-8"
           >
             <p className="text-xs text-muted-foreground italic max-w-2xl mx-auto px-4">
-              Matches are based on postcode proximity and verified trade profiles. AI assists in refining job posts for better accuracy.
+              Verified badges are awarded after manual review of qualifications and insurance by our team. AI matches are based on postcode proximity and verified credentials.
             </p>
           </motion.div>
         </div>
@@ -983,12 +1005,14 @@ const Index = () => {
               transition={{ duration: 0.6 }}
             >
               <div className="inline-flex items-center gap-2 bg-jobhub-successBg text-emerald-700 px-4 py-2 rounded-full mb-6 font-semibold border border-emerald-200">
-                <MessageSquare className="h-5 w-5" />
-                <span>Our Mission</span>
+                <Shield className="h-5 w-5" />
+                <span>Verified & Trusted</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-jobhub-text mb-3 sm:mb-4">Trust Built In — Through Verified Reviews</h2>
-              <p className="text-jobhub-subtext text-base sm:text-lg px-4 max-w-2xl mx-auto">HireLocal uses AI to connect homeowners with suitable tradespeople. Verified professionals upload qualifications and insurance for added trust.</p>
-              <p className="text-xs sm:text-sm text-jobhub-subtext mt-2 italic px-4 max-w-2xl mx-auto">Every review comes from completed jobs — no fake feedback, ever. Both verified and unverified users can leave reviews.</p>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-jobhub-text mb-3 sm:mb-4">Real Reviews. Real Verification. Real Peace of Mind.</h2>
+              <p className="text-jobhub-subtext text-base sm:text-lg px-4 max-w-2xl mx-auto">JobHub manually verifies qualifications and insurance before awarding verified badges. <span className="font-semibold">AI matching</span> then prioritizes these pre-checked professionals for your job.</p>
+              <p className="text-sm text-emerald-700 font-semibold mt-3 px-4 max-w-2xl mx-auto bg-emerald-50 py-2 rounded-lg border border-emerald-200">
+                Every review comes from completed jobs — no fake feedback, ever. Only real homeowners can leave verified reviews.
+              </p>
             <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 mt-4 sm:mt-6 mb-6 sm:mb-8 px-4">
               <div className="flex items-center gap-1.5 sm:gap-2 bg-jobhub-successBg px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full border border-emerald-200">
                   <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600" aria-hidden="true" />
@@ -1112,28 +1136,28 @@ const Index = () => {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 max-w-5xl mx-auto px-2 sm:px-4"
           >
+            <div className="text-center p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl bg-emerald-50 border-2 border-emerald-200 shadow-subtle hover:shadow-lift hover:-translate-y-0.5 transition-all duration-300">
+              <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-emerald-100 mb-3 sm:mb-4 border-2 border-emerald-300">
+                <Shield className="h-7 w-7 sm:h-8 sm:w-8 text-emerald-700" />
+              </div>
+              <h3 className="text-lg sm:text-xl font-bold text-emerald-900 mb-2 sm:mb-3">Manually Verified Pros</h3>
+              <p className="text-emerald-800 text-xs sm:text-sm leading-relaxed font-medium">Our team checks qualifications and insurance before awarding verified badges — no automated approval.</p>
+            </div>
+            
             <div className="text-center p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl bg-jobhub-card border border-jobhub-border shadow-subtle hover:shadow-lift hover:-translate-y-0.5 transition-all duration-300">
               <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-jobhub-infoBg mb-3 sm:mb-4 border border-blue-200">
                 <Brain className="h-7 w-7 sm:h-8 sm:w-8 text-jobhub-blue" />
               </div>
-              <h3 className="text-lg sm:text-xl font-bold text-jobhub-text mb-2 sm:mb-3">AI-Assisted Matching</h3>
-              <p className="text-jobhub-subtext text-xs sm:text-sm leading-relaxed">Faster, smarter job connections powered by intelligent automation.</p>
-            </div>
-            
-            <div className="text-center p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl bg-jobhub-card border border-jobhub-border shadow-subtle hover:shadow-lift hover:-translate-y-0.5 transition-all duration-300">
-              <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-jobhub-successBg mb-3 sm:mb-4 border border-emerald-200">
-                <Shield className="h-7 w-7 sm:h-8 sm:w-8 text-emerald-600" />
-              </div>
-              <h3 className="text-lg sm:text-xl font-bold text-jobhub-text mb-2 sm:mb-3">Verified Badges Available</h3>
-              <p className="text-jobhub-subtext text-xs sm:text-sm leading-relaxed">Verification is optional — verified professionals upload qualifications and insurance for review — verification badges help you identify them.</p>
+              <h3 className="text-lg sm:text-xl font-bold text-jobhub-text mb-2 sm:mb-3">AI Prioritizes Verified</h3>
+              <p className="text-jobhub-subtext text-xs sm:text-sm leading-relaxed">AI matches you with pre-checked professionals first — faster, safer connections.</p>
             </div>
             
             <div className="text-center p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl bg-jobhub-card border border-jobhub-border shadow-subtle hover:shadow-lift hover:-translate-y-0.5 transition-all duration-300 sm:col-span-2 md:col-span-1">
               <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-jobhub-infoBg mb-3 sm:mb-4 border border-blue-200">
                 <CheckCircle2 className="h-7 w-7 sm:h-8 sm:w-8 text-jobhub-blue" />
               </div>
-              <h3 className="text-lg sm:text-xl font-bold text-jobhub-text mb-2 sm:mb-3">Free for Homeowners</h3>
-              <p className="text-jobhub-subtext text-xs sm:text-sm leading-relaxed">Post your job at no cost — transparency from start to finish.</p>
+              <h3 className="text-lg sm:text-xl font-bold text-jobhub-text mb-2 sm:mb-3">Free & Transparent</h3>
+              <p className="text-jobhub-subtext text-xs sm:text-sm leading-relaxed">Post your job at no cost — only pay when you hire a verified professional.</p>
             </div>
           </motion.div>
         </div>
@@ -1159,6 +1183,35 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Trader CTA Bar */}
+      <section className="py-6 sm:py-8 bg-gradient-to-r from-emerald-50 via-blue-50 to-emerald-50 border-y border-jobhub-border">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          >
+            <div className="flex items-center gap-3">
+              <div className="bg-emerald-100 rounded-full p-2">
+                <Shield className="h-6 w-6 text-emerald-700" />
+              </div>
+              <p className="text-jobhub-text text-base sm:text-lg font-bold">
+                Tradespeople: Get verified and appear first in AI matches.
+              </p>
+            </div>
+            <Button
+              onClick={() => navigate('/tradesperson/onboarding')}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg font-semibold shadow-sm hover:shadow-md transition-all duration-300"
+            >
+              Get Started
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+            </motion.div>
+        </div>
+      </section>
+
       {/* FAQ Section */}
       <section className="py-8 sm:py-12 md:py-16 lg:py-20 bg-white border-t border-jobhub-border">
         <div className="space-y-6 md:space-y-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1169,21 +1222,21 @@ const Index = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-jobhub-text mb-3 sm:mb-4">Frequently Asked Questions</h2>
-              <p className="text-jobhub-subtext text-base sm:text-lg max-w-2xl mx-auto">Everything you need to know about finding and hiring tradespeople on HireLocal</p>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-jobhub-text mb-3 sm:mb-4">Questions About Trust & Verification</h2>
+              <p className="text-jobhub-subtext text-base sm:text-lg max-w-2xl mx-auto">Everything you need to know about finding and hiring verified tradespeople on JobHub</p>
             </motion.div>
           </div>
           
           <div className="space-y-4">
             {[
               {
-                question: "What does 'verified' mean on HireLocal?",
-                answer: "Verification is optional for tradespeople. Verified professionals upload qualifications and insurance, which are manually reviewed before a verification badge is awarded. This includes trade certifications review, insurance confirmation, and profile completeness checks.",
-                icon: <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                question: "What does 'verified' mean on JobHub?",
+                answer: "Every verified badge is manually awarded by our team after reviewing uploaded qualifications and insurance documents. We check trade certifications, confirm current insurance coverage, and verify profile authenticity — no automated approval. This gives you confidence that verified professionals have been thoroughly checked.",
+                icon: <Shield className="h-5 w-5 text-emerald-600" />
               },
               {
-                question: "How does HireLocal's AI match me with professionals?",
-                answer: "AI analyses skills, distance, and verified experience to recommend the best local matches. It compares your project requirements with each tradesperson's expertise, specialisations, location, and availability.",
+                question: "How does JobHub's AI match me with professionals?",
+                answer: "Our AI prioritizes verified professionals in your postcode area first, then analyses trade type, experience, and availability. Verified pros appear at the top of suggestions because we've already checked their credentials — saving you time and giving you peace of mind.",
                 icon: <Brain className="h-5 w-5 text-jobhub-blue" />
               },
               {
@@ -1197,9 +1250,9 @@ const Index = () => {
                 icon: <MessageSquare className="h-5 w-5 text-amber-600" />
               },
               {
-                question: "How does HireLocal's AI get smarter?",
-                answer: "Over time, AI learns from successful matches and feedback to improve accuracy and recommendations. It continuously refines its understanding of what makes a successful homeowner-tradesperson partnership.",
-                icon: <Brain className="h-5 w-5 text-jobhub-blue" />
+                question: "Why should tradespeople get verified?",
+                answer: "Verified professionals are prioritized in AI search results and earn more job opportunities. Getting verified helps you stand out, build trust instantly, and win more projects — all backed by our manual review process that confirms your credentials to homeowners.",
+                icon: <Award className="h-5 w-5 text-emerald-600" />
               }
             ].map((faq, index) => {
               const isOpen = openFaqIndex === index;
@@ -1251,6 +1304,22 @@ const Index = () => {
               );
             })}
           </div>
+          
+          {/* Verification Reassurance Footer */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="text-center mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-jobhub-border"
+          >
+            <div className="flex items-center justify-center gap-2 text-emerald-700">
+              <Shield className="h-5 w-5" />
+              <p className="text-sm sm:text-base font-semibold">
+                All verified trades are reviewed by our UK-based team.
+              </p>
+            </div>
+          </motion.div>
         </div>
       </section>
 
