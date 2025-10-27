@@ -15,7 +15,7 @@ const Chat = () => {
   const { conversation_id: paramConversationId } = useParams();
   const [searchParams] = useSearchParams();
 
-  // Support both URL params and search params for backward compatibility
+  // Support both URL psarams and search params for backward compatibility
   const conversationId = paramConversationId || searchParams.get('conversation_id');
 
   // Payment flow parameters
