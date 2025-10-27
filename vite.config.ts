@@ -33,9 +33,9 @@ export default defineConfig(({ mode }) => ({
       },
       includeAssets: [ 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
-        name: 'Job-Hub',
+        name: 'JobHub',
         short_name: 'JobHub',
-        description: 'Connect with trusted tradespeople and manage your projects efficiently',
+        description: 'Connect with verified tradespeople and manage your projects efficiently - AI-powered matching with manual verification',
         theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',
