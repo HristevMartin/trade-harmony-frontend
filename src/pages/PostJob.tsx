@@ -177,7 +177,7 @@ const PostJob = () => {
             1: formData.country && locationComplete, // Location
             2: formData.serviceCategory && formData.jobTitle && formData.jobDescription.length >= 20, // Details
             3: true, // Photos (optional)
-            4: formData.firstName && formData.email && formData.phone, // Contact
+            4: formData.firstName && formData.phone, // Contact
             5: formData.gdprConsent // Review/Consent
         };
         return steps;

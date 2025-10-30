@@ -927,26 +927,33 @@ const HomeownerGetProjects = () => {
 
                   <CardContent className="p-6 pt-0">
                     {/* Project Image */}
-                    {project.image_urls && project.image_urls.length > 0 && (
-                      <div className="mb-6">
-                        <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-gray-50">
-                          <img
-                            src={project.image_urls[0]}
-                            alt="Project"
-                            className="w-full h-full object-cover transition-all duration-200"
-                            loading="lazy"
-                          />
-                          {project.image_count > 1 && (
-                            <div className="absolute bottom-2 right-2 bg-gray-900/90 text-white text-xs px-2.5 py-1 rounded-full">
-                              +{project.image_count - 1} more
-                            </div>
-                          )}
-                        </div>
+                    <div className="mb-6">
+                      <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50">
+                        {project.image_urls && project.image_urls.length > 0 && project.image_urls[0] && project.image_urls[0].trim() !== '' ? (
+                          <>
+                            <img
+                              src={project.image_urls[0]}
+                              alt="Project"
+                              className="w-full h-full object-cover transition-all duration-200"
+                              loading="lazy"
+                            />
+                            {project.image_count > 1 && (
+                              <div className="absolute bottom-2 right-2 bg-gray-900/90 text-white text-xs px-2.5 py-1 rounded-full">
+                                +{project.image_count - 1} more
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
+                            <HiPhoto className="w-16 h-16 mb-2" />
+                            <span className="text-sm font-medium">No image uploaded</span>
+                          </div>
+                        )}
                       </div>
-                    )}
+                    </div>
 
                     {/* Key Metadata Row */}
-                    <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="grid grid-cols-2 gap-4 mb-4">
                       {/* Left Column */}
                       <div className="space-y-3">
                         <div className="flex items-center gap-2 text-sm">
@@ -983,7 +990,7 @@ const HomeownerGetProjects = () => {
                     </div>
 
                     {/* Optional chips */}
-                    <div className="flex items-center justify-between mb-6 text-xs">
+                    <div className="flex items-center justify-between mb-4 text-xs">
                       <div className="flex items-center gap-1 text-gray-500">
                         <Clock className="w-3 h-3" />
                         <span>Updated {formatTimeAgo(project.updated_at)}</span>

@@ -571,6 +571,14 @@ const TradesPersonJobs = () => {
     return `${Math.floor(diffInHours / 24)}d ago`;
   };
 
+  // Check if job was created within the last 72 hours
+  const isNewJob = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    return diffInHours <= 72;
+  };
+
   const handleRetry = () => {
     setError(null);
     window.location.reload();
@@ -809,7 +817,8 @@ const TradesPersonJobs = () => {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, ease: [0.22, 0.61, 0.36, 1] }}
-        className="desktop-filter-bar hidden md:block bg-white/95 backdrop-blur-sm border-b border-gray-200/60 shadow-sm sticky top-0 z-40"
+        className="desktop-filter-bar hidden md:block bg-white/95 backdrop-blur-sm border-b border-gray-200/60 shadow-sm sticky top-14 z-40 transition-shadow duration-200"
+        style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)' }}
       >
         <div className="container mx-auto px-4 max-w-6xl py-4">
           <div className="flex items-center justify-between gap-4">
@@ -2166,17 +2175,17 @@ const TradesPersonJobs = () => {
                           delay: Math.min(index * 0.04, 0.24),
                           ease: [0.22, 0.61, 0.36, 1]
                         }}
-                        whileHover={{ y: -2, transition: { duration: 0.2, ease: 'easeOut' } }}
+                        whileHover={{ y: -4, transition: { duration: 0.2, ease: 'easeOut' } }}
                       >
-                        <Card className="bg-white border border-gray-200/40 shadow-md hover:shadow-2xl hover:-translate-y-1 hover:border-gray-300/50 transition-all duration-200 group flex flex-col h-[580px] rounded-2xl overflow-hidden ring-1 ring-gray-100/50">
+                        <Card className="bg-white border border-slate-200 shadow-sm hover:shadow-xl hover:border-emerald-200 transition-all duration-300 group flex flex-col h-[540px] rounded-xl overflow-hidden">
                           {/* Job Image Section - Fixed Height */}
-                          <div className="relative h-48 w-full flex-shrink-0 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
-                            {job.image_urls && job.image_urls.length > 0 && (
+                          <div className="relative h-44 w-full flex-shrink-0 bg-gradient-to-br from-slate-50 via-white to-slate-50 overflow-hidden">
+                            {job.image_urls && job.image_urls.length > 0 ? (
                               <>
                                 <img
                                   src={job.image_urls[0]}
                                   alt={job.job_title}
-                                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                                   loading="lazy"
                                   onError={(e) => {
                                     const target = e.target as HTMLImageElement;
@@ -2186,98 +2195,105 @@ const TradesPersonJobs = () => {
                                   }}
                                 />
                                 {/* Fallback for broken images */}
-                                <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 items-center justify-center hidden">
-                                  <div className="p-6 bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg">
+                                <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-slate-50 items-center justify-center hidden">
+                                  <div className="p-5 bg-white/90 backdrop-blur-sm rounded-xl shadow-md">
                                     {getCategoryIcon(job.additional_data?.serviceCategory || job.service_category, 'lg')}
                                   </div>
                                 </div>
                               </>
-                            )}
-                            {/* Placeholder when no image - More prominent background */}
-                            {(!job.image_urls || job.image_urls.length === 0) && (
-                              <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 flex items-center justify-center">
-                                <div className="p-6 bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg">
+                            ) : (
+                              <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-slate-50 flex items-center justify-center">
+                                <div className="p-5 bg-white/90 backdrop-blur-sm rounded-xl shadow-md">
                                   {getCategoryIcon(job.additional_data?.serviceCategory || job.service_category, 'lg')}
                                 </div>
                               </div>
                             )}
 
-                            {/* Top Badges Row */}
-                            <div className="absolute top-3 left-3 right-3 flex items-start justify-between">
-                              {/* Budget Badge - Prominent */}
+                            {/* Price Badge - Top Left */}
+                            <div className="absolute top-3 left-3">
                               <motion.div 
-                                initial={{ opacity: 0, scale: 0.92 }}
+                                initial={{ opacity: 0, scale: 0.9 }}
                                 whileInView={{ opacity: 1, scale: 1 }}
                                 viewport={{ once: true }}
-                                transition={{ duration: 0.18, delay: 0.1 }}
-                                className="bg-white backdrop-blur-md text-gray-900 text-sm font-bold px-4 py-2 rounded-full shadow-lg border border-gray-200/50 ring-1 ring-white/50"
+                                transition={{ duration: 0.2, delay: 0.1 }}
+                                className="bg-white/95 backdrop-blur-sm text-slate-900 text-sm font-bold px-3.5 py-1.5 rounded-lg shadow-md"
                               >
                                 {extractPriceOnly(job.budget)}
                               </motion.div>
-
-                              {/* Urgency Badge */}
-                              <motion.div 
-                                initial={{ opacity: 0, scale: 0.92 }}
-                                whileInView={{ opacity: 1, scale: 1 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.18, delay: 0.15 }}
-                                className={`text-xs font-bold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-md border ${
-                                formatUrgency(job.urgency) === 'ASAP'
-                                  ? 'bg-red-500 text-white border-red-400/30 ring-1 ring-red-300/50'
-                                  : formatUrgency(job.urgency) === 'This week'
-                                    ? 'bg-amber-500 text-white border-amber-400/30 ring-1 ring-amber-300/50'
-                                    : 'bg-blue-500 text-white border-blue-400/30 ring-1 ring-blue-300/50'
-                              }`}>
-                                {formatUrgency(job.urgency)}
-                              </motion.div>
                             </div>
+
+                            {/* NEW Badge - Top Right */}
+                            {isNewJob(job.created_at) && (
+                              <div className="absolute top-3 right-3">
+                                <motion.div
+                                  initial={{ opacity: 0, scale: 0.9 }}
+                                  whileInView={{ opacity: 1, scale: 1 }}
+                                  viewport={{ once: true }}
+                                  transition={{ duration: 0.2, delay: 0.15 }}
+                                  className="bg-gradient-to-r from-emerald-500 to-green-500 text-white text-xs font-bold px-2.5 py-1 rounded-md shadow-md"
+                                >
+                                  NEW
+                                </motion.div>
+                              </div>
+                            )}
                           </div>
 
                           {/* Card Content */}
-                          <div className="flex-1 p-6 flex flex-col divide-y divide-gray-100">
-                            {/* Header - Category & Time */}
-                            <div className="flex items-center justify-between pb-4">
-                              <div className="flex items-center gap-2">
+                          <div className="flex-1 p-5 flex flex-col">
+                            {/* Category & Time */}
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-1.5">
                                 {getCategoryIcon(job.additional_data?.serviceCategory || job.service_category, 'sm')}
-                                <span className="text-xs text-gray-600 font-semibold uppercase tracking-wider">
+                                <span className="text-xs text-slate-600 font-semibold uppercase tracking-wide">
                                   {job.additional_data?.serviceCategory || job.service_category}
                                 </span>
                               </div>
-                              <span className="text-xs text-gray-500 font-medium">
+                              <span className="text-xs text-slate-500 font-medium">
                                 {formatTimeAgo(job.created_at)}
                               </span>
                             </div>
 
-                            {/* Job Title - Prominent */}
-                            <div className="pt-4 pb-3">
-                              <h3 className="text-lg font-bold text-gray-800 line-clamp-2 leading-snug mb-3 min-h-[3.5rem] group-hover:text-blue-600 transition-colors">
-                                {job.job_title}
-                              </h3>
+                            {/* Job Title */}
+                            <h3 className="text-lg font-bold text-slate-900 line-clamp-2 leading-tight mb-3 group-hover:text-emerald-600 transition-colors">
+                              {job.job_title}
+                            </h3>
 
-                              {/* Location */}
-                              <div className="flex items-start gap-2">
-                                <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                                <div className="flex-1">
-                                  <span className="text-sm text-gray-700 font-medium line-clamp-1">
-                                    {job.additional_data?.nuts || job.nuts || job.location}
-                                  </span>
-                                </div>
+                            {/* Location & Urgency */}
+                            <div className="space-y-1.5 mb-3">
+                              <div className="flex items-center gap-2">
+                                <MapPin className="h-3.5 w-3.5 text-slate-400 flex-shrink-0" />
+                                <span className="text-sm text-slate-700 font-medium line-clamp-1">
+                                  {job.additional_data?.nuts || job.nuts || job.location}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Clock className="h-3.5 w-3.5 text-slate-400 flex-shrink-0" />
+                                <span className={`text-xs font-semibold px-2 py-0.5 rounded ${
+                                  formatUrgency(job.urgency) === 'ASAP'
+                                    ? 'bg-red-100 text-red-700 border border-red-200'
+                                    : formatUrgency(job.urgency) === 'This week'
+                                      ? 'bg-amber-100 text-amber-700 border border-amber-200'
+                                      : formatUrgency(job.urgency) === 'This month'
+                                        ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                                        : 'bg-slate-100 text-slate-700 border border-slate-200'
+                                }`}>
+                                  {formatUrgency(job.urgency)}
+                                </span>
                               </div>
                             </div>
 
-                            {/* Description - Truncated */}
-                            <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed pt-4 pb-2 flex-1">
+                            {/* Description */}
+                            <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed flex-1 mb-4">
                               {job.job_description}
                             </p>
-                          </div>
 
-                          {/* Action Button */}
-                          <div className="p-6 pt-4 bg-gray-50/50">
+                            {/* Action Button */}
                             <Button
-                              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:shadow-lg active:scale-[0.98] group-hover:bg-blue-700"
+                              variant="outline"
+                              className="w-full border-2 border-slate-300 text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300 font-medium py-2 sm:py-2.5 rounded-lg transition-all duration-200"
                               onClick={() => navigate(`/jobs/${job.project_id}`)}
                             >
-                              <Eye className="h-4 w-4 mr-2" />
+                              <Eye className="h-4 w-4 mr-2 text-slate-500 group-hover:text-emerald-600" />
                               View Details
                             </Button>
                           </div>
