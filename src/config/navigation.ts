@@ -42,7 +42,7 @@ export const FOOTER_GROUPS: FooterGroup[] = [
   {
     title: 'For Tradespeople',
     items: [
-      { label: 'View Jobs', href: '/tradesperson/jobs', audience: 'trader' },
+      { label: 'My Jobs', href: '/tradesperson/jobs', audience: 'trader' },
       { label: 'My Profile', href: '/tradesperson/profile', audience: 'trader' },
       { label: 'Join as a Tradesperson', href: '/tradesperson/onboarding', audience: 'guest' },
       { label: 'Chat', href: '/chat', audience: 'trader' },

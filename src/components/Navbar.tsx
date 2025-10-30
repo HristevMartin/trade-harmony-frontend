@@ -276,7 +276,7 @@ const Navbar = () => {
                   onClick={() => handleNavigation('/tradesperson/jobs')}
                   className={`text-foreground hover:text-trust-blue transition-colors font-medium flex items-center gap-2 ${isActive('/tradesperson/jobs') ? 'text-trust-blue' : ''}`}
                 >
-                  View Jobs
+                  My Jobs
                 </button>
                 <button
                   onClick={() => handleNavigation('/tradesperson/profile')}
@@ -386,7 +386,7 @@ const Navbar = () => {
                       onClick={() => handleNavigation('/tradesperson/jobs')}
                       className={`flex items-center gap-2 w-full text-left py-2 px-4 rounded-lg transition-colors ${isActive('/tradesperson/jobs') ? 'bg-trust-blue/10 text-trust-blue' : 'text-foreground hover:bg-muted'}`}
                     >
-                      View Jobs
+                      My Jobs
                     </button>
                     <button
                       onClick={() => handleNavigation('/tradesperson/profile')}
