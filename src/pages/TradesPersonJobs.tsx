@@ -817,7 +817,8 @@ const TradesPersonJobs = () => {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, ease: [0.22, 0.61, 0.36, 1] }}
-        className="desktop-filter-bar hidden md:block bg-white/95 backdrop-blur-sm border-b border-gray-200/60 shadow-sm sticky top-0 z-40"
+        className="desktop-filter-bar hidden md:block bg-white/95 backdrop-blur-sm border-b border-gray-200/60 shadow-sm sticky top-14 z-40 transition-shadow duration-200"
+        style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)' }}
       >
         <div className="container mx-auto px-4 max-w-6xl py-4">
           <div className="flex items-center justify-between gap-4">
