@@ -690,105 +690,90 @@ const TradesPersonProfile = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-background via-muted/5 to-background">
-            {/* Hero Section - Compact Mobile Layout */}
-            <div className="relative bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 border-b border-border/5">
-                <div className="container mx-auto px-4 py-6 md:py-12 max-w-6xl">
+            {/* Hero Section - Polished Layout */}
+            <div className="relative bg-gradient-to-r from-trust-blue/5 via-background to-trust-green/5 border-b border-border/40 shadow-sm">
+                <div className="container mx-auto px-4 py-8 md:py-16 max-w-6xl">
                     {/* Mobile: Compact Stack Layout */}
                     <div className="block md:hidden">
                         {/* Back button for homeowners coming from chat */}
                         {nameId && (
-                            <div className="flex items-center mb-4">
+                            <div className="flex items-center mb-6">
                                 <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => window.history.back()}
-                                    className="hover:bg-muted -ml-2 min-h-[44px] min-w-[44px] p-2"
+                                    className="hover:bg-muted/80 -ml-2 min-h-[44px] min-w-[44px] p-2 rounded-full"
                                     aria-label="Go back to chat"
                                 >
                                     <ArrowLeft className="w-5 h-5" />
                                 </Button>
-                                <span className="text-sm text-muted-foreground ml-2">Back to chat</span>
+                                <span className="text-sm text-muted-foreground ml-2 font-medium">Back to chat</span>
                             </div>
                         )}
 
-                        <div className="flex items-center gap-4 mb-4">
-                            <Avatar className="h-16 w-16 border-2 border-background shadow-lg">
-                                <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground text-lg font-bold">
+                        <div className="flex items-center gap-5 mb-6">
+                            <Avatar className="h-20 w-20 border-4 border-background shadow-xl ring-2 ring-primary/10">
+                                <AvatarFallback className="bg-gradient-to-br from-trust-blue to-trust-green text-white text-xl font-bold">
                                     {traderProfile.name?.split(' ').map((n: string) => n[0]).join('') || 'TP'}
                                 </AvatarFallback>
                             </Avatar>
                             <div className="flex-1 min-w-0">
-                                <h1 className="text-2xl font-bold text-foreground truncate">
+                                <h1 className="text-2xl font-bold text-foreground truncate mb-1">
                                     {traderProfile.name}
                                 </h1>
-                                <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                    <Badge variant="default" className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground border-0 px-2 py-1 text-sm font-medium">
-                                        {traderProfile.primaryTrade} Specialist
-                                    </Badge>
-                                    {/* Verification Badge for Homeowners - Mobile */}
-
-                                    <Badge
-                                        variant={isVerified ? "default" : "secondary"}
-                                        className={`px-2 py-1 text-xs font-medium border-0 ${isVerified
-                                            ? "bg-gradient-to-r from-green-500 to-green-600 text-white"
-                                            : verificationRequested
-                                            ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
-                                            : "bg-gradient-to-r from-gray-400 to-gray-500 text-white"
-                                            }`}
-                                    >
-                                        <CheckCircle className="h-3 w-3 mr-1" />
-                                        {checkingVerification 
-                                            ? "Checking..." 
-                                            : isVerified 
-                                            ? "Verified" 
-                                            : verificationRequested 
-                                            ? "Pending" 
-                                            : "Unverified"}
-                                    </Badge>
-
-                                    {/* Request Verification Button - Only for traders on their own profile when not verified */}
-                                    {isOwnProfile && !isVerified && !verificationRequested && (
-                                        <Button
-                                            size="sm"
-                                            onClick={handleRequestVerification}
-                                            disabled={isRequestingVerification}
-                                            className="h-6 px-2 text-xs bg-green-600 hover:bg-green-700 text-white"
-                                        >
-                                            {isRequestingVerification ? 'Requesting...' : 'Request Verification'}
-                                        </Button>
-                                    )}
-                                    {ratingTraderRatingProfile?.rating !== undefined && ratingTraderRatingProfile?.rating > 0 && ratingTraderRatingProfile?.total_ratings > 0 && (
-                                        <button
-                                            onClick={() => {
-                                                console.log('Rating clicked:', {
-                                                    traderName: traderProfile.name,
-                                                    rating: ratingTraderRatingProfile.rating,
-                                                    totalReviews: ratingTraderRatingProfile.total_ratings,
-                                                    timestamp: new Date().toISOString()
-                                                });
-                                            }}
-                                            className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-blue-50 to-slate-50 rounded-lg border border-blue-200/50"
-                                        >
-                                            <Star className="h-4 w-4 text-[#FACC15] fill-current" />
-                                            <span className="text-sm font-bold text-gray-800">{ratingTraderRatingProfile.rating}</span>
-                                            <span className="text-xs text-gray-600">({ratingTraderRatingProfile.total_ratings})</span>
-                                        </button>
-                                    )}
-                                </div>
+                                <Badge variant="default" className="bg-gradient-to-r from-trust-blue to-trust-blue/90 text-white border-0 px-3 py-1.5 text-sm font-semibold shadow-md">
+                                    {traderProfile.primaryTrade} Specialist
+                                </Badge>
                             </div>
                         </div>
-                        <p className="text-muted-foreground text-sm mb-4">
+
+                        {/* Bio below name */}
+                        <p className="text-muted-foreground text-sm mb-5 leading-relaxed">
                             Professional {traderProfile.primaryTrade.toLowerCase()} services in {traderProfile.city}
                         </p>
 
-                        {/* Mobile Statistics */}
-                        <div className="grid grid-cols-2 gap-3">
-                            <div className="bg-background/50 backdrop-blur-sm rounded-lg p-3 border border-border/20 text-center">
-                                <div className="text-lg font-bold text-gray-900 dark:text-gray-100">{traderProfile.experienceYears}</div>
-                                <div className="text-xs text-muted-foreground">Years Experience</div>
+                        {/* Badges Row */}
+                        <div className="flex items-center gap-2 mb-5 flex-wrap">
+                            {/* Request Verification Button - Only for traders on their own profile when not verified */}
+                            {isOwnProfile && !isVerified && !verificationRequested && (
+                                <Button
+                                    size="sm"
+                                    onClick={handleRequestVerification}
+                                    disabled={isRequestingVerification}
+                                    className="h-7 px-3 text-xs bg-gradient-to-r from-trust-green to-trust-green/90 hover:from-trust-green/90 hover:to-trust-green text-white font-semibold shadow-md border-0"
+                                >
+                                    {isRequestingVerification ? 'Requesting...' : 'Request Verification'}
+                                </Button>
+                            )}
+                            
+                            {/* Rating Badge */}
+                            {ratingTraderRatingProfile?.rating !== undefined && ratingTraderRatingProfile?.rating > 0 && ratingTraderRatingProfile?.total_ratings > 0 && (
+                                <button
+                                    onClick={() => {
+                                        console.log('Rating clicked:', {
+                                            traderName: traderProfile.name,
+                                            rating: ratingTraderRatingProfile.rating,
+                                            totalReviews: ratingTraderRatingProfile.total_ratings,
+                                            timestamp: new Date().toISOString()
+                                        });
+                                    }}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-50 to-amber-100/80 rounded-lg border border-amber-200 shadow-sm hover:shadow-md transition-shadow"
+                                >
+                                    <Star className="h-4 w-4 text-[#FACC15] fill-current" />
+                                    <span className="text-sm font-bold text-gray-900">{ratingTraderRatingProfile.rating}</span>
+                                    <span className="text-xs text-gray-600">({ratingTraderRatingProfile.total_ratings})</span>
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Mobile Statistics - Below badges */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-white/60 dark:bg-muted/60 backdrop-blur-sm rounded-xl p-4 border-2 border-primary/20 shadow-md text-center hover:shadow-lg transition-shadow">
+                                <div className="text-2xl font-bold bg-gradient-to-br from-trust-blue to-trust-green bg-clip-text text-transparent">{traderProfile.experienceYears}</div>
+                                <div className="text-xs text-muted-foreground font-medium mt-1">Years Experience</div>
                             </div>
-                            <div className="bg-background/50 backdrop-blur-sm rounded-lg p-3 border border-border/20 text-center">
-                                <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                            <div className="bg-white/60 dark:bg-muted/60 backdrop-blur-sm rounded-xl p-4 border-2 border-accent-orange/20 shadow-md text-center hover:shadow-lg transition-shadow">
+                                <div className="text-2xl font-bold bg-gradient-to-br from-accent-orange to-trust-blue bg-clip-text text-transparent">
                                     <span className="inline-flex items-baseline justify-center">
                                         {Number.isFinite(Number(traderProfile.radiusKm))
                                             ? parseInt(traderProfile.radiusKm, 10)
@@ -796,7 +781,7 @@ const TradesPersonProfile = () => {
                                         <span className="ml-1 text-sm text-muted-foreground">km</span>
                                     </span>
                                 </div>
-                                <div className="text-xs text-muted-foreground">Service Radius</div>
+                                <div className="text-xs text-muted-foreground font-medium mt-1">Service Radius</div>
                             </div>
                         </div>
                     </div>
@@ -838,20 +823,20 @@ const TradesPersonProfile = () => {
                                         </Badge>
                                         <Badge
                                             variant={isVerified ? "default" : "secondary"}
-                                            className={`px-3 py-2 text-sm font-medium border-0 ${isVerified
-                                                ? "bg-gradient-to-r from-green-500 to-green-600 text-white"
+                                            className={`px-4 py-2 text-sm font-semibold border-0 shadow-md ${isVerified
+                                                ? "bg-gradient-to-r from-trust-green to-trust-green/90 text-white"
                                                 : verificationRequested
                                                 ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
-                                                : "bg-gradient-to-r from-gray-400 to-gray-500 text-white"
+                                                : "bg-gradient-to-r from-amber-500 to-orange-500 text-white"
                                                 }`}
                                         >
-                                            <CheckCircle className="h-4 w-4 mr-1" />
+                                            <CheckCircle className="h-4 w-4 mr-2" />
                                             {checkingVerification 
                                                 ? "Checking..." 
                                                 : isVerified 
-                                                ? "Verified" 
+                                                ? "Verified Pro" 
                                                 : verificationRequested 
-                                                ? "Pending" 
+                                                ? "Pending Review" 
                                                 : "Unverified"}
                                         </Badge>
 
@@ -861,7 +846,7 @@ const TradesPersonProfile = () => {
                                                 size="sm"
                                                 onClick={handleRequestVerification}
                                                 disabled={isRequestingVerification}
-                                                className="px-4 py-2 text-sm bg-green-600 hover:bg-green-700 text-white"
+                                                className="px-5 py-2 text-sm bg-gradient-to-r from-trust-green to-trust-green/90 hover:from-trust-green/90 hover:to-trust-green text-white font-semibold shadow-md border-0"
                                             >
                                                 {isRequestingVerification ? 'Requesting...' : 'Request Verification'}
                                             </Button>
@@ -905,17 +890,17 @@ const TradesPersonProfile = () => {
                         </div>
 
                         <div className="grid grid-cols-3 gap-4 text-center">
-                            <div className="bg-background/50 backdrop-blur-sm rounded-xl p-4 border border-border/20">
-                                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100 text-center">{traderProfile.experienceYears}</div>
-                                <div className="text-sm text-muted-foreground text-center">Years Experience</div>
+                            <div className="bg-white/60 dark:bg-muted/60 backdrop-blur-sm rounded-xl p-5 border-2 border-primary/20 shadow-md hover:shadow-lg transition-shadow">
+                                <div className="text-3xl font-bold bg-gradient-to-br from-trust-blue to-trust-green bg-clip-text text-transparent text-center">{traderProfile.experienceYears}</div>
+                                <div className="text-sm text-muted-foreground font-medium text-center mt-1">Years Experience</div>
                             </div>
                             <div
-                                className="bg-background/50 backdrop-blur-sm rounded-xl p-4 border border-border/20"
+                                className="bg-white/60 dark:bg-muted/60 backdrop-blur-sm rounded-xl p-5 border-2 border-accent-orange/20 shadow-md hover:shadow-lg transition-shadow"
                                 tabIndex={0}
                                 aria-label={`Service Radius: ${Number.isFinite(traderProfile.radiusKm) ? parseInt(traderProfile.radiusKm, 10) : traderProfile.radiusKm} kilometers`}
                                 role="region"
                             >
-                                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100 text-center">
+                                <div className="text-3xl font-bold bg-gradient-to-br from-accent-orange to-trust-blue bg-clip-text text-transparent text-center">
                                     <span className="inline-flex items-baseline justify-center">
                                         {Number.isFinite(Number(traderProfile.radiusKm))
                                             ? parseInt(traderProfile.radiusKm, 10)
@@ -923,23 +908,23 @@ const TradesPersonProfile = () => {
                                         <span className="ml-1 text-base text-muted-foreground">km</span>
                                     </span>
                                 </div>
-                                <div className="text-sm text-muted-foreground text-center">Service Radius</div>
+                                <div className="text-sm text-muted-foreground font-medium text-center mt-1">Service Radius</div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="container mx-auto px-4 py-8 max-w-6xl">
+            <div className="container mx-auto px-4 py-12 max-w-6xl">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Left Sidebar - Contact & Quick Info */}
                     <div className="lg:col-span-1 space-y-6">
                         {/* Contact Information */}
-                        <Card className="shadow-xl bg-gradient-to-br from-card to-card/80 border-0">
-                            <CardHeader className="pb-4">
+                        <Card className="shadow-lift bg-gradient-to-br from-card to-card/95 border border-border/40">
+                            <CardHeader className="pb-5">
                                 <div className="flex items-center justify-between">
-                                    <CardTitle className="text-xl flex items-center">
-                                        <User className="h-5 w-5 mr-2 text-gray-800" />
+                                    <CardTitle className="text-xl font-bold flex items-center">
+                                        <User className="h-5 w-5 mr-2 text-trust-blue" />
                                         Contact Details
                                     </CardTitle>
                                     <Button
@@ -957,8 +942,8 @@ const TradesPersonProfile = () => {
                                 </div>
                             </CardHeader>
                             <div className={`md:block ${accordionStates.contact ? 'block' : 'hidden'}`}>
-                                <CardContent className="space-y-6">
-                                    <div className="space-y-4">
+                                <CardContent className="space-y-6 pt-2">
+                                    <div className="space-y-5">
                                         {/* Email - Hidden for homeowners viewing other profiles */}
                                         {isOwnProfile && (
                                             <div className="flex items-start space-x-4 p-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl border border-primary/10">
@@ -1164,7 +1149,7 @@ const TradesPersonProfile = () => {
                                     </div>
 
                                     {isOwnProfile && (
-                                        <Button className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground shadow-lg">
+                                        <Button className="w-full bg-gradient-to-r from-trust-blue to-trust-blue/90 hover:from-trust-blue/90 hover:to-trust-blue text-white shadow-md font-semibold h-11">
                                             <Edit3 className="h-4 w-4 mr-2" />
                                             Update Contact Info
                                         </Button>
@@ -1172,8 +1157,8 @@ const TradesPersonProfile = () => {
 
                                     {/* Message for homeowners viewing other profiles */}
                                     {!isOwnProfile && (
-                                        <div className="text-center py-4">
-                                            <p className="text-sm text-muted-foreground">
+                                        <div className="text-center py-6 bg-muted/30 rounded-xl border border-muted/30">
+                                            <p className="text-sm text-muted-foreground leading-relaxed px-4">
                                                 Contact information is private. Use the chat feature to get in touch with this tradesperson.
                                             </p>
                                         </div>
@@ -1188,19 +1173,19 @@ const TradesPersonProfile = () => {
                     {/* Right Column - Detailed Information */}
                     <div className="lg:col-span-2 space-y-8">
                         {/* Services & Expertise */}
-                        <Card className="shadow-xl bg-gradient-to-br from-card to-card/80 border-0">
+                        <Card className="shadow-lift bg-gradient-to-br from-card to-card/95 border border-border/40">
                             <CardHeader className="pb-6">
                                 <div className="flex items-center justify-between">
-                                    <CardTitle className="text-2xl flex items-center">
-                                        <Briefcase className="h-6 w-6 mr-3 text-gray-800" />
+                                    <CardTitle className="text-2xl font-bold flex items-center">
+                                        <Briefcase className="h-6 w-6 mr-3 text-trust-blue" />
                                         Services & Expertise
                                     </CardTitle>
                                 </div>
                             </CardHeader>
-                            <CardContent className="space-y-8">
+                            <CardContent className="space-y-8 pt-2">
                                 <div>
-                                    <div className="flex items-center justify-between mb-4">
-                                        <h4 className="font-semibold text-lg">Primary Specialization</h4>
+                                    <div className="flex items-center justify-between mb-5">
+                                        <h4 className="font-bold text-lg text-foreground">Primary Specialization</h4>
                                         {isOwnProfile && editingField !== 'primaryTrade' && (
                                             <Button
                                                 size="sm"
@@ -1209,9 +1194,9 @@ const TradesPersonProfile = () => {
                                                     setEditingField('primaryTrade');
                                                     setTempData({ primaryTrade: traderProfile.primaryTrade });
                                                 }}
-                                                className="border-primary/20 hover:bg-primary/5"
+                                                className="border-trust-blue/30 hover:bg-trust-blue/10 text-sm font-medium"
                                             >
-                                                <Edit3 className="h-3 w-3 mr-2" />
+                                                <Edit3 className="h-3.5 w-3.5 mr-2" />
                                                 Edit
                                             </Button>
                                         )}
@@ -1222,7 +1207,7 @@ const TradesPersonProfile = () => {
                                             <select
                                                 value={tempData.primaryTrade || ''}
                                                 onChange={(e) => setTempData({ ...tempData, primaryTrade: e.target.value })}
-                                                className="w-full p-3 border border-border/20 rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                                className="w-full p-3 border-2 border-border/40 rounded-xl bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-trust-blue/40 focus:border-trust-blue"
                                             >
                                                 <option value="">Select Primary Trade</option>
                                                 {getServiceOptions().map((service, index) => (
@@ -1252,27 +1237,27 @@ const TradesPersonProfile = () => {
                                         </div>
                                     ) : (
                                         <div className="relative">
-                                            <Badge variant="default" className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-6 py-3 text-lg font-medium border-0 shadow-lg">
-                                                <Award className="h-4 w-4 mr-2" />
+                                            <Badge variant="default" className="bg-gradient-to-r from-trust-blue to-trust-blue/90 text-white px-8 py-4 text-lg font-bold border-0 shadow-lg hover:shadow-xl transition-shadow">
+                                                <Award className="h-5 w-5 mr-3" />
                                                 {traderProfile.primaryTrade}
                                             </Badge>
                                         </div>
                                     )}
                                 </div>
 
-                                <Separator className="my-6" />
+                                <Separator className="my-8 bg-border/40" />
 
                                 <div>
-                                    <div className="flex items-center justify-between mb-4">
-                                        <h4 className="font-semibold text-lg">Additional Services</h4>
+                                    <div className="flex items-center justify-between mb-5">
+                                        <h4 className="font-bold text-lg text-foreground">Additional Services</h4>
                                         {isOwnProfile && !editingServices && (
                                             <Button
                                                 size="sm"
                                                 variant="outline"
                                                 onClick={startEditingServices}
-                                                className="border-primary/20 hover:bg-primary/5"
+                                                className="border-trust-blue/30 hover:bg-trust-blue/10 text-sm font-medium"
                                             >
-                                                <Edit3 className="h-3 w-3 mr-2" />
+                                                <Edit3 className="h-3.5 w-3.5 mr-2" />
                                                 Edit
                                             </Button>
                                         )}
@@ -1319,30 +1304,31 @@ const TradesPersonProfile = () => {
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="min-h-[80px] flex items-center">
+                                        <div className="min-h-[100px] flex items-center">
                                             {getOtherServices().length > 0 ? (
                                                 <div className="flex flex-wrap gap-3">
                                                     {getOtherServices().map((service: string, index: number) => (
-                                                        <Badge key={index} variant="secondary" className="px-4 py-2 text-sm">
+                                                        <Badge key={index} variant="secondary" className="px-5 py-2.5 text-sm font-medium bg-gradient-to-r from-secondary to-secondary/90 hover:shadow-md transition-shadow">
                                                             {service}
                                                         </Badge>
                                                     ))}
                                                 </div>
                                             ) : (
-                                                <div className="w-full text-center p-8 bg-muted/20 rounded-xl border-2 border-dashed border-muted/40">
-                                                    <p className="text-muted-foreground text-lg">No additional services listed</p>
-                                                    <p className="text-sm text-muted-foreground/70 mt-1">Add more services to attract more clients</p>
+                                                <div className="w-full text-center p-10 bg-gradient-to-br from-muted/30 to-muted/20 rounded-xl border-2 border-dashed border-muted/50 hover:border-muted/60 transition-colors">
+                                                    <Briefcase className="h-10 w-10 text-muted-foreground/60 mx-auto mb-3" />
+                                                    <p className="text-muted-foreground text-base font-medium">No additional services listed</p>
+                                                    <p className="text-sm text-muted-foreground/70 mt-2 leading-relaxed">Add more services to attract more clients and showcase your expertise</p>
                                                 </div>
                                             )}
                                         </div>
                                     )}
                                 </div>
 
-                                <Separator className="my-6" />
+                                <Separator className="my-8 bg-border/40" />
 
                                 <div>
-                                    <div className="flex items-center justify-between mb-4">
-                                        <h4 className="font-semibold text-lg">Certifications & Qualifications</h4>
+                                    <div className="flex items-center justify-between mb-5">
+                                        <h4 className="font-bold text-lg text-foreground">Certifications & Qualifications</h4>
                                         {isOwnProfile && editingField !== 'certifications' && (
                                             <Button
                                                 size="sm"
@@ -1351,9 +1337,9 @@ const TradesPersonProfile = () => {
                                                     setEditingField('certifications');
                                                     setTempData({ certifications: traderProfile.certifications || '' });
                                                 }}
-                                                className="border-primary/20 hover:bg-primary/5"
+                                                className="border-trust-blue/30 hover:bg-trust-blue/10 text-sm font-medium"
                                             >
-                                                <Edit3 className="h-3 w-3 mr-2" />
+                                                <Edit3 className="h-3.5 w-3.5 mr-2" />
                                                 Edit
                                             </Button>
                                         )}
@@ -1387,16 +1373,16 @@ const TradesPersonProfile = () => {
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-950/20 dark:to-blue-900/20 p-6 rounded-xl border border-blue-200 dark:border-blue-800">
+                                        <div className="bg-gradient-to-r from-trust-blue/10 via-trust-blue/5 to-trust-green/10 p-6 rounded-xl border-2 border-trust-blue/20 shadow-sm">
                                             <div className="flex items-start space-x-4">
-                                                <div className="bg-blue-500 p-2 rounded-lg">
-                                                    <Award className="h-5 w-5 text-gray-800" />
+                                                <div className="bg-trust-blue/20 p-3 rounded-xl">
+                                                    <Award className="h-6 w-6 text-trust-blue" />
                                                 </div>
-                                                <div>
-                                                    <p className="font-medium text-blue-900 dark:text-blue-100 text-lg">
+                                                <div className="flex-1">
+                                                    <p className="font-semibold text-foreground text-lg leading-relaxed">
                                                         {traderProfile.certifications || 'Professional Certification'}
                                                     </p>
-                                                    <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                                                    <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
                                                         {traderProfile.certifications ? '' : 'Add your certifications to build trust with clients'}
                                                     </p>
                                                 </div>
@@ -1510,15 +1496,15 @@ const TradesPersonProfile = () => {
                         </Card>
 
                         {/* Professional Bio */}
-                        <Card className="shadow-xl bg-gradient-to-br from-card to-card/80 border-0 border-t border-gray-100 mt-8 pt-6">
+                        <Card className="shadow-lift bg-gradient-to-br from-card to-card/95 border border-border/40">
                             <CardHeader className="pb-6">
                                 <div className="flex items-center justify-between">
-                                    <CardTitle className="text-2xl">About Me</CardTitle>
+                                    <CardTitle className="text-2xl font-bold">About Me</CardTitle>
                                     {isOwnProfile && editingField !== 'bio' && (
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            className="border-primary/20 hover:bg-primary/5"
+                                            className="border-trust-blue/30 hover:bg-trust-blue/10 font-medium"
                                             onClick={() => {
                                                 setEditingField('bio');
                                                 setTempData({ bio: traderProfile.bio || '' });
@@ -1569,11 +1555,11 @@ const TradesPersonProfile = () => {
                         </Card>
 
                         {/* Portfolio Gallery */}
-                        <Card className="shadow-xl bg-gradient-to-br from-card to-card/80 border-0 border-t border-gray-100 mt-8 pt-6">
+                        <Card className="shadow-lift bg-gradient-to-br from-card to-card/95 border border-border/40">
                             <CardHeader className="pb-6">
                                 <div className="flex items-center justify-between">
-                                    <CardTitle className="text-2xl flex items-center">
-                                        <Camera className="h-6 w-6 mr-3 text-gray-800" />
+                                    <CardTitle className="text-2xl font-bold flex items-center">
+                                        <Camera className="h-6 w-6 mr-3 text-accent-orange" />
                                         Portfolio Gallery
                                     </CardTitle>
                                     {isOwnProfile && (
@@ -1643,10 +1629,10 @@ const TradesPersonProfile = () => {
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="text-center py-12 bg-muted/20 rounded-xl border-2 border-dashed border-muted/40">
-                                        <Camera className="h-12 w-12 text-gray-800 mx-auto mb-4" />
-                                        <h3 className="text-lg font-medium text-foreground mb-2">No Portfolio Images</h3>
-                                        <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                                    <div className="text-center py-16 bg-gradient-to-br from-muted/30 to-muted/20 rounded-xl border-2 border-dashed border-muted/50 hover:border-muted/60 transition-colors">
+                                        <Camera className="h-16 w-16 text-accent-orange/60 mx-auto mb-4" />
+                                        <h3 className="text-lg font-bold text-foreground mb-2">No Portfolio Images</h3>
+                                        <p className="text-muted-foreground mb-6 max-w-md mx-auto leading-relaxed">
                                             Showcase your best work by adding photos of completed projects. High-quality images help attract more clients.
                                         </p>
                                         {isOwnProfile && (
@@ -1677,11 +1663,11 @@ const TradesPersonProfile = () => {
                         <div className="h-px bg-gradient-to-r from-transparent via-gray-200/60 to-transparent my-8" />
 
                         {/* Customer Reviews */}
-                        <Card id="customer-reviews-section" className="shadow-xl bg-gradient-to-br from-card to-card/80 border-0 mt-4 pt-4">
+                        <Card id="customer-reviews-section" className="shadow-lift bg-gradient-to-br from-card to-card/95 border border-border/40">
                             <CardHeader className="pb-6">
                                 <div className="flex items-center justify-between flex-wrap gap-3">
-                                    <CardTitle className="text-2xl flex items-center">
-                                        <Star className="h-6 w-6 mr-3 text-[#FACC15]" />
+                                    <CardTitle className="text-2xl font-bold flex items-center">
+                                        <Star className="h-6 w-6 mr-3 text-[#FACC15] fill-current" />
                                         Customer Reviews
                                     </CardTitle>
                                     {!loadingRatings && ratingTraderRatingProfile?.total_ratings > 0 && (
@@ -1912,11 +1898,11 @@ const TradesPersonProfile = () => {
 
                                 {/* Empty State */}
                                 {!loadingRatings && !ratingsError && sortedComments.length === 0 && (
-                                    <div className="text-center py-12 bg-muted/20 rounded-xl border-2 border-dashed border-muted/40">
-                                        <Star className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                                        <h3 className="text-lg font-medium text-foreground mb-2">No customer reviews yet</h3>
-                                        <p className="text-muted-foreground max-w-md mx-auto">
-                                            Complete more jobs to build your reputation.
+                                    <div className="text-center py-16 bg-gradient-to-br from-muted/30 to-muted/20 rounded-xl border-2 border-dashed border-muted/50">
+                                        <Star className="h-16 w-16 text-[#FACC15]/40 fill-[#FACC15]/20 mx-auto mb-4" />
+                                        <h3 className="text-lg font-bold text-foreground mb-2">No customer reviews yet</h3>
+                                        <p className="text-muted-foreground max-w-md mx-auto leading-relaxed">
+                                            Complete more jobs to build your reputation and receive reviews from satisfied clients.
                                         </p>
                                     </div>
                                 )}
