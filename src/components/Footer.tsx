@@ -144,7 +144,7 @@ const Footer = () => {
           {/* Bottom Legal Bar */}
           <div className="py-4 flex flex-col md:flex-row items-center justify-center md:justify-between gap-3 text-xs text-slate-500">
             <p>
-              &copy; {new Date().getFullYear()} JobHub. Built in the UK.
+              &copy; {new Date().getFullYear()} JobHub.
             </p>
             <div className="flex gap-6">
               {/* Optional privacy/terms links */}
