@@ -58,7 +58,7 @@ const Index = () => {
   const navigate = useNavigate();
   usePageTracking('home');
 
-  // Check user authentication and role on mount
+  // Check user authentication and role on mounts
   useEffect(() => {
     const checkAuthState = () => {
       const authUser = localStorage.getItem('auth_user');
