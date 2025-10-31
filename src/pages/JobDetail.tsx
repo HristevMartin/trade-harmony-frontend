@@ -82,6 +82,7 @@ const JobDetail = () => {
     const [isRequestingVerification, setIsRequestingVerification] = useState(false);
     const [verificationPending, setVerificationPending] = useState(false);
     const [showVerificationSuccess, setShowVerificationSuccess] = useState(false);
+    const [jobApplicants, setJobApplicants] = useState<number>(0);
 
     // Get AI job fit data for follow-up questions
     const { followUpQuestions } = useAiJobFit(jobData?.project_id || '');
@@ -94,7 +95,7 @@ const JobDetail = () => {
         }
 
         setIsRequestingVerification(true);
-        
+
         try {
             const response = await fetch(`${import.meta.env.VITE_API_URL}/api/homeowner/verify/user`, {
                 method: 'POST',
@@ -113,20 +114,20 @@ const JobDetail = () => {
 
             const data = await response.json();
             console.log('Verification request response:', data);
-            
+
             // Save verification pending status to localStorage
             const verificationKey = `verification_pending_${user.id}`;
             localStorage.setItem(verificationKey, 'true');
             setVerificationPending(true);
-            
+
             // Show success modal
             setShowVerificationSuccess(true);
-            
+
             // Auto-hide modal after 4 seconds
             setTimeout(() => {
                 setShowVerificationSuccess(false);
             }, 4000);
-            
+
         } catch (error) {
             console.error('Error requesting verification:', error);
             alert('Failed to submit verification request. Please try again.');
@@ -192,6 +193,23 @@ const JobDetail = () => {
         request();
     }, [id]);
 
+    useEffect(() => {
+        const apiRequest = async () => {
+            const apiResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/job-applicants/${id}`, {
+                credentials: 'include',
+            })
+
+
+            if (!apiResponse.ok) {
+                console.log('Failed to fetch job stats');
+                return;
+            }
+            const data = await apiResponse.json();
+            console.log('in here the data is', data);
+            setJobApplicants(data.count);
+        }
+        apiRequest();
+    }, []);
 
     // Check if current user is a trader
     const isTrader = Array.isArray(user?.role)
@@ -537,7 +555,7 @@ const JobDetail = () => {
                         <div className="flex items-center gap-2 flex-wrap">
                             <p className="text-gray-900 font-semibold text-base md:text-lg tracking-tight">{jobData.first_name}</p>
                             {homeOwnerVerified ? (
-                                <Badge 
+                                <Badge
                                     className="bg-jobhub-successBg text-emerald-700 border border-emerald-200 flex items-center gap-1.5 text-xs px-2.5 py-0.5 rounded-full font-medium hover:bg-emerald-100 transition-colors cursor-pointer"
                                     onClick={() => setShowVerificationModal(true)}
                                 >
@@ -545,7 +563,7 @@ const JobDetail = () => {
                                     Verified Client
                                 </Badge>
                             ) : verificationPending ? (
-                                <Badge 
+                                <Badge
                                     className="bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-1.5 text-xs px-2.5 py-0.5 rounded-full font-medium hover:bg-blue-100 transition-colors cursor-pointer"
                                     onClick={() => setShowVerificationModal(true)}
                                 >
@@ -553,7 +571,7 @@ const JobDetail = () => {
                                     Verification Pending
                                 </Badge>
                             ) : (
-                                <Badge 
+                                <Badge
                                     className="bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1.5 text-xs px-2.5 py-0.5 rounded-full font-medium hover:bg-amber-100 transition-colors cursor-pointer"
                                     onClick={() => setShowVerificationModal(true)}
                                 >
@@ -562,6 +580,7 @@ const JobDetail = () => {
                                 </Badge>
                             )}
                         </div>
+
 
                         {/* Verification Info Message - Only for homeowners */}
                         {!isTrader && !homeOwnerVerified && !verificationPending && (
@@ -575,8 +594,8 @@ const JobDetail = () => {
                                         <p className="text-gray-700 text-sm leading-relaxed mb-3">
                                             Verified clients get more applications from trusted tradespeople and build stronger trust with professionals.
                                         </p>
-                                        <Button 
-                                            variant="outline" 
+                                        <Button
+                                            variant="outline"
                                             size="sm"
                                             onClick={handleRequestVerification}
                                             disabled={isRequestingVerification}
@@ -638,10 +657,10 @@ const JobDetail = () => {
                         <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-gray-900 mb-4 md:mb-5 leading-tight">
                             {jobData.job_title}
                         </h1>
-                        
+
                         {/* Subtle gradient divider */}
                         <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent mb-4"></div>
-                        
+
                         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-gray-600 text-sm sm:text-base mb-2">
                             <div className="flex items-center gap-2">
                                 <div className="w-5 h-5 bg-blue-50 rounded-full flex items-center justify-center">
@@ -719,7 +738,7 @@ const JobDetail = () => {
                                 <Card className="rounded-2xl bg-gradient-to-br from-jobhub-blue/95 to-jobhub-blue border border-jobhub-blue/20 p-6 md:p-8 shadow-xl transition-all duration-300 relative overflow-hidden hover:shadow-2xl">
                                     {/* Subtle decorative gradient overlay */}
                                     <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none"></div>
-                                    
+
                                     <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                                         <div className="text-white space-y-3">
                                             <h3 className="text-xl md:text-2xl font-bold leading-tight">Ready to apply for this job?</h3>
@@ -783,6 +802,12 @@ const JobDetail = () => {
                                     email: jobData.email,
                                     phone: jobData.phone
                                 }}
+                                homeownerName={jobData.first_name}
+                                homeownerVerified={homeOwnerVerified}
+                                applicantCount={jobApplicants}
+                                jobStats={jobStats || undefined}
+                                location={`${getCountryFlag(jobData.additional_data.country)} ${jobData.additional_data.location}`}
+                                postedDate={formatDate(jobData.created_at)}
                                 onOpenChat={async () => {
                                     try {
                                         console.log('Opening chat for job:', id);
@@ -1119,7 +1144,7 @@ const JobDetail = () => {
                                     </div>
                                     <h3 className="text-lg font-semibold text-gray-900">Verified Client</h3>
                                 </div>
-                                
+
                                 <div className="space-y-3 mb-6">
                                     <p className="text-gray-600 text-sm leading-relaxed">
                                         This homeowner has been internally verified by JobHub. Their identity and activity have been confirmed through our verification process.
@@ -1138,7 +1163,7 @@ const JobDetail = () => {
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <Button
                                     onClick={() => setShowVerificationModal(false)}
                                     className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
@@ -1154,7 +1179,7 @@ const JobDetail = () => {
                                     </div>
                                     <h3 className="text-lg font-semibold text-gray-900">Verification Pending</h3>
                                 </div>
-                                
+
                                 <div className="space-y-3 mb-6">
                                     <p className="text-gray-600 text-sm leading-relaxed">
                                         Your verification request is currently being reviewed by our team. This process typically takes 1-2 business days.
@@ -1176,7 +1201,7 @@ const JobDetail = () => {
                                         You'll receive an email notification once your account has been verified.
                                     </p>
                                 </div>
-                                
+
                                 <Button
                                     onClick={() => setShowVerificationModal(false)}
                                     className="w-full bg-blue-600 hover:bg-blue-700 text-white"
@@ -1192,7 +1217,7 @@ const JobDetail = () => {
                                     </div>
                                     <h3 className="text-lg font-semibold text-gray-900">Unverified Client</h3>
                                 </div>
-                                
+
                                 <div className="space-y-3 mb-6">
                                     <p className="text-gray-600 text-sm leading-relaxed">
                                         This homeowner has not been verified by JobHub yet. Their identity and activity have not been confirmed through our verification process.
@@ -1211,7 +1236,7 @@ const JobDetail = () => {
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <Button
                                     onClick={() => setShowVerificationModal(false)}
                                     className="w-full bg-amber-600 hover:bg-amber-700 text-white"
