@@ -676,11 +676,18 @@ const JobDetail = () => {
                             </div>
                         </div>
 
-                        {/* Job Status for Traders */}
-                        {isTrader && !userPaid && paymentStatusLoaded && (
-                            <div className="mt-3">
-                                <Badge className="bg-jobhub-successBg text-emerald-700 border-emerald-200 px-3 py-1.5 text-sm font-medium">
-                                    Job Open — Accepting Applicants
+                        {/* Job Status and Application Count for Traders */}
+                        {isTrader && paymentStatusLoaded && (
+                            <div className="mt-3 flex flex-wrap items-center gap-3">
+                                {!userPaid && (
+                                    <Badge className="bg-jobhub-successBg text-emerald-700 border-emerald-200 px-3 py-1.5 text-sm font-medium">
+                                        Job Open — Accepting Applicants
+                                    </Badge>
+                                )}
+                                {/* Application Count Badge - Visible to all traders */}
+                                <Badge className="bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-2 text-sm px-3 py-1.5 rounded-full font-semibold">
+                                    <HiUserCircle className="w-4 h-4" />
+                                    {jobApplicants} {jobApplicants === 1 ? 'application' : 'applications'}
                                 </Badge>
                             </div>
                         )}
