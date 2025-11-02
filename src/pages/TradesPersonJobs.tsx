@@ -65,6 +65,7 @@ const TradesPersonJobs = () => {
     locations: string[];
     urgency?: string;
     radius?: number;
+    showPaidOnly?: boolean;
   }>({ categories: [], locations: [] });
   const [sortBy, setSortBy] = useState<'budget_high' | 'budget_low'>('budget_high');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -83,7 +84,27 @@ const TradesPersonJobs = () => {
   const [requestedRadius, setRequestedRadius] = useState<number | null>(null);
   const [radiusAttempts, setRadiusAttempts] = useState(0);
   const [ipFilterEnabled, setIpFilterEnabled] = useState(false);
+  const [paymentStatuses, setPaymentStatuses] = useState<Record<string, string>>({});
+  const [userId, setUserId] = useState<string>('');
+  const [loadingPaymentStatuses, setLoadingPaymentStatuses] = useState(false);
   const { toast } = useToast();
+
+  // List of statuses that indicate a job has been paid for
+  // Based on JobDetail.tsx implementation - only 'paid' status indicates payment
+  const PAID_STATUSES = ['paid'];
+
+  // Helper function to get count of paid jobs (excluding completed jobs)
+  const getPaidJobsCount = () => {
+    // Count only jobs that are paid AND not completed (matching the filter logic)
+    return jobs.filter(job => {
+      // Exclude completed jobs
+      if (job.status && job.status.toLowerCase() === 'completed') return false;
+      
+      // Check if payment status is 'paid'
+      const paymentStatus = paymentStatuses[job.project_id];
+      return paymentStatus && paymentStatus !== 'not found' && PAID_STATUSES.includes(paymentStatus.toLowerCase());
+    }).length;
+  };
 
   // Convert km to the nearest supported miles option used by the dropdown
   // Supported options: 5, 10, 25, 50, 100 miles
@@ -121,6 +142,22 @@ const TradesPersonJobs = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Load user ID from localStorage - matching JobDetail.tsx implementation
+  useEffect(() => {
+    const authUser = localStorage.getItem('auth_user');
+    if (authUser) {
+      try {
+        const userData = JSON.parse(authUser);
+        if (userData?.id) {
+          setUserId(userData.id);
+          console.log('👤 User ID loaded from localStorage:', userData.id);
+        }
+      } catch (err) {
+        console.error('Error parsing auth user:', err);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     const apiRequest = async () => {
       try {
@@ -138,6 +175,13 @@ const TradesPersonJobs = () => {
 
         // Extract postcode and preferred radius from user data
         if (response) {
+          // Store user ID for payment status checks (fallback if not in localStorage)
+          if (!userId && (response.user_id || response.id || response._id)) {
+            const extractedUserId = response.user_id || response.id || response._id;
+            setUserId(extractedUserId);
+            console.log('👤 User ID set from API:', extractedUserId);
+          }
+
           if (response.postcode) {
             setUserPostcode(response.postcode);
             console.log('User postcode set to:', response.postcode);
@@ -164,7 +208,7 @@ const TradesPersonJobs = () => {
     }
 
     apiRequest();
-  }, []);
+  }, [userId]);
 
   // Calculate progressive radius increments based on attempts
   const getProgressiveRadiusIncrements = (currentRadius: number, attempts: number) => {
@@ -418,6 +462,16 @@ const TradesPersonJobs = () => {
         return jobLocation?.toLowerCase().trim() === filterLocation.toLowerCase().trim();
       })) return false;
       if (filters.urgency && formatUrgency(job.urgency) !== filters.urgency) return false;
+      
+      // Filter by paid status if enabled
+      if (filters.showPaidOnly) {
+        const paymentStatus = paymentStatuses[job.project_id];
+        // Only show jobs where payment has been completed (status indicates payment made)
+        if (!paymentStatus || paymentStatus === 'not found' || !PAID_STATUSES.includes(paymentStatus.toLowerCase())) {
+          return false;
+        }
+      }
+      
       return true;
     });
 
@@ -483,6 +537,69 @@ const TradesPersonJobs = () => {
   }, [allFilteredJobs, displayedJobsCount]);
 
   // Get unique values for filter options (excluding completed jobs)
+  // Function to check payment status for all jobs
+  const checkPaymentStatuses = async (jobsList: Job[], currentUserId: string) => {
+    if (!currentUserId || jobsList.length === 0) {
+      console.log('⚠️ Skipping payment status check - no user ID or jobs', { currentUserId, jobsCount: jobsList.length });
+      setLoadingPaymentStatuses(false);
+      return;
+    }
+
+    setLoadingPaymentStatuses(true);
+    console.log('💳 Starting payment status check for', jobsList.length, 'jobs with user ID:', currentUserId);
+    
+    const statusPromises = jobsList.map(async (job) => {
+      try {
+        const url = `${import.meta.env.VITE_API_URL}/api/payments/check-payment-status/${currentUserId}/${job.project_id}`;
+        console.log('🔍 Checking payment for job:', job.project_id, 'URL:', url);
+        
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          console.warn(`❌ Failed to check payment for job ${job.project_id}. Status:`, response.status);
+          return { jobId: job.project_id, status: 'not found' };
+        }
+
+        const data = await response.json();
+        console.log(`✅ Payment check result for job ${job.project_id}:`, data);
+        return { jobId: job.project_id, status: data.status || 'not found' };
+      } catch (error) {
+        console.error(`💥 Error checking payment for job ${job.project_id}:`, error);
+        return { jobId: job.project_id, status: 'not found' };
+      }
+    });
+
+    try {
+      const results = await Promise.all(statusPromises);
+      const statusMap: Record<string, string> = {};
+      
+      results.forEach(({ jobId, status }) => {
+        statusMap[jobId] = status;
+      });
+
+      const paidJobsCount = Object.values(statusMap).filter(status => 
+        status !== 'not found' && PAID_STATUSES.includes(status.toLowerCase())
+      ).length;
+      setPaymentStatuses(statusMap);
+      console.log('✨ Payment statuses updated:', statusMap);
+      console.log('💰 Total paid jobs found:', paidJobsCount);
+      console.log('📊 Status breakdown:', Object.entries(statusMap).reduce((acc, [jobId, status]) => {
+        acc[status] = (acc[status] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>));
+    } catch (error) {
+      console.error('💥 Error checking payment statuses:', error);
+    } finally {
+      setLoadingPaymentStatuses(false);
+    }
+  };
+
   const filterOptions = useMemo(() => {
     // First filter out completed jobs before generating filter options
     const activeJobs = jobs.filter(job => !(job.status && job.status.toLowerCase() === 'completed'));
@@ -541,6 +658,11 @@ const TradesPersonJobs = () => {
             setEffectiveRadius(null);
             setRequestedRadius(null);
           }
+
+          // Check payment statuses for all jobs if userId is available
+          if (userId && data.projects.length > 0) {
+            checkPaymentStatuses(data.projects, userId);
+          }
         } else {
           setError('Failed to fetch jobs');
         }
@@ -558,7 +680,7 @@ const TradesPersonJobs = () => {
     };
 
     fetchJobs();
-  }, [toast, ipFilterEnabled]);
+  }, [toast, ipFilterEnabled, userId]);
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
@@ -1109,6 +1231,35 @@ const TradesPersonJobs = () => {
                 </Badge>
               </button>
 
+              {/* My Paid Jobs Filter */}
+              <button
+                onClick={() => setFilters(prev => ({ ...prev, showPaidOnly: !prev.showPaidOnly }))}
+                disabled={loadingPaymentStatuses}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all duration-200 ${
+                  filters.showPaidOnly
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-md hover:bg-emerald-700 hover:shadow-lg' 
+                    : 'bg-white hover:bg-gray-50 border-gray-200 hover:border-gray-300 shadow-sm'
+                } ${loadingPaymentStatuses ? 'opacity-70 cursor-wait' : ''}`}
+                title={loadingPaymentStatuses ? 'Checking payment status...' : 'Show only jobs you\'ve paid for'}
+              >
+                <PoundSterling className="h-4 w-4" />
+                <span className="text-sm">My Paid Jobs</span>
+                <Badge 
+                  variant="secondary" 
+                  className={`text-xs px-2 py-0.5 h-5 ml-1 font-semibold ${
+                    filters.showPaidOnly 
+                      ? 'bg-white/20 text-white' 
+                      : 'bg-gray-200 text-gray-600'
+                  }`}
+                >
+                  {loadingPaymentStatuses ? (
+                    <RefreshCw className="h-3 w-3 animate-spin" />
+                  ) : (
+                    getPaidJobsCount()
+                  )}
+                </Badge>
+              </button>
+
               {/* Urgency Filter Chips */}
               {filterOptions.urgencies.map((urgency) => {
                 const getUrgencyIcon = (urgencyLabel: string) => {
@@ -1202,12 +1353,12 @@ const TradesPersonJobs = () => {
               </div>
 
               {/* Clear All Button */}
-              {(filters.categories.length > 0 || filters.locations.length > 0 || filters.urgency || (filters.radius && filters.radius !== 25)) && (
+              {(filters.categories.length > 0 || filters.locations.length > 0 || filters.urgency || (filters.radius && filters.radius !== 25) || filters.showPaidOnly) && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    setFilters({ categories: [], locations: [], radius: 25 });
+                    setFilters({ categories: [], locations: [], radius: 25, showPaidOnly: false });
                   }}
                   className="text-destructive border-destructive/20 hover:bg-destructive/10"
                 >
@@ -1309,18 +1460,18 @@ const TradesPersonJobs = () => {
                 >
                   <Filter className="h-4 w-4" />
                   Filters
-                  {(filters.categories.length + filters.locations.length + (filters.urgency ? 1 : 0) + (filters.radius && filters.radius !== 25 ? 1 : 0)) > 0 && (
+                  {(filters.categories.length + filters.locations.length + (filters.urgency ? 1 : 0) + (filters.radius && filters.radius !== 25 ? 1 : 0) + (filters.showPaidOnly ? 1 : 0)) > 0 && (
                     <Badge variant="default" className="bg-primary text-primary-foreground text-xs px-1.5 py-0.5 h-5">
-                      {filters.categories.length + filters.locations.length + (filters.urgency ? 1 : 0) + (filters.radius && filters.radius !== 25 ? 1 : 0)}
+                      {filters.categories.length + filters.locations.length + (filters.urgency ? 1 : 0) + (filters.radius && filters.radius !== 25 ? 1 : 0) + (filters.showPaidOnly ? 1 : 0)}
                     </Badge>
                   )}
                 </button>
 
                 {/* Clear All Action */}
-                {(filters.categories.length > 0 || filters.locations.length > 0 || filters.urgency || (filters.radius && filters.radius !== 25)) && (
+                {(filters.categories.length > 0 || filters.locations.length > 0 || filters.urgency || (filters.radius && filters.radius !== 25) || filters.showPaidOnly) && (
                   <button
                     onClick={() => {
-                      setFilters({ categories: [], locations: [], radius: 25 });
+                      setFilters({ categories: [], locations: [], radius: 25, showPaidOnly: false });
                     }}
                     className="flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/20 transition-all"
                   >
@@ -1423,18 +1574,18 @@ const TradesPersonJobs = () => {
               >
                 <Filter className="h-4 w-4" />
                 Filters
-                {(filters.categories.length + filters.locations.length + (filters.urgency ? 1 : 0) + (filters.radius && filters.radius !== 25 ? 1 : 0)) > 0 && (
+                {(filters.categories.length + filters.locations.length + (filters.urgency ? 1 : 0) + (filters.radius && filters.radius !== 25 ? 1 : 0) + (filters.showPaidOnly ? 1 : 0)) > 0 && (
                   <Badge variant="default" className="bg-primary text-primary-foreground text-xs px-1.5 py-0.5 h-5">
-                    {filters.categories.length + filters.locations.length + (filters.urgency ? 1 : 0) + (filters.radius && filters.radius !== 25 ? 1 : 0)}
+                    {filters.categories.length + filters.locations.length + (filters.urgency ? 1 : 0) + (filters.radius && filters.radius !== 25 ? 1 : 0) + (filters.showPaidOnly ? 1 : 0)}
                   </Badge>
                 )}
               </button>
 
               {/* Clear All Action */}
-              {(filters.categories.length > 0 || filters.locations.length > 0 || filters.urgency || (filters.radius && filters.radius !== 25)) && (
+              {(filters.categories.length > 0 || filters.locations.length > 0 || filters.urgency || (filters.radius && filters.radius !== 25) || filters.showPaidOnly) && (
                 <button
                   onClick={() => {
-                    setFilters({ categories: [], locations: [], radius: 25 });
+                    setFilters({ categories: [], locations: [], radius: 25, showPaidOnly: false });
                   }}
                   className="flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/20 transition-all"
                 >
@@ -1694,7 +1845,7 @@ const TradesPersonJobs = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => {
-                        setFilters({ categories: [], locations: [] });
+                        setFilters({ categories: [], locations: [], radius: 25, showPaidOnly: false });
                         setSortBy('budget_high');
                       }}
                       className="text-slate-600 hover:text-slate-900"
@@ -1837,6 +1988,63 @@ const TradesPersonJobs = () => {
                     <p className="text-xs text-slate-500 mt-2 flex items-center gap-1">
                       <AlertCircle className="h-3 w-3" />
                       {ipFilterEnabled ? 'Radius filter is available when enabled' : 'Enable to use radius-based filtering'}
+                    </p>
+                  </div>
+
+                  {/* Mobile My Paid Jobs Filter */}
+                  <div className="mb-6">
+                    <h4 className="text-sm font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                      <div className="p-1.5 bg-emerald-100 rounded-full">
+                        <PoundSterling className="h-3.5 w-3.5 text-emerald-600" />
+                      </div>
+                      My Paid Jobs
+                      {loadingPaymentStatuses && (
+                        <RefreshCw className="h-3.5 w-3.5 text-emerald-600 animate-spin ml-1" />
+                      )}
+                    </h4>
+                    <motion.button
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setFilters(prev => ({ ...prev, showPaidOnly: !prev.showPaidOnly }))}
+                      disabled={loadingPaymentStatuses}
+                      className={`w-full p-4 rounded-xl border-2 font-semibold transition-all duration-150 flex items-center justify-between active:scale-[0.98] ${
+                        filters.showPaidOnly
+                          ? 'bg-emerald-500 text-white border-emerald-500 shadow-md'
+                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                      } ${loadingPaymentStatuses ? 'opacity-60 cursor-wait' : ''}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <PoundSterling className="h-5 w-5" />
+                        <div className="text-left">
+                          <div className="text-sm font-semibold">Show My Paid Jobs Only</div>
+                          <div className={`text-xs mt-0.5 ${filters.showPaidOnly ? 'text-emerald-100' : 'text-slate-500'}`}>
+                            {loadingPaymentStatuses ? 'Checking payment status...' : filters.showPaidOnly ? 'Showing jobs you have paid for' : 'Show all available jobs'}
+                          </div>
+                        </div>
+                      </div>
+                      <Badge 
+                        variant="secondary" 
+                        className={`text-xs px-3 py-1 font-bold ${
+                          filters.showPaidOnly 
+                            ? 'bg-white/20 text-white' 
+                            : 'bg-slate-200 text-slate-700'
+                        }`}
+                      >
+                        {loadingPaymentStatuses ? (
+                          <RefreshCw className="h-3 w-3 animate-spin" />
+                        ) : (
+                          getPaidJobsCount()
+                        )}
+                      </Badge>
+                    </motion.button>
+                    <p className="text-xs text-slate-500 mt-2 flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      {loadingPaymentStatuses ? (
+                        'Checking payment status...'
+                      ) : getPaidJobsCount() > 0 ? (
+                        `You have ${getPaidJobsCount()} paid job${getPaidJobsCount() !== 1 ? 's' : ''}`
+                      ) : (
+                        'No paid jobs yet'
+                      )}
                     </p>
                   </div>
 
