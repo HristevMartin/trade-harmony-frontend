@@ -10,7 +10,7 @@ import { GoogleLogin } from '@react-oauth/google';
 
 interface AuthData {
     id: string;
-    role: string;
+    role: string[];
     token: string;
     email?: string;
 }
@@ -135,9 +135,13 @@ const AuthModal = ({ isOpen, onClose, onSuccess, role = 'customer', initialEmail
             const data = await response.json();
 
             if (response.ok) {
+                // Normalize role to always be an array
+                const normalizedRole = Array.isArray(data.role) ? data.role : [data.role];
+                const uniqueRoles = Array.from(new Set(normalizedRole.filter(Boolean))) as string[];
+                
                 localStorage.setItem("auth_user", JSON.stringify({
                     id: data.id,
-                    role: data.role,
+                    role: uniqueRoles,
                 }));
 
                 markRecentLogin();
@@ -146,7 +150,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess, role = 'customer', initialEmail
 
                 onSuccess({
                     id: data.id,
-                    role: data.role,
+                    role: uniqueRoles,
                     token: data.token || '',
                     email: data.email,
                 });
@@ -190,9 +194,13 @@ const AuthModal = ({ isOpen, onClose, onSuccess, role = 'customer', initialEmail
             const data = await response.json();
 
             if (response.ok) {
+                // Normalize role to always be an array
+                const normalizedRole = Array.isArray(data.role) ? data.role : [data.role];
+                const uniqueRoles = Array.from(new Set(normalizedRole.filter(Boolean))) as string[];
+                
                 localStorage.setItem('auth_user', JSON.stringify({
                     id: data.id,
-                    role: data.role,
+                    role: uniqueRoles,
                 }));
 
                 markRecentLogin();
@@ -200,7 +208,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess, role = 'customer', initialEmail
 
                 onSuccess({
                     id: data.id,
-                    role: data.role,
+                    role: uniqueRoles,
                     token: data.token || '',
                     email: data.email,
                 });

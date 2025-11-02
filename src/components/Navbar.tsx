@@ -12,6 +12,22 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
 
+  // DEBUG: Intercept localStorage.setItem to track auth_user writes
+  useEffect(() => {
+    const originalSetItem = localStorage.setItem.bind(localStorage);
+    localStorage.setItem = function(key: string, value: string) {
+      if (key === 'auth_user') {
+        console.log('🚨 localStorage.setItem("auth_user") called with:', value);
+        console.trace('Stack trace:');
+      }
+      return originalSetItem(key, value);
+    };
+    
+    return () => {
+      localStorage.setItem = originalSetItem;
+    };
+  }, []);
+
   // Chat state
   const [hasChats, setHasChats] = useState(false);
   const [unreadTotal, setUnreadTotal] = useState(0);
@@ -38,6 +54,7 @@ const Navbar = () => {
       if (authUser) {
         try {
           const userData = JSON.parse(authUser);
+          console.log('🔍 checkAuthState - userData from localStorage:', userData);
           setUser(userData);
         } catch (error) {
           console.error('Error parsing user data:', error);
@@ -76,26 +93,40 @@ const Navbar = () => {
             }
           });
           const data = await response.json();
-          console.log('show me the user role', data);
+          console.log('API user role response:', data);
+          console.log('Current authUser before update:', authUser);
 
-          // Handle the case where API returns an array of roles
+          // Normalize roles to always be a deduplicated array
+          let roles: string[] = [];
+          
           if (Array.isArray(data)) {
-            // Update user with the array of roles from API
-            const updatedUser = { ...authUser, role: data };
-            localStorage.setItem('auth_user', JSON.stringify(updatedUser));
-            setUser(updatedUser);
-            console.log('Updated user role to:', data);
+            // API returned array directly
+            roles = data;
           } else if (data.trader) {
-            // Handle legacy format if needed
-            const updatedUser = { ...authUser, role: data.trader };
-            localStorage.setItem('auth_user', JSON.stringify(updatedUser));
-            setUser(updatedUser);
-            console.log('Updated user role to:', data.trader);
+            // Legacy format: { trader: "role" } or { trader: ["role1", "role2"] }
+            roles = Array.isArray(data.trader) ? data.trader : [data.trader];
           } else if (data.role) {
-            // Handle case where API returns role directly
-            const updatedUser = { ...authUser, role: data.role };
+            // Format: { role: "role" } or { role: ["role1", "role2"] }
+            roles = Array.isArray(data.role) ? data.role : [data.role];
+          }
+
+          // Remove duplicates using Set
+          const uniqueRoles = Array.from(new Set(roles.filter(Boolean)));
+
+          if (uniqueRoles.length > 0) {
+            const updatedUser = { ...authUser, role: uniqueRoles };
+            console.log('in here this is:', updatedUser);
+            console.log('About to set localStorage with:', JSON.stringify(updatedUser));
             localStorage.setItem('auth_user', JSON.stringify(updatedUser));
-            console.log('Updated user role to:', data.role);
+            
+            // Verify it was set correctly
+            const verification = localStorage.getItem('auth_user');
+            console.log('Verification - localStorage now contains:', verification);
+            
+            setUser(updatedUser);
+            console.log('Updated user role to:', uniqueRoles);
+          } else {
+            console.warn('No valid roles found in API response');
           }
         } catch (error) {
           console.error('Error fetching user role:', error);
@@ -105,7 +136,7 @@ const Navbar = () => {
       }
     }
     refetchUserRole();
-  }, []);
+  }, [user?.id]); // Re-run when user logs in/out
 
 
   // Chat summary fetching with polling

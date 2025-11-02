@@ -574,13 +574,17 @@ const TradesPersonOnboarding = () => {
   }, [formData, isSubmitting, hasSubmitted, navigate]);
 
   // Handle authentication success
-  const handleAuthSuccess = useCallback(async (authData: { id: string; role: string; token: string; email?: string }) => {
+  const handleAuthSuccess = useCallback(async (authData: { id: string; role: string[]; token: string; email?: string }) => {
     console.log('Authentication successful:', authData);
+
+    // Normalize role to always be an array
+    const normalizedRole = Array.isArray(authData.role) ? authData.role : [authData.role];
+    const uniqueRoles = Array.from(new Set(normalizedRole.filter(Boolean))) as string[];
 
     // CRITICAL: Update localStorage immediately
     localStorage.setItem('auth_user', JSON.stringify({
       id: authData.id,
-      role: authData.role,
+      role: uniqueRoles,
     }));
     console.log('✅ localStorage updated');
     
@@ -599,8 +603,7 @@ const TradesPersonOnboarding = () => {
     setShowAuthModal(false);
 
     // Check if the authenticated user has the correct role
-    const authUserRole = Array.isArray(authData.role) ? authData.role : [authData.role];
-    if (authUserRole.includes('customer') || authUserRole.includes('CUSTOMER')) {
+    if (uniqueRoles.includes('customer') || uniqueRoles.includes('CUSTOMER')) {
       setErrors(prev => ({
         ...prev,
         general: 'Customer accounts cannot register as tradespeople. Please create a new trader account or switch to a trader account to complete registration.'
@@ -620,7 +623,7 @@ const TradesPersonOnboarding = () => {
   }, [formData]);
 
   // Submit registration with auth data directly (bypassing localStorage timing issues)
-  const submitRegistrationWithAuthData = useCallback(async (authData: { id: string; role: string; token: string; email?: string }) => {
+  const submitRegistrationWithAuthData = useCallback(async (authData: { id: string; role: string[]; token: string; email?: string }) => {
     // Prevent double submission
     if (isSubmitting || hasSubmitted) {
       console.log('Submission already in progress or completed, skipping...');

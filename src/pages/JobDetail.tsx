@@ -249,19 +249,15 @@ const JobDetail = () => {
 
             try {
                 const request = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/check-payment-status/${user.id}/${id}`);
-                console.log('show me the request', request);
 
                 if (!request.ok) {
-                    console.log('failed the reps')
                     setPaymentStatusLoaded(true);
                     return;
                 }
 
                 const response = await request.json();
-                console.log('show me if the user has paid', response);
 
                 if (response.status === 'paid') {
-                    console.log('in here the response is', response);
                     setUserPaid(true);
                 }
             } catch (error) {

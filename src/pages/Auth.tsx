@@ -145,9 +145,13 @@ const Auth = () => {
         if (activeTab === 'forgot-password') {
           setForgotPasswordSent(true);
         } else {
+          // Normalize role to always be an array
+          const normalizedRole = Array.isArray(data.role) ? data.role : [data.role];
+          const uniqueRoles = Array.from(new Set(normalizedRole.filter(Boolean))) as string[];
+          
           localStorage.setItem('auth_user', JSON.stringify({
             id: data.id,
-            role: data.role,
+            role: uniqueRoles,
           }));
 
           markRecentLogin();
@@ -200,9 +204,13 @@ const Auth = () => {
       const data = await response.json();
 
       if (response.ok) {
+        // Normalize role to always be an array
+        const normalizedRole = Array.isArray(data.role) ? data.role : [data.role];
+        const uniqueRoles = Array.from(new Set(normalizedRole.filter(Boolean))) as string[];
+        
         localStorage.setItem('auth_user', JSON.stringify({
           id: data.id,
-          role: data.role,
+          role: uniqueRoles,
         }));
 
         markRecentLogin();
