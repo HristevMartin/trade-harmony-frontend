@@ -4,7 +4,6 @@ import MobileHeader from "@/components/MobileHeader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import PayToApplyModal from "@/components/PayToApplyModal";
 import PaidUserBanner from "@/components/PaidUserBanner";
 import CompetitionIndicator from "@/components/CompetitionIndicator";
 import AiJobFitCard from "@/components/AiJobFitCard";
@@ -27,14 +26,14 @@ import {
     HiInformationCircle,
     HiHome,
     HiPencilSquare,
-    HiXMark,
-    HiLockClosed
+    HiXMark
 } from "react-icons/hi2";
 import { X } from "lucide-react";
 
 interface JobData {
     id: string;
     project_id: string;
+    user_id?: string;
     first_name: string;
     email: string;
     phone: string;
@@ -68,9 +67,6 @@ const JobDetail = () => {
     const [showEditSuccess, setShowEditSuccess] = useState(false);
     const [showPostSuccess, setShowPostSuccess] = useState(false);
     const [user, setUser] = useState<any>(null);
-    const [showPayToApplyModal, setShowPayToApplyModal] = useState(false);
-    const [userPaid, setUserPaid] = useState(false);
-    const [paymentStatusLoaded, setPaymentStatusLoaded] = useState(false);
     const [jobStats, setJobStats] = useState<{
         completed_jobs: number;
         in_progress_jobs: number;
@@ -138,30 +134,109 @@ const JobDetail = () => {
 
     // Handler functions for follow-up questions
     const handleFollowUpQuestion = async (question: string) => {
-        if (userPaid) {
-            // Post-payment: Navigate to chat with the question
+        try {
+            console.log('🔍 [FOLLOW-UP] Opening chat for job:', jobData?.project_id);
+            console.log('🔍 [FOLLOW-UP] User role:', user?.role);
+            console.log('🔍 [FOLLOW-UP] Question:', question);
+            
+            // Step 1: Create free application first (so homeowner can see the trader)
+            console.log('🆓 [FOLLOW-UP] Creating free application...');
             try {
-                console.log('Opening chat for job:', jobData?.project_id);
-                const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/chat-component/get-conversation-by-id/${jobData?.project_id}`, {
+                const appResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/create-free-application`, {
+                    method: 'POST',
                     credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json',
-                    }
+                    },
+                    body: JSON.stringify({
+                        job_id: jobData?.project_id,
+                        user_id: user?.id,
+                        application_text: `Trader is interested in this job and wants to ask: "${question}"`
+                    })
                 });
-                if (!response.ok) {
-                    throw new Error('Failed to fetch conversation');
+                
+                if (appResponse.ok) {
+                    const appData = await appResponse.json();
+                    console.log('✅ [FOLLOW-UP] Free application created:', {
+                        applicationId: appData.applicationId,
+                        status: appData.status
+                    });
+                } else {
+                    const errorText = await appResponse.text();
+                    console.warn('⚠️ [FOLLOW-UP] Failed to create free application (continuing anyway):', {
+                        status: appResponse.status,
+                        error: errorText
+                    });
                 }
-                const data = await response.json();
-                console.log('Got conversation data:', data);
-                navigate(`/chat/${data.conversation.conversation_id}?message=${encodeURIComponent(question)}`);
-            } catch (error) {
-                console.error('Error opening chat:', error);
-                // Fallback: try with job ID directly
+            } catch (appError) {
+                console.warn('⚠️ [FOLLOW-UP] Error creating free application (continuing anyway):', appError);
+            }
+            
+            // Step 2: Try to get existing conversation
+            let response = await fetch(`${import.meta.env.VITE_API_URL}/travel/chat-component/get-conversation-by-id/${jobData?.project_id}`, {
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            if (!response.ok) {
+                console.log('📞 [FOLLOW-UP] Conversation not found, creating new one...');
+                // If conversation doesn't exist, create it
+                const createResponse = await fetch(`${import.meta.env.VITE_API_URL}/travel/chat-component/create-chat`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        job_id: jobData?.project_id,
+                        trader_id: user?.id,
+                        homeowner_id: jobData?.user_id,
+                    })
+                });
+                
+                console.log('📤 [FOLLOW-UP] Create conversation request:', {
+                    job_id: jobData?.project_id,
+                    trader_id: user?.id,
+                    homeowner_id: jobData?.user_id,
+                    endpoint: `${import.meta.env.VITE_API_URL}/travel/chat-component/create-chat`
+                });
+                
+                if (!createResponse.ok) {
+                    const errorText = await createResponse.text();
+                    console.error('❌ [FOLLOW-UP] Failed to create conversation:', {
+                        status: createResponse.status,
+                        statusText: createResponse.statusText,
+                        error: errorText
+                    });
+                    throw new Error('Failed to create conversation');
+                }
+                
+                response = createResponse;
+            }
+            
+            const data = await response.json();
+            console.log('✅ [FOLLOW-UP] Got conversation data:', data);
+            console.log('✅ [FOLLOW-UP] Conversation ID:', data.conversation?.conversation_id || data.conversation_id);
+            console.log('✅ [FOLLOW-UP] Conversation participants:', {
+                homeowner_id: data.conversation?.homeowner_id,
+                trader_id: data.conversation?.trader_id,
+                job_id: data.conversation?.job_id
+            });
+                
+                // Navigate to the conversation with the question
+            const conversationId = data.conversation?.conversation_id || data.conversation_id;
+            if (conversationId) {
+                navigate(`/chat/${conversationId}?message=${encodeURIComponent(question)}`);
+            } else {
+                // Fallback
                 navigate(`/chat/${jobData?.project_id}?message=${encodeURIComponent(question)}`);
             }
-        } else {
-            // Pre-payment: Trigger payment flow
-            setShowPayToApplyModal(true);
+        } catch (error) {
+            console.error('Error opening chat:', error);
+            // Final fallback: try with job ID directly
+            navigate(`/chat/${jobData?.project_id}?message=${encodeURIComponent(question)}`);
         }
     };
 
@@ -241,36 +316,6 @@ const JobDetail = () => {
     }, [user]);
 
     useEffect(() => {
-        const getCustomerApplication = async () => {
-            if (!user?.id || !id) {
-                setPaymentStatusLoaded(true);
-                return;
-            }
-
-            try {
-                const request = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/check-payment-status/${user.id}/${id}`);
-
-                if (!request.ok) {
-                    setPaymentStatusLoaded(true);
-                    return;
-                }
-
-                const response = await request.json();
-
-                if (response.status === 'paid') {
-                    setUserPaid(true);
-                }
-            } catch (error) {
-                console.error('Error checking payment status:', error);
-            } finally {
-                setPaymentStatusLoaded(true);
-            }
-        }
-
-        getCustomerApplication();
-    }, [user, id]);
-
-    useEffect(() => {
         if (isTrader) {
             const makeRequest = async () => {
                 let apiResponse = await fetch(`${import.meta.env.VITE_API_URL}/travel/trader-helper`, {
@@ -306,6 +351,11 @@ const JobDetail = () => {
                     }
                 });
                 const data = await response.json();
+
+                console.log('🔍 Job API Response:', data);
+                console.log('🔍 Project Data:', data.project);
+                console.log('🔍 Project user_id:', data.project?.user_id);
+                console.log('🔍 Full project object keys:', data.project ? Object.keys(data.project) : 'No project');
 
                 if (data.success && data.project) {
                     setJobData(data.project);
@@ -435,16 +485,14 @@ const JobDetail = () => {
         return flags[country] || '🌍';
     };
 
-    // Show loading if either job data or payment status is still loading
-    if (loading || (isTrader && !paymentStatusLoaded)) {
+    // Show loading if job data is still loading
+    if (loading) {
         return (
             <>
                 <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-jobhub-blue mx-auto mb-4"></div>
-                        <p className="text-gray-600">
-                            {loading ? 'Loading job details...' : 'Checking application status...'}
-                        </p>
+                        <p className="text-gray-600">Loading job details...</p>
                     </div>
                 </div>
             </>
@@ -588,7 +636,7 @@ const JobDetail = () => {
                                     <div className="flex-1">
                                         <h4 className="text-gray-900 font-semibold mb-2 text-sm">Want to get verified?</h4>
                                         <p className="text-gray-700 text-sm leading-relaxed mb-3">
-                                            Verified clients get more applications from trusted tradespeople and build stronger trust with professionals.
+                                            Verified clients get more responses from trusted tradespeople and build stronger trust with professionals.
                                         </p>
                                         <Button
                                             variant="outline"
@@ -672,18 +720,16 @@ const JobDetail = () => {
                             </div>
                         </div>
 
-                        {/* Job Status and Application Count for Traders */}
-                        {isTrader && paymentStatusLoaded && (
+                        {/* Job Status and Interest Count for Traders */}
+                        {isTrader && (
                             <div className="mt-3 flex flex-wrap items-center gap-3">
-                                {!userPaid && (
-                                    <Badge className="bg-jobhub-successBg text-emerald-700 border-emerald-200 px-3 py-1.5 text-sm font-medium">
-                                        Job Open — Accepting Applicants
-                                    </Badge>
-                                )}
-                                {/* Application Count Badge - Visible to all traders */}
+                                <Badge className="bg-jobhub-successBg text-emerald-700 border-emerald-200 px-3 py-1.5 text-sm font-medium">
+                                    Job Open — Accepting Inquiries
+                                </Badge>
+                                {/* Interest Count Badge - Visible to all traders */}
                                 <Badge className="bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-2 text-sm px-3 py-1.5 rounded-full font-semibold">
                                     <HiUserCircle className="w-4 h-4" />
-                                    {jobApplicants} {jobApplicants === 1 ? 'Applied' : 'Applied'}
+                                    {jobApplicants} {jobApplicants === 1 ? 'Interested' : 'Interested'}
                                 </Badge>
                             </div>
                         )}
@@ -733,70 +779,8 @@ const JobDetail = () => {
 
 
 
-                    {/* Apply for Job Banner - Desktop */}
-                    {isTrader && !userPaid && paymentStatusLoaded && (
-                        <>
-                            {/* Desktop Banner */}
-                            <div className="hidden md:block mb-6 md:mb-8">
-                                <Card className="rounded-2xl bg-gradient-to-br from-jobhub-blue/95 to-jobhub-blue border border-jobhub-blue/20 p-6 md:p-8 shadow-xl transition-all duration-300 relative overflow-hidden hover:shadow-2xl">
-                                    {/* Subtle decorative gradient overlay */}
-                                    <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none"></div>
-
-                                    <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                                        <div className="text-white space-y-3">
-                                            <h3 className="text-xl md:text-2xl font-bold leading-tight">Ready to apply for this job?</h3>
-                                            <p className="text-blue-50 text-sm leading-relaxed flex items-center gap-2">
-                                                <HiCheckCircle className="w-4 h-4 flex-shrink-0" />
-                                                <span>We verify every job to protect your spend.</span>
-                                            </p>
-                                        </div>
-                                        <div className="flex flex-col items-center lg:items-end gap-2.5">
-                                            <Button
-                                                onClick={() => setShowPayToApplyModal(true)}
-                                                className="bg-white text-jobhub-blue hover:bg-gray-50 font-bold px-8 py-4 text-lg rounded-full shadow-subtle hover:shadow-lift transition-all duration-200 min-h-[48px] whitespace-nowrap border border-white hover:scale-105"
-                                                size="lg"
-                                                aria-label="Apply for this job securely"
-                                            >
-                                                <HiLockClosed className="w-5 h-5 mr-2" />
-                                                Apply for £1.99
-                                            </Button>
-                                            <p className="text-blue-100 text-xs text-center lg:text-right font-normal">
-                                                Secure payment powered by Stripe
-                                            </p>
-                                        </div>
-                                    </div>
-                                </Card>
-                            </div>
-
-                            {/* Mobile Sticky CTA */}
-                            <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 p-4 pb-safe shadow-lg">
-                                <div className="space-y-3">
-                                    <div className="text-center">
-                                        <p className="text-gray-900 font-bold text-base leading-tight mb-1">Ready to apply for this job?</p>
-                                        <p className="text-gray-600 text-xs mt-1.5 flex items-center justify-center gap-1.5">
-                                            <HiCheckCircle className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                                            <span>We verify every job to protect your spend.</span>
-                                        </p>
-                                    </div>
-                                    <Button
-                                        onClick={() => setShowPayToApplyModal(true)}
-                                        className="w-full bg-jobhub-blue hover:bg-jobhub-blue/90 text-white font-bold px-6 py-3.5 rounded-full shadow-subtle hover:shadow-lift transition-all duration-200 min-h-[48px] active:scale-95"
-                                        aria-label="Apply for this job securely"
-                                    >
-                                        <HiLockClosed className="w-5 h-5 mr-2" />
-                                        Apply for £1.99
-                                    </Button>
-                                    <p className="text-gray-500 text-xs text-center font-normal">
-                                        Secure payment powered by Stripe
-                                    </p>
-                                </div>
-                            </div>
-                        </>
-                    )}
-
-                    {/* if user has paid already */}
-                    {
-                        userPaid && (
+                    {/* Trader Contact Banner - Always show for traders */}
+                    {isTrader && (
                             <PaidUserBanner
                                 jobId={id || ''}
                                 jobTitle={jobData.job_title}
@@ -807,48 +791,130 @@ const JobDetail = () => {
                                 }}
                                 homeownerName={jobData.first_name}
                                 homeownerVerified={homeOwnerVerified}
+                                homeownerId={jobData.user_id}
                                 applicantCount={jobApplicants}
                                 jobStats={jobStats || undefined}
                                 location={`${getCountryFlag(jobData.additional_data.country)} ${jobData.additional_data.location}`}
                                 postedDate={formatDate(jobData.created_at)}
                                 onOpenChat={async () => {
                                     try {
-                                        console.log('Opening chat for job:', id);
-                                        const response = await fetch(`${import.meta.env.VITE_API_URL}/travel/chat-component/get-conversation-by-id/${id}`, {
+                                        console.log('🔍 [OPEN-CHAT] Opening chat for job:', id);
+                                        console.log('🔍 [OPEN-CHAT] User role:', user?.role);
+                                        
+                                        // Step 1: Create free application first (so homeowner can see the trader)
+                                        console.log('🆓 [OPEN-CHAT] Creating free application...');
+                                        try {
+                                            const appResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/create-free-application`, {
+                                                method: 'POST',
+                                                credentials: 'include',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                },
+                                                body: JSON.stringify({
+                                                    job_id: id,
+                                                    user_id: user?.id,
+                                                    application_text: `Trader is interested in this job and wants to chat`
+                                                })
+                                            });
+                                            
+                                            if (appResponse.ok) {
+                                                const appData = await appResponse.json();
+                                                console.log('✅ [OPEN-CHAT] Free application created:', {
+                                                    applicationId: appData.applicationId,
+                                                    status: appData.status
+                                                });
+                                            } else {
+                                                const errorText = await appResponse.text();
+                                                console.warn('⚠️ [OPEN-CHAT] Failed to create free application (continuing anyway):', {
+                                                    status: appResponse.status,
+                                                    error: errorText
+                                                });
+                                            }
+                                        } catch (appError) {
+                                            console.warn('⚠️ [OPEN-CHAT] Error creating free application (continuing anyway):', appError);
+                                        }
+                                        
+                                        // Step 2: Try to get existing conversation
+                                        let response = await fetch(`${import.meta.env.VITE_API_URL}/travel/chat-component/get-conversation-by-id/${id}`, {
                                             credentials: 'include',
                                             headers: {
                                                 'Content-Type': 'application/json',
                                             }
                                         });
+                                        
                                         if (!response.ok) {
-                                            throw new Error('Failed to fetch conversation');
+                                            console.log('📞 [OPEN-CHAT] Conversation not found, creating new one...');
+                                            // If conversation doesn't exist, create it
+                                            const createResponse = await fetch(`${import.meta.env.VITE_API_URL}/travel/chat-component/create-chat`, {
+                                                method: 'POST',
+                                                credentials: 'include',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                },
+                                                body: JSON.stringify({
+                                                    job_id: id,
+                                                    trader_id: user?.id,
+                                                    homeowner_id: jobData?.user_id,
+                                                })
+                                            });
+                                            
+                                            console.log('📤 [OPEN-CHAT] Create conversation request:', {
+                                                job_id: id,
+                                                trader_id: user?.id,
+                                                homeowner_id: jobData?.user_id,
+                                                endpoint: `${import.meta.env.VITE_API_URL}/travel/chat-component/create-chat`
+                                            });
+                                            
+                                            if (!createResponse.ok) {
+                                                const errorText = await createResponse.text();
+                                                console.error('❌ [OPEN-CHAT] Failed to create conversation:', {
+                                                    status: createResponse.status,
+                                                    statusText: createResponse.statusText,
+                                                    error: errorText
+                                                });
+                                                throw new Error('Failed to create conversation');
+                                            }
+                                            
+                                            response = createResponse;
                                         }
+                                        
                                         const data = await response.json();
-                                        console.log('Got conversation data:', data);
-                                        navigate(`/chat/${data.conversation.conversation_id}`);
+                                        console.log('✅ [OPEN-CHAT] Got conversation data:', data);
+                                        console.log('✅ [OPEN-CHAT] Conversation ID:', data.conversation?.conversation_id || data.conversation_id);
+                                        console.log('✅ [OPEN-CHAT] Conversation participants:', {
+                                            homeowner_id: data.conversation?.homeowner_id,
+                                            trader_id: data.conversation?.trader_id,
+                                        });
+                                            
+                                        // Navigate to the conversation
+                                        const conversationId = data.conversation?.conversation_id || data.conversation_id;
+                                        if (conversationId) {
+                                            navigate(`/chat/${conversationId}`);
+                                        } else {
+                                            navigate(`/chat/${id}`);
+                                        }
                                     } catch (error) {
                                         console.error('Error opening chat:', error);
                                         // Fallback: navigate to chat with job ID
-                                        navigate(`/chat?job_id=${id}`);
+                                        navigate(`/chat/${id}`);
                                     }
                                 }}
                             />
-                        )
-                    }
+                    )}
 
                     {/* AI Job Fit Card - Only for traders */}
-                    {isTrader && paymentStatusLoaded && (
+                    {isTrader && (
                         <div className="mb-6">
                             <AiJobFitCard jobId={jobData.project_id} />
                         </div>
                     )}
 
                     {/* Follow-up Questions - Only for traders */}
-                    {isTrader && paymentStatusLoaded && followUpQuestions.length > 0 && (
+                    {isTrader && followUpQuestions.length > 0 && (
                         <div className="mb-6">
                             <FollowUpQuestions
                                 questions={followUpQuestions}
-                                mode={userPaid ? 'postpay' : 'prepay'}
+                                mode="postpay"
                                 onQuestionClick={handleFollowUpQuestion}
                                 className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-200 p-4 md:p-6"
                             />
@@ -870,13 +936,13 @@ const JobDetail = () => {
                                         <div className="space-y-1 md:space-y-2 text-xs md:text-sm text-gray-700">
                                             {isTrader ? (
                                                 <>
-                                                    <p>• Contact the homeowner to discuss the job</p>
-                                                    <p>• Review the job requirements carefully</p>
-                                                    <p>• Submit your application with a competitive quote</p>
+                                                    <p>• Contact the homeowner to discuss the job details</p>
+                                                    <p>• Review the requirements and ask any questions</p>
+                                                    <p>• Provide a quote and arrange a site visit if needed</p>
                                                 </>
                                             ) : (
                                                 <>
-                                                    <p>• You'll receive an email when tradespeople apply</p>
+                                                    <p>• Tradespeople can contact you directly via chat</p>
                                                     <p>• We'll keep you updated on all activity</p>
                                                 </>
                                             )}
@@ -1084,56 +1150,19 @@ const JobDetail = () => {
                 </div>
             )}
 
-            {/* Mobile Sticky Footer */}
+            {/* Mobile Sticky Footer - Only for homeowners */}
+            {!isTrader && (
             <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-xl p-4 sm:hidden backdrop-blur-sm"
                 style={{ paddingBottom: 'env(safe-area-inset-bottom, 16px)' }}>
-                {isTrader && !userPaid && paymentStatusLoaded && (
-                    <div className="space-y-3">
-                        <div className="text-center">
-                            <p className="text-gray-900 font-bold text-base leading-tight mb-1">Ready to apply for this job?</p>
-                            <p className="text-gray-600 text-xs mt-1.5 flex items-center justify-center gap-1.5">
-                                <HiCheckCircle className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                                <span>We verify every job to protect your spend.</span>
-                            </p>
-                        </div>
-                        <Button
-                            onClick={() => setShowPayToApplyModal(true)}
-                            className="w-full bg-jobhub-blue hover:bg-jobhub-blue/90 text-white font-bold px-6 py-3.5 rounded-full shadow-subtle hover:shadow-lift transition-all duration-200 min-h-[48px] active:scale-95"
-                            aria-label="Apply for this job securely"
-                        >
-                            <HiLockClosed className="w-5 h-5 mr-2" />
-                            Apply for £1.99
-                        </Button>
-                        <p className="text-gray-500 text-xs text-center font-normal">
-                            Secure payment powered by Stripe
-                        </p>
-                    </div>
-                )}
-
-
-                {!isTrader && (
-                    <Button
-                        onClick={() => navigate(`/edit-job/${id}`)}
-                        className="w-full bg-gradient-to-r from-jobhub-blue to-blue-500 hover:from-jobhub-blue/90 hover:to-blue-500/90 text-white flex items-center justify-center gap-2 min-h-[48px] font-semibold shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
-                    >
-                        <HiPencilSquare className="w-4 h-4" />
-                        Edit Job
-                    </Button>
-                )}
+                <Button
+                    onClick={() => navigate(`/edit-job/${id}`)}
+                    className="w-full bg-gradient-to-r from-jobhub-blue to-blue-500 hover:from-jobhub-blue/90 hover:to-blue-500/90 text-white flex items-center justify-center gap-2 min-h-[48px] font-semibold shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
+                >
+                    <HiPencilSquare className="w-4 h-4" />
+                    Edit Job
+                </Button>
             </div>
-
-            {/* Pay to Apply Modal */}
-            <PayToApplyModal
-                isOpen={showPayToApplyModal}
-                onClose={() => setShowPayToApplyModal(false)}
-                jobTitle={jobData.job_title}
-                jobId={id || ''}
-                homeownerInfo={{
-                    first_name: jobData.first_name,
-                    email: jobData.email,
-                    phone: jobData.phone
-                }}
-            />
+            )}
 
             {/* Verification Modal */}
             {showVerificationModal && (

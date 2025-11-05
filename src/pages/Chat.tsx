@@ -309,6 +309,64 @@ const Chat = () => {
     setIsLoadingMessages(true);
   }, [conversationId]);
 
+  // Polling interval for fetching new messages
+  useEffect(() => {
+    if (!conversationId || !authToken) return;
+
+    const pollMessages = async () => {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const url = `${apiUrl}/travel/chat-component/${conversationId}`;
+        
+        const response = await fetch(url, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const transformedMessages = data.messages?.map(msg => ({
+            id: msg.id,
+            conversationId: msg.conversation_id,
+            senderId: msg.sender_id,
+            body: msg.body,
+            createdAt: new Date(msg.created_at).getTime(),
+            attachments: msg.attachments_json ? JSON.parse(msg.attachments_json) : []
+          })).sort((a, b) => a.createdAt - b.createdAt) || [];
+
+          // Only update if messages actually changed (check by comparing IDs)
+          setMessages(prev => {
+            const prevIds = prev.map(m => m.id).sort().join(',');
+            const newIds = transformedMessages.map(m => m.id).sort().join(',');
+            
+            if (prevIds !== newIds) {
+              console.log('🔄 [POLLING] New messages detected!', {
+                oldCount: prev.length,
+                newCount: transformedMessages.length,
+                oldIds: prev.map(m => m.id),
+                newIds: transformedMessages.map(m => m.id),
+                currentUserId,
+                userRole: isCustomer ? 'HOMEOWNER' : 'TRADER'
+              });
+              return transformedMessages;
+            }
+            return prev;
+          });
+        }
+      } catch (error) {
+        console.error('Error polling messages:', error);
+      }
+    };
+
+    // Poll every 3 seconds
+    const interval = setInterval(pollMessages, 3000);
+    
+    return () => clearInterval(interval);
+  }, [conversationId, authToken]);
+
   // Fetch messages for the current conversation
   useEffect(() => {
     const fetchMessages = async () => {
@@ -319,6 +377,25 @@ const Chat = () => {
 
         try {
           const apiUrl = import.meta.env.VITE_API_URL;
+          
+          // First, fetch the job data to get the homeowner_id
+          let homeownerId: string | undefined;
+          try {
+            const jobResponse = await fetch(`${apiUrl}/travel/get-client-project/${jobId}`, {
+              credentials: 'include',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+            if (jobResponse.ok) {
+              const jobData = await jobResponse.json();
+              homeownerId = jobData.project?.user_id;
+              console.log('Fetched homeowner_id from job:', homeownerId);
+            }
+          } catch (error) {
+            console.warn('Could not fetch job data for homeowner_id:', error);
+          }
+          
           const createResponse = await fetch(`${apiUrl}/travel/chat-component/create-chat`, {
             method: 'POST',
             credentials: 'include',
@@ -328,6 +405,7 @@ const Chat = () => {
             body: JSON.stringify({
               job_id: jobId,
               trader_id: currentUserId,
+              homeowner_id: homeownerId,
             }),
           });
 
@@ -376,20 +454,61 @@ const Chat = () => {
 
         if (response.ok) {
           const data = await response.json();
-          console.log('Messages API response for conversation', conversationId, ':', data);
+          console.log('📨 Messages API response for conversation', conversationId, ':', data);
+          console.log('📨 Raw messages array:', data.messages);
+          console.log('📨 Number of messages:', data.messages?.length || 0);
 
-          const transformedMessages = data.messages?.map(msg => ({
-            id: msg.id,
-            conversationId: msg.conversation_id,
-            senderId: msg.sender_id,
-            body: msg.body,
-            createdAt: new Date(msg.created_at).getTime(),
-            attachments: msg.attachments_json ? JSON.parse(msg.attachments_json) : []
-          })).sort((a, b) => a.createdAt - b.createdAt) || []; // Sort in ascending order
+          const transformedMessages = data.messages?.map(msg => {
+            const transformed = {
+              id: msg.id,
+              conversationId: msg.conversation_id,
+              senderId: msg.sender_id,
+              body: msg.body,
+              createdAt: new Date(msg.created_at).getTime(),
+              attachments: msg.attachments_json ? JSON.parse(msg.attachments_json) : []
+            };
+            console.log('📝 Transformed message:', {
+              id: transformed.id,
+              senderId: transformed.senderId,
+              body: transformed.body.substring(0, 50) + '...',
+              createdAt: new Date(transformed.createdAt).toISOString()
+            });
+            return transformed;
+          }).sort((a, b) => a.createdAt - b.createdAt) || []; // Sort in ascending order
 
-          console.log('Loaded', transformedMessages.length, 'messages for conversation:', conversationId);
+          console.log('✅ Loaded', transformedMessages.length, 'messages for conversation:', conversationId);
+          console.log('👤 Current user ID:', currentUserId);
+          console.log('📊 Message sender IDs:', transformedMessages.map(m => m.senderId));
+          
+          // Check if any messages are from the current user
+          const myMessages = transformedMessages.filter(m => m.senderId === currentUserId);
+          const otherMessages = transformedMessages.filter(m => m.senderId !== currentUserId);
+          console.log('📊 Message breakdown:', {
+            total: transformedMessages.length,
+            myMessages: myMessages.length,
+            otherMessages: otherMessages.length
+          });
 
           setMessages(transformedMessages);
+          
+          console.log('✅ State updated - messages array length:', transformedMessages.length);
+          console.log('✅ Messages state after setMessages:', transformedMessages.map(m => ({
+            id: m.id,
+            senderId: m.senderId,
+            body: m.body.substring(0, 30) + '...'
+          })));
+          
+          // Log rendering info
+          console.log('🎨 Will render MessageList with:', {
+            messagesCount: transformedMessages.length,
+            conversationId,
+            currentUserId,
+            sampleMessages: transformedMessages.slice(0, 3).map(m => ({
+              id: m.id,
+              senderId: m.senderId,
+              body: m.body.substring(0, 30)
+            }))
+          });
 
           // Store conversation data if available
           if (data.conversation) {
@@ -490,7 +609,13 @@ const Chat = () => {
       action: "send_message"
     };
 
-    console.log('Sending message:', chatObj);
+    console.log('🚀 [SEND MESSAGE] Preparing to send:', {
+      conversationId,
+      senderId: currentUserId,
+      senderRole: isCustomer ? 'HOMEOWNER' : 'TRADER',
+      messagePreview: textToSend.substring(0, 50),
+      timestamp: new Date().toISOString()
+    });
 
     try {
       const apiUrl = import.meta.env.VITE_API_URL;
@@ -504,11 +629,12 @@ const Chat = () => {
         body: JSON.stringify(chatObj)
       });
 
-      console.log('Send message response:', response.status, response.statusText);
+      console.log('📤 [SEND MESSAGE] Response:', response.status, response.statusText);
 
       if (response.ok) {
         const responseData = await response.json();
-        console.log('Message sent successfully:', responseData);
+        console.log('✅ [SEND MESSAGE] Success! Backend response:', responseData);
+        console.log('✅ [SEND MESSAGE] Message ID:', responseData.message_id || responseData.id || 'NOT_RETURNED');
         // Only clear message if it was user typed (not from follow-up question)
         if (!messageText) {
           setMessage(''); // Clear the input after sending
@@ -526,7 +652,11 @@ const Chat = () => {
 
         if (refreshResponse.ok) {
           const refreshData = await refreshResponse.json();
-          console.log('Refreshed messages:', refreshData);
+          console.log('🔄 [REFRESH] Messages after send:', {
+            totalMessages: refreshData.messages?.length || 0,
+            messageIds: refreshData.messages?.map(m => m.id) || [],
+            senderIds: refreshData.messages?.map(m => m.sender_id) || []
+          });
           const transformedMessages = refreshData.messages?.map(msg => ({
             id: msg.id,
             conversationId: msg.conversation_id,
@@ -539,7 +669,13 @@ const Chat = () => {
         }
       } else {
         const errorData = await response.json().catch(() => ({}));
-        console.error('Failed to send message:', response.status, errorData);
+        console.error('❌ [SEND MESSAGE] Failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData,
+          conversationId,
+          senderId: currentUserId
+        });
       }
     } catch (error) {
       console.error('Error sending message:', error);

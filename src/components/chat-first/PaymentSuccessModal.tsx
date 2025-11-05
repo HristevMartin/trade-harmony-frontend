@@ -79,6 +79,7 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
           body: JSON.stringify({
             job_id: jobId,
             trader_id: currentUserId,
+            homeowner_id: homeowner.id,
           }),
         });
         
@@ -135,22 +136,11 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
         }
       }
 
-      // Build chat URL with parameters and navigate
-      const params = new URLSearchParams();
-      params.set('job_id', jobId);
-      params.set('homeowner_name', homeowner.name);
-      params.set('trader_name', trader.name);
-      params.set('job_title', `Job #${jobId}`);
-      
-      const chatUrl = `/chat?${params.toString()}`;
+      // Navigate to chat with conversation ID
+      const chatUrl = `/chat/${conversationId}`;
       
       console.log('🌐 Navigating to chat URL:', chatUrl);
-      console.log('📋 URL Parameters:', {
-        job_id: jobId,
-        homeowner_name: homeowner.name,
-        trader_name: trader.name,
-        job_title: `Job #${jobId}`
-      });
+      console.log('📋 Conversation ID:', conversationId);
       
       // Navigate to chat
       window.location.href = chatUrl;
@@ -158,15 +148,16 @@ const PaymentSuccessModal: React.FC<PaymentSuccessModalProps> = ({
     } catch (error) {
       console.error('❌ Error in handleSendAndOpenChat:', error);
       // Even if there's an error, still try to navigate to chat
-      const params = new URLSearchParams();
-      params.set('job_id', jobId);
-      params.set('homeowner_name', homeowner.name);
-      params.set('trader_name', trader.name);
-      params.set('job_title', `Job #${jobId}`);
-      
-      const chatUrl = `/chat?${params.toString()}`;
-      console.log('🔄 Fallback navigation to:', chatUrl);
-      window.location.href = chatUrl;
+      // If we have a conversation ID, use it; otherwise fall back to job_id param
+      if (conversation?.id) {
+        const chatUrl = `/chat/${conversation.id}`;
+        console.log('🔄 Fallback navigation to conversation:', chatUrl);
+        window.location.href = chatUrl;
+      } else {
+        const chatUrl = `/chat/${jobId}`;
+        console.log('🔄 Fallback navigation to job:', chatUrl);
+        window.location.href = chatUrl;
+      }
     } finally {
       setIsCreatingConversation(false);
     }
