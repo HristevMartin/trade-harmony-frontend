@@ -263,16 +263,16 @@ const Navbar = () => {
 
   return (
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-      <div className="container mx-auto px-4 pt-6 sm:pt-8 pb-4">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex items-center justify-between relative">
+          {/* Logo - Left Section */}
           <motion.div
             onClick={() => handleNavigation('/')}
             style={{ cursor: 'pointer' }}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex items-center gap-2 group"
+            className="flex items-center gap-2 group flex-1"
           >
             <div className="relative flex items-center">
               <div className="w-7 h-7 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300 ring-1 ring-blue-100/50">
@@ -282,8 +282,8 @@ const Navbar = () => {
             <span className="text-lg font-bold text-gray-900 leading-none">JobHub</span>
           </motion.div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          {/* Desktop Navigation - Center Section */}
+          <nav className="hidden md:flex items-center justify-center space-x-8 flex-1">
             <button
               onClick={() => handleNavigation('/')}
               className={`text-foreground hover:text-trust-blue transition-colors font-medium ${isActive('/') ? 'text-trust-blue' : ''}`}
@@ -336,8 +336,8 @@ const Navbar = () => {
 
           </nav>
 
-          {/* Desktop Auth & CTA Buttons */}
-          <div className="hidden md:flex items-center space-x-4">
+          {/* Desktop Auth & CTA Buttons - Right Section */}
+          <div className="hidden md:flex items-center justify-end space-x-4 flex-1">
             {/* Login/Logout Button */}
             {isLoggedIn ? (
               <button
