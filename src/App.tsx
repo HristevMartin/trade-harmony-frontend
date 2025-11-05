@@ -107,7 +107,7 @@ const SessionValidator = () => {
     validateSession();
   }, []);
 
-  return null; // This component doesn't render anything
+  return null;
 };
 
 const App = () => {
