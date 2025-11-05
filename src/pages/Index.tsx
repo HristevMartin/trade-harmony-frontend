@@ -92,6 +92,8 @@ const Index = () => {
       : user.role === 'trader' || user.role === 'master'
   );
 
+  console.log('is trader', isTrader);
+
   // Show Popular Services for anonymous users and homeowners, hide for traders
   const showPopularServices = !isTrader;
 
