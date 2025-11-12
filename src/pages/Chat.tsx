@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Send, MessageCircle, CheckCircle, DollarSign, Clock, Briefcase, User } from 'lucide-react';
+import { ArrowLeft, Send, MessageCircle, CheckCircle, DollarSign, Clock, Briefcase, User, Phone } from 'lucide-react';
 import MessageList from '@/components/chat/MessageList';
 import Sidebar from '@/components/chat/Sidebar';
 import { useChats, type Counterparty } from '@/components/chat/useChatStore';
@@ -57,6 +57,7 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [isLoadingMessages, setIsLoadingMessages] = useState(true);
   const [counterparty, setCounterparty] = useState<Counterparty | null>(null);
+  const [isCounterpartyLoading, setIsCounterpartyLoading] = useState(true);
   const [traderId, setTraderId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { chats, fetchChats } = useChats();
@@ -241,6 +242,11 @@ const Chat = () => {
     fetchTraderId();
   }, [conversationId, isCustomer, traderId]);
 
+  const updateCounterparty = useCallback((value: Counterparty | null) => {
+    setCounterparty(value);
+    setIsCounterpartyLoading(!value);
+  }, []);
+
   // Handle payment flow - create counterparty from URL parameters
   useEffect(() => {
     if (isPaymentFlow && homeownerName) {
@@ -250,9 +256,9 @@ const Chat = () => {
         name: homeownerName,
         job_title: jobTitle || `Job #${jobId}`
       };
-      setCounterparty(paymentFlowCounterparty);
+      updateCounterparty(paymentFlowCounterparty);
     }
-  }, [isPaymentFlow, homeownerName, jobId, jobTitle]);
+  }, [isPaymentFlow, homeownerName, jobId, jobTitle, updateCounterparty]);
 
   // Set counterparty from current chat data (only if not already set from conversation API)
   useEffect(() => {
@@ -260,13 +266,13 @@ const Chat = () => {
     if (!counterparty) {
       if (currentChat) {
         console.log('Setting counterparty from currentChat:', currentChat);
-        setCounterparty(currentChat.counterparty);
+        updateCounterparty(currentChat.counterparty);
       } else if (chats.length > 0 && conversationId) {
         console.log('Looking for conversation in chats:', { conversationId, chats });
         const foundChat = chats.find(chat => chat.conversation_id === conversationId);
         if (foundChat) {
           console.log('Found chat, setting counterparty:', foundChat);
-          setCounterparty(foundChat.counterparty);
+          updateCounterparty(foundChat.counterparty);
         }
       }
     }
@@ -304,10 +310,13 @@ const Chat = () => {
   useEffect(() => {
     setMessages([]);
     setConversation(null);
-    setCounterparty(null);
+    updateCounterparty(null);
     setTraderId(null);
     setIsLoadingMessages(true);
-  }, [conversationId]);
+    if (!conversationId) {
+      setIsCounterpartyLoading(false);
+    }
+  }, [conversationId, updateCounterparty]);
 
   // Polling interval for fetching new messages
   useEffect(() => {
@@ -518,7 +527,9 @@ const Chat = () => {
             // Update counterparty from conversation data if available and more complete
             if (data.conversation.counterparty) {
               console.log('Updating counterparty from conversation data:', data.conversation.counterparty);
-              setCounterparty(data.conversation.counterparty);
+            updateCounterparty(data.conversation.counterparty);
+          } else {
+            setIsCounterpartyLoading(false);
             }
           }
 
@@ -542,7 +553,7 @@ const Chat = () => {
     };
 
     fetchMessages();
-  }, [conversationId, authToken, isPaymentFlow, jobId, currentUserId, navigate, isAuthenticated]);
+  }, [conversationId, authToken, isPaymentFlow, jobId, currentUserId, navigate, isAuthenticated, updateCounterparty]);
 
   // Mark conversation as read when window gains focus
   useEffect(() => {
@@ -573,6 +584,40 @@ const Chat = () => {
       window.history.replaceState({}, '', newUrl);
     }
   }, [searchParams]);
+
+  const resolvedCounterpartyPhone = useMemo(() => {
+    if (!counterparty) {
+      return '';
+    }
+
+    const candidates = [
+      counterparty.phone,
+      (counterparty as Record<string, unknown>).phoneNumber,
+      counterparty.phone_number,
+      (counterparty as Record<string, unknown>).phone_number,
+      counterparty.contact_number,
+      (counterparty as Record<string, unknown>).contactNumber
+    ];
+
+    const found = candidates.find((value) => typeof value === 'string' && value.trim().length > 0);
+    if (typeof found === 'string') {
+      return found.trim();
+    }
+
+    if (typeof counterparty.phone === 'number') {
+      return String(counterparty.phone);
+    }
+
+    return '';
+  }, [counterparty]);
+
+  const resolvedCounterpartyPhoneHref = useMemo(() => {
+    if (!resolvedCounterpartyPhone) {
+      return '';
+    }
+    const digitsOnly = resolvedCounterpartyPhone.replace(/[^\d+]/g, '');
+    return digitsOnly ? `tel:${digitsOnly}` : '';
+  }, [resolvedCounterpartyPhone]);
 
   // Create a UserRef-compatible counterparty for legacy components with defensive checks
   const legacyCounterparty = counterparty ? {
@@ -685,8 +730,11 @@ const Chat = () => {
   return (
     <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
       {/* Header - Final refined design pass */}
-      <header ref={headerRef} className="flex-shrink-0 bg-background border-b border-border z-10">
-        <div className="flex items-center justify-between px-4 sm:px-6 py-2.5">
+      <header
+        ref={headerRef}
+        className="flex-shrink-0 bg-white/95 backdrop-blur border-b border-slate-200 shadow-[0_6px_16px_rgba(15,23,42,0.04)] z-20"
+      >
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 gap-3">
           {/* Left side - Back button */}
           <div className="flex items-center flex-shrink-0">
             <Button
@@ -702,7 +750,12 @@ const Chat = () => {
 
           {/* Center - Profile Capsule (only clickable for customers) */}
           <div className="flex-1 flex flex-col items-center justify-center px-2 sm:px-4 overflow-hidden">
-            {counterparty && isCustomer ? (
+            {isCounterpartyLoading ? (
+              <div className="flex items-center justify-center w-full py-4">
+                <span className="sr-only">Loading contact details</span>
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" aria-hidden="true" />
+              </div>
+            ) : counterparty && isCustomer ? (
               <>
                 <button
                   onClick={(e) => {
@@ -733,28 +786,42 @@ const Chat = () => {
                     </div>
                   )}
 
-                  {/* Name, Arrow, and Profession - Aligned */}
-                  <div className="flex flex-col items-start min-w-0 gap-0.5">
-                    <div className="flex items-baseline gap-1">
-                      <h1 className="font-bold text-sm sm:text-base text-gray-800 group-hover:text-blue-600 transition-colors duration-200 ease-in-out truncate">
+                  {/* Name, Profession, and Contact */}
+                  <div className="flex flex-col items-center sm:items-start text-center sm:text-left min-w-0 gap-1.5">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <h1 className="text-[15px] sm:text-base font-semibold text-slate-900 tracking-tight truncate">
                         {counterparty.name}
                       </h1>
                       <svg
-                        className="w-2.5 h-2.5 text-gray-500 group-hover:text-blue-600 transition-colors duration-200 ease-in-out flex-shrink-0"
+                        className="w-3.5 h-3.5 text-blue-500 flex-shrink-0"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
-                        style={{ marginLeft: '4px' }}
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M9 5l7 7-7 7" />
                       </svg>
                     </div>
 
-                    {/* Profession - consistent 16px line height, hidden on very small screens */}
                     {counterparty.job_title && (
-                      <span className="hidden sm:inline text-sm text-gray-500 truncate max-w-[200px] sm:max-w-[260px] pb-1" style={{ lineHeight: '16px' }}>
+                      <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-600/85 truncate max-w-[220px] sm:max-w-[260px]">
                         {counterparty.job_title}
                       </span>
+                    )}
+
+                    {resolvedCounterpartyPhone && (
+                      <a
+                        href={resolvedCounterpartyPhoneHref || '#'}
+                        className="inline-flex items-center gap-2 px-3 py-1.5 mt-0.5 rounded-full bg-blue-50 text-blue-700 text-xs sm:text-sm font-semibold shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                        aria-label={`Call ${counterparty.name}`}
+                        onClick={(event) => {
+                          if (!resolvedCounterpartyPhoneHref) {
+                            event.preventDefault();
+                          }
+                        }}
+                      >
+                        <Phone className="h-4 w-4" aria-hidden="true" />
+                        {resolvedCounterpartyPhone}
+                      </a>
                     )}
                   </div>
                 </button>
@@ -778,14 +845,29 @@ const Chat = () => {
                     <User className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600" />
                   </div>
                 )}
-                <div className="flex flex-col items-start gap-0.5 min-w-0">
-                  <h1 className="font-bold text-sm sm:text-base text-gray-800 truncate">
+                <div className="flex flex-col items-center sm:items-start text-center sm:text-left gap-1.5 min-w-0">
+                  <h1 className="text-[15px] sm:text-base font-semibold text-slate-900 tracking-tight truncate">
                     {counterparty.name}
                   </h1>
                   {counterparty.job_title && (
-                    <span className="hidden sm:inline text-sm text-gray-500 truncate pb-1" style={{ lineHeight: '16px' }}>
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-600/85 truncate max-w-[220px] sm:max-w-[260px]">
                       {counterparty.job_title}
                     </span>
+                  )}
+                  {resolvedCounterpartyPhone && (
+                    <a
+                      href={resolvedCounterpartyPhoneHref || '#'}
+                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 text-xs sm:text-sm font-semibold shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      aria-label={`Call ${counterparty.name}`}
+                      onClick={(event) => {
+                        if (!resolvedCounterpartyPhoneHref) {
+                          event.preventDefault();
+                        }
+                      }}
+                    >
+                      <Phone className="w-4 h-4" aria-hidden="true" />
+                      {resolvedCounterpartyPhone}
+                    </a>
                   )}
                 </div>
               </div>
@@ -802,10 +884,10 @@ const Chat = () => {
               variant="default"
               size="sm"
               onClick={() => setSidebarOpen(true)}
-              className="sm:hidden flex-shrink-0 min-h-[44px] min-w-[44px] px-3 text-xs font-medium shadow-sm"
+              className="sm:hidden flex-shrink-0 min-h-[48px] min-w-[48px] px-4 text-sm font-semibold shadow-sm"
               aria-label="Open conversations"
             >
-              <MessageCircle className="w-4 h-4 mr-1.5" />
+              <MessageCircle className="w-5 h-5 mr-1.5" />
               Chats
             </Button>
           </div>

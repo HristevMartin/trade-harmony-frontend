@@ -6,6 +6,9 @@ export type Counterparty = {
   name: string;
   avatar_url?: string;
   job_title?: string;
+  phone?: string | number;
+  phone_number?: string | number;
+  contact_number?: string | number;
   lastActiveAt?: string; // ISO timestamp of last activity
 };
 
@@ -18,7 +21,8 @@ export type ChatItem = {
   message_count: number;
   created_at: string;
   counterparty: Counterparty;
-  unread_count?: number; // Added for unread message count
+  unread_count?: number;
+  phone?: string;
 };
 
 // Legacy types for backward compatibility
@@ -39,6 +43,7 @@ export type Conversation = {
   status: 'open' | 'closed';
   canViewPhone?: boolean;
   canViewEmail?: boolean;
+  phone?: string;
 };
 
 export type Message = {

@@ -50,7 +50,7 @@ const MessageList: React.FC<MessageListProps> = ({
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3 px-1">
       {messages.map((message, index) => {
         const senderInfo = getSenderInfo(message.senderId);
         const senderInitials = senderInfo.name 
@@ -80,7 +80,7 @@ const MessageList: React.FC<MessageListProps> = ({
               </div>
             )}
             
-            <div className={`flex flex-col ${senderInfo.isMe ? 'items-end' : 'items-start'} max-w-[70%]`}>
+            <div className={`flex flex-col ${senderInfo.isMe ? 'items-end' : 'items-start'} max-w-[75%]`}>
               {showAvatar && !senderInfo.isMe && (
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xs text-muted-foreground font-medium">
@@ -93,13 +93,13 @@ const MessageList: React.FC<MessageListProps> = ({
               )}
               
               <div
-                className={`rounded-2xl px-4 py-3 max-w-full break-words ${
+                className={`rounded-2xl px-4 py-3 max-w-full break-words shadow-sm ${
                   senderInfo.isMe
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-foreground'
+                    ? 'bg-primary text-primary-foreground shadow-md'
+                    : 'bg-white text-slate-900 border border-slate-200'
                 } ${message.pending ? 'opacity-70' : ''}`}
               >
-                <p className="text-base leading-relaxed whitespace-pre-wrap">{message.body}</p>
+                <p className="text-sm sm:text-base leading-relaxed whitespace-pre-wrap">{message.body}</p>
                 {message.pending && (
                   <div className="flex items-center gap-1 mt-2">
                     <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin opacity-50" />
