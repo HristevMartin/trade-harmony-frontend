@@ -159,12 +159,14 @@ const Sidebar: React.FC<SidebarProps> = ({
   );
 
   return (
-    <div className="w-full bg-muted/30 flex flex-col overflow-hidden h-full border-r border-border">
+    <div className="w-full bg-muted/20 flex flex-col overflow-hidden h-full border-r border-border">
       {/* Mobile header with close button */}
       {onClose && (
-        <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b bg-background/95 backdrop-blur-sm">
-          <h2 className="font-semibold text-lg text-foreground flex items-center gap-2">
-            <MessageCircle className="w-5 h-5 text-gray-700" />
+        <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-3 border-b bg-background backdrop-blur-sm shadow-sm">
+          <h2 className="font-semibold text-lg text-foreground flex items-center gap-2.5">
+            <div className="p-1.5 bg-primary/10 rounded-lg">
+              <MessageCircle className="w-5 h-5 text-primary" />
+            </div>
             Conversations
           </h2>
           <Button
@@ -177,26 +179,26 @@ const Sidebar: React.FC<SidebarProps> = ({
                 conversationsTrigger?.focus();
               }, 100);
             }}
-            className="min-h-[40px] min-w-[40px] rounded-lg hover:bg-muted/50 transition-colors"
+            className="min-h-[40px] min-w-[40px] rounded-lg hover:bg-muted/70 transition-colors"
             aria-label="Close conversations"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5 text-muted-foreground" />
           </Button>
         </div>
       )}
       
-      {/* Desktop header */}
+      {/* Desktop header - improved styling */}
       {!onClose && (
-        <div className="p-4 lg:p-6 border-b bg-background/80 backdrop-blur-sm">
+        <div className="px-5 py-4 border-b bg-background shadow-sm">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-foreground text-lg flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg transition-colors duration-200 hover:bg-primary/15">
-                <MessageCircle className="w-5 h-5 text-gray-700 transition-colors duration-200" />
+            <h3 className="font-semibold text-foreground text-lg flex items-center gap-2.5">
+              <div className="p-2 bg-primary/10 rounded-lg transition-all duration-200 hover:bg-primary/15">
+                <MessageCircle className="w-5 h-5 text-primary" />
               </div>
               Conversations
             </h3>
             {chats.length > 0 && (
-              <Badge variant="secondary" className="text-xs px-2 py-1 bg-primary/10 text-primary">
+              <Badge variant="secondary" className="text-xs px-2.5 py-1 bg-primary/10 text-primary font-medium rounded-full">
                 {chats.length}
               </Badge>
             )}
@@ -317,24 +319,24 @@ const Sidebar: React.FC<SidebarProps> = ({
 
               return (
                 <>
-                  {/* Tab Headers */}
-                  <div className="flex mb-4 bg-muted/30 rounded-lg p-1">
+                   {/* Tab Headers - improved styling */}
+                  <div className="flex mb-3 bg-muted/40 rounded-lg p-1 border border-border/50">
                     <button
                       onClick={() => setShowArchived(false)}
-                      className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-all ${
+                      className={`flex-1 px-4 py-2.5 text-sm font-medium rounded-md transition-all ${
                         !showArchived
-                          ? 'bg-background text-foreground shadow-sm'
-                          : 'text-muted-foreground hover:text-foreground'
+                          ? 'bg-background text-foreground shadow-md border border-border/50'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
                       }`}
                     >
                       Active Jobs ({activeChats.length})
                     </button>
                     <button
                       onClick={() => setShowArchived(true)}
-                      className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-all ${
+                      className={`flex-1 px-4 py-2.5 text-sm font-medium rounded-md transition-all ${
                         showArchived
-                          ? 'bg-background text-foreground shadow-sm'
-                          : 'text-muted-foreground hover:text-foreground'
+                          ? 'bg-background text-foreground shadow-md border border-border/50'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
                       }`}
                     >
                       Past Jobs ({pastJobs.length})
@@ -351,21 +353,21 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <button
                   key={chat.conversation_id}
                   onClick={() => handleChatClick(chat)}
-                  className={`relative w-full p-4 mb-2 rounded-xl text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20 group ${
+                  className={`relative w-full p-4 mb-2 rounded-xl text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/30 group ${
                     isActive 
-                      ? 'bg-primary/8 border border-primary/20 shadow-sm' 
-                      : 'hover:bg-muted/50 border border-transparent hover:border-border/30'
+                      ? 'bg-primary/10 border border-primary/30 shadow-md' 
+                      : 'hover:bg-accent/50 border border-transparent hover:border-border/40 hover:shadow-sm'
                   }`}
                 >
-                  {/* Active indicator */}
+                  {/* Active indicator - more prominent */}
                   {isActive && (
-                    <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-12 bg-primary rounded-r-full"></div>
+                    <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1.5 h-14 bg-primary rounded-r-full shadow-sm"></div>
                   )}
                   
-                  <div className="flex items-start gap-3">
-                    {/* Avatar */}
+                  <div className="flex items-start gap-3.5">
+                    {/* Avatar - improved styling */}
                     <div className="relative flex-shrink-0">
-                      <Avatar className="w-12 h-12 ring-2 ring-background shadow-sm">
+                      <Avatar className="w-12 h-12 ring-2 ring-background shadow-md">
                         {chat.counterparty?.avatar_url ? (
                           <AvatarImage src={chat.counterparty.avatar_url} alt={chat.counterparty?.name || 'Unknown'} />
                         ) : null}
@@ -375,37 +377,37 @@ const Sidebar: React.FC<SidebarProps> = ({
                       </Avatar>
                     </div>
                     
-                    {/* Content */}
+                    {/* Content - improved spacing and typography */}
                     <div className="flex-1 min-w-0">
                       {/* Header row */}
-                      <div className="flex items-start justify-between mb-1">
+                      <div className="flex items-start justify-between mb-1.5">
                         <div className="flex-1 min-w-0 mr-3">
-                          <h4 className={`font-semibold truncate text-sm text-foreground ${hasUnread ? 'font-bold' : ''}`}>
+                          <h4 className={`truncate text-sm ${hasUnread ? 'font-bold text-foreground' : 'font-semibold text-foreground/90'}`}>
                             {chat.counterparty?.name || 'Unknown'}
                           </h4>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
-                          <span className="text-xs text-muted-foreground font-medium">
+                          <span className="text-xs text-muted-foreground font-medium tabular-nums">
                             {formatLastMessageTime(chat.last_message_at)}
                           </span>
                           {(chat.unread_count ?? 0) > 0 && (
-                            <Badge className="bg-primary text-primary-foreground text-xs px-2 py-0.5 min-w-[20px] h-5 rounded-full flex items-center justify-center">
+                            <Badge className="bg-primary text-primary-foreground text-xs px-2 py-0.5 min-w-[20px] h-5 rounded-full flex items-center justify-center font-semibold shadow-sm">
                               {chat.unread_count > 99 ? '99+' : chat.unread_count}
                             </Badge>
                           )}
                         </div>
                       </div>
                       
-                      {/* Job title */}
+                      {/* Job title - improved spacing */}
                       {chat.counterparty?.job_title && chat.counterparty.job_title !== '0' && (
-                        <p className={`text-sm truncate mb-3 ${hasUnread ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>
+                        <p className={`text-sm truncate mb-2 ${hasUnread ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>
                           {chat.counterparty.job_title}
                         </p>
                       )}
                       
-                      {/* Message count */}
+                      {/* Message count - improved styling */}
                       {Number(chat.message_count) > 0 && (
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground/80 font-medium">
                           {Number(chat.message_count)} message{Number(chat.message_count) !== 1 ? 's' : ''}
                       </p>
                       )}

@@ -729,29 +729,29 @@ const Chat = () => {
 
   return (
     <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
-      {/* Header - Final refined design pass */}
+      {/* Header - Refined and polished desktop layout */}
       <header
         ref={headerRef}
-        className="flex-shrink-0 bg-white/95 backdrop-blur border-b border-slate-200 shadow-[0_6px_16px_rgba(15,23,42,0.04)] z-20"
+        className="flex-shrink-0 bg-background border-b border-border z-20"
       >
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3 gap-3">
+        <div className="flex items-center justify-between px-4 lg:px-6 py-4 gap-4">
           {/* Left side - Back button */}
           <div className="flex items-center flex-shrink-0">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => navigate(-1)}
-              className="hover:bg-muted -ml-2 min-h-[44px] min-w-[44px]"
+              className="hover:bg-muted/80 transition-colors -ml-2 min-h-[44px] min-w-[44px] rounded-lg"
               aria-label="Go back"
             >
-              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+              <ArrowLeft className="w-5 h-5 text-muted-foreground" />
             </Button>
           </div>
 
-          {/* Center - Profile Capsule (only clickable for customers) */}
-          <div className="flex-1 flex flex-col items-center justify-center px-2 sm:px-4 overflow-hidden">
+          {/* Center - Tradesperson Info Section with better visual grouping */}
+          <div className="flex-1 flex flex-col items-center justify-center px-3 overflow-hidden">
             {isCounterpartyLoading ? (
-              <div className="flex items-center justify-center w-full py-4">
+              <div className="flex items-center justify-center w-full py-3">
                 <span className="sr-only">Loading contact details</span>
                 <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" aria-hidden="true" />
               </div>
@@ -760,140 +760,149 @@ const Chat = () => {
                 <button
                   onClick={(e) => {
                     // Premium micro-interaction
-                    e.currentTarget.style.transform = 'scale(1.02)';
-                    e.currentTarget.style.opacity = '0.85';
+                    e.currentTarget.style.transform = 'scale(0.98)';
                     setTimeout(() => {
+                      e.currentTarget.style.transform = 'scale(1)';
                       // Use the stored traderId if available, fallback to counterparty.id
                       const profileId = traderId || counterparty.id;
                       console.log('Navigating to profile with ID:', profileId);
                       navigate(`/tradesperson/profile?nameId=${profileId}`);
-                    }, 170);
+                    }, 150);
                   }}
-                  className="flex items-center gap-2 sm:gap-3 group hover:bg-[#F0F7FF] rounded-lg px-2 sm:px-4 py-2 transition-all duration-200 ease-in-out cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 min-h-[44px] max-w-full"
+                  className="flex flex-col items-center gap-3 group hover:bg-accent/50 rounded-xl px-4 py-3 transition-all duration-200 ease-out cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2 min-h-[44px] w-full max-w-md shadow-sm border border-transparent hover:border-border hover:shadow-md"
                   aria-label="View tradesperson profile"
-                  title="Click to view tradesperson's profile"
+                  title="Click to view tradesperson's full profile"
                 >
-                  {/* Avatar - 32px circle with light gray border */}
-                  {counterparty.avatar_url ? (
-                    <img
-                      src={counterparty.avatar_url}
-                      alt={counterparty.name}
-                      className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border-2 border-[#E5E7EB] flex-shrink-0"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center border-2 border-[#E5E7EB] flex-shrink-0">
-                      <User className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600" />
-                    </div>
-                  )}
-
-                  {/* Name, Profession, and Contact */}
-                  <div className="flex flex-col items-center sm:items-start text-center sm:text-left min-w-0 gap-1.5">
-                    <div className="flex items-center gap-1.5 sm:gap-2">
-                      <h1 className="text-[15px] sm:text-base font-semibold text-slate-900 tracking-tight truncate">
-                        {counterparty.name}
-                      </h1>
-                      <svg
-                        className="w-3.5 h-3.5 text-blue-500 flex-shrink-0"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
-
-                    {counterparty.job_title && (
-                      <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-600/85 truncate max-w-[220px] sm:max-w-[260px]">
-                        {counterparty.job_title}
-                      </span>
+                  {/* Avatar and Name Row */}
+                  <div className="flex items-center gap-3 w-full justify-center">
+                    {/* Avatar - slightly larger for better prominence */}
+                    {counterparty.avatar_url ? (
+                      <img
+                        src={counterparty.avatar_url}
+                        alt={counterparty.name}
+                        className="w-11 h-11 rounded-full object-cover border-2 border-border shadow-sm flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-11 h-11 rounded-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center border-2 border-border shadow-sm flex-shrink-0">
+                        <User className="w-5 h-5 text-muted-foreground" />
+                      </div>
                     )}
 
-                    {resolvedCounterpartyPhone && (
-                      <a
-                        href={resolvedCounterpartyPhoneHref || '#'}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 mt-0.5 rounded-full bg-blue-50 text-blue-700 text-xs sm:text-sm font-semibold shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                        aria-label={`Call ${counterparty.name}`}
-                        onClick={(event) => {
-                          if (!resolvedCounterpartyPhoneHref) {
-                            event.preventDefault();
-                          }
-                        }}
-                      >
-                        <Phone className="h-4 w-4" aria-hidden="true" />
-                        {resolvedCounterpartyPhone}
-                      </a>
-                    )}
-                  </div>
-                </button>
+                    {/* Name and Trade */}
+                    <div className="flex flex-col items-start min-w-0 gap-1">
+                      <div className="flex items-center gap-2">
+                        <h1 className="text-base font-semibold text-foreground tracking-tight truncate">
+                          {counterparty.name}
+                        </h1>
+                        <svg
+                          className="w-4 h-4 text-primary flex-shrink-0 group-hover:translate-x-0.5 transition-transform"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
 
-                {/* Hint text - visible for homeowners */}
-                <p className="text-xs sm:text-sm text-gray-600 italic mt-1 text-center px-2 max-w-[90%] mx-auto leading-relaxed">
-                  💡 You can click the trader's name above to view their profile
-                </p>
-              </>
-            ) : counterparty ? (
-              <div className="flex items-center gap-2 sm:gap-3 px-2 py-2">
-                {/* Non-clickable version for traders */}
-                {counterparty.avatar_url ? (
-                  <img
-                    src={counterparty.avatar_url}
-                    alt={counterparty.name}
-                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border-2 border-[#E5E7EB] flex-shrink-0"
-                  />
-                ) : (
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center border-2 border-[#E5E7EB] flex-shrink-0">
-                    <User className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600" />
+                      {counterparty.job_title && (
+                        <span className="text-xs font-medium uppercase tracking-wider text-primary/80 truncate max-w-[260px]">
+                          {counterparty.job_title}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                )}
-                <div className="flex flex-col items-center sm:items-start text-center sm:text-left gap-1.5 min-w-0">
-                  <h1 className="text-[15px] sm:text-base font-semibold text-slate-900 tracking-tight truncate">
-                    {counterparty.name}
-                  </h1>
-                  {counterparty.job_title && (
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-600/85 truncate max-w-[220px] sm:max-w-[260px]">
-                      {counterparty.job_title}
-                    </span>
-                  )}
+
+                  {/* Phone Number - visually distinct */}
                   {resolvedCounterpartyPhone && (
                     <a
                       href={resolvedCounterpartyPhoneHref || '#'}
-                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 text-xs sm:text-sm font-semibold shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary hover:bg-primary/15 text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                       aria-label={`Call ${counterparty.name}`}
                       onClick={(event) => {
+                        event.stopPropagation(); // Prevent profile navigation
                         if (!resolvedCounterpartyPhoneHref) {
                           event.preventDefault();
                         }
                       }}
                     >
-                      <Phone className="w-4 h-4" aria-hidden="true" />
+                      <Phone className="h-4 w-4" aria-hidden="true" />
                       {resolvedCounterpartyPhone}
                     </a>
                   )}
+                </button>
+
+                {/* Hint text - more subtle and better styled */}
+                <p className="text-xs text-muted-foreground mt-2 text-center px-2 max-w-md leading-relaxed">
+                  💡 Click above to view their full profile
+                </p>
+              </>
+            ) : counterparty ? (
+              <div className="flex flex-col items-center gap-3 px-4 py-3 w-full max-w-md rounded-xl bg-accent/30 border border-border shadow-sm">
+                {/* Non-clickable version for traders */}
+                <div className="flex items-center gap-3 w-full justify-center">
+                  {counterparty.avatar_url ? (
+                    <img
+                      src={counterparty.avatar_url}
+                      alt={counterparty.name}
+                      className="w-11 h-11 rounded-full object-cover border-2 border-border shadow-sm flex-shrink-0"
+                    />
+                  ) : (
+                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center border-2 border-border shadow-sm flex-shrink-0">
+                      <User className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                  )}
+                  <div className="flex flex-col items-start gap-1 min-w-0">
+                    <h1 className="text-base font-semibold text-foreground tracking-tight truncate">
+                      {counterparty.name}
+                    </h1>
+                    {counterparty.job_title && (
+                      <span className="text-xs font-medium uppercase tracking-wider text-primary/80 truncate max-w-[260px]">
+                        {counterparty.job_title}
+                      </span>
+                    )}
+                  </div>
                 </div>
+                {resolvedCounterpartyPhone && (
+                  <a
+                    href={resolvedCounterpartyPhoneHref || '#'}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary hover:bg-primary/15 text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                    aria-label={`Call ${counterparty.name}`}
+                    onClick={(event) => {
+                      if (!resolvedCounterpartyPhoneHref) {
+                        event.preventDefault();
+                      }
+                    }}
+                  >
+                    <Phone className="w-4 h-4" aria-hidden="true" />
+                    {resolvedCounterpartyPhone}
+                  </a>
+                )}
               </div>
             ) : (
-              <h1 className="font-semibold text-sm sm:text-base text-foreground truncate py-2">
+              <h1 className="font-semibold text-base text-foreground truncate py-3">
                 {isPaymentFlow ? homeownerName : 'Chat'}
               </h1>
             )}
           </div>
 
-          {/* Right side - Mobile Conversations Button */}
-          <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Right side - Conversations button (mobile only) */}
+          <div className="flex items-center gap-2 flex-shrink-0 sm:hidden">
             <Button
               variant="default"
               size="sm"
               onClick={() => setSidebarOpen(true)}
-              className="sm:hidden flex-shrink-0 min-h-[48px] min-w-[48px] px-4 text-sm font-semibold shadow-sm"
+              className="min-h-[44px] px-4 text-sm font-semibold shadow-sm rounded-lg"
               aria-label="Open conversations"
             >
-              <MessageCircle className="w-5 h-5 mr-1.5" />
+              <MessageCircle className="w-4 h-4 mr-2" />
               Chats
             </Button>
           </div>
         </div>
-
       </header>
+
+      {/* Subtle divider/shadow after header */}
+      <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent shadow-sm"></div>
 
       {/* Job Info Header - Shows job context when a chat is selected and has messages or is payment flow */}
       {conversationId && !isLoadingMessages && messages.length > 0 && (conversation || counterparty) && (jobTitle || counterparty?.job_title || jobBudget || jobUrgency || jobCategory) && (

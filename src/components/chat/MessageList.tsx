@@ -50,7 +50,7 @@ const MessageList: React.FC<MessageListProps> = ({
   }
 
   return (
-    <div className="space-y-3 px-1">
+    <div className="space-y-4 px-2 py-2">
       {messages.map((message, index) => {
         const senderInfo = getSenderInfo(message.senderId);
         const senderInitials = senderInfo.name 
@@ -63,7 +63,7 @@ const MessageList: React.FC<MessageListProps> = ({
         return (
           <div
             key={message.id}
-            className={`flex gap-3 ${senderInfo.isMe ? 'flex-row-reverse' : 'flex-row'} ${isLastInGroup ? 'mb-4' : 'mb-2'}`}
+            className={`flex gap-3.5 ${senderInfo.isMe ? 'flex-row-reverse' : 'flex-row'} ${isLastInGroup ? 'mb-5' : 'mb-2'}`}
           >
             {!senderInfo.isMe && (
               <div className="w-7 flex-shrink-0">
@@ -93,10 +93,10 @@ const MessageList: React.FC<MessageListProps> = ({
               )}
               
               <div
-                className={`rounded-2xl px-4 py-3 max-w-full break-words shadow-sm ${
+                className={`rounded-2xl px-4 py-3 max-w-full break-words ${
                   senderInfo.isMe
                     ? 'bg-primary text-primary-foreground shadow-md'
-                    : 'bg-white text-slate-900 border border-slate-200'
+                    : 'bg-background text-foreground border border-border shadow-sm'
                 } ${message.pending ? 'opacity-70' : ''}`}
               >
                 <p className="text-sm sm:text-base leading-relaxed whitespace-pre-wrap">{message.body}</p>
@@ -110,7 +110,7 @@ const MessageList: React.FC<MessageListProps> = ({
               
               {/* Timestamp for my messages */}
               {senderInfo.isMe && showAvatar && (
-                <span className="text-xs text-muted-foreground mt-1">
+                <span className="text-xs text-muted-foreground/80 mt-1.5 font-medium tabular-nums">
                   {formatTime(message.createdAt)}
                 </span>
               )}
