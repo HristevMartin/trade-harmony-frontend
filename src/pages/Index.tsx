@@ -29,7 +29,8 @@ import {
   MessageSquare,
   ChevronDown,
   AlertCircle,
-  ArrowUp
+  ArrowUp,
+  Layers
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -111,6 +112,7 @@ const Index = () => {
     { name: "Heating & Cooling", icon: <Thermometer className="h-8 w-8" />, color: "text-red-500", slug: "heating-cooling" },
     { name: "Mechanical Repairs", icon: <Wrench className="h-8 w-8" />, color: "text-gray-600", slug: "mechanical-repairs" },
     { name: "Cleaning", icon: <Sparkle className="h-8 w-8" />, color: "text-blue-500", slug: "cleaning" },
+  { name: "Bricklaying", icon: <Layers className="h-8 w-8" />, color: "text-amber-600", slug: "bricklaying" },
     { name: "Removals", icon: <Truck className="h-8 w-8" />, color: "text-orange-500", slug: "removals" },
     { name: "Handyman", icon: <Settings className="h-8 w-8" />, color: "text-indigo-500", slug: "handyman" },
   ];
