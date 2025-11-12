@@ -46,9 +46,18 @@ const initialProDraft: ProDraft = {
 };
 
 const serviceOptions = [
-  'Plumbing', 'Electrical', 'Carpentry', 'Roofing', 'Painting & Decorating',
-  'Gardening & Landscaping', 'Heating & Cooling', 'Flooring', 'Building & Construction',
-  'Kitchen & Bathroom', 'Cleaning', 'Handyman Services'
+  'Plumbing',
+  'Electrical',
+  'Carpentry',
+  'Roofing',
+  'Painting',
+  'Gardening',
+  'Heating & Cooling',
+  'Mechanical Repairs',
+  'Cleaning',
+  'Bricklaying',
+  'Removals',
+  'Handyman'
 ];
 
 const radiusOptions = [
@@ -455,10 +464,8 @@ const TradesPersonOnboarding = () => {
 
     console.log('Saving tradesperson data after authentication...');
 
-    // Check authentication status with detailed logging
     const authUser = localStorage.getItem('auth_user');
 
-    // Validate required fields before submission
     const requiredFields = ['name', 'primaryTrade', 'city', 'postcode'];
     const missingFields = requiredFields.filter(field => !formData[field as keyof ProDraft]);
 
@@ -780,7 +787,6 @@ const TradesPersonOnboarding = () => {
     // Clear any previous errors
     setErrors(prev => ({ ...prev, general: '' }));
 
-    // Check user role first (for authenticated users)
     const roleCheck = checkUserRole();
     if (!roleCheck.isValid) {
       setErrors(prev => ({ ...prev, general: roleCheck.message }));
