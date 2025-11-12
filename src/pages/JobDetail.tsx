@@ -727,10 +727,10 @@ const JobDetail = () => {
                                     Job Open — Accepting Inquiries
                                 </Badge>
                                 {/* Interest Count Badge - Visible to all traders */}
-                                <Badge className="bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-2 text-sm px-3 py-1.5 rounded-full font-semibold">
+                                {/* <Badge className="bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-2 text-sm px-3 py-1.5 rounded-full font-semibold">
                                     <HiUserCircle className="w-4 h-4" />
                                     {jobApplicants} {jobApplicants === 1 ? 'Interested' : 'Interested'}
-                                </Badge>
+                                </Badge> */}
                             </div>
                         )}
 

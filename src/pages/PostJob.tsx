@@ -43,7 +43,7 @@ const PostJob = () => {
     
     // Service categories array
     const serviceCategories = [
-        'Plumbing', 'Electrical', 'Carpentry', 'Roofing', 'Painting', 
+        'Plumbing', 'Electrical', 'Bricklaying', 'Carpentry', 'Roofing', 'Painting', 
         'Gardening', 'Heating & Cooling', 'Flooring', 'Cleaning', 'Removals', 'Handyman', 'Mechanic'
     ];
     
@@ -67,6 +67,7 @@ const PostJob = () => {
         const categoryTitles: Record<string, string> = {
             'plumbing': 'Plumbing repair needed',
             'electrical': 'Electrical work required',
+            'bricklaying': 'Bricklaying work needed',
             'carpentry': 'Carpentry work needed',
             'roofing': 'Roofing repair required',
             'painting': 'Painting work needed',
