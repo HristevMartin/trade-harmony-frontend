@@ -1237,8 +1237,8 @@ const TradesPersonJobs = () => {
                 } ${loadingPaymentStatuses ? 'opacity-70 cursor-wait' : ''}`}
                 title={loadingPaymentStatuses ? 'Checking payment status...' : 'Show only jobs you\'ve paid for'}
               >
-                <PoundSterling className="h-4 w-4" />
-                <span className="text-sm">My Current Jobs</span>
+                {/* <PoundSterling className="h-4 w-4" /> */}
+                <span className="text-sm">Active Jobs</span>
                 <Badge 
                   variant="secondary" 
                   className={`text-xs px-2 py-0.5 h-5 ml-1 font-semibold ${
@@ -1983,9 +1983,9 @@ const TradesPersonJobs = () => {
                   {/* Mobile My Paid Jobs Filter */}
                   <div className="mb-6">
                     <h4 className="text-sm font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                      <div className="p-1.5 bg-emerald-100 rounded-full">
+                      {/* <div className="p-1.5 bg-emerald-100 rounded-full">
                         <PoundSterling className="h-3.5 w-3.5 text-emerald-600" />
-                      </div>
+                      </div> */}
                       My Current Jobs
                       {loadingPaymentStatuses && (
                         <RefreshCw className="h-3.5 w-3.5 text-emerald-600 animate-spin ml-1" />
@@ -2002,11 +2002,11 @@ const TradesPersonJobs = () => {
                       } ${loadingPaymentStatuses ? 'opacity-60 cursor-wait' : ''}`}
                     >
                       <div className="flex items-center gap-3">
-                        <PoundSterling className="h-5 w-5" />
+                        {/* <PoundSterling className="h-5 w-5" /> */}
                         <div className="text-left">
-                          <div className="text-sm font-semibold">Show My Paid Jobs Only</div>
+                          {/* <div className="text-sm font-semibold">My Current Jobs</div> */}
                           <div className={`text-xs mt-0.5 ${filters.showPaidOnly ? 'text-emerald-100' : 'text-slate-500'}`}>
-                            {loadingPaymentStatuses ? 'Checking payment status...' : filters.showPaidOnly ? 'Showing jobs you have paid for' : 'Show all available jobs'}
+                            {loadingPaymentStatuses ? 'Loading jobs...' : filters.showPaidOnly ? 'Showing jobs you have paid for' : 'Active Jobs'}
                           </div>
                         </div>
                       </div>
