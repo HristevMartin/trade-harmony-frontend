@@ -781,12 +781,7 @@ const TradesPersonJobs = () => {
               animate={{ opacity: 1, y: 0 }}
               className="text-center mb-8"
             >
-              <div className="mb-6">
-                <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
-                  Available Jobs
-                </h1>
-                <p className="text-lg text-slate-600">Your next opportunity is waiting nearby</p>
-              </div>
+            
 
               {/* Stats */}
               <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto">
@@ -1243,7 +1238,7 @@ const TradesPersonJobs = () => {
                 title={loadingPaymentStatuses ? 'Checking payment status...' : 'Show only jobs you\'ve paid for'}
               >
                 <PoundSterling className="h-4 w-4" />
-                <span className="text-sm">My Paid Jobs</span>
+                <span className="text-sm">My Current Jobs</span>
                 <Badge 
                   variant="secondary" 
                   className={`text-xs px-2 py-0.5 h-5 ml-1 font-semibold ${
@@ -1748,13 +1743,7 @@ const TradesPersonJobs = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-12 sm:block hidden"
           >
-            <div className="relative bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 rounded-3xl p-8 mb-8 border border-border/5">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-3xl blur-3xl scale-110 -z-10"></div>
-              <div className="relative">
-
-                <h3 className="text-xl text-muted-foreground max-w-2xl mx-auto">Your next opportunity is waiting nearby</h3>
-              </div>
-            </div>
+           
 
             {/* Enhanced Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
@@ -1997,7 +1986,7 @@ const TradesPersonJobs = () => {
                       <div className="p-1.5 bg-emerald-100 rounded-full">
                         <PoundSterling className="h-3.5 w-3.5 text-emerald-600" />
                       </div>
-                      My Paid Jobs
+                      My Current Jobs
                       {loadingPaymentStatuses && (
                         <RefreshCw className="h-3.5 w-3.5 text-emerald-600 animate-spin ml-1" />
                       )}

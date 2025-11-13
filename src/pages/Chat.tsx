@@ -21,7 +21,6 @@ const Chat = () => {
   // Payment flow parameters
   const jobId = searchParams.get('job_id');
   const homeownerName = searchParams.get('homeowner_name');
-  const traderName = searchParams.get('trader_name');
   const jobTitle = searchParams.get('job_title');
   const jobBudget = searchParams.get('budget');
   const jobUrgency = searchParams.get('urgency');
@@ -59,6 +58,7 @@ const Chat = () => {
   const [counterparty, setCounterparty] = useState<Counterparty | null>(null);
   const [isCounterpartyLoading, setIsCounterpartyLoading] = useState(true);
   const [traderId, setTraderId] = useState<string | null>(null);
+  const [traderProfileSlug, setTraderProfileSlug] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { chats, fetchChats } = useChats();
 
@@ -193,22 +193,17 @@ const Chat = () => {
   // Find current chat from the chats list to get counterparty info
   const currentChat = chats.find(chat => chat.conversation_id === conversationId);
 
-  // Extract trader ID from chat data when available
   useEffect(() => {
     if (currentChat && isCustomer) {
-      // For homeowners, we need to find the trader_id from the chat summary API
-      // The counterparty.id should be the trader's ID when viewing from homeowner perspective
       if (currentChat.counterparty?.id) {
-        console.log('Setting trader ID from current chat:', currentChat.counterparty.id);
         setTraderId(currentChat.counterparty.id);
       }
     }
   }, [currentChat, isCustomer]);
 
-  // Fetch trader ID from chat-summary API when we have a conversation
   useEffect(() => {
     const fetchTraderId = async () => {
-      if (!conversationId || !isCustomer || traderId) return; // Don't fetch if we already have it
+      if (!conversationId || !isCustomer || traderId) return; 
 
       try {
         const apiUrl = import.meta.env.VITE_API_URL;
@@ -245,7 +240,91 @@ const Chat = () => {
   const updateCounterparty = useCallback((value: Counterparty | null) => {
     setCounterparty(value);
     setIsCounterpartyLoading(!value);
+    if (!value) {
+      setTraderProfileSlug(null);
+    }
   }, []);
+
+  // Automatically derive or fetch a profile slug for navigation when viewing as a homeowner
+  useEffect(() => {
+    if (!isCustomer || !counterparty) {
+      return;
+    }
+
+    // Prefer values embedded in the counterparty payload
+    const embeddedSlugCandidates: Array<unknown> = [
+      (counterparty as Record<string, unknown> | null)?.profileNameId,
+      (counterparty as Record<string, unknown> | null)?.profile_name_id,
+      (counterparty as Record<string, unknown> | null)?.nameId,
+      (counterparty as Record<string, unknown> | null)?.name_id,
+      (counterparty as Record<string, unknown> | null)?.profileSlug,
+      (counterparty as Record<string, unknown> | null)?.profile_slug,
+      (counterparty as Record<string, unknown> | null)?.slug
+    ];
+
+    const embeddedSlug = embeddedSlugCandidates.find(
+      value => typeof value === 'string' && value.trim().length > 0
+    ) as string | undefined;
+
+    if (embeddedSlug) {
+      setTraderProfileSlug(embeddedSlug.trim());
+      return;
+    }
+
+    if (!counterparty.id || String(counterparty.id).startsWith('homeowner_')) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const fetchProfileSlug = async () => {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const response = await fetch(`${apiUrl}/travel/get-trader-project/${counterparty.id}`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          signal: controller.signal
+        });
+
+        if (!response.ok) {
+          console.warn('Failed to fetch trader profile details for slug resolution', response.status);
+          return;
+        }
+
+        const data = await response.json();
+        const slugCandidates: Array<unknown> = [
+          data?.project?.nameId,
+          data?.project?.profileNameId,
+          data?.project?.profileSlug,
+          data?.project?.slug,
+          data?.project?.name_id,
+          data?.trader?.nameId,
+          data?.trader?.profileNameId,
+          data?.trader?.profileSlug,
+          data?.trader?.slug
+        ];
+
+        const slug = slugCandidates.find(
+          value => typeof value === 'string' && value.trim().length > 0
+        ) as string | undefined;
+
+        if (slug) {
+          setTraderProfileSlug(slug.trim());
+        }
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') {
+          console.error('Error resolving trader profile slug:', error);
+        }
+      }
+    };
+
+    fetchProfileSlug();
+
+    return () => controller.abort();
+  }, [isCustomer, counterparty]);
 
   // Handle payment flow - create counterparty from URL parameters
   useEffect(() => {
@@ -254,7 +333,8 @@ const Chat = () => {
       const paymentFlowCounterparty: Counterparty = {
         id: 'homeowner_' + jobId, // Generate a temporary ID
         name: homeownerName,
-        job_title: jobTitle || `Job #${jobId}`
+        job_title: jobTitle || `Job #${jobId}`,
+        project_id: jobId
       };
       updateCounterparty(paymentFlowCounterparty);
     }
@@ -619,6 +699,43 @@ const Chat = () => {
     return digitsOnly ? `tel:${digitsOnly}` : '';
   }, [resolvedCounterpartyPhone]);
 
+  const profileIdentifierCandidates = useMemo(() => {
+    const base: Array<unknown> = [
+      traderProfileSlug,
+      traderId,
+      (counterparty as Record<string, unknown> | null)?.profileNameId,
+      (counterparty as Record<string, unknown> | null)?.profile_name_id,
+      (counterparty as Record<string, unknown> | null)?.nameId,
+      (counterparty as Record<string, unknown> | null)?.name_id,
+      (counterparty as Record<string, unknown> | null)?.profileSlug,
+      (counterparty as Record<string, unknown> | null)?.profile_slug,
+      (counterparty as Record<string, unknown> | null)?.slug,
+      (conversation as Record<string, unknown> | null)?.traderProfile &&
+        typeof (conversation as Record<string, unknown> | null)?.traderProfile === 'object'
+        ? ((conversation as Record<string, unknown>).traderProfile as Record<string, unknown>).nameId
+        : undefined,
+      (conversation as Record<string, unknown> | null)?.trader_profile &&
+        typeof (conversation as Record<string, unknown> | null)?.trader_profile === 'object'
+        ? ((conversation as Record<string, unknown>).trader_profile as Record<string, unknown>).nameId
+        : undefined,
+      (conversation as Record<string, unknown> | null)?.trader_name_id,
+      counterparty?.id
+    ];
+
+    return base
+      .map(value => {
+        if (typeof value === 'string') {
+          const trimmed = value.trim();
+          return trimmed.length > 0 ? trimmed : null;
+        }
+        if (typeof value === 'number') {
+          return String(value);
+        }
+        return null;
+      })
+      .filter((value): value is string => Boolean(value));
+  }, [traderProfileSlug, traderId, counterparty, conversation]);
+
   // Create a UserRef-compatible counterparty for legacy components with defensive checks
   const legacyCounterparty = counterparty ? {
     id: counterparty.id || '',
@@ -627,17 +744,6 @@ const Chat = () => {
     role: 'homeowner' as const // Default role since we don't have this in new API
   } : null;
 
-  // Debug logging
-  console.log('Chat Debug:', {
-    conversationId,
-    conversation,
-    counterparty,
-    currentChat,
-    traderId,
-    messagesLength: messages.length,
-    isLoadingMessages,
-    isCustomer
-  });
 
   const handleSendMessage = async (messageText?: string) => {
     const textToSend = messageText || message.trim();
@@ -654,13 +760,6 @@ const Chat = () => {
       action: "send_message"
     };
 
-    console.log('🚀 [SEND MESSAGE] Preparing to send:', {
-      conversationId,
-      senderId: currentUserId,
-      senderRole: isCustomer ? 'HOMEOWNER' : 'TRADER',
-      messagePreview: textToSend.substring(0, 50),
-      timestamp: new Date().toISOString()
-    });
 
     try {
       const apiUrl = import.meta.env.VITE_API_URL;
@@ -727,6 +826,8 @@ const Chat = () => {
     }
   };
 
+  console.log('show me if its the customer', isCustomer);
+
   return (
     <div className="h-[100dvh] bg-background flex flex-col overflow-hidden">
       {/* Header - Refined and polished desktop layout */}
@@ -758,16 +859,8 @@ const Chat = () => {
             ) : counterparty && isCustomer ? (
               <>
                 <button
-                  onClick={(e) => {
-                    // Premium micro-interaction
-                    e.currentTarget.style.transform = 'scale(0.98)';
-                    setTimeout(() => {
-                      e.currentTarget.style.transform = 'scale(1)';
-                      // Use the stored traderId if available, fallback to counterparty.id
-                      const profileId = traderId || counterparty.id;
-                      console.log('Navigating to profile with ID:', profileId);
-                      navigate(`/tradesperson/profile?nameId=${profileId}`);
-                    }, 150);
+                  onClick={() => {
+                    navigate(`/tradesperson/profile?nameId=${encodeURIComponent(counterparty.id)}`);
                   }}
                   className="flex flex-col items-center gap-3 group hover:bg-accent/50 rounded-xl px-4 py-3 transition-all duration-200 ease-out cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2 min-h-[44px] w-full max-w-md shadow-sm border border-transparent hover:border-border hover:shadow-md"
                   aria-label="View tradesperson profile"
@@ -789,13 +882,13 @@ const Chat = () => {
                     )}
 
                     {/* Name and Trade */}
-                    <div className="flex flex-col items-start min-w-0 gap-1">
-                      <div className="flex items-center gap-2">
-                        <h1 className="text-base font-semibold text-foreground tracking-tight truncate">
+                     <div className="flex flex-col items-start min-w-0 gap-1.5">
+                       <div className="flex items-center gap-2">
+                         <h1 className="text-base font-semibold text-slate-900 tracking-tight truncate">
                           {counterparty.name}
                         </h1>
                         <svg
-                          className="w-4 h-4 text-primary flex-shrink-0 group-hover:translate-x-0.5 transition-transform"
+                           className="w-4 h-4 text-blue-500 flex-shrink-0 group-hover:translate-x-0.5 transition-transform"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -805,7 +898,7 @@ const Chat = () => {
                       </div>
 
                       {counterparty.job_title && (
-                        <span className="text-xs font-medium uppercase tracking-wider text-primary/80 truncate max-w-[260px]">
+                         <span className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-600 truncate max-w-[260px]">
                           {counterparty.job_title}
                         </span>
                       )}
@@ -814,20 +907,10 @@ const Chat = () => {
 
                   {/* Phone Number - visually distinct */}
                   {resolvedCounterpartyPhone && (
-                    <a
-                      href={resolvedCounterpartyPhoneHref || '#'}
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary hover:bg-primary/15 text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                      aria-label={`Call ${counterparty.name}`}
-                      onClick={(event) => {
-                        event.stopPropagation(); // Prevent profile navigation
-                        if (!resolvedCounterpartyPhoneHref) {
-                          event.preventDefault();
-                        }
-                      }}
-                    >
-                      <Phone className="h-4 w-4" aria-hidden="true" />
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-slate-900 text-sm font-semibold shadow-sm">
+                      <Phone className="h-4 w-4 text-slate-900" aria-hidden="true" />
                       {resolvedCounterpartyPhone}
-                    </a>
+                    </div>
                   )}
                 </button>
 
@@ -837,45 +920,44 @@ const Chat = () => {
                 </p>
               </>
             ) : counterparty ? (
-              <div className="flex flex-col items-center gap-3 px-4 py-3 w-full max-w-md rounded-xl bg-accent/30 border border-border shadow-sm">
+                <div 
+                 className="flex flex-col items-center gap-3 px-4 py-3 w-full max-w-md rounded-xl"
+               
+                >
                 {/* Non-clickable version for traders */}
-                <div className="flex items-center gap-3 w-full justify-center">
+                 <div 
+                 style={{ cursor: 'pointer' }} className="flex items-center gap-3 w-full justify-center"
+                 onClick={() => {
+                  navigate(`/jobs/${counterparty?.project_id}`)
+                }}
+                 >
                   {counterparty.avatar_url ? (
                     <img
                       src={counterparty.avatar_url}
                       alt={counterparty.name}
-                      className="w-11 h-11 rounded-full object-cover border-2 border-border shadow-sm flex-shrink-0"
+                      className="w-11 h-11 rounded-full object-cover border-2 border-border/60 shadow-sm flex-shrink-0"
                     />
                   ) : (
-                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center border-2 border-border shadow-sm flex-shrink-0">
+                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center border-2 border-border/60 shadow-sm flex-shrink-0">
                       <User className="w-5 h-5 text-muted-foreground" />
                     </div>
                   )}
-                  <div className="flex flex-col items-start gap-1 min-w-0">
-                    <h1 className="text-base font-semibold text-foreground tracking-tight truncate">
+                   <div className="flex flex-col items-start gap-1.5 min-w-0">
+                     <h1 className="text-base font-semibold text-slate-900 tracking-tight truncate">
                       {counterparty.name}
                     </h1>
                     {counterparty.job_title && (
-                      <span className="text-xs font-medium uppercase tracking-wider text-primary/80 truncate max-w-[260px]">
+                       <span className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-600 truncate max-w-[260px]">
                         {counterparty.job_title}
                       </span>
                     )}
                   </div>
                 </div>
                 {resolvedCounterpartyPhone && (
-                  <a
-                    href={resolvedCounterpartyPhoneHref || '#'}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary hover:bg-primary/15 text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                    aria-label={`Call ${counterparty.name}`}
-                    onClick={(event) => {
-                      if (!resolvedCounterpartyPhoneHref) {
-                        event.preventDefault();
-                      }
-                    }}
-                  >
-                    <Phone className="w-4 h-4" aria-hidden="true" />
+                  <span className="inline-flex items-center gap-2 text-sm font-semibold text-slate-900">
+                    <Phone className="w-4 h-4 text-slate-900" aria-hidden="true" />
                     {resolvedCounterpartyPhone}
-                  </a>
+                  </span>
                 )}
               </div>
             ) : (

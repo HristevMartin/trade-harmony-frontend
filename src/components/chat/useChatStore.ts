@@ -9,7 +9,8 @@ export type Counterparty = {
   phone?: string | number;
   phone_number?: string | number;
   contact_number?: string | number;
-  lastActiveAt?: string; // ISO timestamp of last activity
+  lastActiveAt?: string;  
+  project_id?: string;
 };
 
 export type ChatItem = {
@@ -173,7 +174,6 @@ class ChatStore {
       canViewEmail: false
     };
 
-    console.log('Creating new conversation:', newConversation);
     this.conversations.set(params.conversationId, newConversation);
     this.messages.set(params.conversationId, []);
     this.notifySubscribers();
