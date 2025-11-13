@@ -721,9 +721,31 @@ const TradesPersonProfile = () => {
                                 <h1 className="text-2xl font-bold text-foreground truncate mb-1">
                                     {traderProfile.name}
                                 </h1>
-                                <Badge variant="default" className="bg-gradient-to-r from-trust-blue to-trust-blue/90 text-white border-0 px-3 py-1.5 text-sm font-semibold shadow-md">
-                                    {traderProfile.primaryTrade} Specialist
-                                </Badge>
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <Badge variant="default" className="bg-gradient-to-r from-trust-blue to-trust-blue/90 text-white border-0 px-3 py-1.5 text-sm font-semibold shadow-md">
+                                        {traderProfile.primaryTrade} Specialist
+                                    </Badge>
+                                    <Badge
+                                        variant={isVerified ? "default" : "secondary"}
+                                        className={`px-3 py-1.5 text-xs font-semibold border-0 shadow-md flex items-center gap-1 ${
+                                            isVerified
+                                                ? "bg-gradient-to-r from-trust-green to-trust-green/90 text-white"
+                                                : verificationRequested
+                                                ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white"
+                                                : "bg-gradient-to-r from-amber-500 to-orange-500 text-white"
+                                        }`}
+                                        aria-live="polite"
+                                    >
+                                        <CheckCircle className="h-3.5 w-3.5" />
+                                        {checkingVerification
+                                            ? "Checking..."
+                                            : isVerified
+                                            ? "Verified"
+                                            : verificationRequested
+                                            ? "Pending Review"
+                                            : "Unverified"}
+                                    </Badge>
+                                </div>
                             </div>
                         </div>
 
@@ -834,7 +856,7 @@ const TradesPersonProfile = () => {
                                             {checkingVerification 
                                                 ? "Checking..." 
                                                 : isVerified 
-                                                ? "Verified Pro" 
+                                                ? "Verified" 
                                                 : verificationRequested 
                                                 ? "Pending Review" 
                                                 : "Unverified"}
