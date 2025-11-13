@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MobileHeader from '@/components/MobileHeader';
 import { Card, CardContent } from '@/components/ui/card';
@@ -66,6 +66,7 @@ const TradesPersonJobs = () => {
     urgency?: string;
     radius?: number;
     showPaidOnly?: boolean;
+    showNewOnly?: boolean;
   }>({ categories: [], locations: [] });
   const [sortBy, setSortBy] = useState<'budget_high' | 'budget_low'>('budget_high');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -448,6 +449,22 @@ const TradesPersonJobs = () => {
     return urgencyMap[urgency] || urgency;
   };
 
+  // Check if job was created within the last 72 hours (moved before useMemo)
+  const isNewJob = useCallback((dateString: string | undefined | null) => {
+    if (!dateString) return false;
+    try {
+      const date = new Date(dateString);
+      // Check if date is valid
+      if (isNaN(date.getTime())) return false;
+      const now = new Date();
+      const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+      return diffInHours <= 72 && diffInHours >= 0;
+    } catch (error) {
+      console.error('Error checking if job is new:', error);
+      return false;
+    }
+  }, []);
+
   // Filter and sort jobs
   const allFilteredJobs = useMemo(() => {
     let filtered = jobs.filter(job => {
@@ -470,6 +487,11 @@ const TradesPersonJobs = () => {
         if (!paymentStatus || paymentStatus === 'not found' || !PAID_STATUSES.includes(paymentStatus.toLowerCase())) {
           return false;
         }
+      }
+      
+      // Filter by new jobs (posted in past 72 hours) if enabled
+      if (filters.showNewOnly && !isNewJob(job.created_at)) {
+        return false;
       }
       
       return true;
@@ -529,7 +551,7 @@ const TradesPersonJobs = () => {
     });
 
     return filtered;
-  }, [jobs, filters, sortBy]);
+  }, [jobs, filters, sortBy, paymentStatuses, isNewJob]);
 
   // Get currently displayed jobs based on pagination
   const visibleJobs = useMemo(() => {
@@ -691,14 +713,6 @@ const TradesPersonJobs = () => {
     if (diffInHours < 24) return `${diffInHours}h ago`;
     if (diffInHours < 48) return '1d ago';
     return `${Math.floor(diffInHours / 24)}d ago`;
-  };
-
-  // Check if job was created within the last 72 hours
-  const isNewJob = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    return diffInHours <= 72;
   };
 
   const handleRetry = () => {
@@ -1255,6 +1269,31 @@ const TradesPersonJobs = () => {
                 </Badge>
               </button>
 
+              {/* New Jobs Filter */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setFilters(prev => ({ ...prev, showNewOnly: !prev.showNewOnly }))}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all duration-200 ${
+                      filters.showNewOnly
+                        ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white border-emerald-500 shadow-md hover:from-emerald-600 hover:to-green-600 hover:shadow-lg' 
+                        : 'bg-white hover:bg-gray-50 border-gray-200 hover:border-gray-300 shadow-sm'
+                    }`}
+                  >
+                    <Zap className="h-4 w-4" />
+                    <span className="text-sm">NEW</span>
+                    {filters.showNewOnly && (
+                      <Badge variant="secondary" className="bg-white/20 text-white text-xs px-2 py-0.5 h-5 ml-1 font-semibold">
+                        {jobs.filter(job => isNewJob(job.created_at) && !(job.status && job.status.toLowerCase() === 'completed')).length}
+                      </Badge>
+                    )}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-xs">
+                  <p className="text-sm">Show only jobs posted in the past day or two</p>
+                </TooltipContent>
+              </Tooltip>
+
               {/* Urgency Filter Chips */}
               {filterOptions.urgencies.map((urgency) => {
                 const getUrgencyIcon = (urgencyLabel: string) => {
@@ -1348,12 +1387,12 @@ const TradesPersonJobs = () => {
               </div>
 
               {/* Clear All Button */}
-              {(filters.categories.length > 0 || filters.locations.length > 0 || filters.urgency || (filters.radius && filters.radius !== 25) || filters.showPaidOnly) && (
+              {(filters.categories.length > 0 || filters.locations.length > 0 || filters.urgency || (filters.radius && filters.radius !== 25) || filters.showPaidOnly || filters.showNewOnly) && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    setFilters({ categories: [], locations: [], radius: 25, showPaidOnly: false });
+                    setFilters({ categories: [], locations: [], radius: 25, showPaidOnly: false, showNewOnly: false });
                   }}
                   className="text-destructive border-destructive/20 hover:bg-destructive/10"
                 >
@@ -1447,6 +1486,19 @@ const TradesPersonJobs = () => {
                   );
                 })}
 
+                {/* New Jobs Filter Chip */}
+                <button
+                  onClick={() => setFilters(prev => ({ ...prev, showNewOnly: !prev.showNewOnly }))}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
+                    filters.showNewOnly
+                      ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white border-emerald-500'
+                      : 'bg-background hover:bg-muted border-border'
+                  }`}
+                  title="Show only jobs posted in the past day or two"
+                >
+                  <Zap className="h-4 w-4" />
+                  NEW
+                </button>
 
                 {/* Advanced Filters Chip */}
                 <button
@@ -1455,18 +1507,18 @@ const TradesPersonJobs = () => {
                 >
                   <Filter className="h-4 w-4" />
                   Filters
-                  {(filters.categories.length + filters.locations.length + (filters.urgency ? 1 : 0) + (filters.radius && filters.radius !== 25 ? 1 : 0) + (filters.showPaidOnly ? 1 : 0)) > 0 && (
+                  {(filters.categories.length + filters.locations.length + (filters.urgency ? 1 : 0) + (filters.radius && filters.radius !== 25 ? 1 : 0) + (filters.showPaidOnly ? 1 : 0) + (filters.showNewOnly ? 1 : 0)) > 0 && (
                     <Badge variant="default" className="bg-primary text-primary-foreground text-xs px-1.5 py-0.5 h-5">
-                      {filters.categories.length + filters.locations.length + (filters.urgency ? 1 : 0) + (filters.radius && filters.radius !== 25 ? 1 : 0) + (filters.showPaidOnly ? 1 : 0)}
+                      {filters.categories.length + filters.locations.length + (filters.urgency ? 1 : 0) + (filters.radius && filters.radius !== 25 ? 1 : 0) + (filters.showPaidOnly ? 1 : 0) + (filters.showNewOnly ? 1 : 0)}
                     </Badge>
                   )}
                 </button>
 
                 {/* Clear All Action */}
-                {(filters.categories.length > 0 || filters.locations.length > 0 || filters.urgency || (filters.radius && filters.radius !== 25) || filters.showPaidOnly) && (
+                {(filters.categories.length > 0 || filters.locations.length > 0 || filters.urgency || (filters.radius && filters.radius !== 25) || filters.showPaidOnly || filters.showNewOnly) && (
                   <button
                     onClick={() => {
-                      setFilters({ categories: [], locations: [], radius: 25, showPaidOnly: false });
+                      setFilters({ categories: [], locations: [], radius: 25, showPaidOnly: false, showNewOnly: false });
                     }}
                     className="flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/20 transition-all"
                   >
@@ -1560,7 +1612,19 @@ const TradesPersonJobs = () => {
                 );
               })}
 
-
+              {/* New Jobs Filter Chip */}
+              <button
+                onClick={() => setFilters(prev => ({ ...prev, showNewOnly: !prev.showNewOnly }))}
+                className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
+                  filters.showNewOnly
+                    ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white border-emerald-500'
+                    : 'bg-background hover:bg-muted border-border'
+                }`}
+                title="Show only jobs posted in the past day or two"
+              >
+                <Zap className="h-4 w-4" />
+                NEW
+              </button>
 
               {/* Advanced Filters Chip */}
               <button
@@ -1569,18 +1633,18 @@ const TradesPersonJobs = () => {
               >
                 <Filter className="h-4 w-4" />
                 Filters
-                {(filters.categories.length + filters.locations.length + (filters.urgency ? 1 : 0) + (filters.radius && filters.radius !== 25 ? 1 : 0) + (filters.showPaidOnly ? 1 : 0)) > 0 && (
+                {(filters.categories.length + filters.locations.length + (filters.urgency ? 1 : 0) + (filters.radius && filters.radius !== 25 ? 1 : 0) + (filters.showPaidOnly ? 1 : 0) + (filters.showNewOnly ? 1 : 0)) > 0 && (
                   <Badge variant="default" className="bg-primary text-primary-foreground text-xs px-1.5 py-0.5 h-5">
-                    {filters.categories.length + filters.locations.length + (filters.urgency ? 1 : 0) + (filters.radius && filters.radius !== 25 ? 1 : 0) + (filters.showPaidOnly ? 1 : 0)}
+                    {filters.categories.length + filters.locations.length + (filters.urgency ? 1 : 0) + (filters.radius && filters.radius !== 25 ? 1 : 0) + (filters.showPaidOnly ? 1 : 0) + (filters.showNewOnly ? 1 : 0)}
                   </Badge>
                 )}
               </button>
 
               {/* Clear All Action */}
-              {(filters.categories.length > 0 || filters.locations.length > 0 || filters.urgency || (filters.radius && filters.radius !== 25) || filters.showPaidOnly) && (
+              {(filters.categories.length > 0 || filters.locations.length > 0 || filters.urgency || (filters.radius && filters.radius !== 25) || filters.showPaidOnly || filters.showNewOnly) && (
                 <button
                   onClick={() => {
-                    setFilters({ categories: [], locations: [], radius: 25, showPaidOnly: false });
+                    setFilters({ categories: [], locations: [], radius: 25, showPaidOnly: false, showNewOnly: false });
                   }}
                   className="flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/20 transition-all"
                 >
@@ -1834,7 +1898,7 @@ const TradesPersonJobs = () => {
                       variant="ghost"
                       size="sm"
                       onClick={() => {
-                        setFilters({ categories: [], locations: [], radius: 25, showPaidOnly: false });
+                        setFilters({ categories: [], locations: [], radius: 25, showPaidOnly: false, showNewOnly: false });
                         setSortBy('budget_high');
                       }}
                       className="text-slate-600 hover:text-slate-900"
@@ -2034,6 +2098,47 @@ const TradesPersonJobs = () => {
                       ) : (
                         'No paid jobs yet'
                       )}
+                    </p>
+                  </div>
+
+                  {/* Mobile New Jobs Filter */}
+                  <div className="mb-6">
+                    <h4 className="text-sm font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                      <div className="p-1.5 bg-emerald-100 rounded-full">
+                        <Zap className="h-3.5 w-3.5 text-emerald-600" />
+                      </div>
+                      New Jobs
+                    </h4>
+                    <motion.button
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setFilters(prev => ({ ...prev, showNewOnly: !prev.showNewOnly }))}
+                      className={`w-full p-4 rounded-xl border-2 font-semibold transition-all duration-150 flex items-center justify-between active:scale-[0.98] ${
+                        filters.showNewOnly
+                          ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white border-emerald-500 shadow-md'
+                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Zap className="h-5 w-5" />
+                        <div className="text-left">
+                          <div className="text-sm font-semibold">NEW</div>
+                          <div className={`text-xs mt-0.5 ${filters.showNewOnly ? 'text-emerald-100' : 'text-slate-500'}`}>
+                            {filters.showNewOnly ? 'Showing jobs posted in past day or two' : 'Show only recently posted jobs'}
+                          </div>
+                        </div>
+                      </div>
+                      {filters.showNewOnly && (
+                        <Badge 
+                          variant="secondary" 
+                          className="text-xs px-3 py-1 font-bold bg-white/20 text-white"
+                        >
+                          {jobs.filter(job => isNewJob(job.created_at) && !(job.status && job.status.toLowerCase() === 'completed')).length}
+                        </Badge>
+                      )}
+                    </motion.button>
+                    <p className="text-xs text-slate-500 mt-2 flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      Jobs posted within the last 72 hours
                     </p>
                   </div>
 
