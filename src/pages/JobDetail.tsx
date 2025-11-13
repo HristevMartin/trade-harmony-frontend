@@ -604,7 +604,7 @@ const JobDetail = () => {
                                     onClick={() => setShowVerificationModal(true)}
                                 >
                                     <HiCheckCircle className="w-4 h-4" />
-                                    Verified Client
+                                    Verified
                                 </Badge>
                             ) : verificationPending ? (
                                 <Badge
@@ -1174,7 +1174,7 @@ const JobDetail = () => {
                                     <div className="w-10 h-10 bg-jobhub-successBg rounded-full flex items-center justify-center">
                                         <HiCheckCircle className="w-6 h-6 text-emerald-600" />
                                     </div>
-                                    <h3 className="text-lg font-semibold text-gray-900">Verified Client</h3>
+                                    <h3 className="text-lg font-semibold text-gray-900">Verified</h3>
                                 </div>
 
                                 <div className="space-y-3 mb-6">
