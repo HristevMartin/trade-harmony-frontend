@@ -130,7 +130,7 @@ const PaidUserBanner: React.FC<PaidUserBannerProps> = ({
               <HiChatBubbleLeftRight className="w-7 h-7 md:w-8 md:h-8 text-white" />
             </div>
             <div className="flex-1">
-              <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-1.5">Contact Homeowner</h3>
+              <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-1.5">Contact Client</h3>
               <p className="text-gray-600 text-sm md:text-base">Get in touch to discuss the project details</p>
             </div>
           </div>
@@ -145,7 +145,7 @@ const PaidUserBanner: React.FC<PaidUserBannerProps> = ({
                 <HiChatBubbleLeftRight className="w-5 h-5 text-blue-700" />
               </div>
               <div className="flex-1 text-left">
-                <p className="text-sm font-semibold text-gray-900">Chat with homeowner</p>
+                <p className="text-sm font-semibold text-gray-900">Chat with client</p>
                 <p className="text-xs text-gray-600">Start discussing the project</p>
               </div>
               <HiArrowTopRightOnSquare className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors" />

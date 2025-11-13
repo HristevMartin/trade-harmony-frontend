@@ -1159,6 +1159,134 @@ const TradesPersonProfile = () => {
                                             </div>
                                         </div>
 
+                                        {/* Years of Experience - Only visible for traders */}
+                                        {isOwnProfile && (
+                                            <div className="flex items-start space-x-4 p-4 bg-gradient-to-r from-accent/5 to-accent/10 rounded-xl">
+                                                <div className="bg-accent/10 p-2 rounded-lg">
+                                                    <Clock className="h-4 w-4 text-gray-800" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <p className="text-sm text-muted-foreground">Years of Experience</p>
+                                                        {editingField !== 'experienceYears' && (
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                onClick={() => {
+                                                                    setEditingField('experienceYears');
+                                                                    setTempData({ experienceYears: traderProfile.experienceYears || '' });
+                                                                }}
+                                                                className="h-6 w-6 p-0 hover:bg-accent/10"
+                                                            >
+                                                                <Edit3 className="h-3 w-3" />
+                                                            </Button>
+                                                        )}
+                                                    </div>
+                                                    {editingField === 'experienceYears' ? (
+                                                        <div className="space-y-2">
+                                                            <Input
+                                                                value={tempData.experienceYears || ''}
+                                                                onChange={(e) => setTempData({ ...tempData, experienceYears: e.target.value })}
+                                                                type="number"
+                                                                placeholder="e.g., 5"
+                                                                min="0"
+                                                                step="1"
+                                                                className="text-sm"
+                                                            />
+                                                            <div className="flex gap-2">
+                                                                <Button
+                                                                    size="sm"
+                                                                    onClick={() => saveProfile('experienceYears', tempData.experienceYears)}
+                                                                    disabled={saving}
+                                                                    className="h-7 px-3"
+                                                                >
+                                                                    <Save className="h-3 w-3 mr-1" />
+                                                                    Save
+                                                                </Button>
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="outline"
+                                                                    onClick={cancelEditing}
+                                                                    className="h-7 px-3"
+                                                                >
+                                                                    <X className="h-3 w-3 mr-1" />
+                                                                    Cancel
+                                                                </Button>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <p className="font-medium text-foreground">
+                                                            {traderProfile.experienceYears ? `${traderProfile.experienceYears} years` : 'Not set'}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Service Radius - Only visible for traders */}
+                                        {isOwnProfile && (
+                                            <div className="flex items-start space-x-4 p-4 bg-gradient-to-r from-accent/5 to-accent/10 rounded-xl">
+                                                <div className="bg-accent/10 p-2 rounded-lg">
+                                                    <MapPin className="h-4 w-4 text-gray-800" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <p className="text-sm text-muted-foreground">Service Radius (km)</p>
+                                                        {editingField !== 'radiusKm' && (
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                onClick={() => {
+                                                                    setEditingField('radiusKm');
+                                                                    setTempData({ radiusKm: traderProfile.radiusKm || '' });
+                                                                }}
+                                                                className="h-6 w-6 p-0 hover:bg-accent/10"
+                                                            >
+                                                                <Edit3 className="h-3 w-3" />
+                                                            </Button>
+                                                        )}
+                                                    </div>
+                                                    {editingField === 'radiusKm' ? (
+                                                        <div className="space-y-2">
+                                                            <Input
+                                                                value={tempData.radiusKm || ''}
+                                                                onChange={(e) => setTempData({ ...tempData, radiusKm: e.target.value })}
+                                                                type="number"
+                                                                placeholder="e.g., 10"
+                                                                min="0"
+                                                                step="1"
+                                                                className="text-sm"
+                                                            />
+                                                            <div className="flex gap-2">
+                                                                <Button
+                                                                    size="sm"
+                                                                    onClick={() => saveProfile('radiusKm', tempData.radiusKm)}
+                                                                    disabled={saving}
+                                                                    className="h-7 px-3"
+                                                                >
+                                                                    <Save className="h-3 w-3 mr-1" />
+                                                                    Save
+                                                                </Button>
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="outline"
+                                                                    onClick={cancelEditing}
+                                                                    className="h-7 px-3"
+                                                                >
+                                                                    <X className="h-3 w-3 mr-1" />
+                                                                    Cancel
+                                                                </Button>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <p className="font-medium text-foreground">
+                                                            {traderProfile.radiusKm ? `${Math.round(Number(traderProfile.radiusKm))} km` : 'Not set'}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
                                         <div className="flex items-start space-x-4 p-4 bg-gradient-to-r from-muted/5 to-muted/10 rounded-xl border border-muted/20">
                                             <div className="bg-muted/10 p-2 rounded-lg">
                                                 <Calendar className="h-4 w-4 text-gray-800" />
