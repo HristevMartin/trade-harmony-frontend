@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MobileHeader from '@/components/MobileHeader';
 import { Card, CardContent } from '@/components/ui/card';
@@ -88,27 +88,21 @@ const TradesPersonJobs = () => {
   const [paymentStatuses, setPaymentStatuses] = useState<Record<string, string>>({});
   const [userId, setUserId] = useState<string>('');
   const [loadingPaymentStatuses, setLoadingPaymentStatuses] = useState(false);
+  const [userSpecialty, setUserSpecialty] = useState<string>('');
+  const specialtyCategoryRef = useRef<string | null>(null);
   const { toast } = useToast();
 
-  // List of statuses that indicate a job has been paid for
-  // Based on JobDetail.tsx implementation - only 'paid' status indicates payment
   const PAID_STATUSES = ['paid'];
 
-  // Helper function to get count of paid jobs (excluding completed jobs)
   const getPaidJobsCount = () => {
-    // Count only jobs that are paid AND not completed (matching the filter logic)
     return jobs.filter(job => {
-      // Exclude completed jobs
       if (job.status && job.status.toLowerCase() === 'completed') return false;
-      
-      // Check if payment status is 'paid'
+
       const paymentStatus = paymentStatuses[job.project_id];
       return paymentStatus && paymentStatus !== 'not found' && PAID_STATUSES.includes(paymentStatus.toLowerCase());
     }).length;
   };
 
-  // Convert km to the nearest supported miles option used by the dropdown
-  // Supported options: 5, 10, 25, 50, 100 miles
   const kmToNearestMilesOption = (km: number) => {
     const miles = Math.round(km * 0.621371);
     const options = [5, 10, 25, 50, 100];
@@ -124,7 +118,6 @@ const TradesPersonJobs = () => {
     return nearest;
   };
 
-  // Close popovers when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
@@ -143,7 +136,6 @@ const TradesPersonJobs = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Load user ID from localStorage - matching JobDetail.tsx implementation
   useEffect(() => {
     const authUser = localStorage.getItem('auth_user');
     if (authUser) {
@@ -211,19 +203,86 @@ const TradesPersonJobs = () => {
     apiRequest();
   }, [userId]);
 
-  // Calculate progressive radius increments based on attempts
+  useEffect(() => {
+    if (!userId) return;
+
+    let isMounted = true;
+
+    const fetchSpecialty = async () => {
+      try {
+        const request = await fetch(`${import.meta.env.VITE_API_URL}/travel/get-trader-roles/${userId}`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!request.ok) {
+          console.log('show me the error', request.status);
+          throw new Error('Network response was not ok');
+        }
+
+        const data = await request.json();
+        console.log('show me the user specialty data', data);
+        if (isMounted && data.success && data.specialty) {
+          setUserSpecialty(data.specialty);
+        }
+      } catch (error) {
+        console.error('Error fetching user specialty:', error);
+      }
+    };
+
+    fetchSpecialty();
+
+    const handleFocus = () => {
+      fetchSpecialty();
+    };
+
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [userId]);
+
+  console.log('in here this is following the user specialty', userSpecialty);
+
+  useEffect(() => {
+    if (!userSpecialty) return;
+
+    let applied = false;
+
+    setFilters(prev => {
+      const userHasCustomCategories =
+        prev.categories.length > 0 &&
+        !(prev.categories.length === 1 && prev.categories[0] === (specialtyCategoryRef.current ?? ''));
+
+      if (userHasCustomCategories) {
+        return prev;
+      }
+
+      applied = true;
+      return { ...prev, categories: [userSpecialty] };
+    });
+
+    if (applied) {
+      specialtyCategoryRef.current = userSpecialty;
+    }
+  }, [userSpecialty]);
+
   const getProgressiveRadiusIncrements = (currentRadius: number, attempts: number) => {
     const baseIncrements = [
       [5, 10, 20],    // First attempt: +5, +10, +20
       [10, 20, 30],   // Second attempt: +10, +20, +30  
       [25, 50, 100]   // Third+ attempt: +25, +50, +100
     ];
-    
+
     const incrementIndex = Math.min(attempts, baseIncrements.length - 1);
     return baseIncrements[incrementIndex];
   };
 
-  // Function to handle radius changes
   const handleRadiusChange = (newRadius: number, fromEmptyState = false) => {
     // Log the radius change with detailed information
     logRadiusChange(newRadius);
@@ -242,7 +301,6 @@ const TradesPersonJobs = () => {
     }
   };
 
-  // Function to log radius changes for analytics/debugging
   const logRadiusChange = (newRadius: number) => {
     const logData = {
       radiusKm: newRadius,
@@ -253,7 +311,7 @@ const TradesPersonJobs = () => {
     const requestApi = async () => {
       try {
         setLoadingPostcode(true);
-        
+
         const request = await fetch(`${import.meta.env.VITE_API_URL}/travel/post-user-radius-km`, {
           method: 'POST',
           headers: {
@@ -284,12 +342,12 @@ const TradesPersonJobs = () => {
 
           if (data.success && data.projects) {
             setJobs(data.projects);
-            
+
             // Reset radius attempts when jobs are found
             if (data.projects.length > 0) {
               setRadiusAttempts(0);
             }
-            
+
             // Handle effective radius from backend if provided
             if (data.filtersApplied?.effectiveRadiusKm && data.filtersApplied?.requestedRadiusKm) {
               setEffectiveRadius(data.filtersApplied.effectiveRadiusKm);
@@ -434,7 +492,6 @@ const TradesPersonJobs = () => {
 
   const extractPriceOnly = (budget: string) => {
     const formatted = formatBudget(budget);
-    // Extract only the price part, removing "Custom" or other non-price text
     const priceMatch = formatted.match(/£[\d,.-]+(?:\s*-\s*£[\d,.-]+)?|Under £[\d,.-]+|Over £[\d,.-]+|Flexible/);
     return priceMatch ? priceMatch[0] : formatted.replace(/^Custom\s*/i, '').trim();
   };
@@ -479,7 +536,7 @@ const TradesPersonJobs = () => {
         return jobLocation?.toLowerCase().trim() === filterLocation.toLowerCase().trim();
       })) return false;
       if (filters.urgency && formatUrgency(job.urgency) !== filters.urgency) return false;
-      
+
       // Filter by paid status if enabled
       if (filters.showPaidOnly) {
         const paymentStatus = paymentStatuses[job.project_id];
@@ -488,12 +545,12 @@ const TradesPersonJobs = () => {
           return false;
         }
       }
-      
+
       // Filter by new jobs (posted in past 72 hours) if enabled
       if (filters.showNewOnly && !isNewJob(job.created_at)) {
         return false;
       }
-      
+
       return true;
     });
 
@@ -505,7 +562,7 @@ const TradesPersonJobs = () => {
         const concretePriceMatch = budget.match(/£[\d,]+/);
         const customPriceMatch = budget.match(/Custom:\s*£[\d,]+/);
         const plainNumberMatch = budget.match(/^\d+$/);
-        
+
         if (concretePriceMatch) {
           // Extract numeric value from concrete price like "£150"
           const numericValue = parseInt(concretePriceMatch[0].replace(/[£,]/g, ''));
@@ -518,7 +575,7 @@ const TradesPersonJobs = () => {
           // Handle plain numbers like "150"
           return parseInt(plainNumberMatch[0]);
         }
-        
+
         // Handle range-based budgets
         const budgetOrder = { 'over-1000': 1000, '500-1000': 750, '200-500': 350, 'under-200': 200, 'flexible': 0 };
         return budgetOrder[budget as keyof typeof budgetOrder] || 0;
@@ -526,11 +583,11 @@ const TradesPersonJobs = () => {
 
       const aBudgetValue = getBudgetValue(a.budget);
       const bBudgetValue = getBudgetValue(b.budget);
-      
+
       // Check if either has a concrete price (including plain numbers)
       const aIsConcrete = /£[\d,]+/.test(a.budget) || /Custom:\s*£[\d,]+/.test(a.budget) || /^\d+$/.test(a.budget);
       const bIsConcrete = /£[\d,]+/.test(b.budget) || /Custom:\s*£[\d,]+/.test(b.budget) || /^\d+$/.test(b.budget);
-      
+
       switch (sortBy) {
         case 'budget_high':
           // Concrete prices first, then by value (highest to lowest)
@@ -553,6 +610,9 @@ const TradesPersonJobs = () => {
     return filtered;
   }, [jobs, filters, sortBy, paymentStatuses, isNewJob]);
 
+
+
+
   // Get currently displayed jobs based on pagination
   const visibleJobs = useMemo(() => {
     return allFilteredJobs.slice(0, displayedJobsCount);
@@ -569,12 +629,12 @@ const TradesPersonJobs = () => {
 
     setLoadingPaymentStatuses(true);
     console.log('💳 Starting payment status check for', jobsList.length, 'jobs with user ID:', currentUserId);
-    
+
     const statusPromises = jobsList.map(async (job) => {
       try {
         const url = `${import.meta.env.VITE_API_URL}/api/payments/check-payment-status/${currentUserId}/${job.project_id}`;
         console.log('🔍 Checking payment for job:', job.project_id, 'URL:', url);
-        
+
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -600,12 +660,12 @@ const TradesPersonJobs = () => {
     try {
       const results = await Promise.all(statusPromises);
       const statusMap: Record<string, string> = {};
-      
+
       results.forEach(({ jobId, status }) => {
         statusMap[jobId] = status;
       });
 
-      const paidJobsCount = Object.values(statusMap).filter(status => 
+      const paidJobsCount = Object.values(statusMap).filter(status =>
         status !== 'not found' && PAID_STATUSES.includes(status.toLowerCase())
       ).length;
       setPaymentStatuses(statusMap);
@@ -635,10 +695,10 @@ const TradesPersonJobs = () => {
     const urgencies = [...new Set(activeJobs.map(job => formatUrgency(job.urgency)).filter(Boolean))];
 
     // Filter categories and locations based on search terms
-    const categories = allCategories.filter(category => 
+    const categories = allCategories.filter(category =>
       category.toLowerCase().includes(searchTerms.category.toLowerCase())
     );
-    const locations = allLocations.filter(location => 
+    const locations = allLocations.filter(location =>
       location.toLowerCase().includes(searchTerms.location.toLowerCase())
     );
 
@@ -666,12 +726,12 @@ const TradesPersonJobs = () => {
 
         if (data.success && data.projects) {
           setJobs(data.projects);
-          
+
           // Reset radius attempts when jobs are found
           if (data.projects.length > 0) {
             setRadiusAttempts(0);
           }
-          
+
           // Handle effective radius from backend if provided
           if (data.filtersApplied?.effectiveRadiusKm && data.filtersApplied?.requestedRadiusKm) {
             setEffectiveRadius(data.filtersApplied.effectiveRadiusKm);
@@ -795,7 +855,7 @@ const TradesPersonJobs = () => {
               animate={{ opacity: 1, y: 0 }}
               className="text-center mb-8"
             >
-            
+
 
               {/* Stats */}
               <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto">
@@ -944,7 +1004,7 @@ const TradesPersonJobs = () => {
       />
 
       {/* Desktop Filter Bar */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, ease: [0.22, 0.61, 0.36, 1] }}
@@ -959,17 +1019,16 @@ const TradesPersonJobs = () => {
               <div className="relative" data-popover>
                 <button
                   onClick={() => setOpenPopovers(prev => ({ ...prev, category: !prev.category }))}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all duration-200 ${
-                    filters.categories.length > 0 
-                      ? 'bg-blue-600 text-white border-blue-600 shadow-md hover:bg-blue-700 hover:shadow-lg' 
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all duration-200 ${filters.categories.length > 0
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-md hover:bg-blue-700 hover:shadow-lg'
                       : 'bg-white hover:bg-gray-50 border-gray-200 hover:border-gray-300 shadow-sm'
-                  }`}
+                    }`}
                 >
                   <Building2 className="h-4 w-4" />
                   <span className="text-sm">
-                    {filters.categories.length === 0 ? 'Category' : 
-                     filters.categories.length === 1 ? filters.categories[0] : 
-                     `${filters.categories.length} Categories`}
+                    {filters.categories.length === 0 ? 'Category' :
+                      filters.categories.length === 1 ? filters.categories[0] :
+                        `${filters.categories.length} Categories`}
                   </span>
                   <ChevronDown className={`h-4 w-4 transition-transform ${openPopovers.category ? 'rotate-180' : ''}`} />
                   {filters.categories.length > 0 && (
@@ -978,7 +1037,7 @@ const TradesPersonJobs = () => {
                     </Badge>
                   )}
                 </button>
-                
+
                 {/* Category Dropdown */}
                 <AnimatePresence>
                   {openPopovers.category && (
@@ -1000,7 +1059,7 @@ const TradesPersonJobs = () => {
                             autoFocus
                           />
                         </div>
-                        
+
                         {/* Categories Grid */}
                         <div className="max-h-48 overflow-y-auto">
                           {filterOptions.categories.length > 0 ? (
@@ -1021,11 +1080,10 @@ const TradesPersonJobs = () => {
                                       }));
                                     }
                                   }}
-                                  className={`p-3 rounded-lg text-sm font-medium text-left transition-all duration-200 ${
-                                    filters.categories.includes(category)
+                                  className={`p-3 rounded-lg text-sm font-medium text-left transition-all duration-200 ${filters.categories.includes(category)
                                       ? 'bg-blue-600 text-white shadow-sm'
                                       : 'bg-gray-50 hover:bg-gray-100 text-gray-700 hover:text-gray-900'
-                                  }`}
+                                    }`}
                                 >
                                   {category}
                                 </button>
@@ -1055,17 +1113,16 @@ const TradesPersonJobs = () => {
               <div className="relative" data-popover>
                 <button
                   onClick={() => setOpenPopovers(prev => ({ ...prev, location: !prev.location }))}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all duration-200 ${
-                    filters.locations.length > 0 
-                      ? 'bg-green-600 text-white border-green-600 shadow-md hover:bg-green-700 hover:shadow-lg' 
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all duration-200 ${filters.locations.length > 0
+                      ? 'bg-green-600 text-white border-green-600 shadow-md hover:bg-green-700 hover:shadow-lg'
                       : 'bg-white hover:bg-gray-50 border-gray-200 hover:border-gray-300 shadow-sm'
-                  }`}
+                    }`}
                 >
                   <MapPin className="h-4 w-4" />
                   <span className="text-sm">
-                    {filters.locations.length === 0 ? 'Location' : 
-                     filters.locations.length === 1 ? filters.locations[0] : 
-                     `${filters.locations.length} Locations`}
+                    {filters.locations.length === 0 ? 'Location' :
+                      filters.locations.length === 1 ? filters.locations[0] :
+                        `${filters.locations.length} Locations`}
                   </span>
                   <ChevronDown className={`h-4 w-4 transition-transform ${openPopovers.location ? 'rotate-180' : ''}`} />
                   {filters.locations.length > 0 && (
@@ -1074,7 +1131,7 @@ const TradesPersonJobs = () => {
                     </Badge>
                   )}
                 </button>
-                
+
                 {/* Location Dropdown */}
                 <AnimatePresence>
                   {openPopovers.location && (
@@ -1096,7 +1153,7 @@ const TradesPersonJobs = () => {
                             autoFocus
                           />
                         </div>
-                        
+
                         {/* Locations List */}
                         <div className="max-h-48 overflow-y-auto">
                           {filterOptions.locations.length > 0 ? (
@@ -1118,11 +1175,10 @@ const TradesPersonJobs = () => {
                                     }
                                     setOpenPopovers(prev => ({ ...prev, location: false }));
                                   }}
-                                  className={`w-full p-3 rounded-lg text-sm font-medium text-left transition-all duration-200 ${
-                                    filters.locations.includes(location)
+                                  className={`w-full p-3 rounded-lg text-sm font-medium text-left transition-all duration-200 ${filters.locations.includes(location)
                                       ? 'bg-green-600 text-white shadow-sm'
                                       : 'bg-gray-50 hover:bg-gray-100 text-gray-700 hover:text-gray-900'
-                                  }`}
+                                    }`}
                                 >
                                   {location}
                                 </button>
@@ -1153,13 +1209,12 @@ const TradesPersonJobs = () => {
                 <button
                   onClick={() => ipFilterEnabled && setOpenPopovers(prev => ({ ...prev, radius: !prev.radius }))}
                   disabled={!ipFilterEnabled}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all duration-200 ${
-                    !ipFilterEnabled
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all duration-200 ${!ipFilterEnabled
                       ? 'bg-gray-100 text-gray-400 border-gray-200 opacity-60 cursor-not-allowed'
                       : filters.radius && filters.radius !== 25
-                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-md hover:bg-indigo-700 hover:shadow-lg' 
-                      : 'bg-white hover:bg-gray-50 border-gray-200 hover:border-gray-300 shadow-sm'
-                  }`}
+                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-md hover:bg-indigo-700 hover:shadow-lg'
+                        : 'bg-white hover:bg-gray-50 border-gray-200 hover:border-gray-300 shadow-sm'
+                    }`}
                   title={!ipFilterEnabled ? 'Enable IP Filter to adjust radius' : ''}
                 >
                   <MapPin className="h-4 w-4" />
@@ -1176,7 +1231,7 @@ const TradesPersonJobs = () => {
                     </Badge>
                   )}
                 </button>
-                
+
                 {/* Radius Dropdown */}
                 <AnimatePresence>
                   {openPopovers.radius && (
@@ -1196,11 +1251,10 @@ const TradesPersonJobs = () => {
                                 handleRadiusChange(radius);
                                 setOpenPopovers(prev => ({ ...prev, radius: false }));
                               }}
-                              className={`w-full p-3 text-left text-sm font-medium rounded-lg transition-all duration-200 ${
-                                (filters.radius || 25) === radius
+                              className={`w-full p-3 text-left text-sm font-medium rounded-lg transition-all duration-200 ${(filters.radius || 25) === radius
                                   ? 'bg-indigo-600 text-white shadow-sm'
                                   : 'bg-gray-50 hover:bg-gray-100 text-gray-700 hover:text-gray-900'
-                              }`}
+                                }`}
                               disabled={loadingPostcode}
                             >
                               Within {radius} miles
@@ -1219,22 +1273,20 @@ const TradesPersonJobs = () => {
               {/* IP Filter Toggle */}
               <button
                 onClick={() => setIpFilterEnabled(prev => !prev)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all duration-200 ${
-                  ipFilterEnabled
-                    ? 'bg-purple-600 text-white border-purple-600 shadow-md hover:bg-purple-700 hover:shadow-lg' 
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all duration-200 ${ipFilterEnabled
+                    ? 'bg-purple-600 text-white border-purple-600 shadow-md hover:bg-purple-700 hover:shadow-lg'
                     : 'bg-white hover:bg-gray-50 border-gray-200 hover:border-gray-300 shadow-sm'
-                }`}
+                  }`}
                 title={ipFilterEnabled ? 'IP Filtration: ON' : 'IP Filtration: OFF'}
               >
                 <Globe className="h-4 w-4" />
                 <span className="text-sm">Distance Filter</span>
-                <Badge 
-                  variant="secondary" 
-                  className={`text-xs px-2 py-0.5 h-5 ml-1 font-semibold ${
-                    ipFilterEnabled 
-                      ? 'bg-white/20 text-white' 
+                <Badge
+                  variant="secondary"
+                  className={`text-xs px-2 py-0.5 h-5 ml-1 font-semibold ${ipFilterEnabled
+                      ? 'bg-white/20 text-white'
                       : 'bg-gray-200 text-gray-600'
-                  }`}
+                    }`}
                 >
                   {ipFilterEnabled ? 'ON' : 'OFF'}
                 </Badge>
@@ -1244,22 +1296,20 @@ const TradesPersonJobs = () => {
               <button
                 onClick={() => setFilters(prev => ({ ...prev, showPaidOnly: !prev.showPaidOnly }))}
                 disabled={loadingPaymentStatuses}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all duration-200 ${
-                  filters.showPaidOnly
-                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-md hover:bg-emerald-700 hover:shadow-lg' 
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all duration-200 ${filters.showPaidOnly
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-md hover:bg-emerald-700 hover:shadow-lg'
                     : 'bg-white hover:bg-gray-50 border-gray-200 hover:border-gray-300 shadow-sm'
-                } ${loadingPaymentStatuses ? 'opacity-70 cursor-wait' : ''}`}
+                  } ${loadingPaymentStatuses ? 'opacity-70 cursor-wait' : ''}`}
                 title={loadingPaymentStatuses ? 'Checking payment status...' : 'Show only jobs you\'ve paid for'}
               >
                 {/* <PoundSterling className="h-4 w-4" /> */}
                 <span className="text-sm">Active Jobs</span>
-                <Badge 
-                  variant="secondary" 
-                  className={`text-xs px-2 py-0.5 h-5 ml-1 font-semibold ${
-                    filters.showPaidOnly 
-                      ? 'bg-white/20 text-white' 
+                <Badge
+                  variant="secondary"
+                  className={`text-xs px-2 py-0.5 h-5 ml-1 font-semibold ${filters.showPaidOnly
+                      ? 'bg-white/20 text-white'
                       : 'bg-gray-200 text-gray-600'
-                  }`}
+                    }`}
                 >
                   {loadingPaymentStatuses ? (
                     <RefreshCw className="h-3 w-3 animate-spin" />
@@ -1274,11 +1324,10 @@ const TradesPersonJobs = () => {
                 <TooltipTrigger asChild>
                   <button
                     onClick={() => setFilters(prev => ({ ...prev, showNewOnly: !prev.showNewOnly }))}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all duration-200 ${
-                      filters.showNewOnly
-                        ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white border-emerald-500 shadow-md hover:from-emerald-600 hover:to-green-600 hover:shadow-lg' 
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium transition-all duration-200 ${filters.showNewOnly
+                        ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white border-emerald-500 shadow-md hover:from-emerald-600 hover:to-green-600 hover:shadow-lg'
                         : 'bg-white hover:bg-gray-50 border-gray-200 hover:border-gray-300 shadow-sm'
-                    }`}
+                      }`}
                   >
                     <Zap className="h-4 w-4" />
                     <span className="text-sm">NEW</span>
@@ -1311,20 +1360,19 @@ const TradesPersonJobs = () => {
 
                 const Icon = getUrgencyIcon(urgency);
                 const isActive = filters.urgency === urgency;
-                
+
                 return (
                   <motion.button
                     key={urgency}
                     whileTap={{ scale: 0.97 }}
-                    onClick={() => setFilters(prev => ({ 
-                      ...prev, 
-                      urgency: prev.urgency === urgency ? undefined : urgency 
+                    onClick={() => setFilters(prev => ({
+                      ...prev,
+                      urgency: prev.urgency === urgency ? undefined : urgency
                     }))}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-full border font-medium transition-all duration-150 ${
-                      isActive 
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-full border font-medium transition-all duration-150 ${isActive
                         ? getUrgencyColor(urgency)
                         : 'bg-white hover:bg-gray-50 border-gray-200 hover:border-gray-300 shadow-sm text-gray-700 active:scale-[0.97]'
-                    }`}
+                      }`}
                   >
                     <Icon className="h-4 w-4" />
                     <span className="text-sm">{urgency}</span>
@@ -1347,7 +1395,7 @@ const TradesPersonJobs = () => {
                   </span>
                   <ChevronDown className={`h-4 w-4 transition-transform flex-shrink-0 ${openPopovers.sort ? 'rotate-180' : ''}`} />
                 </button>
-                
+
                 {/* Sort Dropdown */}
                 <AnimatePresence>
                   {openPopovers.sort && (
@@ -1370,11 +1418,10 @@ const TradesPersonJobs = () => {
                                 setSortBy(key as typeof sortBy);
                                 setOpenPopovers(prev => ({ ...prev, sort: false }));
                               }}
-                              className={`w-full p-3 text-left text-sm font-medium rounded-lg transition-all ${
-                                sortBy === key
+                              className={`w-full p-3 text-left text-sm font-medium rounded-lg transition-all ${sortBy === key
                                   ? 'bg-primary text-primary-foreground'
                                   : 'bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground'
-                              }`}
+                                }`}
                             >
                               {label}
                             </button>
@@ -1413,16 +1460,15 @@ const TradesPersonJobs = () => {
                 {/* Category Filter Chip */}
                 <button
                   onClick={() => setOpenPopovers(prev => ({ ...prev, category: !prev.category }))}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
-                    filters.categories.length > 0 
-                      ? 'bg-primary text-primary-foreground border-primary' 
+                  className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${filters.categories.length > 0
+                      ? 'bg-primary text-primary-foreground border-primary'
                       : 'bg-background hover:bg-muted border-border'
-                  }`}
+                    }`}
                 >
                   <Building2 className="h-4 w-4" />
-                  {filters.categories.length === 0 ? 'Category' : 
-                   filters.categories.length === 1 ? filters.categories[0] : 
-                   `${filters.categories.length} Categories`}
+                  {filters.categories.length === 0 ? 'Category' :
+                    filters.categories.length === 1 ? filters.categories[0] :
+                      `${filters.categories.length} Categories`}
                   {filters.categories.length > 0 && (
                     <Badge variant="secondary" className="bg-primary-foreground/20 text-primary-foreground text-xs px-1.5 py-0.5 h-5">
                       {filters.categories.length}
@@ -1433,16 +1479,15 @@ const TradesPersonJobs = () => {
                 {/* Location Filter Chip */}
                 <button
                   onClick={() => setOpenPopovers(prev => ({ ...prev, location: !prev.location }))}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
-                    filters.locations.length > 0 
-                      ? 'bg-trust-green text-trust-green-foreground border-trust-green' 
+                  className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${filters.locations.length > 0
+                      ? 'bg-trust-green text-trust-green-foreground border-trust-green'
                       : 'bg-background hover:bg-muted border-border'
-                  }`}
+                    }`}
                 >
                   <MapPin className="h-4 w-4" />
-                  {filters.locations.length === 0 ? 'Location' : 
-                   filters.locations.length === 1 ? filters.locations[0] : 
-                   `${filters.locations.length} Locations`}
+                  {filters.locations.length === 0 ? 'Location' :
+                    filters.locations.length === 1 ? filters.locations[0] :
+                      `${filters.locations.length} Locations`}
                   {filters.locations.length > 0 && (
                     <Badge variant="secondary" className="bg-trust-green-foreground/20 text-trust-green-foreground text-xs px-1.5 py-0.5 h-5">
                       {filters.locations.length}
@@ -1466,19 +1511,18 @@ const TradesPersonJobs = () => {
 
                   const Icon = getUrgencyIcon(urgency);
                   const isActive = filters.urgency === urgency;
-                  
+
                   return (
                     <button
                       key={urgency}
-                      onClick={() => setFilters(prev => ({ 
-                        ...prev, 
-                        urgency: prev.urgency === urgency ? undefined : urgency 
+                      onClick={() => setFilters(prev => ({
+                        ...prev,
+                        urgency: prev.urgency === urgency ? undefined : urgency
                       }))}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
-                        isActive 
+                      className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${isActive
                           ? getUrgencyColor(urgency)
                           : 'bg-background hover:bg-muted border-border'
-                      }`}
+                        }`}
                     >
                       <Icon className="h-4 w-4" />
                       {urgency}
@@ -1489,11 +1533,10 @@ const TradesPersonJobs = () => {
                 {/* New Jobs Filter Chip */}
                 <button
                   onClick={() => setFilters(prev => ({ ...prev, showNewOnly: !prev.showNewOnly }))}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
-                    filters.showNewOnly
+                  className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${filters.showNewOnly
                       ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white border-emerald-500'
                       : 'bg-background hover:bg-muted border-border'
-                  }`}
+                    }`}
                   title="Show only jobs posted in the past day or two"
                 >
                   <Zap className="h-4 w-4" />
@@ -1539,16 +1582,15 @@ const TradesPersonJobs = () => {
               {/* Category Filter Chip */}
               <button
                 onClick={() => setOpenPopovers(prev => ({ ...prev, category: !prev.category }))}
-                className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
-                  filters.categories.length > 0 
-                    ? 'bg-primary text-primary-foreground border-primary' 
+                className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${filters.categories.length > 0
+                    ? 'bg-primary text-primary-foreground border-primary'
                     : 'bg-background hover:bg-muted border-border'
-                }`}
+                  }`}
               >
                 <Building2 className="h-4 w-4" />
-                {filters.categories.length === 0 ? 'Category' : 
-                 filters.categories.length === 1 ? filters.categories[0] : 
-                 `${filters.categories.length} Categories`}
+                {filters.categories.length === 0 ? 'Category' :
+                  filters.categories.length === 1 ? filters.categories[0] :
+                    `${filters.categories.length} Categories`}
                 {filters.categories.length > 0 && (
                   <Badge variant="secondary" className="bg-primary-foreground/20 text-primary-foreground text-xs px-1.5 py-0.5 h-5">
                     {filters.categories.length}
@@ -1559,16 +1601,15 @@ const TradesPersonJobs = () => {
               {/* Location Filter Chip */}
               <button
                 onClick={() => setOpenPopovers(prev => ({ ...prev, location: !prev.location }))}
-                className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
-                  filters.locations.length > 0 
-                    ? 'bg-trust-green text-trust-green-foreground border-trust-green' 
+                className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${filters.locations.length > 0
+                    ? 'bg-trust-green text-trust-green-foreground border-trust-green'
                     : 'bg-background hover:bg-muted border-border'
-                }`}
+                  }`}
               >
                 <MapPin className="h-4 w-4" />
-                {filters.locations.length === 0 ? 'Location' : 
-                 filters.locations.length === 1 ? filters.locations[0] : 
-                 `${filters.locations.length} Locations`}
+                {filters.locations.length === 0 ? 'Location' :
+                  filters.locations.length === 1 ? filters.locations[0] :
+                    `${filters.locations.length} Locations`}
                 {filters.locations.length > 0 && (
                   <Badge variant="secondary" className="bg-trust-green-foreground/20 text-trust-green-foreground text-xs px-1.5 py-0.5 h-5">
                     {filters.locations.length}
@@ -1592,19 +1633,18 @@ const TradesPersonJobs = () => {
 
                 const Icon = getUrgencyIcon(urgency);
                 const isActive = filters.urgency === urgency;
-                
+
                 return (
                   <button
                     key={urgency}
-                    onClick={() => setFilters(prev => ({ 
-                      ...prev, 
-                      urgency: prev.urgency === urgency ? undefined : urgency 
+                    onClick={() => setFilters(prev => ({
+                      ...prev,
+                      urgency: prev.urgency === urgency ? undefined : urgency
                     }))}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
-                      isActive 
+                    className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${isActive
                         ? getUrgencyColor(urgency)
                         : 'bg-background hover:bg-muted border-border'
-                    }`}
+                      }`}
                   >
                     <Icon className="h-4 w-4" />
                     {urgency}
@@ -1615,11 +1655,10 @@ const TradesPersonJobs = () => {
               {/* New Jobs Filter Chip */}
               <button
                 onClick={() => setFilters(prev => ({ ...prev, showNewOnly: !prev.showNewOnly }))}
-                className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${
-                  filters.showNewOnly
+                className={`flex items-center gap-2 px-3 py-2 rounded-full border whitespace-nowrap text-sm font-medium transition-all ${filters.showNewOnly
                     ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white border-emerald-500'
                     : 'bg-background hover:bg-muted border-border'
-                }`}
+                  }`}
                 title="Show only jobs posted in the past day or two"
               >
                 <Zap className="h-4 w-4" />
@@ -1676,7 +1715,7 @@ const TradesPersonJobs = () => {
                     className="h-9 text-sm border-border/40 focus:border-primary"
                   />
                 </div>
-                
+
                 {/* Categories Grid */}
                 <div className="max-h-48 overflow-y-auto">
                   {filterOptions.categories.length > 0 ? (
@@ -1697,11 +1736,10 @@ const TradesPersonJobs = () => {
                               }));
                             }
                           }}
-                          className={`p-3 rounded-lg text-sm font-medium text-left transition-all ${
-                            filters.categories.includes(category)
+                          className={`p-3 rounded-lg text-sm font-medium text-left transition-all ${filters.categories.includes(category)
                               ? 'bg-primary text-primary-foreground'
                               : 'bg-muted hover:bg-muted/80 text-muted-foreground'
-                          }`}
+                            }`}
                         >
                           {category}
                         </button>
@@ -1747,7 +1785,7 @@ const TradesPersonJobs = () => {
                     className="h-9 text-sm border-border/40 focus:border-primary"
                   />
                 </div>
-                
+
                 {/* Locations Grid */}
                 <div className="max-h-48 overflow-y-auto">
                   {filterOptions.locations.length > 0 ? (
@@ -1769,11 +1807,10 @@ const TradesPersonJobs = () => {
                             }
                             setOpenPopovers(prev => ({ ...prev, location: false }));
                           }}
-                          className={`p-3 rounded-lg text-sm font-medium text-left transition-all ${
-                            filters.locations.includes(location)
+                          className={`p-3 rounded-lg text-sm font-medium text-left transition-all ${filters.locations.includes(location)
                               ? 'bg-trust-green text-trust-green-foreground'
                               : 'bg-muted hover:bg-muted/80 text-muted-foreground'
-                          }`}
+                            }`}
                         >
                           {location}
                         </button>
@@ -1807,7 +1844,7 @@ const TradesPersonJobs = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-12 sm:block hidden"
           >
-           
+
 
             {/* Enhanced Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
@@ -1885,7 +1922,7 @@ const TradesPersonJobs = () => {
                 role="dialog"
                 aria-labelledby="filters-title"
                 aria-modal="true"
-                style={{ 
+                style={{
                   paddingBottom: 'calc(env(safe-area-inset-bottom) + 1rem)',
                   transform: 'translateZ(0)',
                   willChange: 'transform'
@@ -1912,8 +1949,8 @@ const TradesPersonJobs = () => {
                     <h4 className="text-sm font-medium text-slate-700 mb-3">Categories</h4>
                     <div className="space-y-2">
                       {filterOptions.categories.map((category, idx) => (
-                        <motion.label 
-                          key={category} 
+                        <motion.label
+                          key={category}
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ duration: 0.2, delay: idx * 0.03 }}
@@ -1943,8 +1980,8 @@ const TradesPersonJobs = () => {
                     <h4 className="text-sm font-medium text-slate-700 mb-3">Location</h4>
                     <div className="space-y-2">
                       {filterOptions.locations.map((location, idx) => (
-                        <motion.label 
-                          key={location} 
+                        <motion.label
+                          key={location}
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ duration: 0.2, delay: idx * 0.03 }}
@@ -1988,8 +2025,8 @@ const TradesPersonJobs = () => {
                               urgency: prev.urgency === urgency ? undefined : urgency
                             }))}
                             className={`inline-flex items-center gap-2 rounded-full px-4 h-10 transition-all duration-150 active:scale-[0.97] ${isPressed
-                                ? 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200'
-                                : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                              ? 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200'
+                              : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                               }`}
                             aria-pressed={isPressed}
                           >
@@ -2012,11 +2049,10 @@ const TradesPersonJobs = () => {
                     <motion.button
                       whileTap={{ scale: 0.98 }}
                       onClick={() => setIpFilterEnabled(prev => !prev)}
-                      className={`w-full p-4 rounded-xl border-2 font-semibold transition-all duration-150 flex items-center justify-between active:scale-[0.98] ${
-                        ipFilterEnabled
+                      className={`w-full p-4 rounded-xl border-2 font-semibold transition-all duration-150 flex items-center justify-between active:scale-[0.98] ${ipFilterEnabled
                           ? 'bg-purple-500 text-white border-purple-500 shadow-md'
                           : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-3">
                         <Globe className="h-5 w-5" />
@@ -2027,13 +2063,12 @@ const TradesPersonJobs = () => {
                           </div>
                         </div>
                       </div>
-                      <Badge 
-                        variant="secondary" 
-                        className={`text-xs px-3 py-1 font-bold ${
-                          ipFilterEnabled 
-                            ? 'bg-white/20 text-white' 
+                      <Badge
+                        variant="secondary"
+                        className={`text-xs px-3 py-1 font-bold ${ipFilterEnabled
+                            ? 'bg-white/20 text-white'
                             : 'bg-slate-200 text-slate-700'
-                        }`}
+                          }`}
                       >
                         {ipFilterEnabled ? 'ON' : 'OFF'}
                       </Badge>
@@ -2059,11 +2094,10 @@ const TradesPersonJobs = () => {
                       whileTap={{ scale: 0.98 }}
                       onClick={() => setFilters(prev => ({ ...prev, showPaidOnly: !prev.showPaidOnly }))}
                       disabled={loadingPaymentStatuses}
-                      className={`w-full p-4 rounded-xl border-2 font-semibold transition-all duration-150 flex items-center justify-between active:scale-[0.98] ${
-                        filters.showPaidOnly
+                      className={`w-full p-4 rounded-xl border-2 font-semibold transition-all duration-150 flex items-center justify-between active:scale-[0.98] ${filters.showPaidOnly
                           ? 'bg-emerald-500 text-white border-emerald-500 shadow-md'
                           : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                      } ${loadingPaymentStatuses ? 'opacity-60 cursor-wait' : ''}`}
+                        } ${loadingPaymentStatuses ? 'opacity-60 cursor-wait' : ''}`}
                     >
                       <div className="flex items-center gap-3">
                         {/* <PoundSterling className="h-5 w-5" /> */}
@@ -2074,13 +2108,12 @@ const TradesPersonJobs = () => {
                           </div>
                         </div>
                       </div>
-                      <Badge 
-                        variant="secondary" 
-                        className={`text-xs px-3 py-1 font-bold ${
-                          filters.showPaidOnly 
-                            ? 'bg-white/20 text-white' 
+                      <Badge
+                        variant="secondary"
+                        className={`text-xs px-3 py-1 font-bold ${filters.showPaidOnly
+                            ? 'bg-white/20 text-white'
                             : 'bg-slate-200 text-slate-700'
-                        }`}
+                          }`}
                       >
                         {loadingPaymentStatuses ? (
                           <RefreshCw className="h-3 w-3 animate-spin" />
@@ -2112,11 +2145,10 @@ const TradesPersonJobs = () => {
                     <motion.button
                       whileTap={{ scale: 0.98 }}
                       onClick={() => setFilters(prev => ({ ...prev, showNewOnly: !prev.showNewOnly }))}
-                      className={`w-full p-4 rounded-xl border-2 font-semibold transition-all duration-150 flex items-center justify-between active:scale-[0.98] ${
-                        filters.showNewOnly
+                      className={`w-full p-4 rounded-xl border-2 font-semibold transition-all duration-150 flex items-center justify-between active:scale-[0.98] ${filters.showNewOnly
                           ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white border-emerald-500 shadow-md'
                           : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-3">
                         <Zap className="h-5 w-5" />
@@ -2128,8 +2160,8 @@ const TradesPersonJobs = () => {
                         </div>
                       </div>
                       {filters.showNewOnly && (
-                        <Badge 
-                          variant="secondary" 
+                        <Badge
+                          variant="secondary"
                           className="text-xs px-3 py-1 font-bold bg-white/20 text-white"
                         >
                           {jobs.filter(job => isNewJob(job.created_at) && !(job.status && job.status.toLowerCase() === 'completed')).length}
@@ -2176,16 +2208,15 @@ const TradesPersonJobs = () => {
                         <button
                           onClick={() => ipFilterEnabled && setMobileRadiusOpen(!mobileRadiusOpen)}
                           disabled={!ipFilterEnabled}
-                          className={`w-full p-4 border-2 rounded-xl text-sm font-semibold focus:outline-none text-blue-900 shadow-sm flex items-center justify-between ${
-                            ipFilterEnabled
+                          className={`w-full p-4 border-2 rounded-xl text-sm font-semibold focus:outline-none text-blue-900 shadow-sm flex items-center justify-between ${ipFilterEnabled
                               ? 'bg-white border-blue-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
                               : 'bg-slate-100 border-slate-200 cursor-not-allowed'
-                          }`}
+                            }`}
                         >
                           <span>Within {filters.radius || 25} miles{(filters.radius || 25) === 25 ? '' : ''}</span>
                           <ChevronDown className={`h-4 w-4 text-blue-600 transition-transform duration-200 ${mobileRadiusOpen ? 'rotate-180' : ''}`} />
                         </button>
-                        
+
                         {mobileRadiusOpen && (
                           <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-blue-200 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto">
                             {[5, 10, 25, 50, 100].map((radius) => (
@@ -2195,11 +2226,10 @@ const TradesPersonJobs = () => {
                                   handleRadiusChange(radius);
                                   setMobileRadiusOpen(false);
                                 }}
-                                className={`w-full p-4 text-left text-sm font-semibold border-b border-slate-100 last:border-b-0 transition-colors ${
-                                  (filters.radius || 25) === radius
+                                className={`w-full p-4 text-left text-sm font-semibold border-b border-slate-100 last:border-b-0 transition-colors ${(filters.radius || 25) === radius
                                     ? 'bg-blue-50 text-blue-900 font-bold'
                                     : 'bg-white text-slate-800 hover:bg-slate-50'
-                                }`}
+                                  }`}
                               >
                                 Within {radius} miles{radius === 25 ? '' : ''}
                               </button>
@@ -2230,8 +2260,8 @@ const TradesPersonJobs = () => {
                           whileTap={{ scale: 0.98 }}
                           onClick={() => setSortBy(key as typeof sortBy)}
                           className={`w-full text-left p-3 rounded-lg transition-all duration-150 active:scale-[0.98] ${sortBy === key
-                              ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200'
-                              : 'hover:bg-slate-50 text-slate-700'
+                            ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200'
+                            : 'hover:bg-slate-50 text-slate-700'
                             }`}
                         >
                           <span className="text-sm font-medium">{label}</span>
@@ -2286,7 +2316,7 @@ const TradesPersonJobs = () => {
                 </div>
               </div>
             )}
-            
+
             {visibleJobs.length === 0 ? (
               <div className="max-w-2xl mx-auto">
                 <Card className="bg-white border border-slate-200 shadow-sm rounded-lg p-8">
@@ -2295,7 +2325,7 @@ const TradesPersonJobs = () => {
                     <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
                       <MapPin className="h-8 w-8 text-slate-400" />
                     </div>
-                    
+
                     {/* Main Message */}
                     <h3 className="text-xl font-semibold text-slate-900 mb-2">
                       No jobs within {filters.radius || 25} miles{userPostcode ? ` of ${userPostcode}` : ''}
@@ -2472,8 +2502,8 @@ const TradesPersonJobs = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
                         exit={{ opacity: 0, y: -20 }}
-                        transition={{ 
-                          duration: 0.24, 
+                        transition={{
+                          duration: 0.24,
                           delay: Math.min(index * 0.04, 0.24),
                           ease: [0.22, 0.61, 0.36, 1]
                         }}
@@ -2513,7 +2543,7 @@ const TradesPersonJobs = () => {
 
                             {/* Price Badge - Top Left */}
                             <div className="absolute top-3 left-3">
-                              <motion.div 
+                              <motion.div
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 whileInView={{ opacity: 1, scale: 1 }}
                                 viewport={{ once: true }}
@@ -2570,15 +2600,14 @@ const TradesPersonJobs = () => {
                               </div>
                               <div className="flex items-center gap-2">
                                 <Clock className="h-3.5 w-3.5 text-slate-400 flex-shrink-0" />
-                                <span className={`text-xs font-semibold px-2 py-0.5 rounded ${
-                                  formatUrgency(job.urgency) === 'ASAP'
+                                <span className={`text-xs font-semibold px-2 py-0.5 rounded ${formatUrgency(job.urgency) === 'ASAP'
                                     ? 'bg-red-100 text-red-700 border border-red-200'
                                     : formatUrgency(job.urgency) === 'This week'
                                       ? 'bg-amber-100 text-amber-700 border border-amber-200'
                                       : formatUrgency(job.urgency) === 'This month'
                                         ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
                                         : 'bg-slate-100 text-slate-700 border border-slate-200'
-                                }`}>
+                                  }`}>
                                   {formatUrgency(job.urgency)}
                                 </span>
                               </div>
