@@ -29,6 +29,9 @@ import {
     HiXMark
 } from "react-icons/hi2";
 import { X } from "lucide-react";
+import { ShareJob } from "@/components/shareButton";
+
+
 
 interface JobData {
     id: string;
@@ -138,7 +141,7 @@ const JobDetail = () => {
             console.log('🔍 [FOLLOW-UP] Opening chat for job:', jobData?.project_id);
             console.log('🔍 [FOLLOW-UP] User role:', user?.role);
             console.log('🔍 [FOLLOW-UP] Question:', question);
-            
+
             // Step 1: Create free application first (so homeowner can see the trader)
             console.log('🆓 [FOLLOW-UP] Creating free application...');
             try {
@@ -154,7 +157,7 @@ const JobDetail = () => {
                         application_text: `Trader is interested in this job and wants to ask: "${question}"`
                     })
                 });
-                
+
                 if (appResponse.ok) {
                     const appData = await appResponse.json();
                     console.log('✅ [FOLLOW-UP] Free application created:', {
@@ -171,7 +174,7 @@ const JobDetail = () => {
             } catch (appError) {
                 console.warn('⚠️ [FOLLOW-UP] Error creating free application (continuing anyway):', appError);
             }
-            
+
             // Step 2: Try to get existing conversation
             let response = await fetch(`${import.meta.env.VITE_API_URL}/travel/chat-component/get-conversation-by-id/${jobData?.project_id}`, {
                 credentials: 'include',
@@ -179,7 +182,7 @@ const JobDetail = () => {
                     'Content-Type': 'application/json',
                 }
             });
-            
+
             if (!response.ok) {
                 console.log('📞 [FOLLOW-UP] Conversation not found, creating new one...');
                 // If conversation doesn't exist, create it
@@ -195,14 +198,14 @@ const JobDetail = () => {
                         homeowner_id: jobData?.user_id,
                     })
                 });
-                
+
                 console.log('📤 [FOLLOW-UP] Create conversation request:', {
                     job_id: jobData?.project_id,
                     trader_id: user?.id,
                     homeowner_id: jobData?.user_id,
                     endpoint: `${import.meta.env.VITE_API_URL}/travel/chat-component/create-chat`
                 });
-                
+
                 if (!createResponse.ok) {
                     const errorText = await createResponse.text();
                     console.error('❌ [FOLLOW-UP] Failed to create conversation:', {
@@ -212,10 +215,10 @@ const JobDetail = () => {
                     });
                     throw new Error('Failed to create conversation');
                 }
-                
+
                 response = createResponse;
             }
-            
+
             const data = await response.json();
             console.log('✅ [FOLLOW-UP] Got conversation data:', data);
             console.log('✅ [FOLLOW-UP] Conversation ID:', data.conversation?.conversation_id || data.conversation_id);
@@ -224,8 +227,8 @@ const JobDetail = () => {
                 trader_id: data.conversation?.trader_id,
                 job_id: data.conversation?.job_id
             });
-                
-                // Navigate to the conversation with the question
+
+            // Navigate to the conversation with the question
             const conversationId = data.conversation?.conversation_id || data.conversation_id;
             if (conversationId) {
                 navigate(`/chat/${conversationId}?message=${encodeURIComponent(question)}`);
@@ -778,128 +781,135 @@ const JobDetail = () => {
                     </div>
 
 
+                    {/* Jobs Grid */}
+
+                    <div className="flex justify-end mb-4">
+                        <ShareJob title={jobData.job_title} />
+                    </div>
+
+
 
                     {/* Trader Contact Banner - Always show for traders */}
                     {isTrader && (
-                            <PaidUserBanner
-                                jobId={id || ''}
-                                jobTitle={jobData.job_title}
-                                homeownerInfo={{
-                                    first_name: jobData.first_name,
-                                    email: jobData.email,
-                                    phone: jobData.phone
-                                }}
-                                homeownerName={jobData.first_name}
-                                homeownerVerified={homeOwnerVerified}
-                                homeownerId={jobData.user_id}
-                                applicantCount={jobApplicants}
-                                jobStats={jobStats || undefined}
-                                location={`${getCountryFlag(jobData.additional_data.country)} ${jobData.additional_data.location}`}
-                                postedDate={formatDate(jobData.created_at)}
-                                onOpenChat={async () => {
+                        <PaidUserBanner
+                            jobId={id || ''}
+                            jobTitle={jobData.job_title}
+                            homeownerInfo={{
+                                first_name: jobData.first_name,
+                                email: jobData.email,
+                                phone: jobData.phone
+                            }}
+                            homeownerName={jobData.first_name}
+                            homeownerVerified={homeOwnerVerified}
+                            homeownerId={jobData.user_id}
+                            applicantCount={jobApplicants}
+                            jobStats={jobStats || undefined}
+                            location={`${getCountryFlag(jobData.additional_data.country)} ${jobData.additional_data.location}`}
+                            postedDate={formatDate(jobData.created_at)}
+                            onOpenChat={async () => {
+                                try {
+                                    console.log('🔍 [OPEN-CHAT] Opening chat for job:', id);
+                                    console.log('🔍 [OPEN-CHAT] User role:', user?.role);
+
+                                    // Step 1: Create free application first (so homeowner can see the trader)
+                                    console.log('🆓 [OPEN-CHAT] Creating free application...');
                                     try {
-                                        console.log('🔍 [OPEN-CHAT] Opening chat for job:', id);
-                                        console.log('🔍 [OPEN-CHAT] User role:', user?.role);
-                                        
-                                        // Step 1: Create free application first (so homeowner can see the trader)
-                                        console.log('🆓 [OPEN-CHAT] Creating free application...');
-                                        try {
-                                            const appResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/create-free-application`, {
-                                                method: 'POST',
-                                                credentials: 'include',
-                                                headers: {
-                                                    'Content-Type': 'application/json',
-                                                },
-                                                body: JSON.stringify({
-                                                    job_id: id,
-                                                    user_id: user?.id,
-                                                    application_text: `Trader is interested in this job and wants to chat`
-                                                })
-                                            });
-                                            
-                                            if (appResponse.ok) {
-                                                const appData = await appResponse.json();
-                                                console.log('✅ [OPEN-CHAT] Free application created:', {
-                                                    applicationId: appData.applicationId,
-                                                    status: appData.status
-                                                });
-                                            } else {
-                                                const errorText = await appResponse.text();
-                                                console.warn('⚠️ [OPEN-CHAT] Failed to create free application (continuing anyway):', {
-                                                    status: appResponse.status,
-                                                    error: errorText
-                                                });
-                                            }
-                                        } catch (appError) {
-                                            console.warn('⚠️ [OPEN-CHAT] Error creating free application (continuing anyway):', appError);
-                                        }
-                                        
-                                        // Step 2: Try to get existing conversation
-                                        let response = await fetch(`${import.meta.env.VITE_API_URL}/travel/chat-component/get-conversation-by-id/${id}`, {
+                                        const appResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/create-free-application`, {
+                                            method: 'POST',
                                             credentials: 'include',
                                             headers: {
                                                 'Content-Type': 'application/json',
-                                            }
+                                            },
+                                            body: JSON.stringify({
+                                                job_id: id,
+                                                user_id: user?.id,
+                                                application_text: `Trader is interested in this job and wants to chat`
+                                            })
                                         });
-                                        
-                                        if (!response.ok) {
-                                            console.log('📞 [OPEN-CHAT] Conversation not found, creating new one...');
-                                            // If conversation doesn't exist, create it
-                                            const createResponse = await fetch(`${import.meta.env.VITE_API_URL}/travel/chat-component/create-chat`, {
-                                                method: 'POST',
-                                                credentials: 'include',
-                                                headers: {
-                                                    'Content-Type': 'application/json',
-                                                },
-                                                body: JSON.stringify({
-                                                    job_id: id,
-                                                    trader_id: user?.id,
-                                                    homeowner_id: jobData?.user_id,
-                                                })
+
+                                        if (appResponse.ok) {
+                                            const appData = await appResponse.json();
+                                            console.log('✅ [OPEN-CHAT] Free application created:', {
+                                                applicationId: appData.applicationId,
+                                                status: appData.status
                                             });
-                                            
-                                            console.log('📤 [OPEN-CHAT] Create conversation request:', {
+                                        } else {
+                                            const errorText = await appResponse.text();
+                                            console.warn('⚠️ [OPEN-CHAT] Failed to create free application (continuing anyway):', {
+                                                status: appResponse.status,
+                                                error: errorText
+                                            });
+                                        }
+                                    } catch (appError) {
+                                        console.warn('⚠️ [OPEN-CHAT] Error creating free application (continuing anyway):', appError);
+                                    }
+
+                                    // Step 2: Try to get existing conversation
+                                    let response = await fetch(`${import.meta.env.VITE_API_URL}/travel/chat-component/get-conversation-by-id/${id}`, {
+                                        credentials: 'include',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        }
+                                    });
+
+                                    if (!response.ok) {
+                                        console.log('📞 [OPEN-CHAT] Conversation not found, creating new one...');
+                                        // If conversation doesn't exist, create it
+                                        const createResponse = await fetch(`${import.meta.env.VITE_API_URL}/travel/chat-component/create-chat`, {
+                                            method: 'POST',
+                                            credentials: 'include',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                            },
+                                            body: JSON.stringify({
                                                 job_id: id,
                                                 trader_id: user?.id,
                                                 homeowner_id: jobData?.user_id,
-                                                endpoint: `${import.meta.env.VITE_API_URL}/travel/chat-component/create-chat`
-                                            });
-                                            
-                                            if (!createResponse.ok) {
-                                                const errorText = await createResponse.text();
-                                                console.error('❌ [OPEN-CHAT] Failed to create conversation:', {
-                                                    status: createResponse.status,
-                                                    statusText: createResponse.statusText,
-                                                    error: errorText
-                                                });
-                                                throw new Error('Failed to create conversation');
-                                            }
-                                            
-                                            response = createResponse;
-                                        }
-                                        
-                                        const data = await response.json();
-                                        console.log('✅ [OPEN-CHAT] Got conversation data:', data);
-                                        console.log('✅ [OPEN-CHAT] Conversation ID:', data.conversation?.conversation_id || data.conversation_id);
-                                        console.log('✅ [OPEN-CHAT] Conversation participants:', {
-                                            homeowner_id: data.conversation?.homeowner_id,
-                                            trader_id: data.conversation?.trader_id,
+                                            })
                                         });
-                                            
-                                        // Navigate to the conversation
-                                        const conversationId = data.conversation?.conversation_id || data.conversation_id;
-                                        if (conversationId) {
-                                            navigate(`/chat/${conversationId}`);
-                                        } else {
-                                            navigate(`/chat/${id}`);
+
+                                        console.log('📤 [OPEN-CHAT] Create conversation request:', {
+                                            job_id: id,
+                                            trader_id: user?.id,
+                                            homeowner_id: jobData?.user_id,
+                                            endpoint: `${import.meta.env.VITE_API_URL}/travel/chat-component/create-chat`
+                                        });
+
+                                        if (!createResponse.ok) {
+                                            const errorText = await createResponse.text();
+                                            console.error('❌ [OPEN-CHAT] Failed to create conversation:', {
+                                                status: createResponse.status,
+                                                statusText: createResponse.statusText,
+                                                error: errorText
+                                            });
+                                            throw new Error('Failed to create conversation');
                                         }
-                                    } catch (error) {
-                                        console.error('Error opening chat:', error);
-                                        // Fallback: navigate to chat with job ID
+
+                                        response = createResponse;
+                                    }
+
+                                    const data = await response.json();
+                                    console.log('✅ [OPEN-CHAT] Got conversation data:', data);
+                                    console.log('✅ [OPEN-CHAT] Conversation ID:', data.conversation?.conversation_id || data.conversation_id);
+                                    console.log('✅ [OPEN-CHAT] Conversation participants:', {
+                                        homeowner_id: data.conversation?.homeowner_id,
+                                        trader_id: data.conversation?.trader_id,
+                                    });
+
+                                    // Navigate to the conversation
+                                    const conversationId = data.conversation?.conversation_id || data.conversation_id;
+                                    if (conversationId) {
+                                        navigate(`/chat/${conversationId}`);
+                                    } else {
                                         navigate(`/chat/${id}`);
                                     }
-                                }}
-                            />
+                                } catch (error) {
+                                    console.error('Error opening chat:', error);
+                                    // Fallback: navigate to chat with job ID
+                                    navigate(`/chat/${id}`);
+                                }
+                            }}
+                        />
                     )}
 
                     {/* AI Job Fit Card - Only for traders */}
@@ -1152,16 +1162,16 @@ const JobDetail = () => {
 
             {/* Mobile Sticky Footer - Only for homeowners */}
             {!isTrader && (
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-xl p-4 sm:hidden backdrop-blur-sm"
-                style={{ paddingBottom: 'env(safe-area-inset-bottom, 16px)' }}>
-                <Button
-                    onClick={() => navigate(`/edit-job/${id}`)}
-                    className="w-full bg-gradient-to-r from-jobhub-blue to-blue-500 hover:from-jobhub-blue/90 hover:to-blue-500/90 text-white flex items-center justify-center gap-2 min-h-[48px] font-semibold shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
-                >
-                    <HiPencilSquare className="w-4 h-4" />
-                    Edit Job
-                </Button>
-            </div>
+                <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-xl p-4 sm:hidden backdrop-blur-sm"
+                    style={{ paddingBottom: 'env(safe-area-inset-bottom, 16px)' }}>
+                    <Button
+                        onClick={() => navigate(`/edit-job/${id}`)}
+                        className="w-full bg-gradient-to-r from-jobhub-blue to-blue-500 hover:from-jobhub-blue/90 hover:to-blue-500/90 text-white flex items-center justify-center gap-2 min-h-[48px] font-semibold shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
+                    >
+                        <HiPencilSquare className="w-4 h-4" />
+                        Edit Job
+                    </Button>
+                </div>
             )}
 
             {/* Verification Modal */}

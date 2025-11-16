@@ -1898,8 +1898,7 @@ const TradesPersonJobs = () => {
             </div>
           </motion.div>
 
-          {/* Jobs Grid */}
-
+        
           {/* Mobile Filter Bottom Sheet */}
           {showMobileFilters && (
             <div className="fixed inset-0 z-50 sm:hidden">

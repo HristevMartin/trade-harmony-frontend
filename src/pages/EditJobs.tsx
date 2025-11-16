@@ -602,6 +602,8 @@ const EditJob = () => {
                                 </div>
                             </div>
 
+                            
+
                             {/* Contact Information Section */}
                             <div>
                                 <div className="flex items-center gap-2 mb-6">
