@@ -101,9 +101,10 @@ steps:
       - -c
       - |
         cd /workspace/infra/prod
-        terraform init -input=false
-    id: 'terraform-init'
-    waitFor: ['create-terraform-vars']
+        terraform init \
+          -backend-config="prefix=prod/frontend-simple/terraform.tfstate" \
+          -reconfigure \
+          -input=false
 
   # Step 8: Validate Terraform
   - name: 'hashicorp/terraform:1.6'
