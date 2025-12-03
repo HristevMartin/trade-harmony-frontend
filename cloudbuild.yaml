@@ -105,6 +105,7 @@ steps:
           -backend-config="prefix=prod/frontend-simple/terraform.tfstate" \
           -reconfigure \
           -input=false
+    id: 'terraform-init'
 
   # Step 8: Validate Terraform
   - name: 'hashicorp/terraform:1.6'
