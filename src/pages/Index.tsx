@@ -538,7 +538,6 @@ const Index = () => {
                 aria-label="Trust indicators"
                 className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm md:text-base px-2"
             >
-              <span className="text-jobhub-text font-semibold">Now live</span>
               <div className="flex">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 fill-current" />
@@ -559,7 +558,7 @@ const Index = () => {
                 Free to post. No obligation. Only verified pros prioritized.
               </p>
               <p className="text-jobhub-text text-xs sm:text-sm font-semibold">
-                JobHub is built for real homeowners and qualified UK trades — no fake profiles, ever.
+                JobHub is built for real homeowners and qualified UK trades.
               </p>
             </motion.div>
           </div>
@@ -711,10 +710,9 @@ const Index = () => {
             >
               <div className="inline-flex items-center gap-2 bg-jobhub-successBg text-emerald-700 px-4 py-2 rounded-full mb-6 font-semibold border border-emerald-200">
                 <Shield className="h-5 w-5" />
-                <span>Manually Verified by JobHub</span>
               </div>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-jobhub-text mb-3 sm:mb-4">Every Verified Badge Is Earned — Not Bought</h2>
-              <p className="text-jobhub-subtext text-base sm:text-lg px-4 max-w-2xl mx-auto">Tradespeople upload <span className="font-semibold">qualifications and insurance documents</span>, which are <span className="font-semibold">manually reviewed by our team</span> before approval. <span className="font-semibold">Verified badges</span> mean we've checked their credentials — giving you peace of mind.</p>
+              <p className="text-jobhub-subtext text-base sm:text-lg px-4 max-w-2xl mx-auto">Tradespeople upload <span className="font-semibold">qualifications</span>, which are <span className="font-semibold">manually reviewed by our team</span> before approval. <span className="font-semibold">Verified badges</span> mean we've checked their credentials — giving you peace of mind.</p>
               <p className="text-sm text-emerald-700 font-semibold mt-3 px-4 max-w-2xl mx-auto bg-emerald-50 py-2 rounded-lg border border-emerald-200">
                 ✓ For Traders: Get verified to stand out and earn more jobs — verified pros are prioritized in AI search results
               </p>
@@ -737,7 +735,7 @@ const Index = () => {
               
               <div className="space-y-4">
                 {[
-                  { icon: <Award className="h-5 w-5" />, title: "Professional Qualifications", desc: "Our team reviews uploaded trade certificates and qualifications — no auto-approval" },
+                  { icon: <Award className="h-5 w-5" />, title: "Professional Qualifications", desc: "Our team reviews uploaded trade certificates and qualifications" },
                   { icon: <Shield className="h-5 w-5" />, title: "Insurance Coverage", desc: "We verify current liability insurance documentation before awarding verification" },
                   { icon: <CheckCircle2 className="h-5 w-5" />, title: "Identity & Profile Checks", desc: "Profile completeness, business legitimacy, and contact verification" },
                   { icon: <Star className="h-5 w-5" />, title: "Work History & Reviews", desc: "Only real homeowner feedback from completed jobs — no fake reviews" }
@@ -824,7 +822,6 @@ const Index = () => {
             className="flex flex-wrap justify-center items-center gap-6 md:gap-12 py-6 px-4 bg-jobhub-surface rounded-2xl border border-jobhub-border"
           >
             {[
-              { icon: <Shield className="h-6 w-6" />, text: "Manually Verified by Our Team" },
               { icon: <Award className="h-6 w-6" />, text: "Qualifications Checked" },
               { icon: <CheckCircle2 className="h-6 w-6" />, text: "Insurance Confirmed" },
               { icon: <Star className="h-6 w-6" />, text: "Real Reviews from Completed Jobs" }
@@ -1013,7 +1010,7 @@ const Index = () => {
                 <span>Verified & Trusted</span>
               </div>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-jobhub-text mb-3 sm:mb-4">Real Reviews. Real Verification. Real Peace of Mind.</h2>
-              <p className="text-jobhub-subtext text-base sm:text-lg px-4 max-w-2xl mx-auto">JobHub manually verifies qualifications and insurance before awarding verified badges. <span className="font-semibold">AI matching</span> then prioritizes these pre-checked professionals for your job.</p>
+              <p className="text-jobhub-subtext text-base sm:text-lg px-4 max-w-2xl mx-auto">JobHub verifies qualifications and insurance before awarding verified badges. <span className="font-semibold">AI matching</span> then prioritizes these pre-checked professionals for your job.</p>
               <p className="text-sm text-emerald-700 font-semibold mt-3 px-4 max-w-2xl mx-auto bg-emerald-50 py-2 rounded-lg border border-emerald-200">
                 Every review comes from completed jobs — no fake feedback, ever. Only real homeowners can leave verified reviews.
               </p>
@@ -1235,7 +1232,7 @@ const Index = () => {
             {[
               {
                 question: "What does 'verified' mean on JobHub?",
-                answer: "Every verified badge is manually awarded by our team after reviewing uploaded qualifications and insurance documents. We check trade certifications, confirm current insurance coverage, and verify profile authenticity — no automated approval. This gives you confidence that verified professionals have been thoroughly checked.",
+                answer: "Every verified badge is manually awarded by our team after reviewing uploaded qualifications and insurance documents. We check trade certifications, and verify profile authenticity — no automated approval. This gives you confidence that verified professionals have been thoroughly checked.",
                 icon: <Shield className="h-5 w-5 text-emerald-600" />
               },
               {
