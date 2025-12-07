@@ -107,7 +107,7 @@ steps:
           -input=false
     id: 'terraform-init'
 
-  # Step 8: Validate Terraform
+  # Step 8: Validaste Terraform
   - name: 'hashicorp/terraform:1.6'
     entrypoint: 'sh'
     args:
