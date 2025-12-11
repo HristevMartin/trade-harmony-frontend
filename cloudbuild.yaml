@@ -64,7 +64,7 @@ steps:
     id: 'debug-structure'
     waitFor: ['configure-git', 'push-images']
 
-  # Step 6: Create terrafsorm.tfvars with new image
+  # Step 6: Create terrsafsorm.tfvars with new image
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
     args:
