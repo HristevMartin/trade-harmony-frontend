@@ -81,11 +81,9 @@ const SessionValidator = () => {
           console.log('✅ Session validation response:', data);
 
           if (data.authenticated) {
-            // Session is valid, mark recent login to prevent interceptor redirects
             markRecentLogin();
             console.log('✅ Session valid! User authenticated, marked recent login');
           } else {
-            // Session invalid, clear localStorage
             console.log('❌ Session invalid, clearing localStorage');
             localStorage.removeItem('auth_user');
             localStorage.removeItem('access_token');

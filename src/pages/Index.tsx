@@ -127,14 +127,6 @@ const Index = () => {
       service: "Verified Homeowner"
     },
     {
-      text: "Been getting steady work through JobHub for three months now. The verification badge really helps customers trust me straight away.",
-      name: "James M.",
-      location: "Croydon, London",
-      avatar: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=150&h=150&fit=crop&crop=face",
-      rating: 5,
-      service: "Verified Tradesperson"
-    },
-    {
       text: "Much better than those other sites where you don't know who's legit. The verified badges and reviews gave me confidence choosing a plumber.",
       name: "Emma R.",
       location: "Islington, London",
