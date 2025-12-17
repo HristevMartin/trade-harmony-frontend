@@ -165,7 +165,6 @@ const Index = () => {
     }
   }, [isHovering, testimonials.length]);
 
-  // Show/hide scroll to top button based on scroll position
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
