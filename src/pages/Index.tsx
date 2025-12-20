@@ -155,7 +155,6 @@ const Index = () => {
     { text: "Available", location: "In Your Area", action: "connecting", service: "local professionals", time: "", icon: "📍" }
   ];
 
-  // Auto-advance testimonial carousel
   useEffect(() => {
     if (!isHovering) {
       const interval = setInterval(() => {
