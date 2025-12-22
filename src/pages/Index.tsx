@@ -182,7 +182,6 @@ const Index = () => {
     setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
   };
 
-  // Touch handlers for mobile swipe
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(0);
     setTouchStart(e.targetTouches[0].clientX);
