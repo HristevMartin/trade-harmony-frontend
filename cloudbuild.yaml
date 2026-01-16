@@ -6,7 +6,7 @@ steps:
 
   - name: 'node:18'
     entrypoint: 'bash'
-    # //test
+    # //test2
     args:
       - -c
       - |
