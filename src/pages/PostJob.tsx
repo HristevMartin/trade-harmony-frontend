@@ -13,17 +13,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { 
-  HiShieldCheck, 
-  HiMapPin, 
-  HiWrenchScrewdriver, 
-  HiCamera, 
-  HiAdjustmentsHorizontal, 
-  HiUserCircle, 
-  HiCloudArrowUp, 
-  HiCheckCircle,
-  HiStar, 
-  HiLockClosed 
+import {
+    HiShieldCheck,
+    HiMapPin,
+    HiWrenchScrewdriver,
+    HiCamera,
+    HiAdjustmentsHorizontal,
+    HiUserCircle,
+    HiCloudArrowUp,
+    HiCheckCircle,
+    HiStar,
+    HiLockClosed
 } from "react-icons/hi2";
 import { X, Sparkles } from "lucide-react";
 import UKLocationInput from "@/components/UKLocationInput";
@@ -34,36 +34,35 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 const PostJob = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
-    
-    // Get country from query param and validate it exists in our mapping
+
     const countryParam = searchParams.get('country')?.toUpperCase() || 'GB';
     const countryCodeMap = {
         'GB': '🇬🇧 United Kingdom',
     };
-    
+
     // Service categories array
     const serviceCategories = [
-        'Plumbing', 'Electrical', 'Bricklaying', 'Carpentry', 'Roofing', 'Painting', 
+        'Plumbing', 'Electrical', 'Bricklaying', 'Carpentry', 'Roofing', 'Painting',
         'Gardening', 'Heating & Cooling', 'Flooring', 'Cleaning', 'Removals', 'Handyman', 'Mechanic'
     ];
-    
-    
+
+
     // Use the country if it exists in our mapping, otherwise default to GB
     const initialCountry = countryCodeMap[countryParam as keyof typeof countryCodeMap] ? countryParam : 'GB';
     const initialPostcode = searchParams.get('postcode') || '';
-    
+
     // Get category from query param and find the exact match from serviceCategories
     const categoryParam = searchParams.get('category') || '';
-    
+
     // Find exact category match (case-insensitive)
-    const initialCategory = categoryParam 
+    const initialCategory = categoryParam
         ? serviceCategories.find(cat => cat.toLowerCase() === categoryParam.toLowerCase()) || ''
         : '';
-    
+
     // Generate initial job title based on category
     const generateJobTitleFromCategory = (category: string) => {
         if (!category) return '';
-        
+
         const categoryTitles: Record<string, string> = {
             'plumbing': 'Plumbing repair needed',
             'electrical': 'Electrical work required',
@@ -79,25 +78,25 @@ const PostJob = () => {
             'handyman': 'Handyman services required',
             'mechanic': 'Mechanic services needed'
         };
-        
+
         return categoryTitles[category.toLowerCase()] || `${category} work needed`;
     };
-    
+
     const initialJobTitle = initialCategory ? generateJobTitleFromCategory(initialCategory) : '';
-    
+
     console.log('Query params:', { country: countryParam, postcode: initialPostcode, mappedCountry: initialCountry, category: categoryParam, matchedCategory: initialCategory, generatedTitle: initialJobTitle });
-    
+
     // Extract city/town from postcode parameter if available
     const extractCityFromPostcode = (postcode: string, country: string) => {
         if (!postcode) return '';
-        
+
         const pc = postcode.toUpperCase().replace(/\s/g, '');
-        
+
         // If it's already a city name (contains letters), return as-is
         if (/^[A-Z][a-z]+/.test(postcode)) {
             return postcode;
         }
-        
+
         // Country-specific postcode patterns
         if (country === 'GB') {
             // UK Postcode patterns
@@ -129,11 +128,11 @@ const PostJob = () => {
             if (pc.startsWith('8')) return 'Burgas';
             if (pc.startsWith('5')) return 'Stara Zagora';
         }
-        
+
         // If no specific match, return the postcode as entered
         return postcode;
     };
-    
+
     const [formData, setFormData] = useState({
         country: initialCountry,
         postcode: initialPostcode,
@@ -164,16 +163,16 @@ const PostJob = () => {
     const [showAiSuggestion, setShowAiSuggestion] = useState(false);
     const [showAiBriefInput, setShowAiBriefInput] = useState(false);
     const [aiBrief, setAiBrief] = useState('');
-    const [aiResponse, setAiResponse] = useState<{title: string, description: string, service_category?: string} | null>(null);
+    const [aiResponse, setAiResponse] = useState<{ title: string, description: string, service_category?: string } | null>(null);
     const [aiError, setAiError] = useState('');
     const [isDraftApplied, setIsDraftApplied] = useState(false);
 
     // Calculate completion progress for each step
     const getStepCompletion = () => {
-        const locationComplete = formData.country === 'GB' 
+        const locationComplete = formData.country === 'GB'
             ? (formData.postcode && formData.postcode.trim() !== '' && formData.area && formData.area.trim() !== '')
             : (formData.location && formData.location.trim() !== '');
-            
+
         const steps = {
             1: formData.country && locationComplete, // Location
             2: formData.serviceCategory && formData.jobTitle && formData.jobDescription.length >= 20, // Details
@@ -194,9 +193,9 @@ const PostJob = () => {
 
     useEffect(() => {
         const newJobTitle = initialCategory ? generateJobTitleFromCategory(initialCategory) : '';
-        setFormData(prev => ({ 
-            ...prev, 
-            country: initialCountry, 
+        setFormData(prev => ({
+            ...prev,
+            country: initialCountry,
             postcode: initialPostcode,
             area: '',
             serviceCategory: initialCategory,
@@ -210,32 +209,32 @@ const PostJob = () => {
         if (draftParam && !isDraftApplied) {
             try {
                 const draft: JobDraft = JSON.parse(decodeURIComponent(draftParam));
-                
+
                 // Map the draft urgency to our form urgency options
                 const urgencyMap: Record<string, string> = {
                     'urgent': 'immediate',
                     'flexible': 'flexible',
                     'planned': 'next-month'
                 };
-                
+
                 // Find matching service category
                 const matchedCategory = serviceCategories.find(
                     cat => cat.toLowerCase() === draft.categoryLabel.toLowerCase()
                 ) || draft.categoryLabel;
-                
+
                 setFormData(prev => ({
                     ...prev,
                     serviceCategory: matchedCategory,
                     jobTitle: draft.title,
                     jobDescription: draft.description,
                     urgency: urgencyMap[draft.urgency] || 'flexible',
-                    budget: draft.suggestedBudget?.min && draft.suggestedBudget?.max 
-                        ? `${draft.suggestedBudget.min}-${draft.suggestedBudget.max}` 
+                    budget: draft.suggestedBudget?.min && draft.suggestedBudget?.max
+                        ? `${draft.suggestedBudget.min}-${draft.suggestedBudget.max}`
                         : ''
                 }));
-                
+
                 setIsDraftApplied(true);
-                
+
                 // Scroll to top to show the AI draft banner
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } catch (error) {
@@ -266,7 +265,7 @@ const PostJob = () => {
             const remainingSlots = 5 - currentCount;
             const filesToAdd = files.slice(0, remainingSlots);
             setUploadedImages(prev => [...prev, ...filesToAdd]);
-            
+
             // Clear the input so the same file can be selected again if needed
             e.target.value = '';
         }
@@ -345,7 +344,7 @@ const PostJob = () => {
 
     const validateField = (field: string, value: string | boolean, returnError: boolean = false): boolean | string => {
         const errors: Record<string, string> = {};
-        
+
         switch (field) {
             case 'jobTitle':
                 if (!value || (value as string).length < 5) {
@@ -434,11 +433,11 @@ const PostJob = () => {
                 }
                 break;
         }
-        
+
         if (returnError) {
             return errors[field] || '';
         }
-        
+
         setFormErrors(prev => ({ ...prev, ...errors }));
         return Object.keys(errors).length === 0;
     };
@@ -452,7 +451,7 @@ const PostJob = () => {
         setShowAiSuggestion(false);
         setAiError('');
         setAiResponse(null);
-        
+
         // Scroll to the AI input section after a brief delay to ensure it's rendered
         setTimeout(() => {
             const aiSection = document.getElementById('ai-brief-section');
@@ -473,10 +472,10 @@ const PostJob = () => {
 
         setIsAiGenerating(true);
         setAiError('');
-        
+
         try {
             // Enhance the brief with service category context
-            const enhancedBrief = formData.serviceCategory 
+            const enhancedBrief = formData.serviceCategory
                 ? `${formData.serviceCategory} service needed: ${aiBrief.trim()}`
                 : aiBrief.trim();
 
@@ -496,7 +495,7 @@ const PostJob = () => {
                 setAiResponse(data);
                 setShowAiSuggestion(true);
                 setShowAiBriefInput(false);
-                
+
                 // Scroll to the AI suggestion section after a brief delay
                 setTimeout(() => {
                     const suggestionSection = document.getElementById('ai-suggestion-section');
@@ -525,7 +524,7 @@ const PostJob = () => {
         if (aiResponse) {
             handleInputChange('jobTitle', aiResponse.title);
             handleInputChange('jobDescription', aiResponse.description);
-            
+
             // Update service category if AI suggested one and it's valid
             if (aiResponse.service_category && serviceCategories.includes(aiResponse.service_category)) {
                 handleInputChange('serviceCategory', aiResponse.service_category);
@@ -534,7 +533,7 @@ const PostJob = () => {
         setShowAiSuggestion(false);
         setShowAiBriefInput(false);
         setAiBrief('');
-        
+
         // Clear any form errors
         if (formErrors.jobDescription || formErrors.jobTitle || formErrors.serviceCategory) {
             setFormErrors(prev => {
@@ -551,7 +550,7 @@ const PostJob = () => {
         if (aiResponse) {
             handleInputChange('jobTitle', aiResponse.title);
             handleInputChange('jobDescription', aiResponse.description);
-            
+
             // Update service category if AI suggested one and it's valid
             if (aiResponse.service_category && serviceCategories.includes(aiResponse.service_category)) {
                 handleInputChange('serviceCategory', aiResponse.service_category);
@@ -560,7 +559,7 @@ const PostJob = () => {
         setShowAiSuggestion(false);
         setShowAiBriefInput(false);
         setAiBrief('');
-        
+
         // Focus the textarea for editing
         setTimeout(() => {
             const textarea = document.getElementById('jobDescription') as HTMLTextAreaElement;
@@ -576,7 +575,7 @@ const PostJob = () => {
         setShowAiBriefInput(true);
         setShowAiSuggestion(false);
         setAiError('');
-        
+
         // Scroll to the AI input section after a brief delay
         setTimeout(() => {
             const aiSection = document.getElementById('ai-brief-section');
@@ -585,7 +584,7 @@ const PostJob = () => {
                     behavior: 'smooth',
                     block: 'center'
                 });
-                
+
                 // Focus the textarea for immediate editing
                 setTimeout(() => {
                     const textarea = aiSection.querySelector('textarea');
@@ -614,9 +613,9 @@ const PostJob = () => {
     // Check if user is authenticated as a homeowner/customer
     const isAuthenticatedHomeowner = () => {
         const authUser = localStorage.getItem('auth_user');
-        
+
         console.log('isAuthenticatedHomeowner check:', { authUser: !!authUser });
-        
+
         if (!authUser) {
             console.log('Missing authUser');
             return false;
@@ -626,7 +625,7 @@ const PostJob = () => {
             const userData = JSON.parse(authUser);
             const userRole = Array.isArray(userData.role) ? userData.role : [userData.role];
             console.log('User data:', { userData, userRole });
-            
+
             // Check if user has customer/homeowner role
             const isHomeowner = userRole.includes('customer') || userRole.includes('CUSTOMER') || userRole.includes('homeowner') || userRole.includes('HOMEOWNER');
             console.log('Is homeowner:', isHomeowner);
@@ -644,12 +643,11 @@ const PostJob = () => {
         }
     };
 
-    // Check if authenticated user has correct role for posting jobs
     const checkUserRole = () => {
         const authUser = localStorage.getItem('auth_user');
-        
+
         if (!authUser) {
-            return { isValid: true, message: '' }; // Not authenticated, allow to proceed with auth modal
+            return { isValid: true, message: '' };
         }
 
         try {
@@ -669,33 +667,27 @@ const PostJob = () => {
         }
     };
 
-    // Scroll to the first error field
     const scrollToFirstError = (errors: Record<string, string> = formErrors) => {
-        // Use setTimeout to ensure the errors are set in the DOM first
         setTimeout(() => {
-            // Define the order of fields to check (in the order they appear on the form)
             const fieldOrder = [
-                'postcode', 'area', 'location', 'serviceCategory', 'jobTitle', 'jobDescription', 
+                'postcode', 'area', 'location', 'serviceCategory', 'jobTitle', 'jobDescription',
                 'budget', 'customBudget', 'urgency', 'firstName', 'email', 'phone', 'gdprConsent'
             ];
-            
-            // Find the first field with an error
+
             for (const field of fieldOrder) {
                 if (errors[field]) {
                     const element = document.getElementById(field);
-                    
+
                     if (element) {
-                        // Scroll to the element with some offset for better visibility
                         const elementRect = element.getBoundingClientRect();
                         const absoluteElementTop = elementRect.top + window.pageYOffset;
-                        const offset = 100; // Offset from top of viewport
-                        
+                        const offset = 100;
+
                         window.scrollTo({
                             top: absoluteElementTop - offset,
                             behavior: 'smooth'
                         });
-                        
-                        // Focus the element for better accessibility
+
                         element.focus();
                         break;
                     }
@@ -704,117 +696,99 @@ const PostJob = () => {
         }, 100);
     };
 
-    // Handle authentication success
-    const handleAuthSuccess = async (authData: { id: string; role: string; token: string; email?: string }) => {
+    const handleAuthSuccess = async (authData: { id: string; role: string | string[]; token: string; email?: string }) => {
         console.log('Authentication successful:', authData);
-        
-        // CRITICAL: Update localStorage immediately
+
         localStorage.setItem('auth_user', JSON.stringify({
             id: authData.id,
             role: authData.role,
         }));
         console.log('✅ localStorage updated');
-        
-        // CRITICAL: Mark recent login to prevent interceptor redirects
+
         const { markRecentLogin } = await import('@/lib/fetch-interceptor');
         markRecentLogin();
         console.log('✅ markRecentLogin called');
-        
-        // CRITICAL: Dispatch auth change event
+
         window.dispatchEvent(new Event('authChange'));
         console.log('✅ authChange dispatched');
-        
+
         setShowAuthModal(false);
-        
-        // Check if the authenticated user has the correct role
+
         const authUserRole = Array.isArray(authData.role) ? authData.role : [authData.role];
         if (authUserRole.includes('trader') || authUserRole.includes('TRADER')) {
-            setFormErrors(prev => ({ 
-                ...prev, 
-                general: 'Traders cannot post homeowner projects. Please create a new customer account or switch to a customer account to post a job.' 
+            setFormErrors(prev => ({
+                ...prev,
+                general: 'Traders cannot post homeowner projects. Please create a new customer account or switch to a customer account to post a job.'
             }));
             setPendingSubmission(false);
-            // Scroll to top to make the error message visible
             window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         }
-        
-        // If there was a pending submission, proceed with it
+
         if (pendingSubmission) {
             setPendingSubmission(false);
-            // Call the actual job submission
             submitJobData();
         }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
-        // Clear any previous errors
+
         setFormErrors({});
-        
-        // Validate all fields
-        // Only include postcode validation if country is GB AND location is London
+
         const baseFields = ['serviceCategory', 'jobTitle', 'jobDescription', 'budget', 'customBudget', 'firstName', 'phone', 'urgency', 'gdprConsent'];
-        const fieldsToValidate = formData.country === 'GB' 
-            ? (formData.area === 'London' 
+        const fieldsToValidate = formData.country === 'GB'
+            ? (formData.area === 'London'
                 ? ['postcode', 'area', ...baseFields]
                 : ['area', ...baseFields])
             : ['location', ...baseFields];
         let isValid = true;
-        
+
         const currentErrors: Record<string, string> = {};
-        
+
         fieldsToValidate.forEach(field => {
             const value = field === 'gdprConsent' ? formData.gdprConsent : formData[field as keyof typeof formData];
-            
+
             const errorMessage = validateField(field, value, true) as string;
             if (errorMessage) {
                 isValid = false;
                 currentErrors[field] = errorMessage;
             }
-            // Also run normal validation to set form errors
             validateField(field, value);
         });
-        
-        // Special validation for custom budget
+
         if (formData.budget === 'custom' && (!formData.customBudget || formData.customBudget.trim() === '')) {
             setFormErrors(prev => ({ ...prev, budget: 'Please enter your custom budget amount' }));
             currentErrors.budget = 'Please enter your custom budget amount';
             isValid = false;
         }
-        
+
         if (!isValid) {
             console.log('VALIDATION FAILED - Current errors:', currentErrors);
             console.log('Form data at time of validation:', formData);
-            // Scroll to the first error field using current errors
             setTimeout(() => scrollToFirstError(currentErrors), 50);
             return;
         }
-        
+
         console.log('VALIDATION PASSED - Form is valid, proceeding...');
 
-        // Check user role first (for authenticated users)
         const roleCheck = checkUserRole();
         if (!roleCheck.isValid) {
             setFormErrors(prev => ({ ...prev, general: roleCheck.message }));
-            // Scroll to top to make the error message visible
             window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         }
 
-        // Check if user is authenticated as a homeowner
         const isHomeowner = isAuthenticatedHomeowner();
         console.log('Form submission - isAuthenticatedHomeowner result:', isHomeowner);
-        
+
         if (!isHomeowner) {
             console.log('User is not authenticated as homeowner, showing auth modal');
-            // Show auth modal and mark submission as pending
             setPendingSubmission(true);
             setShowAuthModal(true);
             return;
         }
-        
+
         console.log('User is authenticated as homeowner, proceeding with submission');
 
         await submitJobData();
@@ -822,19 +796,15 @@ const PostJob = () => {
 
     const submitJobData = async () => {
         setIsSubmitting(true);
-        
+
         try {
-            // Create FormData for file upload
             const formDataToSend = new FormData();
-            
-            // Add form fields with special handling for budget
+
             Object.keys(formData).forEach(key => {
                 const value = formData[key as keyof typeof formData];
                 if (value !== null && value !== undefined) {
-                    // Handle budget field specially
                     if (key === 'budget') {
                         if (value === 'custom' && formData.customBudget) {
-                            // Send the custom budget amount as the budget value
                             formDataToSend.append('budget', `Custom: £${formData.customBudget}`);
                             formDataToSend.append('budgetType', 'custom');
                             formDataToSend.append('budgetAmount', formData.customBudget);
@@ -843,7 +813,6 @@ const PostJob = () => {
                             formDataToSend.append('budgetType', 'range');
                         }
                     } else if (key === 'customBudget') {
-                        // Only send customBudget if budget is set to custom
                         if (formData.budget === 'custom') {
                             formDataToSend.append(key, value.toString());
                         }
@@ -852,26 +821,23 @@ const PostJob = () => {
                     }
                 }
             });
-            
-            // Add images
+
             uploadedImages.forEach((file, index) => {
                 formDataToSend.append(`images`, file);
             });
 
-            // Add userId from auth data
             const authUser = localStorage.getItem('auth_user');
             if (authUser) {
                 const userData = JSON.parse(authUser);
                 formDataToSend.append('userId', userData.id);
             }
 
-            // Add auth token to headers
             const token = localStorage.getItem('access_token');
             const headers: HeadersInit = {};
             if (token) {
                 headers['Authorization'] = `Bearer ${token}`;
             }
-            
+
             console.log('Sending form data:', {
                 formData,
                 imageCount: uploadedImages.length,
@@ -880,14 +846,14 @@ const PostJob = () => {
             });
 
             console.log('formDataToSend', formDataToSend);
-            
+
             const submitDataRequest = await fetch(`${API_URL}/travel/save-client-project`, {
                 method: 'POST',
                 credentials: 'include',
                 headers,
                 body: formDataToSend,
             });
-            
+
             if (submitDataRequest.ok) {
                 const data = await submitDataRequest.json();
                 console.log('Success response:', data);
@@ -899,20 +865,16 @@ const PostJob = () => {
             } else {
                 const errorData = await submitDataRequest.text();
                 console.error('Server error:', errorData);
-                
-                // Try to parse error response
+
                 try {
                     const errorJson = JSON.parse(errorData);
                     if (errorJson.errors) {
-                        // If there are specific field errors, show them inline
                         setFormErrors(errorJson.errors);
                     } else {
-                        // If it's a general server error, show error modal
                         setErrorModalMessage(errorJson.message || 'Server error occurred. Please try again.');
                         setShowErrorModal(true);
                     }
-                } catch {
-                    // If error response isn't JSON, show error modal
+                } catch {   
                     setErrorModalMessage('Server error occurred. Please try again later.');
                     setShowErrorModal(true);
                 }
@@ -936,7 +898,7 @@ const PostJob = () => {
 
     return (
         <>
-            <MobileHeader 
+            <MobileHeader
                 title="Post Your Job"
                 subtitle="Free to post - Connect with verified tradespeople"
             />
@@ -973,33 +935,30 @@ const PostJob = () => {
                                 const completion = getStepCompletion();
                                 const isCompleted = completion[step.number as keyof typeof completion];
                                 const isCurrent = currentStep === step.number;
-                                
+
                                 return (
                                     <div key={step.number} className="flex items-center">
                                         <div className={`flex flex-col items-center ${index < steps.length - 1 ? 'flex-1' : ''}`}>
-                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
-                                                isCompleted 
-                                                    ? 'bg-green-500 text-white' 
-                                                    : isCurrent 
-                                                        ? 'bg-blue-500 text-white' 
+                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${isCompleted
+                                                    ? 'bg-green-500 text-white'
+                                                    : isCurrent
+                                                        ? 'bg-blue-500 text-white'
                                                         : 'bg-slate-200 text-slate-500'
-                                            }`}>
+                                                }`}>
                                                 {isCompleted ? (
                                                     <HiCheckCircle className="w-5 h-5" />
                                                 ) : (
                                                     <Icon className="w-5 h-5" />
                                                 )}
                                             </div>
-                                            <span className={`text-xs font-medium mt-1 ${
-                                                isCompleted ? 'text-green-600' : isCurrent ? 'text-blue-600' : 'text-slate-500'
-                                            }`}>
+                                            <span className={`text-xs font-medium mt-1 ${isCompleted ? 'text-green-600' : isCurrent ? 'text-blue-600' : 'text-slate-500'
+                                                }`}>
                                                 {step.title}
                                             </span>
                                         </div>
                                         {index < steps.length - 1 && (
-                                            <div className={`flex-1 h-0.5 mx-2 transition-colors ${
-                                                isCompleted ? 'bg-green-500' : 'bg-slate-200'
-                                            }`} />
+                                            <div className={`flex-1 h-0.5 mx-2 transition-colors ${isCompleted ? 'bg-green-500' : 'bg-slate-200'
+                                                }`} />
                                         )}
                                     </div>
                                 );
@@ -1007,7 +966,7 @@ const PostJob = () => {
                         </div>
                         <div className="mt-6">
                             <div className="w-full bg-slate-200 rounded-full h-2">
-                                <div 
+                                <div
                                     className="bg-gradient-to-r from-blue-500 to-green-500 h-2 rounded-full transition-all duration-500"
                                     style={{ width: `${(Object.values(getStepCompletion()).filter(Boolean).length / 5) * 100}%` }}
                                 ></div>
@@ -1020,11 +979,11 @@ const PostJob = () => {
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div aria-live="polite" aria-atomic="true" className="sr-only">
-                            {Object.keys(formErrors).length > 0 && 
+                            {Object.keys(formErrors).length > 0 &&
                                 `Form has ${Object.keys(formErrors).length} error${Object.keys(formErrors).length > 1 ? 's' : ''}`
                             }
                         </div>
-                        
+
                         {/* General Error Message */}
                         {formErrors.general && (
                             <div className="rounded-xl bg-red-50 border border-red-200 p-4 mb-6">
@@ -1073,7 +1032,7 @@ const PostJob = () => {
                                 <div>
                                     <Label htmlFor="country" className="text-sm font-medium text-slate-700">Country</Label>
                                     <Select value={formData.country} onValueChange={(value) => handleInputChange('country', value)}>
-                                        <SelectTrigger 
+                                        <SelectTrigger
                                             id="country"
                                             className="rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0"
                                         >
@@ -1111,9 +1070,8 @@ const PostJob = () => {
                                                     }}
                                                     onBlur={(e) => handleBlur('area', e.target.value)}
                                                     placeholder="Enter your town or city"
-                                                    className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${
-                                                        formErrors.area ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
-                                                    }`}
+                                                    className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${formErrors.area ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
+                                                        }`}
                                                     aria-invalid={!!formErrors.area}
                                                     aria-describedby={formErrors.area ? 'area-error' : 'area-help'}
                                                 />
@@ -1162,9 +1120,8 @@ const PostJob = () => {
                                                 onChange={(e) => handleInputChange('location', e.target.value)}
                                                 onBlur={(e) => handleBlur('location', e.target.value)}
                                                 placeholder="Enter your postcode or area"
-                                                className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${
-                                                    formErrors.location ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
-                                                }`}
+                                                className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${formErrors.location ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
+                                                    }`}
                                                 aria-invalid={!!formErrors.location}
                                                 aria-describedby={formErrors.location ? 'location-error' : 'location-help'}
                                             />
@@ -1213,11 +1170,10 @@ const PostJob = () => {
                                         handleInputChange('serviceCategory', value);
                                         handleBlur('serviceCategory', value);
                                     }}>
-                                        <SelectTrigger 
+                                        <SelectTrigger
                                             id="serviceCategory"
-                                            className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${
-                                                formErrors.serviceCategory ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
-                                            }`}
+                                            className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${formErrors.serviceCategory ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
+                                                }`}
                                             aria-invalid={!!formErrors.serviceCategory}
                                             aria-describedby={formErrors.serviceCategory ? 'serviceCategory-error' : 'serviceCategory-help'}
                                         >
@@ -1257,9 +1213,8 @@ const PostJob = () => {
                                         onBlur={(e) => handleBlur('jobTitle', e.target.value)}
                                         placeholder="e.g., Fix leaking pipe"
                                         maxLength={120}
-                                        className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${
-                                            formErrors.jobTitle ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
-                                        }`}
+                                        className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${formErrors.jobTitle ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
+                                            }`}
                                         aria-invalid={!!formErrors.jobTitle}
                                         aria-describedby={formErrors.jobTitle ? 'jobTitle-error' : 'jobTitle-help'}
                                     />
@@ -1293,9 +1248,8 @@ const PostJob = () => {
                                         }}
                                         onBlur={(e) => handleBlur('jobDescription', e.target.value)}
                                         placeholder="Describe the problem and when you need it done"
-                                        className={`min-h-[120px] rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 resize-none overflow-hidden ${
-                                            formErrors.jobDescription ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
-                                        }`}
+                                        className={`min-h-[120px] rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 resize-none overflow-hidden ${formErrors.jobDescription ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
+                                            }`}
                                         aria-invalid={!!formErrors.jobDescription}
                                         aria-describedby={formErrors.jobDescription ? 'jobDescription-error' : 'jobDescription-help'}
                                     />
@@ -1314,7 +1268,7 @@ const PostJob = () => {
                                     )}
 
                                     {/* AI Brief Input */}
-                                    <div 
+                                    <div
                                         id="ai-brief-section"
                                         className={`
                                             overflow-hidden transition-all duration-300 ease-in-out
@@ -1338,7 +1292,7 @@ const PostJob = () => {
                                                     <X className="w-4 h-4" />
                                                 </button>
                                             </div>
-                                            
+
                                             <div className="mb-3">
                                                 {formData.serviceCategory && (
                                                     <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full mb-2">
@@ -1347,13 +1301,13 @@ const PostJob = () => {
                                                     </div>
                                                 )}
                                                 <p className="text-sm text-slate-600">
-                                                    {formData.serviceCategory 
+                                                    {formData.serviceCategory
                                                         ? `Tell me about your ${formData.serviceCategory.toLowerCase()} project, and I'll help you write a compelling job title and description.`
                                                         : 'Tell me briefly what work you need done, and I\'ll help you write a compelling job title and description.'
                                                     }
                                                 </p>
                                             </div>
-                                            
+
                                             <div className="space-y-3">
                                                 <Textarea
                                                     value={aiBrief}
@@ -1387,17 +1341,17 @@ const PostJob = () => {
                                                             'Handyman': 'Various small repairs around the house',
                                                             'Mechanic': 'Car won\'t start, need diagnostic and repair'
                                                         };
-                                                        
-                                                        const example = formData.serviceCategory 
+
+                                                        const example = formData.serviceCategory
                                                             ? examples[formData.serviceCategory as keyof typeof examples] || `Need help with ${formData.serviceCategory.toLowerCase()} work`
                                                             : 'My kitchen tap is dripping and won\'t turn off properly';
-                                                            
+
                                                         return `e.g., ${example}... (Ctrl+Enter to generate, Esc to cancel)`;
                                                     })()}
                                                     className="min-h-[80px] rounded-lg border-purple-200 bg-white/80 placeholder:text-slate-400 focus:border-purple-400 focus:ring-2 focus:ring-purple-100 resize-none"
                                                     disabled={isAiGenerating}
                                                 />
-                                                
+
                                                 {aiError && (
                                                     <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
                                                         <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -1406,7 +1360,7 @@ const PostJob = () => {
                                                         <p className="text-sm text-red-700">{aiError}</p>
                                                     </div>
                                                 )}
-                                                
+
                                                 <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
                                                     <button
                                                         type="button"
@@ -1457,7 +1411,7 @@ const PostJob = () => {
                                     </div>
 
                                     {/* AI Suggestion Box */}
-                                    <div 
+                                    <div
                                         id="ai-suggestion-section"
                                         className={`
                                             overflow-hidden transition-all duration-500 ease-in-out
@@ -1481,7 +1435,7 @@ const PostJob = () => {
                                                     Regenerate
                                                 </button>
                                             </div>
-                                            
+
                                             {aiResponse && (
                                                 <div className="space-y-3 mb-4">
                                                     {aiResponse.service_category && (
@@ -1514,7 +1468,7 @@ const PostJob = () => {
                                                     </div>
                                                 </div>
                                             )}
-                                            
+
                                             <div className="flex flex-col sm:flex-row gap-3 sm:justify-center mt-4 border-t border-purple-200/50 pt-4">
                                                 <button
                                                     type="button"
@@ -1563,14 +1517,13 @@ const PostJob = () => {
                                 <HiCamera className="w-5 h-5 text-blue-600" aria-hidden="true" />
                                 Photos (Optional)
                             </legend>
-                            <div className={`border-2 border-dashed rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors p-6 text-center border-slate-300 ${
-                                uploadedImages.length >= 5 ? 'opacity-50 pointer-events-none' : ''
-                            }`}>
+                            <div className={`border-2 border-dashed rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors p-6 text-center border-slate-300 ${uploadedImages.length >= 5 ? 'opacity-50 pointer-events-none' : ''
+                                }`}>
                                 <HiCloudArrowUp className="text-3xl text-slate-400 mb-2 mx-auto" aria-hidden="true" />
                                 <p className="text-lg font-medium mb-2 text-slate-900">Upload photos of your job</p>
                                 <p className="text-sm text-slate-600 mb-4">
-                                    {uploadedImages.length >= 5 
-                                        ? 'Maximum 5 photos reached' 
+                                    {uploadedImages.length >= 5
+                                        ? 'Maximum 5 photos reached'
                                         : `Optional - add photos to help tradespeople understand your job (${uploadedImages.length}/5)`
                                     }
                                 </p>
@@ -1583,18 +1536,17 @@ const PostJob = () => {
                                     id="photo-upload"
                                     disabled={uploadedImages.length >= 5}
                                 />
-                                <label 
-                                    htmlFor="photo-upload" 
-                                    className={`inline-flex items-center px-4 py-2 rounded-lg bg-white ring-1 ring-slate-200 hover:bg-slate-50 text-slate-700 font-medium transition-colors ${
-                                        uploadedImages.length >= 5 
-                                            ? 'cursor-not-allowed opacity-50' 
+                                <label
+                                    htmlFor="photo-upload"
+                                    className={`inline-flex items-center px-4 py-2 rounded-lg bg-white ring-1 ring-slate-200 hover:bg-slate-50 text-slate-700 font-medium transition-colors ${uploadedImages.length >= 5
+                                            ? 'cursor-not-allowed opacity-50'
                                             : 'cursor-pointer'
-                                    }`}
+                                        }`}
                                 >
                                     {uploadedImages.length >= 5 ? 'Limit reached' : 'Choose photos'}
                                 </label>
                             </div>
-                            
+
                             {uploadedImages.length > 0 && (
                                 <div className="mt-4">
                                     <p className="text-sm font-medium mb-2 text-slate-700">Uploaded Images ({uploadedImages.length}/5):</p>
@@ -1630,7 +1582,7 @@ const PostJob = () => {
                                     </div>
                                 </div>
                             )}
-                            
+
                             {formErrors.photos && (
                                 <p className="text-xs text-red-600 mt-2">{formErrors.photos}</p>
                             )}
@@ -1661,11 +1613,10 @@ const PostJob = () => {
                                         }
                                         handleBlur('budget', value);
                                     }}>
-                                        <SelectTrigger 
+                                        <SelectTrigger
                                             id="budget"
-                                            className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${
-                                                formErrors.budget ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
-                                            }`}
+                                            className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${formErrors.budget ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
+                                                }`}
                                             aria-invalid={!!formErrors.budget}
                                             aria-describedby={formErrors.budget ? 'budget-error' : 'budget-help'}
                                         >
@@ -1679,7 +1630,7 @@ const PostJob = () => {
                                             <SelectItem value="custom">Custom Amount</SelectItem>
                                         </SelectContent>
                                     </Select>
-                                    
+
                                     {/* Custom Budget Input - Show when 'Custom Amount' is selected */}
                                     {formData.budget === 'custom' && (
                                         <div className="mt-3">
@@ -1698,7 +1649,7 @@ const PostJob = () => {
                                                         const parts = value.split('.');
                                                         const cleanValue = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : value;
                                                         handleInputChange('customBudget', cleanValue);
-                                                        
+
                                                         // Clear budget errors when user starts typing
                                                         if (formErrors.budget || formErrors.customBudget) {
                                                             setFormErrors(prev => {
@@ -1710,9 +1661,8 @@ const PostJob = () => {
                                                         }
                                                     }}
                                                     onBlur={(e) => handleBlur('customBudget', e.target.value)}
-                                                    className={`pl-8 rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${
-                                                        formErrors.customBudget ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
-                                                    }`}
+                                                    className={`pl-8 rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${formErrors.customBudget ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
+                                                        }`}
                                                     aria-invalid={!!formErrors.customBudget}
                                                     aria-describedby={formErrors.customBudget ? 'custom-budget-error' : 'custom-budget-help'}
                                                 />
@@ -1724,7 +1674,7 @@ const PostJob = () => {
                                             )}
                                         </div>
                                     )}
-                                    
+
                                     {formErrors.budget ? (
                                         <p id="budget-error" className="text-xs text-red-600 mt-1">{formErrors.budget}</p>
                                     ) : (
@@ -1742,15 +1692,14 @@ const PostJob = () => {
                                             { value: 'this_month', label: 'Within a month' },
                                             { value: 'flexible', label: 'Flexible' }
                                         ].map((option) => (
-                                            <label 
+                                            <label
                                                 key={option.value}
-                                                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 hover:bg-slate-50 cursor-pointer transition-colors w-full ${
-                                                    formData.urgency === option.value 
-                                                        ? 'bg-blue-50 border-blue-400 text-blue-700' 
+                                                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 hover:bg-slate-50 cursor-pointer transition-colors w-full ${formData.urgency === option.value
+                                                        ? 'bg-blue-50 border-blue-400 text-blue-700'
                                                         : formErrors.urgency
                                                             ? 'border-red-300 bg-red-50'
                                                             : 'border-slate-300 text-slate-700'
-                                                }`}
+                                                    }`}
                                             >
                                                 <input
                                                     type="radio"
@@ -1802,9 +1751,8 @@ const PostJob = () => {
                                             }}
                                             onBlur={(e) => handleBlur('firstName', e.target.value)}
                                             placeholder="Your first name"
-                                            className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${
-                                                formErrors.firstName ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
-                                            }`}
+                                            className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${formErrors.firstName ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
+                                                }`}
                                             aria-invalid={!!formErrors.firstName}
                                             aria-describedby={formErrors.firstName ? 'firstName-error' : 'firstName-help'}
                                         />
@@ -1833,9 +1781,8 @@ const PostJob = () => {
                                             }}
                                             onBlur={(e) => handleBlur('phone', e.target.value)}
                                             placeholder="Your phone number"
-                                            className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${
-                                                formErrors.phone ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
-                                            }`}
+                                            className={`rounded-xl border-slate-300 placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${formErrors.phone ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
+                                                }`}
                                             aria-invalid={!!formErrors.phone}
                                             aria-describedby={formErrors.phone ? 'phone-error' : 'phone-help'}
                                         />
@@ -1858,70 +1805,17 @@ const PostJob = () => {
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div className="flex items-center gap-2 text-slate-700 text-sm">
                                     <HiCheckCircle className="w-5 h-5 text-green-600" aria-hidden="true" />
-                                    <span>Free to post — no obligation to hire</span>
+                                    <span>Free to post</span>
                                 </div>
                                 <div className="flex items-center gap-2 text-slate-700 text-sm">
                                     <HiShieldCheck className="w-5 h-5 text-blue-600" aria-hidden="true" />
-                                    <span>Verified & insured tradespeople only</span>
+                                    <span>Verified tradespeople only</span>
                                 </div>
                                 <div className="flex items-center gap-2 text-slate-700 text-sm">
                                     <HiStar className="w-5 h-5 text-orange-500" aria-hidden="true" />
                                     <span>30,000+ happy customers</span>
                                 </div>
                             </div>
-                        </div>
-
-                        {/* Final CTA */}
-                        <div className="text-center space-y-4 mt-8 sm:block hidden md:block md:mt-0">
-                            <button 
-                                type="submit" 
-                                className="inline-flex items-center justify-center rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 shadow-md hover:shadow-lg transition w-full md:w-auto md:px-12 md:py-4 md:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled={isSubmitting || showAuthModal}
-                                aria-busy={isSubmitting}
-                            >
-                                {isSubmitting ? (
-                                    <>
-                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        Posting Your Job...
-                                    </>
-                                ) : (
-                                    'Post My Job'
-                                )}
-                            </button>
-                            <p className="text-xs text-slate-500 mt-2 text-center">
-                                {!isAuthenticatedHomeowner() 
-                                    ? "You'll be asked to sign in or create an account."
-                                    : "We'll notify local tradespeople right away."
-                                }
-                            </p>
-                            <p className="text-xs text-slate-400 mt-1 text-center">
-                                Photos are optional but help you get better quotes
-                            </p>
-                        </div>
-
-                        {/* Mobile Sticky CTA */}
-                        <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur border-t p-3 md:hidden z-50">
-                            <button 
-                                type="submit" 
-                                className="inline-flex items-center justify-center rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 shadow-md hover:shadow-lg transition w-full disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled={isSubmitting || showAuthModal}
-                                aria-busy={isSubmitting}
-                            >
-                                {isSubmitting ? (
-                                    <>
-                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        Posting...
-                                    </>
-                                ) : (
-                                    'Post My Job'
-                                )}
-                            </button>
                         </div>
 
                         {/* GDPR Consent */}
@@ -1940,15 +1834,14 @@ const PostJob = () => {
                                             handleInputChange('gdprConsent', e.target.checked);
                                             handleBlur('gdprConsent', e.target.checked);
                                         }}
-                                        className={`mt-1 rounded border-slate-300 text-blue-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${
-                                            formErrors.gdprConsent ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
-                                        }`}
+                                        className={`mt-1 rounded border-slate-300 text-blue-600 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:ring-offset-0 ${formErrors.gdprConsent ? 'ring-1 ring-red-300 bg-red-50 border-red-300' : ''
+                                            }`}
                                         aria-invalid={!!formErrors.gdprConsent}
                                         aria-describedby={formErrors.gdprConsent ? 'gdpr-error' : 'gdpr-help'}
                                     />
                                     <div className="text-sm">
                                         <span className="text-slate-700">
-                                            I agree to the <a href="/privacy" className="text-blue-600 hover:text-blue-700 underline">Privacy Policy</a> and 
+                                            I agree to the <a href="/privacy" className="text-blue-600 hover:text-blue-700 underline">Privacy Policy</a> and
                                             <a href="/terms" className="text-blue-600 hover:text-blue-700 underline ml-1">Terms of Service</a>.
                                             I consent to my details being shared with verified tradespeople to receive quotes.
                                         </span>
@@ -1962,13 +1855,68 @@ const PostJob = () => {
                                 </label>
                             </div>
                         </fieldset>
+
+                        {/* Final CTA */}
+                        <div className="text-center space-y-4 mt-8 sm:block hidden md:block md:mt-0">
+                            <button
+                                type="submit"
+                                className="inline-flex items-center justify-center rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 shadow-md hover:shadow-lg transition w-full md:w-auto md:px-12 md:py-4 md:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={isSubmitting || showAuthModal}
+                                aria-busy={isSubmitting}
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Posting Your Job...
+                                    </>
+                                ) : (
+                                    'Post My Job'
+                                )}
+                            </button>
+                            <p className="text-xs text-slate-500 mt-2 text-center">
+                                {!isAuthenticatedHomeowner()
+                                    ? "You'll be asked to sign in or create an account."
+                                    : "We'll notify local tradespeople right away."
+                                }
+                            </p>
+                            <p className="text-xs text-slate-400 mt-1 text-center">
+                                Photos are optional but help you get better quotes
+                            </p>
+                        </div>
+
+                        {/* Mobile Sticky CTA */}
+                        <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur border-t p-3 md:hidden z-50">
+                            <button
+                                type="submit"
+                                className="inline-flex items-center justify-center rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 shadow-md hover:shadow-lg transition w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={isSubmitting || showAuthModal}
+                                aria-busy={isSubmitting}
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Posting...
+                                    </>
+                                ) : (
+                                    'Post My Job'
+                                )}
+                            </button>
+                        </div>
+
+
                     </form>
                 </div>
-                
+
                 {/* Mobile spacer for fixed sticky button */}
                 <div className="h-20 md:hidden" />
             </div>
-            
+
             {/* Success Modal */}
             <SuccessModal
                 isOpen={showSuccessModal}

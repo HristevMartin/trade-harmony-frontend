@@ -479,6 +479,34 @@ const TradesPersonJobs = () => {
     setDisplayedJobsCount(6);
   }, [filters, sortBy]);
 
+  // Auto-clear category filter if no jobs match and there are jobs available
+  useEffect(() => {
+    // Only run after initial load is complete
+    if (loading || jobs.length === 0) return;
+    
+    // Check if we have category filters applied
+    if (filters.categories.length === 0) return;
+    
+    // Get active jobs (non-completed)
+    const activeJobs = jobs.filter(job => !(job.status && job.status.toLowerCase() === 'completed'));
+    
+    // Check if any active jobs match the current category filter
+    const matchingJobs = activeJobs.filter(job => {
+      const jobCategory = job.additional_data?.serviceCategory || job.service_category;
+      return filters.categories.includes(jobCategory);
+    });
+    
+    // If no jobs match the category filter, clear it to show all jobs
+    if (matchingJobs.length === 0) {
+      console.log('🔄 No jobs match category filter, clearing to show all jobs');
+      setFilters(prev => ({ ...prev, categories: [] }));
+      toast({
+        title: "Filter adjusted",
+        description: "No jobs found for the selected category. Showing all available jobs.",
+      });
+    }
+  }, [jobs, loading, filters.categories, toast]);
+
   const formatBudget = (budget: string) => {
     const budgetMap: { [key: string]: string } = {
       'under-200': 'Under £200',
@@ -686,12 +714,18 @@ const TradesPersonJobs = () => {
     // First filter out completed jobs before generating filter options
     const activeJobs = jobs.filter(job => !(job.status && job.status.toLowerCase() === 'completed'));
 
-    const allCategories = [...new Set(activeJobs.map(job => job.additional_data?.serviceCategory || job.service_category).filter(Boolean))];
+    const jobCategories = [...new Set(activeJobs.map(job => job.additional_data?.serviceCategory || job.service_category).filter(Boolean))];
+    // Always include currently selected categories so user can deselect them even when no jobs match
+    const allCategories = [...new Set([...jobCategories, ...filters.categories])];
+    
     // Use nuts field for location options, fallback to location if nuts is not available
-    const allLocations = [...new Set(activeJobs.map(job => {
+    const jobLocations = [...new Set(activeJobs.map(job => {
       const jobNuts = job.additional_data?.nuts || job.nuts;
       return jobNuts || job.location;
     }).filter(Boolean))];
+    // Always include currently selected locations so user can deselect them even when no jobs match
+    const allLocations = [...new Set([...jobLocations, ...filters.locations])];
+    
     const urgencies = [...new Set(activeJobs.map(job => formatUrgency(job.urgency)).filter(Boolean))];
 
     // Filter categories and locations based on search terms
@@ -703,7 +737,7 @@ const TradesPersonJobs = () => {
     );
 
     return { categories, locations, urgencies, allCategories, allLocations };
-  }, [jobs, searchTerms]);
+  }, [jobs, searchTerms, filters.categories, filters.locations]);
 
   useEffect(() => {
     const fetchJobs = async () => {
